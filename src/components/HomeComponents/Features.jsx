@@ -1,11 +1,19 @@
 import React from 'react';
 import { AlignLeft, Headphones, LayoutGrid, Tag } from 'lucide-react';
+import s1 from '../../assets/s1.svg';
+import s2 from '../../assets/s2.svg';
+import s3 from '../../assets/s3.svg';
+import s4 from '../../assets/s4.svg';
 
-const FeatureCard = ({ icon: Icon, title, description }) => {
+const FeatureCard = ({ icon: IconSrc, title, description }) => {
   return (
     <div className="bg-white rounded-2xl p-8 flex flex-col items-start shadow-sm">
       <div className="mb-6">
-        <Icon size={24} className="text-brand" />
+        <img 
+          src={IconSrc} 
+          alt={title}
+          className="w-9 h-9 text-brand" // Same size as previous icons (24px)
+        />
       </div>
       <h3 className="text-xl font-semibold mb-3 text-gray-900">{title}</h3>
       <p className="text-gray-600 leading-relaxed">{description}</p>
@@ -16,22 +24,22 @@ const FeatureCard = ({ icon: Icon, title, description }) => {
 const Features = () => {
   const features = [
     {
-      icon: AlignLeft,
+      icon: s1,
       title: "Unique Dog Filters",
       description: "The first booking platform with 30+ dog filters to find the perfect stay for you and your dog."
     },
     {
-      icon: Headphones,
+      icon: s2,
       title: "Personal Contact",
       description: "Book easily on your own or reach out for help anytime - we're here for your questions and requests."
     },
     {
-      icon: LayoutGrid,
+      icon: s3,
       title: "All in One Place",
       description: "Explore our travel blog for tips on dog-friendly destinations and book travel gear conveniently."
     },
     {
-      icon: Tag,
+      icon: s4,
       title: "Transparent Pricing",
       description: "No hidden fees - pay the same as booking directly with the accommodation."
     }

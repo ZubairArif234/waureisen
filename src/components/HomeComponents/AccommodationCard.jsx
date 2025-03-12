@@ -1,14 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Heart } from 'lucide-react';
 
 const AccommodationCard = ({ image, price, location, provider }) => {
+  const [isFavorite, setIsFavorite] = useState(false);
+
   return (
     <div className="flex flex-col">
-      <div className="rounded-xl overflow-hidden mb-3">
+      <div className="rounded-xl overflow-hidden mb-3 relative">
         <img 
           src={image} 
           alt={location}
           className="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
         />
+        <button 
+          onClick={() => setIsFavorite(!isFavorite)}
+          className="absolute top-3 right-3 p-2 rounded-full bg-white/50 backdrop-blur-sm hover:bg-white/70 transition-colors"
+        >
+          <Heart 
+            className={`w-5 h-5 ${
+              isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'
+            }`}
+          />
+        </button>
       </div>
       <div className="space-y-1">
         <p className="text-brand text-sm">CHF {price.toFixed(2)} per night</p>
