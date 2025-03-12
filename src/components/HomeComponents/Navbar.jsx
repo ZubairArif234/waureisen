@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Globe, Menu, User, X } from 'lucide-react';
+import logo from '../../assets/logo.png';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -9,7 +10,7 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-8"> {/* Added padding */}
         {/* Logo */}
         <div className="flex-shrink-0 ml-4 md:ml-8"> {/* Added margin */}
-          <img src="/src/assets/logo.png" alt="Wau Logo" className="h-12" />
+          <img src={logo} alt="Wau Logo" className="h-12" />
         </div>
 
         {/* Desktop Navigation Links */}
