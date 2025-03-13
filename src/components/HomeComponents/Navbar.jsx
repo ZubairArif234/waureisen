@@ -32,7 +32,12 @@ const Navbar = () => {
           <a href="#" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
             Camper Rental
           </a>
-          <a href="#" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
+          <a 
+            href="https://meet.brevo.com/waureisen" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-gray-700 hover:text-gray-900 text-sm font-medium"
+          >
             Book an appointment
           </a>
         </div>
@@ -65,7 +70,14 @@ const Navbar = () => {
           <div className="md:hidden border-b border-gray-200 mb-1 pb-1">
             <a href="#" className="block px-3 py-1.5 text-gray-700 hover:bg-gray-50 text-sm">List your space</a>
             <a href="#" className="block px-3 py-1.5 text-gray-700 hover:bg-gray-50 text-sm">Camper Rental</a>
-            <a href="#" className="block px-3 py-1.5 text-gray-700 hover:bg-gray-50 text-sm">Book an appointment</a>
+            <a 
+            href="https://meet.brevo.com/waureisen"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block px-3 py-1.5 text-gray-700 hover:bg-gray-50 text-sm"
+          >
+            Book an appointment
+          </a>
           </div>
           
           {/* Menu Items */}

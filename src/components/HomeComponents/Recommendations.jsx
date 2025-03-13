@@ -7,18 +7,21 @@ import i3 from '../../assets/i3.png';
 const RecommendationsSection = ({ title }) => {
   const accommodations = [
     {
+      id: '1',
       image: i1,
       price: 230.00,
       location: "Room in Rio de Janeiro, Brazil",
       provider: "Waureisen"
     },
     {
+      id: '2',
       image: i2,
       price: 230.00,
       location: "Room in Rio de Janeiro, Brazil",
       provider: "Waureisen"
     },
     {
+      id: '3',
       image: i3,
       price: 230.00,
       location: "Room in Rio de Janeiro, Brazil",
@@ -30,9 +33,10 @@ const RecommendationsSection = ({ title }) => {
     <div className="mb-16">
       <h2 className="text-2xl font-semibold text-gray-900 mb-6">{title}</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {accommodations.map((accommodation, index) => (
+        {accommodations.map((accommodation) => (
           <AccommodationCard
-            key={index}
+            key={accommodation.id}
+            id={accommodation.id}
             image={accommodation.image}
             price={accommodation.price}
             location={accommodation.location}
