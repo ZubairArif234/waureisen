@@ -9,7 +9,7 @@ const MapToggle = ({ showMap, onToggle }) => {
   };
 
   return (
-    <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[60] md:hidden">
+    <div className="fixed bottom-2 left-1/2 transform -translate-x-1/2 z-[60] md:hidden">
       <div className="bg-white rounded-full shadow-lg p-1 flex items-center">
         <button
           onClick={(e) => handleClick(e, false)}

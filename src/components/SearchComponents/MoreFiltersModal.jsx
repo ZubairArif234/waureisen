@@ -69,9 +69,9 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
 
   return (
     <>
-      <div 
-        className="fixed inset-0 bg-black bg-opacity-50 z-100"
-        onClick={onClose}
+       <div 
+    className="fixed inset-0 bg-black bg-opacity-10 z-100"
+    onClick={onClose}
       />
       
       <div className="fixed inset-x-0 bottom-0 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 bg-white rounded-t-2xl md:rounded-2xl shadow-xl z-50 max-h-[90vh] md:max-h-[85vh] md:w-[800px] w-full overflow-hidden">
