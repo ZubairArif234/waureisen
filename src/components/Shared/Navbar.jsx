@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Globe, Menu, User, X, MessageSquare, Map, Heart, Home, UserCircle, Settings, LogOut } from 'lucide-react';
 import logo from '../../assets/logo.png';
-import LanguagePopup from './LanguagePopup';
+import LanguagePopup from '../HomeComponents/LanguagePopup';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -13,9 +13,9 @@ const Navbar = () => {
   const menuItems = [
     { icon: <MessageSquare className="h-4 w-4" />, label: 'Messages', path: '/messages' },
     { icon: <Map className="h-4 w-4" />, label: 'Your Trips', path: '#' },
-    { icon: <Heart className="h-4 w-4" />, label: 'Favorites', path: '#' },
+    { icon: <Heart className="h-4 w-4" />, label: 'Favorites', path: '/wishlist' },
     { icon: <Home className="h-4 w-4" />, label: 'Your Listings', path: '#' },
-    { icon: <UserCircle className="h-4 w-4" />, label: 'Profile', path: '#' },
+    { icon: <UserCircle className="h-4 w-4" />, label: 'Profile', path: '/profile' },
     { icon: <Settings className="h-4 w-4" />, label: 'Account', path: '#' },
     { icon: <LogOut className="h-4 w-4" />, label: 'Log out', path: '#' },
   ];

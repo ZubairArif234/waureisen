@@ -5,7 +5,7 @@ const AccordionItem = ({ question, answer, isOpen, onClick }) => {
   return (
     <div className="bg-[#FAFAFA] rounded-lg overflow-hidden">
       <button
-        className="w-full px-6 py-4 text-left flex justify-between items-center"
+        className="w-full px-6 py-2 text-left flex justify-between items-center"
         onClick={onClick}
       >
         <span className="text-gray-700">{question}</span>

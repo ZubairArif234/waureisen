@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Sliders, MessageSquare, ArrowLeft } from 'lucide-react';
-import Navbar from '../../components/HomeComponents/Navbar';
+import Navbar from '../../components/Shared/Navbar';
 import Avt from '../../assets/avatar.png';
 
 // Dummy data for conversations

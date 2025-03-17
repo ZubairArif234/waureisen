@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Navbar from '../../components/HomeComponents/Navbar';
+import Navbar from '../../components/Shared/Navbar';
 import authBg from '../../assets/auth.png';
+import Footer from '../../components/Shared/Footer';
+import Modal from '../../components/Auth/Modal';
+import TermsContent from '../../components/Auth/TermsContent';
+import PrivacyContent from '../../components/Auth/PrivacyContent';
 
 const Signup = () => {
   const [userType, setUserType] = useState('');
+  const [isTermsOpen, setIsTermsOpen] = useState(false);
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     firstName: '',
@@ -46,7 +52,7 @@ const Signup = () => {
         <div className="absolute inset-0 bg-black/30" />
 
         {/* Form Container */}
-        <div className="relative z-10 max-w-md mx-auto px-4 pt-8 pb-8">
+        <div className="relative z-10 max-w-md mx-auto px-4 pt-8 pb-16">
           <div className="bg-white rounded-lg shadow-lg overflow-hidden">
             {/* Auth Type Selector */}
             <div className="flex text-2xl font-semibold border-b relative">
@@ -202,11 +208,41 @@ const Signup = () => {
                       />
                       <label htmlFor="terms" className="text-sm text-gray-600">
                         I accept the{' '}
-                        <Link to="#" className="text-[#B4A481] hover:underline">Terms of Service</Link>
+                        <button 
+                          type="button"
+                          onClick={() => setIsTermsOpen(true)}
+                          className="text-[#B4A481] hover:underline"
+                        >
+                          Terms of Service
+                        </button>
                         {' '}and the{' '}
-                        <Link to="#" className="text-[#B4A481] hover:underline">Privacy Policy</Link>
+                        <button
+                          type="button"
+                          onClick={() => setIsPrivacyOpen(true)}
+                          className="text-[#B4A481] hover:underline"
+                        >
+                          Privacy Policy
+                        </button>
                       </label>
                     </div>
+
+                    {/* Terms of Service Modal */}
+                    <Modal
+                      isOpen={isTermsOpen}
+                      onClose={() => setIsTermsOpen(false)}
+                      title="Terms of Service"
+                    >
+                      <TermsContent />
+                    </Modal>
+
+                     {/* Privacy Policy Modal */}
+                     <Modal
+                      isOpen={isPrivacyOpen}
+                      onClose={() => setIsPrivacyOpen(false)}
+                      title=""
+                    >
+                      <PrivacyContent />
+                    </Modal>
 
                     {/* Signup Button */}
                     <button
@@ -230,6 +266,7 @@ const Signup = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Navbar from '../../components/HomeComponents/Navbar';
+import Navbar from '../../components/Shared/Navbar';
 import DateRangePicker from '../../components/HomeComponents/DateRangePicker';
 import GuestSelector from '../../components/HomeComponents/GuestSelector';
 import { Check, ChevronDown } from 'lucide-react';
@@ -10,7 +10,8 @@ import s3 from '../../assets/s3.png';
 import s4 from '../../assets/s4.png';
 import s5 from '../../assets/s5.png';
 import logo from '../../assets/logo.png';
-
+import Footer from '../../components/Shared/Footer';
+import ImageGalleryModal from '../../components/Shared/ImageGalleryModal';
 
 
 const PlaceOffer = ({ icon: Icon, text, value }) => (
@@ -30,25 +31,67 @@ const Detail = ({ icon: Icon, text }) => (
   </div>
 );
 
-const ImageGrid = () => (
-  <div className="flex md:flex-row flex-col gap-4 mb-10">
-    {/* Main large image */}
-    <div className="md:w-1/2 w-full">
-      <img 
-        src={s1} 
-        alt="Main accommodation view" 
-        className="w-full md:h-[400px] h-[300px] object-cover rounded-lg"
+const ImageGrid = () => {
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const images = [s1, s2, s3, s4, s5];
+
+  return (
+    <>
+      <div className="flex md:flex-row flex-col gap-4 mb-10">
+        {/* Main large image */}
+        <div className="md:w-1/2 w-full">
+          <img 
+            src={s1} 
+            alt="Main accommodation view" 
+            className="w-full md:h-[400px] h-[300px] object-cover rounded-lg cursor-pointer"
+            onClick={() => setIsGalleryOpen(true)}
+          />
+        </div>
+        {/* Grid of smaller images */}
+        <div className="md:w-1/2 w-full grid grid-cols-2 gap-4">
+          <img 
+            src={s2} 
+            alt="Room view" 
+            className="w-full md:h-[192px] h-[140px] object-cover rounded-lg cursor-pointer" 
+            onClick={() => setIsGalleryOpen(true)}
+          />
+          <img 
+            src={s3} 
+            alt="Room view" 
+            className="w-full md:h-[192px] h-[140px] object-cover rounded-lg cursor-pointer" 
+            onClick={() => setIsGalleryOpen(true)}
+          />
+          <img 
+            src={s4} 
+            alt="Room view" 
+            className="w-full md:h-[192px] h-[140px] object-cover rounded-lg cursor-pointer" 
+            onClick={() => setIsGalleryOpen(true)}
+          />
+          <div className="relative">
+            <img 
+              src={s5} 
+              alt="Room view" 
+              className="w-full md:h-[192px] h-[140px] object-cover rounded-lg cursor-pointer" 
+              onClick={() => setIsGalleryOpen(true)}
+            />
+            <button
+              onClick={() => setIsGalleryOpen(true)}
+              className="absolute bottom-4 right-4 px-4 py-2 bg-white rounded-lg text-sm font-medium shadow-md hover:bg-gray-50 transition-colors"
+            >
+              View all
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <ImageGalleryModal 
+        images={images}
+        isOpen={isGalleryOpen}
+        onClose={() => setIsGalleryOpen(false)}
       />
-    </div>
-    {/* Grid of smaller images */}
-    <div className="md:w-1/2 w-full grid grid-cols-2 gap-4">
-      <img src={s2} alt="Room view" className="w-full md:h-[192px] h-[140px] object-cover rounded-lg" />
-      <img src={s3} alt="Room view" className="w-full md:h-[192px] h-[140px] object-cover rounded-lg" />
-      <img src={s4} alt="Room view" className="w-full md:h-[192px] h-[140px] object-cover rounded-lg" />
-      <img src={s5} alt="Room view" className="w-full md:h-[192px] h-[140px] object-cover rounded-lg" />
-    </div>
-  </div>
-);
+    </>
+  );
+};
 
 const Amenity = ({ icon, text }) => (
   <div className="flex items-center gap-3 p-3 border rounded-lg">
@@ -299,6 +342,7 @@ const AccommodationPage = () => {
         guests={guests}
         onGuestsChange={setGuests}
       />
+      <Footer />
     </div>
   );
 };

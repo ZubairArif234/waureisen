@@ -2,8 +2,15 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 
-const AccommodationCard = ({ id = '1', image, price, location, provider }) => {
-  const [isFavorite, setIsFavorite] = useState(false);
+const AccommodationCard = ({ 
+  id = '1', 
+  image, 
+  price, 
+  location, 
+  provider,
+  isFavorited = false
+}) => {
+  const [isFavorite, setIsFavorite] = useState(isFavorited);
   const navigate = useNavigate();
 
   return (

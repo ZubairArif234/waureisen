@@ -5,6 +5,7 @@ import Features from '../../components/HomeComponents/Features';
 import Travellers from '../../components/HomeComponents/Travellers';
 import Register from '../../components/HomeComponents/Register';
 import FAQ from '../../components/HomeComponents/FAQ';
+import Footer from '../../components/Shared/Footer';
 
 const Home = () => {
   return (
@@ -15,6 +16,8 @@ const Home = () => {
       <Travellers />
       <Register />
       <FAQ />
+      <Footer />
+
     </main>
   );
 };

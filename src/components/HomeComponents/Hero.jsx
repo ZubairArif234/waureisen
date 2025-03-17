@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from './Navbar';
+import Navbar from '../Shared/Navbar';
 import DateRangePicker from './DateRangePicker';
 import GuestSelector from './GuestSelector';
 import { Search, Calendar, Users } from 'lucide-react';

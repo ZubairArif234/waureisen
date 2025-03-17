@@ -1,8 +1,9 @@
 import React from 'react';
-import Navbar from '../../components/HomeComponents/Navbar';
+import Navbar from '../../components/Shared/Navbar';
 import camperBg from '../../assets/camper.png';
-import willyVan from '../../assets/cr1.png';  // You'll need to add these images
-import walterVan from '../../assets/cr2.png'; // You'll need to add these images
+import willyVan from '../../assets/cr1.png';  
+import walterVan from '../../assets/cr2.png'; 
+import Footer from '../../components/Shared/Footer';
 
 const CamperRental = () => {
   return (
@@ -76,7 +77,9 @@ const CamperRental = () => {
             </div>
         </div>
         </div>
+        <Footer />
     </div>
+    
   );
 };
 

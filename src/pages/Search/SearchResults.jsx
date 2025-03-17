@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import Navbar from '../../components/HomeComponents/Navbar';
+import Navbar from '../../components/Shared/Navbar';
 import SearchFilters from '../../components/SearchComponents/SearchFilters';
 import AccommodationCard from '../../components/HomeComponents/AccommodationCard';
 import MockMap from '../../components/SearchComponents/MockMap';
@@ -8,6 +8,7 @@ import MapToggle from '../../components/SearchComponents/MapToggle';
 import i1 from '../../assets/i1.png';
 import i2 from '../../assets/i2.png';
 import i3 from '../../assets/i3.png';
+import Footer from '../../components/Shared/Footer';
 
 const SearchResults = () => {
   const location = useLocation();
@@ -94,6 +95,7 @@ const SearchResults = () => {
           )}
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

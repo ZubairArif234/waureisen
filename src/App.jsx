@@ -7,6 +7,10 @@ import CamperRental from './pages/Main/CamperRental'
 import Login from './pages/Auth/Login'
 import Signup from './pages/Auth/Signup'
 import Messages from './pages/User/Messages'
+import Profile from './pages/User/Profile'
+import WishlistHome from './pages/User/WishlistHome'
+import RecentlyViewed from './pages/User/RecentlyViewed'
+import YourFavorites from './pages/User/YourFavorites'
 
 
 function App() {
@@ -21,6 +25,10 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/messages" element={<Messages />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/wishlist" element={<WishlistHome />} />
+          <Route path="/wishlist/recently-viewed" element={<RecentlyViewed />} />
+          <Route path="/wishlist/favorites" element={<YourFavorites />} />
         </Routes>
       </div>
     </Router>

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Navbar from '../../components/HomeComponents/Navbar';
+import Navbar from '../../components/Shared/Navbar';
 import authBg from '../../assets/auth.png';
+import Footer from '../../components/Shared/Footer';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -116,6 +117,7 @@ const Login = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
