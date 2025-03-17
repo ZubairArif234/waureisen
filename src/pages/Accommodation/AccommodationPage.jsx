@@ -111,10 +111,10 @@ const AccommodationPage = () => {
 
  
   const placeOffers = [
+    { icon: Users, text: 'People', value: '6' },
     { icon: Dog, text: 'Dog', value: '1' },
     { icon: Home, text: 'Bedrooms', value: '2' },
     { icon: DoorOpen, text: 'Rooms', value: '2' },
-    { icon: Users, text: 'People', value: '6' },
     { icon: Bath, text: 'Washroom', value: '1' }
   ];
 
