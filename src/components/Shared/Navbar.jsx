@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Globe, Menu, User, X, MessageSquare, Map, Heart, Home, UserCircle, Settings, LogOut } from 'lucide-react';
+import { Globe, Menu, User, X, MessageSquare, Map, Heart, Home, UserCircle, Settings, LogOut, LogIn, UserPlus } from 'lucide-react';
 import logo from '../../assets/logo.png';
 import LanguagePopup from '../HomeComponents/LanguagePopup';
 
@@ -8,16 +8,16 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLanguagePopupOpen, setIsLanguagePopupOpen] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState('en');
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   const menuItems = [
     { icon: <MessageSquare className="h-4 w-4" />, label: 'Messages', path: '/messages' },
-    { icon: <Map className="h-4 w-4" />, label: 'Your Trips', path: '#' },
+    { icon: <Map className="h-4 w-4" />, label: 'Your Trips', path: '/trips' },
     { icon: <Heart className="h-4 w-4" />, label: 'Favorites', path: '/wishlist' },
     { icon: <Home className="h-4 w-4" />, label: 'Your Listings', path: '#' },
     { icon: <UserCircle className="h-4 w-4" />, label: 'Profile', path: '/profile' },
-    { icon: <Settings className="h-4 w-4" />, label: 'Account', path: '#' },
-    { icon: <LogOut className="h-4 w-4" />, label: 'Log out', path: '#' },
+    { icon: <Settings className="h-4 w-4" />, label: 'Account', path: '/account' },
   ];
 
   const handleLanguageSelect = (langCode) => {
@@ -54,72 +54,129 @@ const Navbar = () => {
         </div>
 
         {/* Right Side Icons */}
-        <div className="flex items-center space-x-4 mr-4 md:mr-8"> 
+        <div className="flex items-center space-x-4 mr-4 md:mr-8">
           <button 
             className="p-2 hover:bg-gray-300 rounded-full"
             onClick={() => setIsLanguagePopupOpen(true)}
           >
             <Globe className="h-6 w-6 text-gray-700" />
           </button>
-          <button 
-            className="p-2 hover:bg-gray-300 rounded-full"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? (
-              <X className="h-6 w-6 text-gray-700" />
-            ) : (
-              <Menu className="h-6 w-6 text-gray-700" />
-            )}
-          </button>
-          <button className="p-2 rounded-full" style={{ backgroundColor: '#B4A481' }}>
-            <User className="h-6 w-6 text-white" />
-          </button>
-        </div>
-      </div>
-
-      {/* Menu Dropdown - Desktop and Mobile */}
-      {isMenuOpen && (
-        <div className="absolute top-full right-0 md:right-[150px] w-56 bg-white shadow-lg rounded-lg mt-2 py-1 px-1 text-sm">
-          {/* Mobile Navigation Links */}
-          <div className="md:hidden border-b border-gray-200 mb-1 pb-1">
-            <Link to="#" className="block px-3 py-1.5 text-gray-700 hover:bg-gray-50 text-sm">
-              List your space
-            </Link>
-            <Link to="/camper-rental" className="block px-3 py-1.5 text-gray-700 hover:bg-gray-50 text-sm">
-              Camper Rental
-            </Link>
-            <a 
-              href="https://meet.brevo.com/waureisen"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block px-3 py-1.5 text-gray-700 hover:bg-gray-50 text-sm"
-            >
-              Book an appointment
-            </a>
-          </div>
           
-          {/* Menu Items */}
-          {menuItems.map((item, index) => (
-            <Link
-              key={index}
-              to={item.path}
-              className="flex items-center px-3 py-1.5 text-gray-700 hover:bg-gray-50"
-              onClick={() => setIsMenuOpen(false)}
+          {/* Menu Button and Dropdown */}
+          <div className="relative">
+            <button 
+              className="p-2 hover:bg-gray-300 rounded-full"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              {item.icon}
-              <span className="ml-2 text-sm">{item.label}</span>
-            </Link>
-          ))}
-        </div>
-      )}
+              {isMenuOpen ? (
+                <X className="h-6 w-6 text-gray-700" />
+              ) : (
+                <Menu className="h-6 w-6 text-gray-700" />
+              )}
+            </button>
 
-      {/* Language Popup */}
-      <LanguagePopup
-        isOpen={isLanguagePopupOpen}
-        onClose={() => setIsLanguagePopupOpen(false)}
-        onLanguageSelect={handleLanguageSelect}
-        currentLanguage={currentLanguage}
-      />
+            {/* Menu Dropdown */}
+            {isMenuOpen && (
+              <>
+                <div 
+                  className="fixed inset-0 z-40"
+                  onClick={() => setIsMenuOpen(false)}
+                />
+                <div className="absolute right-0 mt-2 w-56 bg-white shadow-lg rounded-lg py-1 px-1 z-50">
+                  {/* Mobile Navigation Links */}
+                  <div className="md:hidden border-b border-gray-200 mb-1 pb-1">
+                    <Link to="#" className="block px-3 py-1.5 text-gray-700 hover:bg-gray-50 text-sm">
+                      List your space
+                    </Link>
+                    <Link to="/camper-rental" className="block px-3 py-1.5 text-gray-700 hover:bg-gray-50 text-sm">
+                      Camper Rental
+                    </Link>
+                    <a 
+                      href="https://meet.brevo.com/waureisen"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block px-3 py-1.5 text-gray-700 hover:bg-gray-50 text-sm"
+                    >
+                      Book an appointment
+                    </a>
+                  </div>
+                  
+                  {/* Menu Items */}
+                  {menuItems.map((item, index) => (
+                    <Link
+                      key={index}
+                      to={item.path}
+                      className="flex items-center px-3 py-1.5 text-gray-700 hover:bg-gray-50"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {item.icon}
+                      <span className="ml-2 text-sm">{item.label}</span>
+                    </Link>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Profile Button and Dropdown */}
+          <div className="relative">
+            <button 
+              className="p-2 rounded-full"
+              style={{ backgroundColor: '#B4A481' }}
+              onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+            >
+              <User className="h-6 w-6 text-white" />
+            </button>
+
+            {/* Profile Menu Popup */}
+            {isProfileMenuOpen && (
+              <>
+                <div 
+                  className="fixed inset-0 z-40"
+                  onClick={() => setIsProfileMenuOpen(false)}
+                />
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50 py-1">
+                  <Link
+                    to="/login"
+                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    onClick={() => setIsProfileMenuOpen(false)}
+                  >
+                    <LogIn className="h-4 w-4 mr-2" />
+                    <span>Log in</span>
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    onClick={() => setIsProfileMenuOpen(false)}
+                  >
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    <span>Sign up</span>
+                  </Link>
+                  <div className="border-t border-gray-100 my-1" />
+                  <button
+                    onClick={() => {
+                      // Handle logout
+                      setIsProfileMenuOpen(false);
+                    }}
+                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    <span>Log out</span>
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Language Popup */}
+        <LanguagePopup
+          isOpen={isLanguagePopupOpen}
+          onClose={() => setIsLanguagePopupOpen(false)}
+          onLanguageSelect={handleLanguageSelect}
+          currentLanguage={currentLanguage}
+        />
+      </div>
     </nav>
   );
 };

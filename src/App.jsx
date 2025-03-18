@@ -11,6 +11,10 @@ import Profile from './pages/User/Profile'
 import WishlistHome from './pages/User/WishlistHome'
 import RecentlyViewed from './pages/User/RecentlyViewed'
 import YourFavorites from './pages/User/YourFavorites'
+import AccountPage from './pages/User/AccountPage'
+import LoginSecurityPage from './pages/User/LoginSecurityPage'
+import PaymentMethodsPage from './pages/User/PaymentMethodsPage'
+import TripsPage from './pages/User/TripsPage'
 
 
 function App() {
@@ -29,6 +33,10 @@ function App() {
           <Route path="/wishlist" element={<WishlistHome />} />
           <Route path="/wishlist/recently-viewed" element={<RecentlyViewed />} />
           <Route path="/wishlist/favorites" element={<YourFavorites />} />
+          <Route path="/account" element={<AccountPage/>}/>
+          <Route path="/account/security" element={<LoginSecurityPage/>}/>
+          <Route path="/account/payments" element={<PaymentMethodsPage/>}/>
+          <Route path="/trips" element={<TripsPage/>}/>
         </Routes>
       </div>
     </Router>
