@@ -7,11 +7,21 @@ import Footer from '../../components/Shared/Footer';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle login logic here
+    setError(''); // Reset error on new submission
+
+    // Check for admin credentials
+    if (email === 'admin@mail.com' && password === '1234') {
+      navigate('/admin');
+      return;
+    }
+
+    // For now, show error for non-admin users
+    setError('Invalid email or password');
   };
 
   return (
@@ -52,64 +62,72 @@ const Login = () => {
                 className="absolute bottom-0 right-0 w-1/2 h-0.5 bg-[#B4A481]"
               />
             </div>
-                        {/* Login Form */}
+
+            {/* Login Form */}
             <form onSubmit={handleSubmit} className="p-8">
-            <div className="space-y-8"> {/* Increased from space-y-6 to space-y-8 */}
+              <div className="space-y-8">
+                {/* Error Message */}
+                {error && (
+                  <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
+                    {error}
+                  </div>
+                )}
+
                 {/* Email Field */}
-                <div className="space-y-3"> {/* Added space between label and input */}
-                <label 
+                <div className="space-y-3">
+                  <label 
                     htmlFor="email" 
                     className="block text-sm font-medium text-gray-700"
-                >
+                  >
                     Email
-                </label>
-                <input
+                  </label>
+                  <input
                     type="email"
                     id="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="jane.doe@example.com"
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
-                />
+                  />
                 </div>
 
                 {/* Password Field */}
-                <div className="space-y-3"> {/* Added space between label and input */}
-                <label 
+                <div className="space-y-3">
+                  <label 
                     htmlFor="password" 
                     className="block text-sm font-medium text-gray-700"
-                >
+                  >
                     Password
-                </label>
-                <input
+                  </label>
+                  <input
                     type="password"
                     id="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your password..."
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
-                />
+                  />
                 </div>
 
                 {/* Forgot Password Link */}
                 <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-500">Forgot your password?</span>
-                <button 
+                  <span className="text-gray-500">Forgot your password?</span>
+                  <button 
                     type="button"
                     className="text-[#B4A481] hover:underline ml-2"
-                >
+                  >
                     Reset password
-                </button>
+                  </button>
                 </div>
 
                 {/* Login Button */}
                 <button
-                type="submit"
-                className="w-full py-3 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                  type="submit"
+                  className="w-full py-3 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors font-medium"
                 >
-                Log in
+                  Log in
                 </button>
-            </div>
+              </div>
             </form>
 
             {/* Added Footer */}
