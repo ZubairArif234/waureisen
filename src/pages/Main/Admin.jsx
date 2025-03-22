@@ -4,6 +4,7 @@ import AdminSidebar from '../../components/Admin/AdminSidebar';
 import Accommodations from '../Admin/Accommodations';
 import AddAccommodation from '../Admin/AddAccommodation';
 import Transactions from '../Admin/Transactions';
+import TravelMagazine from '../Admin/TravelMagazine';
 
 
 const AdminLayout = () => {
@@ -19,6 +20,7 @@ const AdminLayout = () => {
           <Route path="/accommodations/new" element={<AddAccommodation />} />
           <Route path="/accommodations/edit/:id" element={<AddAccommodation />} />
           <Route path="/transactions" element={<Transactions />} />
+          <Route path="/magazine" element={<TravelMagazine />} />
           {/* <Route path="/customers" element={<Customers />} />
           <Route path="/providers" element={<Providers />} />
           <Route path="/magazine" element={<TravelMagazine />} /> */}
