@@ -220,7 +220,7 @@ const AdminMessages = () => {
     {
       id: 3,
       name: 'Michael Brown',
-      lastMessage: 'I wouldd like to book this for next month. How do I proceed?',
+      lastMessage: 'I would like to book this for next month. How do I proceed?',
       lastMessageTime: 'Yesterday',
       online: true,
       unreadCount: 1,
@@ -458,7 +458,7 @@ const AdminMessages = () => {
         {/* Conversation List - Hidden in mobile when conversation is active */}
         <div 
           className={`w-full md:w-80 border-r flex flex-col ${
-            isMobileView && activeConversation && !notification ? 'hidden' : 'flex'
+            isMobileView && activeConversation && currentConversation ? 'hidden md:flex' : 'flex'
           }`}
         >
           {/* Filter Tabs */}
@@ -533,7 +533,7 @@ const AdminMessages = () => {
         {/* Chat Area */}
         <div 
           className={`flex-1 flex flex-col ${
-            isMobileView && (!activeConversation || notification) ? 'hidden' : 'flex'
+            isMobileView && (!activeConversation || !currentConversation) ? 'hidden' : 'flex'
           }`}
         >
           {currentConversation ? (
@@ -565,12 +565,6 @@ const AdminMessages = () => {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button className="p-2 hover:bg-gray-100 rounded-full">
-                    <Phone className="w-5 h-5 text-gray-600" />
-                  </button>
-                  <button className="p-2 hover:bg-gray-100 rounded-full">
-                    <Video className="w-5 h-5 text-gray-600" />
-                  </button>
                   <button className="p-2 hover:bg-gray-100 rounded-full">
                     <Info className="w-5 h-5 text-gray-600" />
                   </button>
