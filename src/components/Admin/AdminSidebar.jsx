@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Building2, Menu, X, CreditCard, Users, UserCog, Newspaper } from 'lucide-react';
+import { Building2, Menu, X, CreditCard, Users, UserCog, Newspaper, MessageCircle } from 'lucide-react';
 import logo from '../../assets/logo.png';
 
 const SidebarLink = ({ icon: Icon, label, to, isActive }) => (
@@ -46,6 +46,11 @@ const AdminSidebar = () => {
       icon: Newspaper,
       label: 'Travel Magazine',
       path: '/admin/magazine'
+    },
+    {
+      icon: MessageCircle,
+      label: 'Messages',
+      path: '/admin/messages'
     }
   ];
 
