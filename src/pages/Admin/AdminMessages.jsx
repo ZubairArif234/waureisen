@@ -290,10 +290,10 @@ const AdminMessages = () => {
 
   // Set initial active conversation
   useEffect(() => {
-    if (conversations.length > 0 && !activeConversation) {
+    if (!isMobileView && conversations.length > 0 && !activeConversation) {
       setActiveConversation(conversations[0].id);
     }
-  }, [conversations, activeConversation]);
+  }, [conversations, activeConversation, isMobileView]);
 
   // Filter conversations based on search query and active tab
   const filteredConversations = conversations.filter(conversation => {
@@ -385,6 +385,12 @@ const AdminMessages = () => {
   const handleNotificationClick = (conversationId) => {
     clearNotifications(conversationId);
   };
+
+  
+  const handleBackClick = () => {
+    setActiveConversation(null);
+  };
+
 
   // Simulate incoming messages periodically
   useEffect(() => {
@@ -543,7 +549,7 @@ const AdminMessages = () => {
                 {isMobileView && (
                   <button 
                     className="mr-2 p-2 hover:bg-gray-100 rounded-full"
-                    onClick={() => setActiveConversation(null)}
+                    onClick={handleBackClick} 
                   >
                     <ArrowLeft className="w-5 h-5 text-gray-600" />
                   </button>
