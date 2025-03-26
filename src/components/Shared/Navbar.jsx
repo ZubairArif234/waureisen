@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Globe, Menu, User, X, MessageSquare, Map, Heart, Home, UserCircle, Settings, LogOut, LogIn, UserPlus } from 'lucide-react';
 import logo from '../../assets/logo.png';
@@ -10,6 +10,7 @@ const Navbar = () => {
   const [currentLanguage, setCurrentLanguage] = useState('en');
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const globeButtonRef = useRef(null);
 
   const menuItems = [
     { icon: <MessageSquare className="h-4 w-4" />, label: 'Messages', path: '/messages' },
@@ -27,42 +28,87 @@ const Navbar = () => {
 
   return (
     <nav className="fixed w-full top-0 z-50 px-6 py-4 bg-white/20 backdrop-blur-sm rounded-b-2xl shadow-sm">
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-8">
+      <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
-        <div className="flex-shrink-0 ml-4 md:ml-8">
+        <div className="flex-shrink-0 ml-2 sm:ml-4 md:ml-8">
           <Link to="/">
             <img src={logo} alt="Wau Logo" className="h-12" />
           </Link>
         </div>
 
-        {/* Desktop Navigation Links */}
-        <div className="hidden md:flex items-center space-x-8 ml-[410px]">
-          <Link to="#" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
-            List your space
+        {/* Desktop & Tablet Navigation Links */}
+        <div className="hidden md:flex items-center space-x-4 lg:space-x-8 lg:ml-[410px] md:ml-auto">
+          <Link to="#" className="text-gray-700 hover:text-gray-900 text-sm font-medium whitespace-nowrap">
+            Register Accommodation
           </Link>
-          <Link to="/camper-rental" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
+          <Link to="/camper-rental" className="text-gray-700 hover:text-gray-900 text-sm font-medium whitespace-nowrap">
             Camper Rental
           </Link>
           <a 
             href="https://meet.brevo.com/waureisen" 
             target="_blank" 
             rel="noopener noreferrer" 
-            className="text-gray-700 hover:text-gray-900 text-sm font-medium"
+            className="text-gray-700 hover:text-gray-900 text-sm font-medium whitespace-nowrap"
           >
             Book an appointment
           </a>
         </div>
 
         {/* Right Side Icons */}
-        <div className="flex items-center space-x-4 mr-4 md:mr-8">
-          <button 
-            className="p-2 hover:bg-gray-300 rounded-full"
-            onClick={() => setIsLanguagePopupOpen(true)}
-          >
-            <Globe className="h-6 w-6 text-gray-700" />
-          </button>
+        <div className="flex items-center gap-2 sm:gap-4 mr-2 sm:mr-4 md:mr-8">
+          {/* Language Button */}
+          <div className="relative">
+            <button 
+              className="p-2 hover:bg-gray-300 rounded-full"
+              onClick={() => setIsLanguagePopupOpen(!isLanguagePopupOpen)}
+            >
+              <Globe className="h-6 w-6 text-gray-700" />
+            </button>
+
+            {isLanguagePopupOpen && (
+              <>
+                <div 
+                  className="fixed inset-0 z-40"
+                  onClick={() => setIsLanguagePopupOpen(false)}
+                />
+                <div className="absolute right-0 mt-2 w-[300px] bg-white rounded-lg shadow-lg z-50">
+                  <div className="p-4 border-b">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-md font-semibold">Language and region</h2>
+                      <button 
+                        onClick={() => setIsLanguagePopupOpen(false)}
+                        className="p-2 hover:bg-gray-100 rounded-full"
+                      >
+                        <X className="w-5 h-5 text-gray-500" />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <div className="space-y-4">
+                      <button
+                        onClick={() => handleLanguageSelect('en')}
+                        className={`w-full text-left px-3 py-2 rounded-lg ${
+                          currentLanguage === 'en' ? 'bg-gray-100' : 'hover:bg-gray-50'
+                        }`}
+                      >
+                        English
+                      </button>
+                      <button
+                        onClick={() => handleLanguageSelect('de')}
+                        className={`w-full text-left px-3 py-2 rounded-lg ${
+                          currentLanguage === 'de' ? 'bg-gray-100' : 'hover:bg-gray-50'
+                        }`}
+                      >
+                        Deutsch
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
           
-          {/* Menu Button and Dropdown */}
+          {/* Menu Button */}
           <div className="relative">
             <button 
               className="p-2 hover:bg-gray-300 rounded-full"
@@ -86,7 +132,7 @@ const Navbar = () => {
                   {/* Mobile Navigation Links */}
                   <div className="md:hidden border-b border-gray-200 mb-1 pb-1">
                     <Link to="#" className="block px-3 py-1.5 text-gray-700 hover:bg-gray-50 text-sm">
-                      List your space
+                    Register Accommodation
                     </Link>
                     <Link to="/camper-rental" className="block px-3 py-1.5 text-gray-700 hover:bg-gray-50 text-sm">
                       Camper Rental
@@ -118,7 +164,7 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Profile Button and Dropdown */}
+          {/* Profile Button */}
           <div className="relative">
             <button 
               className="p-2 rounded-full"
@@ -168,14 +214,6 @@ const Navbar = () => {
             )}
           </div>
         </div>
-
-        {/* Language Popup */}
-        <LanguagePopup
-          isOpen={isLanguagePopupOpen}
-          onClose={() => setIsLanguagePopupOpen(false)}
-          onLanguageSelect={handleLanguageSelect}
-          currentLanguage={currentLanguage}
-        />
       </div>
     </nav>
   );

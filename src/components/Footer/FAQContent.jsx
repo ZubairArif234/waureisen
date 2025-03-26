@@ -26,7 +26,7 @@ const AccordionItem = ({ question, answer, isOpen, onClick }) => {
   );
 };
 
-const FAQ = () => {
+const FAQContent = () => {
   const [openIndex, setOpenIndex] = useState(null);
 
   const faqItems = [
@@ -96,4 +96,4 @@ const FAQ = () => {
   );
 };
 
-export default FAQ;
+export default FAQContent;

@@ -9,7 +9,7 @@ import Customers from '../Admin/Customers';
 import Providers from '../Admin/Providers';
 import AdminMessages from '../Admin/AdminMessages';
 import DiscountVouchers from '../Admin/DiscountVouchers';
-
+import FiltersManagement from '../Admin/FiltersManagement';
 
 const AdminLayout = () => {
   return (
@@ -29,8 +29,8 @@ const AdminLayout = () => {
           <Route path="/providers" element={<Providers />} />
           <Route path="/messages" element={<AdminMessages />} />
           <Route path="/vouchers" element={<DiscountVouchers />} />
-          {/* <Route path="/customers" element={<Customers />} />
-          <Route path="/magazine" element={<TravelMagazine />} /> */}
+          <Route path="/filters" element={<FiltersManagement />} />
+
         </Routes>
       </div>
     </div>

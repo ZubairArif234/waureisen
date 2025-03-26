@@ -5,7 +5,8 @@ import { Search, Plus, Edit, Trash } from 'lucide-react';
 const VoucherModal = ({ isOpen, onClose, onSave, editVoucher = null }) => {
   const [formData, setFormData] = useState({
     code: editVoucher?.code || '',
-    discountPercentage: editVoucher?.discountPercentage || '',
+    discountCHF: editVoucher?.discountCHF || '',
+    discountEUR: editVoucher?.discountEUR || '',
     validFrom: editVoucher?.validFrom || '',
     validUntil: editVoucher?.validUntil || '',
     maxUses: editVoucher?.maxUses || '',
@@ -53,15 +54,29 @@ const VoucherModal = ({ isOpen, onClose, onSave, editVoucher = null }) => {
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Discount Percentage
+                Discount Amount (CHF)
               </label>
               <input
                 type="number"
-                name="discountPercentage"
-                value={formData.discountPercentage}
+                name="discountCHF"
+                value={formData.discountCHF}
                 onChange={handleChange}
                 min="1"
-                max="100"
+                className="w-full px-3 py-2 border rounded-lg"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Discount Amount (EUR)
+              </label>
+              <input
+                type="number"
+                name="discountEUR"
+                value={formData.discountEUR}
+                onChange={handleChange}
+                min="1"
                 className="w-full px-3 py-2 border rounded-lg"
                 required
               />
@@ -183,7 +198,8 @@ const DiscountVouchers = () => {
     {
       id: 1,
       code: 'SUMMER2025',
-      discountPercentage: 15,
+      discountCHF: 50,
+      discountEUR: 45,
       validFrom: '2025-06-01',
       validUntil: '2025-08-31',
       maxUses: 100,
@@ -193,7 +209,8 @@ const DiscountVouchers = () => {
     {
       id: 2,
       code: 'WELCOME10',
-      discountPercentage: 10,
+      discountCHF: 25,
+      discountEUR: 22,
       validFrom: '2025-01-01',
       validUntil: '2025-12-31',
       maxUses: 500,
@@ -203,7 +220,8 @@ const DiscountVouchers = () => {
     {
       id: 3,
       code: 'DOGFRIENDLY',
-      discountPercentage: 20,
+      discountCHF: 40,
+      discountEUR: 35,
       validFrom: '2025-03-15',
       validUntil: '2025-09-15',
       maxUses: 200,
@@ -303,7 +321,10 @@ const DiscountVouchers = () => {
                   Code
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Discount
+                  Discount CHF
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Discount EUR
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Valid Period
@@ -327,7 +348,10 @@ const DiscountVouchers = () => {
                       </div>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className="font-medium text-brand">{voucher.discountPercentage}%</span>
+                      <span className="font-medium text-brand">{voucher.discountCHF} CHF</span>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <span className="font-medium text-brand">{voucher.discountEUR} EUR</span>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                       {formatDate(voucher.validFrom)} - {formatDate(voucher.validUntil)}
@@ -358,7 +382,7 @@ const DiscountVouchers = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="px-4 py-6 text-center text-gray-500">
+                  <td colSpan="6" className="px-4 py-6 text-center text-gray-500">
                     No vouchers found
                   </td>
                 </tr>

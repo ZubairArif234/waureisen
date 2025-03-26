@@ -255,6 +255,9 @@ const CustomerRow = ({ customer, onAction }) => {
       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
         {customer.email}
       </td>
+      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
+        #{customer.customerNumber}
+      </td>
       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600 text-center">
         {customer.bookings}
       </td>
@@ -391,6 +394,7 @@ const CustomerCard = ({ customer, onAction }) => {
           </div>
           <div>
             <div className="font-medium text-gray-900">{customer.name}</div>
+            <div className="text-xs text-gray-500">#{customer.customerNumber}</div>
             <div className="text-sm text-gray-500">{customer.email}</div>
           </div>
         </div>
@@ -464,6 +468,7 @@ const Customers = () => {
     {
       id: 1,
       name: 'John Doe',
+      customerNumber: '238491',
       initials: 'JD',
       email: 'john.doe@example.com',
       phone: '+41 76 123 4567',
@@ -480,6 +485,7 @@ const Customers = () => {
     {
       id: 2,
       name: 'Jane Smith',
+      customerNumber: '238491',
       initials: 'JS',
       email: 'jane.smith@example.com',
       phone: '+41 78 456 7890',
@@ -495,6 +501,7 @@ const Customers = () => {
     {
       id: 3,
       name: 'Robert Brown',
+      customerNumber: '238491',
       initials: 'RB',
       email: 'robert.brown@example.com',
       phone: '+41 79 789 0123',
@@ -509,6 +516,7 @@ const Customers = () => {
     {
       id: 4,
       name: 'Emma Wilson',
+      customerNumber: '238491',
       initials: 'EW',
       email: 'emma.wilson@example.com',
       phone: '+41 76 234 5678',
@@ -524,6 +532,7 @@ const Customers = () => {
     {
       id: 5,
       name: 'Michael Johnson',
+      customerNumber: '238491',
       initials: 'MJ',
       email: 'michael.johnson@example.com',
       phone: '+41 78 567 8901',
@@ -641,6 +650,9 @@ const Customers = () => {
                 </th>
                 <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Email
+                </th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Number
                 </th>
                 <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Bookings

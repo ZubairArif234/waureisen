@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import logo from '../../assets/logo.png';
 
@@ -39,6 +39,8 @@ const TestimonialCard = ({ review, author, date }) => {
 };
 
 const Travellers = () => {
+  const [currentPage, setCurrentPage] = useState(0);
+  
   const testimonials = [
     {
       review: "Booking through Waureisen was incredibly easy and stress-free. We were well advised from start to finish and were able to plan our trip exactly as we wanted. All details were perfectly organized, making our vacation especially enjoyable. It was a great experience that we will definitely repeat!",
@@ -49,8 +51,34 @@ const Travellers = () => {
       review: "Our stay was absolutely perfect! The cottage was cozy, well-equipped, and surrounded by beautiful nature. Our dog loved the spacious, fenced garden, giving us peace of mind while we relaxed. The quiet location was exactly what we needed for a stress-free getaway. We can't wait to return!",
       author: "Peter Fässler",
       date: "December 2024"
+    },
+    {
+      review: "What sets Waureisen apart is their attention to pet-friendly details. They found us a beautiful chalet with secure outdoor space for our dog. The local recommendations for dog-friendly restaurants and hiking trails were invaluable. It's refreshing to find a service that truly understands pet owners' needs.",
+      author: "Sarah Schmidt",
+      date: "March 2025"
+    },
+    {
+      review: "An exceptional experience from start to finish. The accommodation exceeded our expectations with its perfect blend of comfort and luxury. The dedicated dog areas and thoughtful pet amenities made our furry friend feel just as welcome as we did. We've already booked our next stay!",
+      author: "Michael Weber",
+      date: "February 2025"
     }
   ];
+
+  const testimonialsPerPage = 2;
+  const totalPages = Math.ceil(testimonials.length / testimonialsPerPage);
+
+  const handleNext = () => {
+    setCurrentPage((prev) => (prev + 1) % totalPages);
+  };
+
+  const handlePrevious = () => {
+    setCurrentPage((prev) => (prev - 1 + totalPages) % totalPages);
+  };
+
+  const visibleTestimonials = testimonials.slice(
+    currentPage * testimonialsPerPage,
+    (currentPage + 1) * testimonialsPerPage
+  );
 
   return (
     <section className="py-20">
@@ -66,21 +94,46 @@ const Travellers = () => {
         {/* Testimonials Container */}
         <div className="relative">
           {/* Navigation Buttons */}
-          <button className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center z-10">
+          <button 
+            onClick={handlePrevious}
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center z-10 transition-transform hover:scale-110"
+          >
             <ChevronLeft className="w-6 h-6 text-gray-600" />
           </button>
-          <button className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center z-10">
+          <button 
+            onClick={handleNext}
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center z-10 transition-transform hover:scale-110"
+          >
             <ChevronRight className="w-6 h-6 text-gray-600" />
           </button>
 
           {/* Testimonials Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-8">
-            {testimonials.map((testimonial, index) => (
-              <TestimonialCard
+            {visibleTestimonials.map((testimonial, index) => (
+              <div 
                 key={index}
-                review={testimonial.review}
-                author={testimonial.author}
-                date={testimonial.date}
+                className="transition-all duration-300 transform"
+              >
+                <TestimonialCard
+                  review={testimonial.review}
+                  author={testimonial.author}
+                  date={testimonial.date}
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Pagination Dots */}
+          <div className="flex justify-center mt-8 gap-2">
+            {[...Array(totalPages)].map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentPage(index)}
+                className={`w-2 h-2 rounded-full transition-all ${
+                  currentPage === index 
+                    ? 'bg-brand w-4' 
+                    : 'bg-gray-300'
+                }`}
               />
             ))}
           </div>

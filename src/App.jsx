@@ -16,6 +16,7 @@ import LoginSecurityPage from './pages/User/LoginSecurityPage'
 import PaymentMethodsPage from './pages/User/PaymentMethodsPage'
 import TripsPage from './pages/User/TripsPage'
 import AdminLayout from './pages/Main/Admin'
+import FAQ from './components/Footer/FAQ'
 
 function App() {
   return (
@@ -40,6 +41,10 @@ function App() {
           <Route path="/account/security" element={<LoginSecurityPage/>} />
           <Route path="/account/payments" element={<PaymentMethodsPage/>} />
           <Route path="/trips" element={<TripsPage/>} />
+
+
+          {/* FAQ Route */}
+          <Route path="/faq" element={<FAQ />} />
 
           {/* Admin Routes */}
           <Route path="/admin/*" element={<AdminLayout />} />

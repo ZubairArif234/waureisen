@@ -5,6 +5,7 @@ import { Instagram, Facebook, Linkedin, Youtube} from 'lucide-react';
 import logo from '../../assets/logo.png';
 import Modal from '../Auth/Modal';
 import TermsContent from '../Auth/TermsContent';
+import FAQ from '../Footer/FAQ';
 
 const FooterSection = ({ title, links, onTermsClick }) => (
   <div className="flex flex-col space-y-4">

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Shared/Navbar';
-import authBg from '../../assets/auth.png';
+import authBg from '../../assets/bg.png';
 import Footer from '../../components/Shared/Footer';
 
 const Login = () => {

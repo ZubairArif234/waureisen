@@ -38,6 +38,7 @@ const ProviderDetailModal = ({ provider, isOpen, onClose }) => {
             <div>
               <h4 className="text-lg font-medium text-gray-900">{provider.name}</h4>
               <p className="text-gray-600">{provider.email}</p>
+              <p className="text-gray-600">#{provider.customerNumber}</p>
               <div className={`mt-1 text-sm ${
                 provider.status === 'active' 
                   ? 'text-green-600' 

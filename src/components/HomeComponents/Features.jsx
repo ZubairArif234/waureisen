@@ -7,16 +7,16 @@ import s4 from '../../assets/s4.svg';
 
 const FeatureCard = ({ icon: IconSrc, title, description }) => {
   return (
-    <div className="bg-white rounded-2xl p-8 flex flex-col items-start shadow-sm">
-      <div className="mb-6">
+    <div className="bg-white rounded-2xl p-8 flex flex-col items-center"> {/* Changed items-start to items-center */}
+      <div className="mb-6 flex justify-center"> {/* Added flex justify-center */}
         <img 
           src={IconSrc} 
           alt={title}
-          className="w-9 h-9 text-brand" // Same size as previous icons (24px)
+          className="w-9 h-9 text-brand"
         />
       </div>
-      <h3 className="text-xl font-semibold mb-3 text-gray-900">{title}</h3>
-      <p className="text-gray-600 leading-relaxed">{description}</p>
+      <h3 className="text-xl font-semibold mb-3 text-gray-900 text-center">{title}</h3> {/* Added text-center */}
+      <p className="text-gray-600 leading-relaxed text-center">{description}</p> {/* Added text-center */}
     </div>
   );
 };

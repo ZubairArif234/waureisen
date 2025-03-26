@@ -32,8 +32,13 @@ const TransactionDetailModal = ({ transaction, isOpen, onClose }) => {
             </div>
             
             <div className="flex justify-between items-center">
-              <span className="text-gray-600">Amount:</span>
-              <span className="font-medium text-brand">{transaction.amount} CHF</span>
+              <span className="text-gray-600">Amount CHF:</span>
+              <span className="font-medium text-brand">{transaction.amountCHF} CHF</span>
+            </div>
+            
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">Amount EUR:</span>
+              <span className="font-medium text-brand">{transaction.amountEUR} EUR</span>
             </div>
             
             <div className="flex justify-between items-center">
@@ -94,7 +99,10 @@ const TransactionRow = ({ transaction, onViewDetails }) => {
         {transaction.date}
       </td>
       <td className="px-4 py-4 text-sm font-medium text-gray-900">
-        {transaction.amount} CHF
+        {transaction.amountCHF} CHF
+      </td>
+      <td className="px-4 py-4 text-sm font-medium text-gray-900">
+        {transaction.amountEUR} EUR
       </td>
       <td className="px-4 py-4 text-sm text-gray-700">
         {transaction.source}
@@ -121,7 +129,8 @@ const Transactions = () => {
       customer: 'John Doe',
       listing: 'Mountain View Chalet',
       date: '2023-03-15',
-      amount: '750',
+      amountCHF: '750',
+      amountEUR: '780',
       source: 'Platform'
     },
     {
@@ -129,7 +138,8 @@ const Transactions = () => {
       customer: 'Jane Smith',
       listing: 'Beachfront Villa',
       date: '2023-03-18',
-      amount: '1,050',
+      amountCHF: '350',
+      amountEUR: '580',
       source: 'Platform'
     },
     {
@@ -137,7 +147,8 @@ const Transactions = () => {
       customer: 'Robert Brown',
       listing: 'Lake House',
       date: '2023-03-20',
-      amount: '1,200',
+      amountCHF: '1750',
+      amountEUR: '2780',
       source: 'API'
     },
     {
@@ -145,7 +156,8 @@ const Transactions = () => {
       customer: 'Emily Johnson',
       listing: 'Forest Cabin',
       date: '2023-03-22',
-      amount: '850',
+      amountCHF: '950',
+      amountEUR: '480',
       source: 'Platform'
     },
     {
@@ -153,7 +165,8 @@ const Transactions = () => {
       customer: 'Michael Wilson',
       listing: 'City Apartment',
       date: '2023-03-25',
-      amount: '550',
+      amountCHF: '2750',
+      amountEUR: '1380',
       source: 'API'
     }
   ]);
@@ -225,7 +238,10 @@ const Transactions = () => {
                   Date
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Amount
+                  Amount CHF
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Amount EUR
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Source
@@ -270,8 +286,11 @@ const Transactions = () => {
                   <p className="text-sm text-gray-500">{transaction.date}</p>
                 </div>
                 <div className="font-medium text-brand">
-                  {transaction.amount} CHF
-                </div>
+              {transaction.amountCHF} CHF
+            </div>
+            <div className="font-medium text-brand">
+              {transaction.amountEUR} EUR
+            </div>
               </div>
               
               <div className="space-y-2 pb-3 border-b mb-3">

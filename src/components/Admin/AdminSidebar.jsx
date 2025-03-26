@@ -1,25 +1,30 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Building2, Menu, X, CreditCard, Users, UserCog, Newspaper, MessageCircle, ReceiptText } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Building2, Menu, X, CreditCard, Users, UserCog, Newspaper, MessageCircle, ReceiptText, LogOut, Sliders } from 'lucide-react';
 import logo from '../../assets/logo.png';
 
-const SidebarLink = ({ icon: Icon, label, to, isActive }) => (
-  <Link
-    to={to}
-    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-      isActive 
-        ? 'bg-brand text-white' 
-        : 'text-gray-600 hover:bg-gray-100'
-    }`}
-  >
-    <Icon className="w-5 h-5" />
-    <span className="font-medium">{label}</span>
-  </Link>
-);
+const SidebarLink = ({ icon: Icon, label, to, isActive, onClick }) => {
+  const Component = to ? Link : 'button';
+  return (
+    <Component
+      to={to}
+      onClick={onClick}
+      className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors w-full ${
+        isActive 
+          ? 'bg-brand text-white' 
+          : 'text-gray-600 hover:bg-gray-100'
+      }`}
+    >
+      <Icon className="w-5 h-5" />
+      <span className="font-medium">{label}</span>
+    </Component>
+  );
+};
 
 const AdminSidebar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const menuItems = [
     {
@@ -56,28 +61,48 @@ const AdminSidebar = () => {
       icon: ReceiptText,
       label: 'Discount Vouchers',
       path: '/admin/vouchers'
+    },
+    {
+      icon: Sliders,
+      label: 'Filters',
+      path: '/admin/filters'
     }
   ];
 
   const sidebarContent = (
-    <>
-      <div className="px-4 py-6 border-b">
+    <div className="flex flex-col h-screen">
+      {/* Fixed Logo Section */}
+      <div className="px-4 py-6 border-b flex-shrink-0">
         <img src={logo} alt="Waureisen Logo" className="h-8" />
       </div>
       
-      <div className="p-4 space-y-2">
-        {menuItems.map((item, index) => (
+      {/* Scrollable Menu Section with Fixed Height */}
+      <div className="flex-1 flex flex-col min-h-0"> {/* min-h-0 is crucial for nested flex scroll */}
+        <div className="flex-1 p-4 overflow-y-auto scrollbar-hide">
+          <div className="space-y-2">
+            {menuItems.map((item, index) => (
+              <SidebarLink
+                key={index}
+                icon={item.icon}
+                label={item.label}
+                to={item.path}
+                isActive={location.pathname === item.path || 
+                  (item.path !== '/admin' && location.pathname.startsWith(item.path))}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Fixed Logout Section */}
+        <div className="p-4 border-t mt-auto">
           <SidebarLink
-            key={index}
-            icon={item.icon}
-            label={item.label}
-            to={item.path}
-            isActive={location.pathname === item.path || 
-              (item.path !== '/admin' && location.pathname.startsWith(item.path))}
+            icon={LogOut}
+            label="Logout"
+            onClick={() => navigate('/login')}
           />
-        ))}
+        </div>
       </div>
-    </>
+    </div>
   );
 
   return (
