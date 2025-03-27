@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, PawPrint } from 'lucide-react';
 import i1 from '../../assets/bg.png';
 import i2 from '../../assets/s1.png';
 import i3 from '../../assets/i1.png';
@@ -169,8 +169,17 @@ const PhotosForm = ({ formData, handleInputChange }) => {
           </label>
         </div>
         <p className="text-xs text-gray-500">
-          Upload up to 10 images. For best results, use high-resolution images in landscape orientation.
+          At least 5 pictures. For best results, use high-resolution images in landscape orientation.<br /><br />
         </p>
+         {/* Dog pictures note with PawPrint */}
+         <div className="flex items-center gap-2 mt-4">
+          <PawPrint className="w-6 h-6 text-[#B4A481]" />
+          <p className="text-sm text-gray-600">
+            For more bookings,
+            we recommend uploading pictures
+            with dogs
+          </p>
+        </div>
       </div>
     </div>
   );

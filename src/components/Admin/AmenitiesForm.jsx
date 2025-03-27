@@ -14,7 +14,7 @@ const CheckboxGroup = ({ title, options, selected, onChange }) => {
               type="checkbox"
               checked={selected[option.value]}
               onChange={() => onChange(option.value, !selected[option.value])}
-              className="rounded border-gray-300 text-brand focus:ring-brand"
+              className="w-4 h-4 rounded border-[#B4A481] accent-[#B4A481] checked:bg-[#B4A481] checked:border-[#B4A481] focus:ring-[#B4A481] focus:ring-2 focus:ring-offset-0"
             />
             <span className="text-gray-700">{option.label}</span>
           </label>
@@ -75,21 +75,7 @@ const AmenitiesForm = ({ formData, handleNestedInputChange }) => {
         onChange={handleDogFilterChange}
       />
 
-      {/* Additional Custom Amenities */}
-      <div className="space-y-3">
-        <h3 className="text-lg font-medium text-gray-900">Additional Amenities</h3>
-        <p className="text-gray-600 text-sm">Need to add a custom amenity? Let us know and we'll consider adding it to our system.</p>
-        
-        <textarea
-          placeholder="Example: Dog bed provided, Fenced garden up to 1.5m, etc."
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
-          rows={3}
-        ></textarea>
-        
-        <p className="text-xs text-gray-500">
-          These amenities won't be added automatically to your listing. Our team will review and add them if appropriate.
-        </p>
-      </div>
+     
     </div>
   );
 };

@@ -10,6 +10,8 @@ import Providers from '../Admin/Providers';
 import AdminMessages from '../Admin/AdminMessages';
 import DiscountVouchers from '../Admin/DiscountVouchers';
 import FiltersManagement from '../Admin/FiltersManagement';
+import Campers from '../Admin/Campers';
+import AddCamper from '../Admin/AddCamper';
 
 const AdminLayout = () => {
   return (
@@ -30,7 +32,9 @@ const AdminLayout = () => {
           <Route path="/messages" element={<AdminMessages />} />
           <Route path="/vouchers" element={<DiscountVouchers />} />
           <Route path="/filters" element={<FiltersManagement />} />
-
+          <Route path="/campers" element={<Campers />} />
+          <Route path="/campers/new" element={<AddCamper />} />
+          <Route path="/campers/edit/:id" element={<AddCamper />} />
         </Routes>
       </div>
     </div>

@@ -6,6 +6,7 @@ import Travellers from '../../components/HomeComponents/Travellers';
 import Register from '../../components/HomeComponents/Register';
 import Footer from '../../components/Shared/Footer';
 import Calendly from '../../components/HomeComponents/Calendly';
+import ChatWidget from '../../components/Shared/ChatWidget';
 
 const Home = () => {
   return (
@@ -16,6 +17,7 @@ const Home = () => {
       <Travellers />
       <Register />
       <Calendly />
+      <ChatWidget />
       <Footer />
 
     </main>

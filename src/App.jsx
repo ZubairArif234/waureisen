@@ -17,10 +17,12 @@ import PaymentMethodsPage from './pages/User/PaymentMethodsPage'
 import TripsPage from './pages/User/TripsPage'
 import AdminLayout from './pages/Main/Admin'
 import FAQ from './components/Footer/FAQ'
+import ScrollToTop from './components/Shared/ScrollToTop'
 
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <div className="bg-white">
         <Routes>
           {/* Public Routes */}

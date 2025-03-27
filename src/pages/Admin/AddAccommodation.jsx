@@ -136,7 +136,7 @@ const AddAccommodation = () => {
         noParties: true,
         quietHours: true
       }
-    }
+    },
   });
 
   // Load data if in edit mode
@@ -318,7 +318,7 @@ const AddAccommodation = () => {
             className="px-4 py-2 bg-black text-white rounded-lg hover:bg-black/80 transition-colors flex items-center gap-2"
           >
             <Save className="w-4 h-4" />
-            Save Listing
+            Publish Listing
           </button>
         </div>
       </div>
