@@ -2,12 +2,14 @@ import React from 'react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Instagram, Facebook, Linkedin, Youtube} from 'lucide-react';
+import { FaTiktok } from "react-icons/fa";
 import logo from '../../assets/logo.png';
 import Modal from '../Auth/Modal';
 import TermsContent from '../Auth/TermsContent';
 import FAQ from '../Footer/FAQ';
+import DataPolicy from '../Footer/DataPolicy';
 
-const FooterSection = ({ title, links, onTermsClick }) => (
+const FooterSection = ({ title, links, onTermsClick, onDataPolicyClick }) => (
   <div className="flex flex-col space-y-4">
     <h3 className="text-[#4D484D] font-semibold">{title}</h3>
     <div className="flex flex-col space-y-2">
@@ -17,6 +19,17 @@ const FooterSection = ({ title, links, onTermsClick }) => (
             <button
               key={index}
               onClick={onTermsClick}
+              className="text-left text-gray-600 hover:text-gray-800 transition-colors text-sm"
+            >
+              {link.label}
+            </button>
+          );
+        }
+        if (link.label === 'Data Policy') {
+          return (
+            <button
+              key={index}
+              onClick={onDataPolicyClick}
               className="text-left text-gray-600 hover:text-gray-800 transition-colors text-sm"
             >
               {link.label}
@@ -50,6 +63,7 @@ const FooterSection = ({ title, links, onTermsClick }) => (
 const Footer = () => {
 
   const [isTermsOpen, setIsTermsOpen] = useState(false);
+  const [isDataPolicyOpen, setIsDataPolicyOpen] = useState(false);
 
   const footerLinks = {
     legal: [
@@ -65,12 +79,12 @@ const Footer = () => {
       { label: 'Become a host', path: '/host' }
     ],
     specials: [
-      { label: 'Our partner', path: '/partner' },
-      { label: 'Travelmagazine', path: '/magazine' },
-      { label: 'Travel Insurance', path: '/insurance' }
+      { label: 'Our partner', path: '/partners' },
+      { label: 'Travelmagazine', path: '/publicmagazine' },
+      { label: 'Travel Insurance', path: 'https://be.erv.ch/?agency=WAUREISEN_01&lang=de', external: true }
     ],
     more: [
-      { label: 'About us', path: '/about' },
+      { label: 'About us', path: '/about-us' },
       { label: 'FAQ', path: '/faq' },
       { label: 'Newsletter', path: 'https://91489596.sibforms.com/serve/MUIFAF7RKiUpQ7DfnIHP2yne3AHbtAygWMg737H-NfJOp6_cw77yfolND_xjtHmbCCmVLvfCdiL7hUtdtSVW6JNYOE7NR3ipyNDP-vuHMjdvdMfZxJxSh9PjXo6OPpeTBeWeLFh7pj3KvI6JDo1eaiso6GnvdceOSIdIA6oZ_8qJRtM8Lijlrumqt6kWZhMeLinfNbpefq5NyHFQ', external: true }
     ]
@@ -88,17 +102,20 @@ const Footer = () => {
               The first Swiss booking platform for dog-friendly travel – exploring Europe with your dog! 🐶 🌍
             </p>
             <div className="flex space-x-4 ml-2">
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-[#B4A481] hover:text-[#a3927b] transition-colors">
+              <a href="https://www.instagram.com/waureisen/" target="_blank" rel="noopener noreferrer" className="text-[#B4A481] hover:text-[#a3927b] transition-colors">
                 <Instagram size={20} />
               </a>
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-[#B4A481] hover:text-[#a3927b] transition-colors">
+              <a href="https://www.facebook.com/people/Waureisen/61564615821969/" target="_blank" rel="noopener noreferrer" className="text-[#B4A481] hover:text-[#a3927b] transition-colors">
                 <Facebook size={20} />
               </a>
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-[#B4A481] hover:text-[#a3927b] transition-colors">
+              <a href="https://www.linkedin.com/company/waureisen-gmbh/" target="_blank" rel="noopener noreferrer" className="text-[#B4A481] hover:text-[#a3927b] transition-colors">
                 <Linkedin size={20} />
               </a>
-              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="text-[#B4A481] hover:text-[#a3927b] transition-colors">
+              <a href="https://www.youtube.com/channel/UCQLaDva8GTvc3WG_YAWg5BA" target="_blank" rel="noopener noreferrer" className="text-[#B4A481] hover:text-[#a3927b] transition-colors">
                 <Youtube size={20} />
+              </a>
+              <a href="https://www.tiktok.com/@waureisen?_t=ZN-8tilJgcPC5O&_r=1" target="_blank" rel="noopener noreferrer" className="text-[#B4A481] hover:text-[#a3927b] transition-colors">
+                <FaTiktok size={20} />
               </a>
 
             </div>
@@ -107,30 +124,40 @@ const Footer = () => {
             </p>
           </div>
 
-          {/* Right Columns */}
-          <div className="md:col-span-8 md:pt-[72px]">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <FooterSection 
+         {/* Right Columns */}
+         <div className="md:col-span-8 md:pt-[72px]">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                <FooterSection 
                   title="Legal" 
                   links={footerLinks.legal} 
                   onTermsClick={() => setIsTermsOpen(true)}
+                  onDataPolicyClick={() => setIsDataPolicyOpen(true)}
                 />
-              <FooterSection title="Sitemap" links={footerLinks.sitemap} />
-              <FooterSection title="Specials" links={footerLinks.specials} />
-              <FooterSection title="More" links={footerLinks.more} />
+                <FooterSection title="Sitemap" links={footerLinks.sitemap} />
+                <FooterSection title="Specials" links={footerLinks.specials} />
+                <FooterSection title="More" links={footerLinks.more} />
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </footer>
+      </footer>
 
-    {/* Terms of Service Modal */}
-    <Modal
+      {/* Terms of Service Modal */}
+      <Modal
         isOpen={isTermsOpen}
         onClose={() => setIsTermsOpen(false)}
         title="Terms of Service"
       >
         <TermsContent />
+      </Modal>
+
+      {/* Data Policy Modal */}
+      <Modal
+        isOpen={isDataPolicyOpen}
+        onClose={() => setIsDataPolicyOpen(false)}
+        title="Data Protection Policy"
+      >
+        <DataPolicy/>
       </Modal>
     </>
   );

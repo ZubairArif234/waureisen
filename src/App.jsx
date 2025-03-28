@@ -18,6 +18,12 @@ import TripsPage from './pages/User/TripsPage'
 import AdminLayout from './pages/Main/Admin'
 import FAQ from './components/Footer/FAQ'
 import ScrollToTop from './components/Shared/ScrollToTop'
+import AboutUs from './components/Footer/AboutUs'
+import Partners from './components/Footer/Partners'
+import Imprint from './components/Footer/Imprint'
+import StarMembership from './components/Footer/StarMembership'
+import HostRegistration from './components/Footer/HostRegistration'
+import TravelMagazine from './components/Footer/TravelMagazine'
 
 function App() {
   return (
@@ -47,6 +53,12 @@ function App() {
 
           {/* FAQ Route */}
           <Route path="/faq" element={<FAQ />} />
+          <Route path="/about-us" element={<AboutUs />} />
+          <Route path="/partners" element={<Partners />} /> 
+          <Route path="/imprint" element={<Imprint />} />
+          <Route path="/star-membership" element={<StarMembership />} />
+          <Route path="/host" element={<HostRegistration />} />
+          <Route path="/publicmagazine" element={<TravelMagazine />} />
 
           {/* Admin Routes */}
           <Route path="/admin/*" element={<AdminLayout />} />
