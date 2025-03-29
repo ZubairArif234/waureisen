@@ -16,7 +16,7 @@ const Navbar = () => {
     { icon: <MessageSquare className="h-4 w-4" />, label: 'Messages', path: '/messages' },
     { icon: <Map className="h-4 w-4" />, label: 'Your Trips', path: '/trips' },
     { icon: <Heart className="h-4 w-4" />, label: 'Favorites', path: '/wishlist' },
-    { icon: <Home className="h-4 w-4" />, label: 'Your Listings', path: '#' },
+    { icon: <Home className="h-4 w-4" />, label: 'Your Listings', path: '/provider/listings' },
     { icon: <UserCircle className="h-4 w-4" />, label: 'Profile', path: '/profile' },
     { icon: <Settings className="h-4 w-4" />, label: 'Account', path: '/account' },
   ];

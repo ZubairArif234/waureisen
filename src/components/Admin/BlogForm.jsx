@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Upload, Image as ImageIcon } from 'lucide-react';
+import Editor from './Editor';  // Import our rich text editor
 
 const BlogForm = ({ isOpen, onClose, onSave, blog = null }) => {
   const [formData, setFormData] = useState({
@@ -33,6 +34,14 @@ const BlogForm = ({ isOpen, onClose, onSave, blog = null }) => {
     setFormData(prev => ({
       ...prev,
       [name]: value
+    }));
+  };
+
+  // Handle rich text editor content changes
+  const handleContentChange = (htmlContent) => {
+    setFormData(prev => ({
+      ...prev,
+      content: htmlContent
     }));
   };
 
@@ -92,7 +101,7 @@ const BlogForm = ({ isOpen, onClose, onSave, blog = null }) => {
             </button>
           </div>
           
-          {/* Form Content */}
+          {/* Form Content - Scrollable */}
           <div className="flex-1 overflow-y-auto p-6">
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Title */}
@@ -129,23 +138,17 @@ const BlogForm = ({ isOpen, onClose, onSave, blog = null }) => {
                 />
               </div>
 
-              {/* Content */}
+              {/* Content - Rich Text Editor */}
               <div className="space-y-2">
                 <label htmlFor="content" className="block text-sm font-medium text-gray-700">
                   Content
                 </label>
-                <textarea
-                  id="content"
-                  name="content"
-                  value={formData.content}
-                  onChange={handleInputChange}
-                  placeholder="Enter blog content..."
-                  rows="10"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
-                  required
+                <Editor 
+                  content={formData.content} 
+                  onChange={handleContentChange} 
                 />
-                <p className="text-xs text-gray-500">
-                  You can use Markdown formatting for rich content
+                <p className="text-xs text-gray-500 mt-2">
+                  Use the toolbar to format your content and add rich elements like headings, lists, and links.
                 </p>
               </div>
 
@@ -232,7 +235,7 @@ const BlogForm = ({ isOpen, onClose, onSave, blog = null }) => {
             <button
               type="button"
               onClick={handleSubmit}
-              className="px-4 py-2 bg-black text-white rounded-lg hover:bg-black/80 transition-colors"
+              className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand/80 transition-colors"
             >
               {blog ? 'Update Blog Post' : 'Publish Blog Post'}
             </button>

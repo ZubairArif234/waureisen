@@ -24,6 +24,7 @@ import Imprint from './components/Footer/Imprint'
 import StarMembership from './components/Footer/StarMembership'
 import HostRegistration from './components/Footer/HostRegistration'
 import TravelMagazine from './components/Footer/TravelMagazine'
+import ProviderLayout from './pages/Main/Provider'
 
 function App() {
   return (
@@ -62,6 +63,10 @@ function App() {
 
           {/* Admin Routes */}
           <Route path="/admin/*" element={<AdminLayout />} />
+
+          {/* Provider Routes */}
+          <Route path="/provider/*" element={<ProviderLayout />} />
+
         </Routes>
       </div>
     </Router>
