@@ -74,7 +74,7 @@ const Footer = () => {
     ],
     sitemap: [
       { label: 'Camper rental', path: '/camper-rental' },
-      { label: 'Travel shop', path: '/shop' },
+      { label: 'Travel shop', path: '/travelshop' },
       { label: 'Book an appointment', path: 'https://meet.brevo.com/waureisen', external: true },
       { label: 'Become a host', path: '/host' }
     ],

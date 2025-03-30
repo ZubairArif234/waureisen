@@ -25,6 +25,7 @@ import StarMembership from './components/Footer/StarMembership'
 import HostRegistration from './components/Footer/HostRegistration'
 import TravelMagazine from './components/Footer/TravelMagazine'
 import ProviderLayout from './pages/Main/Provider'
+import TravelShop from './components/Footer/TravelShop'
 
 function App() {
   return (
@@ -52,7 +53,7 @@ function App() {
           <Route path="/trips" element={<TripsPage/>} />
 
 
-          {/* FAQ Route */}
+          {/* Footer Routes */}
           <Route path="/faq" element={<FAQ />} />
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/partners" element={<Partners />} /> 
@@ -60,6 +61,7 @@ function App() {
           <Route path="/star-membership" element={<StarMembership />} />
           <Route path="/host" element={<HostRegistration />} />
           <Route path="/publicmagazine" element={<TravelMagazine />} />
+          <Route path="/travelshop" element={<TravelShop />} />
 
           {/* Admin Routes */}
           <Route path="/admin/*" element={<AdminLayout />} />
