@@ -111,12 +111,12 @@ const Footer = () => {
               <a href="https://www.linkedin.com/company/waureisen-gmbh/" target="_blank" rel="noopener noreferrer" className="text-[#B4A481] hover:text-[#a3927b] transition-colors">
                 <Linkedin size={20} />
               </a>
-              <a href="https://www.youtube.com/channel/UCQLaDva8GTvc3WG_YAWg5BA" target="_blank" rel="noopener noreferrer" className="text-[#B4A481] hover:text-[#a3927b] transition-colors">
+              {/* <a href="https://www.youtube.com/channel/UCQLaDva8GTvc3WG_YAWg5BA" target="_blank" rel="noopener noreferrer" className="text-[#B4A481] hover:text-[#a3927b] transition-colors">
                 <Youtube size={20} />
               </a>
               <a href="https://www.tiktok.com/@waureisen?_t=ZN-8tilJgcPC5O&_r=1" target="_blank" rel="noopener noreferrer" className="text-[#B4A481] hover:text-[#a3927b] transition-colors">
                 <FaTiktok size={20} />
-              </a>
+              </a> */}
 
             </div>
             <p className="text-gray-500 text-sm ml-2">

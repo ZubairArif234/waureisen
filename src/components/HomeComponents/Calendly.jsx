@@ -1,5 +1,5 @@
 import React from 'react';
-import avatar from '../../assets/avatar.png';
+import avatar from '../../assets/founder.jpg';
 import { PawPrint } from 'lucide-react';
 
 
@@ -7,6 +7,7 @@ const Calendly = () => {
   return (
     <section className="py-20 bg-[#FEFCF5]">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <p className="text-brand text-lg mb-3">Talk with us</p>
         {/* Heading */}
         <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
           Do you have any questions?

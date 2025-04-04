@@ -18,7 +18,7 @@ const Benefit = ({ title, description, isOpen, onClick }) => {
         )}
       </button>
       <div
-        className={`overflow-hidden transition-all duration-300 pl-6 ${
+        className={`overflow-hidden transition-all duration-300  ${
           isOpen ? 'max-h-20 mt-2 opacity-100' : 'max-h-0 opacity-0'
         }`}
       >

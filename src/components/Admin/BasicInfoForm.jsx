@@ -42,6 +42,19 @@ const BasicInfoForm = ({ formData, handleInputChange, handleNestedInputChange })
             <option value="Villa">Villa</option>
             <option value="Cabin">Cabin</option>
             <option value="Chalet">Chalet</option>
+            <option value="Hotel">Hotel</option>
+            <option value="Holiday Home">Holiday Home</option>
+            <option value="Tiny House">Tiny House</option>
+            <option value="Holiday Apartment">Holiday Apartment</option>
+            <option value="Bungalow">Bungalow</option>
+            <option value="House Boat">House Boat</option>
+            <option value="Guest House">Guest House</option>
+            <option value="Yurt">Yurt</option>
+            <option value="Log Cabin">Log Cabin</option>
+            <option value="Camper Van">Camper Van</option>
+            <option value="Farm House">Farm House</option>
+            <option value="Tent">Tent</option>
+            <option value="Tree House">Tree House</option>
           </select>
         </div>
 
@@ -202,12 +215,12 @@ const BasicInfoForm = ({ formData, handleInputChange, handleNestedInputChange })
         
         <div className="space-y-6">
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">Default Check-in/Check-out Dates</label>
+            <label className="block text-sm font-medium text-gray-700">Check-in/Check-out Dates</label>
             <div className="relative">
               <input
                 type="text"
                 value={formData.availability.checkInDates}
-                placeholder="Mar 20, 2025 - Mar 21, 2025"
+                placeholder="Check-in/Check-out"
                 onChange={(e) => handleNestedInputChange('availability', 'checkInDates', e.target.value)}
                 className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
               />

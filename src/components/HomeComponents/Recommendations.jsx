@@ -18,14 +18,14 @@ const RecommendationsSection = ({ title }) => {
       image: i2,
       price: 230.00,
       location: "Room in Rio de Janeiro, Brazil",
-      provider: "Waureisen"
+      provider: "Interhome"
     },
     {
       id: '3',
       image: i3,
       price: 230.00,
       location: "Room in Rio de Janeiro, Brazil",
-      provider: "Interhome"
+      provider: "Europarcs"
     }
   ];
 

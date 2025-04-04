@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Filter, MoreHorizontal, UserX, User, AlertTriangle, Eye } from 'lucide-react';
+import { Search, Filter, MoreHorizontal, UserX, User, AlertTriangle, Eye, Download } from 'lucide-react';
 import avatar from '../../assets/avatar.png';
 
 // CustomerDetailModal component for viewing customer details
@@ -596,6 +596,48 @@ const Customers = () => {
     }
   };
 
+  // Export data to Excel
+  const exportToExcel = () => {
+    // Create data for export
+    const exportData = filteredCustomers.map(customer => ({
+      Name: customer.name,
+      Email: customer.email,
+      CustomerNumber: customer.customerNumber,
+      Bookings: customer.bookings,
+      Status: customer.status === 'active' ? 'Active' : 'Banned',
+      JoinedDate: customer.joinedDate,
+      AccountType: customer.accountType,
+      Phone: customer.phone || 'Not provided'
+    }));
+
+    // Convert data to CSV format
+    const headers = Object.keys(exportData[0]);
+    let csvContent = headers.join(',') + '\n';
+    
+    exportData.forEach(row => {
+      const values = headers.map(header => {
+        const value = row[header] != null ? row[header].toString() : '';
+        // Escape values with commas, quotes or newlines
+        if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+          return `"${value.replace(/"/g, '""')}"`;
+        }
+        return value;
+      });
+      csvContent += values.join(',') + '\n';
+    });
+
+    // Create and download the file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'customers-export.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="p-6">
       {/* Header */}
@@ -637,6 +679,15 @@ const Customers = () => {
             <option value="banned">Banned</option>
           </select>
         </div>
+
+        {/* Export Button */}
+        <button
+          onClick={exportToExcel}
+          className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+        >
+          <Download className="w-5 h-5" />
+          <span>Export</span>
+        </button>
       </div>
 
       {/* Desktop View - Table */}

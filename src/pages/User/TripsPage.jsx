@@ -129,14 +129,25 @@ const TripsPage = () => {
       <Navbar />
       
       <main className="max-w-5xl mx-auto px-4 py-12 mt-20">
-        <div className="mb-8">
-          <h1 className="text-3xl font-semibold text-gray-900 mb-2">
-            Your trips
-          </h1>
-          <p className="text-gray-600">
-            View and manage your upcoming and past trips
-          </p>
-        </div>
+      <div className="mb-8">
+  <h1 className="text-3xl font-semibold text-gray-900 mb-2">
+    Your trips
+  </h1>
+  <div className="space-y-3">
+    <p className="text-gray-600">
+      View and manage your upcoming and past trips
+    </p>
+    <div className="flex items-center gap-2 text-sm text-gray-600 bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
+      <span>Can't find your reservation here?</span>
+      <a 
+        href="mailto:hallo@waureisen.com"
+        className="text-[#B4A481] hover:underline font-medium"
+      >
+        Contact us via email hallo@waureisen.com
+      </a>
+    </div>
+  </div>
+</div>
 
         {trips.length === 0 ? (
           <NoTrips />

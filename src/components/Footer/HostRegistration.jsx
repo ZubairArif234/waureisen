@@ -45,31 +45,30 @@ const ListingTypeForm = ({ formData, handleInputChange }) => {
         </div>
   
         {formData.listingType && (
-          <div className="bg-blue-50 p-4 rounded-lg max-w-2xl">
-            <h3 className="text-blue-800 font-medium mb-2">About {formData.listingType === 'interhome' ? 'Interhome' : formData.listingType === 'europarcs' ? 'EuroParcs' : 'Direct'} Listings</h3>
-            {formData.listingType === 'interhome' && (
-              <p className="text-blue-700 text-sm">
-                Interhome has been providing high-quality vacation rentals since 1965. By registering your Interhome accommodation, 
-                you'll connect with our platform's dog-loving audience while maintaining your Interhome standards.
-              </p>
-            )}
-            {formData.listingType === 'europarcs' && (
-              <p className="text-blue-700 text-sm">
-                EuroParcs offers premium holiday parks across Europe. Registering your EuroParcs accommodation on our platform 
-                allows you to reach dog owners specifically looking for pet-friendly vacation experiences.
-              </p>
-            )}
-            {formData.listingType === 'other' && (
-              <p className="text-blue-700 text-sm">
-                Direct listings allow you to showcase your own property on our platform. You'll have full control over your 
-                listing details, pricing, and availability while benefiting from our specialized dog-friendly travel audience.
-              </p>
-            )}
-          </div>
-        )}
-      </div>
-    );
-  };
+        <div className="bg-grey-100 p-4 rounded-lg max-w-2xl">
+          <h3 className="text-grey-800 font-medium mb-2">About {formData.listingType === 'interhome' ? 'Interhome' : formData.listingType === 'europarcs' ? 'EuroParcs' : 'Direct'} Listings</h3>
+          {formData.listingType === 'interhome' && (
+            <p className="text-grey-700 text-sm">
+              Billing takes place via Interhome. Interhome has been providing high-quality vacation rentals since 1965. By registering your Interhome accommodation, 
+              you'll connect with our platform's dog-loving audience while maintaining your Interhome standards.
+            </p>
+          )}
+          {formData.listingType === 'europarcs' && (
+            <p className="text-grey-700 text-sm">
+              Please contact hallo@waureisen.com
+            </p>
+          )}
+          {formData.listingType === 'other' && (
+            <p className="text-grey-700 text-sm">
+              Direct listings allow you to showcase your own property on our platform. You'll have full control over your 
+              listing details, pricing, and availability while benefiting from our specialized dog-friendly travel audience.
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const HostRegistration = () => {
   const navigate = useNavigate();
@@ -186,8 +185,11 @@ const HostRegistration = () => {
 
   // Determine if we can proceed to the next tab
   const canProceed = () => {
-    if (activeTab === 'listingType' && !formData.listingType) {
-      return false;
+    if (activeTab === 'listingType') {
+      // Block next button if no type is selected or if EuroParcs is selected
+      if (!formData.listingType || formData.listingType === 'europarcs') {
+        return false;
+      }
     }
     return true;
   };
@@ -324,23 +326,27 @@ const HostRegistration = () => {
               
               {activeTab !== 'policiesLocation' ? (
                 <button
-                  type="button"
-                  onClick={() => {
-                    if (canProceed()) {
-                      const currentIndex = tabs.findIndex(tab => tab.id === activeTab);
-                      if (currentIndex < tabs.length - 1) {
-                        setActiveTab(tabs[currentIndex + 1].id);
-                      }
-                    } else {
-                      alert('Please select a listing type to continue.');
+                type="button"
+                onClick={() => {
+                  if (formData.listingType === 'europarcs') {
+                    alert('Please contact hallo@waureisen.com to register EuroParcs accommodation');
+                    return;
+                  }
+                  if (canProceed()) {
+                    const currentIndex = tabs.findIndex(tab => tab.id === activeTab);
+                    if (currentIndex < tabs.length - 1) {
+                      setActiveTab(tabs[currentIndex + 1].id);
                     }
-                  }}
-                  className={`px-4 py-2 bg-brand text-white rounded-lg ${
-                    canProceed() ? 'hover:bg-brand/80' : 'opacity-50 cursor-not-allowed'
-                  } transition-colors`}
-                >
-                  Next
-                </button>
+                  } else {
+                    alert('Please select a listing type to continue.');
+                  }
+                }}
+                className={`px-4 py-2 bg-brand text-white rounded-lg ${
+                  canProceed() ? 'hover:bg-brand/80' : 'opacity-50 cursor-not-allowed'
+                } transition-colors`}
+              >
+                Next
+              </button>
               ) : (
                 <button
                   type="button"

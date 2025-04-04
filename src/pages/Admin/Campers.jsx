@@ -37,7 +37,7 @@ const CamperCard = ({ camper, onAction }) => {
             </button>
             
             {showMenu && (
-              <div className="absolute right-0 mt-1 w-40 bg-white rounded-md shadow-lg z-10 border">
+              <div className="absolute right-0 mb-2 w-40 bg-white rounded-md shadow-lg z-90 border">
                 <button
                   onClick={() => {
                     onAction('edit', camper);

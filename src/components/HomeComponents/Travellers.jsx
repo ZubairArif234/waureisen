@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Star, ChevronLeft, ChevronRight } from 'lucide-react';
-import logo from '../../assets/logo.png';
+import logo from '../../assets/together.png';
 
 const TestimonialCard = ({ review, author, date }) => {
   return (
@@ -25,7 +25,7 @@ const TestimonialCard = ({ review, author, date }) => {
           <img 
             src={logo} 
             alt="Profile" 
-            className="w-6 h-6 object-contain"
+            className="w-10 h-10 rounded-full object-cover"
           />
         </div>
         <div className="flex items-center">

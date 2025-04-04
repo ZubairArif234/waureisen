@@ -175,9 +175,14 @@ const PaymentMethodsPage = () => {
                       className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-brand/20 focus:border-brand"
                     >
                       <option value="">Select a country...</option>
-                      <option value="FI">Finland</option>
-                      <option value="DE">Germany</option>
                       <option value="CH">Switzerland</option>
+                      <option value="DE">Germany</option>
+                      <option value="CH">Austria</option>
+                      <option value="FI">Finland</option>
+                      <option value="CH">France</option>
+                      <option value="CH">Italy</option>
+                      <option value="CH">The Netherlands</option>
+                      <option value="CH">Denmark</option>
                       {/* Add more countries as needed */}
                     </select>
                   </div>

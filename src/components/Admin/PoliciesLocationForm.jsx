@@ -58,7 +58,7 @@ const PoliciesLocationForm = ({ formData, handleInputChange, handleNestedInputCh
         <p className="text-gray-600 text-sm mb-6">Provide the location details for your property.</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <label htmlFor="city" className="block text-sm font-medium text-gray-700">
               City/Town
             </label>
@@ -70,7 +70,7 @@ const PoliciesLocationForm = ({ formData, handleInputChange, handleNestedInputCh
               placeholder="e.g. Vaz"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
             />
-          </div>
+          </div> */}
 
           <div className="space-y-2">
             <label htmlFor="fullAddress" className="block text-sm font-medium text-gray-700">

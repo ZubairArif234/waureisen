@@ -101,20 +101,20 @@ const AddAccommodation = () => {
     
     // Amenities
     generalAmenities: {
-      kitchen: true,
-      airConditioning: true,
-      parking: true,
-      wifi: true,
-      dedicatedWorkspace: true,
-      fireworkFreeZone: true,
-      tv: true,
+      kitchen: false,
+      airConditioning: false,
+      parking: false,
+      wifi: false,
+      dedicatedWorkspace: false,
+      fireworkFreeZone: false,
+      tv: false,
       swimmingPool: false,
-      dogsAllowed: true
+      dogsAllowed: false
     },
     dogFilters: {
-      fireworkFreeZone: true,
+      fireworkFreeZone: false,
       dogParksNearby: false,
-      dogFriendlyRestaurants: true,
+      dogFriendlyRestaurants: false,
       petSupplies: false
     },
     
@@ -132,9 +132,9 @@ const AddAccommodation = () => {
       cancellationPolicy: 'flexible',
       customPolicyDetails: '',
       houseRules: {
-        noSmoking: true,
-        noParties: true,
-        quietHours: true
+        noSmoking: false,
+        noParties: false,
+        quietHours: false
       }
     },
   });
