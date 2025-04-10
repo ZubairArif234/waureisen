@@ -1,0 +1,46 @@
+/* src/styles/googlePlaces.css */
+
+/* Style the Google Places Autocomplete dropdown */
+.pac-container {
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(180, 164, 129, 0.2);
+    font-family: 'Poppins', sans-serif;
+    margin-top: 4px;
+  }
+  
+  /* Style each item in the dropdown */
+  .pac-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+    border-bottom: 1px solid rgba(180, 164, 129, 0.1);
+  }
+  
+  /* Style the hover state */
+  .pac-item:hover {
+    background-color: rgba(180, 164, 129, 0.1);
+  }
+  
+  /* Style the selected/matched text */
+  .pac-item-selected,
+  .pac-item-selected:hover {
+    background-color: rgba(180, 164, 129, 0.2);
+  }
+  
+  /* Style the matched text - main part */
+  .pac-matched {
+    font-weight: 600;
+    color: #B4A481;
+  }
+  
+  /* Style the additional secondary text */
+  .pac-item-query {
+    color: #4D484D;
+  }
+  
+  /* Change icon color */
+  .pac-icon {
+    color: #B4A481;
+  }
