@@ -20,7 +20,19 @@ const Login = () => {
       return;
     }
 
-    // For now, show error for non-admin users
+    // Check for provider credentials
+    if (email === 'provider@mail.com' && password === '1234') {
+      navigate('/provider/dashboard');
+      return;
+    }
+
+    // Check for user credentials
+    if (email === 'user@mail.com' && password === '1234') {
+      navigate('/');
+      return;
+    }
+
+    // For now, show error for other users
     setError('Invalid email or password');
   };
 
@@ -127,6 +139,16 @@ const Login = () => {
                 >
                   Log in
                 </button>
+                
+                {/* Login Credentials Help */}
+                <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-lg">
+                  <p className="text-xs text-blue-700 mb-1 font-medium">Demo Credentials:</p>
+                  <ul className="text-xs text-blue-600 space-y-1">
+                    <li>Provider: provider@mail.com / 1234</li>
+                    <li>Admin: admin@mail.com / 1234</li>
+                    <li>User: user@mail.com / 1234</li>
+                  </ul>
+                </div>
               </div>
             </form>
 

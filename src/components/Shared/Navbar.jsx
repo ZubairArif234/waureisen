@@ -38,7 +38,19 @@ const Navbar = () => {
 
         {/* Desktop & Tablet Navigation Links */}
         <div className="hidden md:flex items-center space-x-4 lg:space-x-8 lg:ml-[410px] md:ml-auto">
-          <Link to="#" className="text-gray-700 hover:text-gray-100 text-sm font-medium whitespace-nowrap">
+          <Link 
+            to="#" 
+            onClick={(e) => {
+              e.preventDefault();
+              const isUserLoggedIn = localStorage.getItem('user') || false;
+              if (isUserLoggedIn) {
+                navigate('/provider/registration');
+              } else {
+                navigate('/signup?redirect=provider-registration');
+              }
+            }}
+            className="text-gray-700 hover:text-gray-100 text-sm font-medium whitespace-nowrap"
+          >
             Register Accommodation
           </Link>
           <Link to="/camper-rental" className="text-gray-700 hover:text-gray-100 text-sm font-medium whitespace-nowrap">

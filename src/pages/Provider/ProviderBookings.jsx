@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, Users, Search, Filter, MessageSquare, Calendar as CalendarIcon, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, Calendar, Users, Search, Filter, MessageSquare, Calendar as CalendarIcon, ChevronDown, ChevronUp, Check, X } from 'lucide-react';
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
 import i1 from '../../assets/i1.png';
@@ -32,7 +32,7 @@ const StatusBadge = ({ status }) => {
 };
 
 // Mobile view booking card
-const BookingCardMobile = ({ booking, onMessage }) => {
+const BookingCardMobile = ({ booking, onMessage, onAcceptBooking, onCancelBooking }) => {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -109,13 +109,45 @@ const BookingCardMobile = ({ booking, onMessage }) => {
               </div>
             </div>
 
-            <button
-              onClick={() => onMessage(booking.id)}
-              className="w-full flex items-center justify-center gap-1 mt-2 bg-gray-100 text-gray-700 rounded-lg p-2 text-xs"
-            >
-              <MessageSquare className="w-3 h-3" />
-              <span>Message Guest</span>
-            </button>
+            <div className="w-full flex flex-col space-y-2 mt-2">
+              <button
+                onClick={() => onMessage(booking.id)}
+                className="w-full flex items-center justify-center gap-1 bg-gray-100 text-gray-700 rounded-lg p-2 text-xs"
+              >
+                <MessageSquare className="w-3 h-3" />
+                <span>Message Guest</span>
+              </button>
+              
+              {booking.status === 'pending' && (
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => onAcceptBooking(booking.id)}
+                    className="flex-1 flex items-center justify-center gap-1 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg p-2 text-xs"
+                  >
+                    <Check className="w-3 h-3" />
+                    <span>Accept</span>
+                  </button>
+                  
+                  <button
+                    onClick={() => onCancelBooking(booking.id)}
+                    className="flex-1 flex items-center justify-center gap-1 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg p-2 text-xs"
+                  >
+                    <X className="w-3 h-3" />
+                    <span>Cancel</span>
+                  </button>
+                </div>
+              )}
+              
+              {booking.status === 'confirmed' && (
+                <button
+                  onClick={() => onCancelBooking(booking.id)}
+                  className="w-full flex items-center justify-center gap-1 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg p-2 text-xs"
+                >
+                  <X className="w-3 h-3" />
+                  <span>Cancel Booking</span>
+                </button>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -247,7 +279,31 @@ const ProviderBookings = () => {
   ]);
 
   const handleMessage = (bookingId) => {
-    navigate(`/messages?booking=${bookingId}`);
+    navigate(`/provider/messages?booking=${bookingId}`);
+  };
+
+  const handleAcceptBooking = (bookingId) => {
+    // In a real app, this would call an API to accept the booking
+    setBookings(prevBookings => 
+      prevBookings.map(booking => 
+        booking.id === bookingId 
+          ? { ...booking, status: 'confirmed' } 
+          : booking
+      )
+    );
+    alert(`Booking ${bookingId} has been accepted.`);
+  };
+
+  const handleCancelBooking = (bookingId) => {
+    // In a real app, this would call an API to cancel the booking
+    setBookings(prevBookings => 
+      prevBookings.map(booking => 
+        booking.id === bookingId 
+          ? { ...booking, status: 'canceled' } 
+          : booking
+      )
+    );
+    alert(`Booking ${bookingId} has been canceled.`);
   };
 
   const sortBookings = (bookings, sortBy) => {
@@ -299,7 +355,7 @@ const ProviderBookings = () => {
         {/* Header with Back Button */}
         <div className="flex items-center gap-4 mb-8">
           <button
-            onClick={() => navigate('/provider/listings')}
+            onClick={() => navigate('/provider/dashboard')}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
             <ArrowLeft className="w-6 h-6 text-gray-600" />
@@ -358,6 +414,8 @@ const ProviderBookings = () => {
                 key={booking.id} 
                 booking={booking} 
                 onMessage={handleMessage}
+                onAcceptBooking={handleAcceptBooking}
+                onCancelBooking={handleCancelBooking}
               />
             ))}
             
@@ -445,13 +503,45 @@ const ProviderBookings = () => {
                       <StatusBadge status={booking.status} />
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm">
-                      <button
-                        onClick={() => handleMessage(booking.id)}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
-                      >
-                        <MessageSquare className="w-4 h-4" />
-                        <span>Message</span>
-                      </button>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleMessage(booking.id)}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+                        >
+                          <MessageSquare className="w-4 h-4" />
+                          <span>Message</span>
+                        </button>
+                        
+                        {booking.status === 'pending' && (
+                          <>
+                            <button
+                              onClick={() => handleAcceptBooking(booking.id)}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg transition-colors"
+                            >
+                              <Check className="w-4 h-4" />
+                              <span>Accept</span>
+                            </button>
+                            
+                            <button
+                              onClick={() => handleCancelBooking(booking.id)}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors"
+                            >
+                              <X className="w-4 h-4" />
+                              <span>Cancel</span>
+                            </button>
+                          </>
+                        )}
+                        
+                        {booking.status === 'confirmed' && (
+                          <button
+                            onClick={() => handleCancelBooking(booking.id)}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors"
+                          >
+                            <X className="w-4 h-4" />
+                            <span>Cancel</span>
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

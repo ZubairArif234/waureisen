@@ -288,7 +288,7 @@ const YourListings = () => {
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
               <div className="flex items-center gap-4">
                 <button
-                  onClick={() => navigate('/provider/listings')}
+                  onClick={() => navigate('/provider/dashboard')}
                   className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                 >
                   <ArrowLeft className="w-6 h-6 text-gray-600" />

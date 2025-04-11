@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PawPrint, ChevronDown, ChevronUp } from 'lucide-react';
 import dogImage from '../../assets/r1.png';
 
@@ -30,6 +31,7 @@ const Benefit = ({ title, description, isOpen, onClick }) => {
 
 const Register = () => {
   const [openBenefit, setOpenBenefit] = useState(null);
+  const navigate = useNavigate();
 
   const benefits = [
     {
@@ -98,6 +100,17 @@ const Register = () => {
             </div>
 
             <button 
+              onClick={() => {
+                // Check if user is logged in (would typically check auth state or token)
+                const isUserLoggedIn = localStorage.getItem('user') || false;
+                
+                if (isUserLoggedIn) {
+                  navigate('/provider/registration');
+                } else {
+                  // Redirect to signup with a redirect parameter
+                  navigate('/signup?redirect=provider-registration');
+                }
+              }}
               className="bg-[#B4A481] text-white px-6 py-3 rounded-lg hover:bg-[#a3927b] transition-colors"
             >
               Register accommodation

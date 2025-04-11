@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../../components/Shared/Navbar';
 import authBg from '../../assets/bg.png';
 import Footer from '../../components/Shared/Footer';
@@ -20,7 +20,23 @@ const Signup = () => {
     password: '',
   });
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [redirectAfterSignup, setRedirectAfterSignup] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Check for redirect parameter in URL
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const redirect = queryParams.get('redirect');
+    if (redirect) {
+      setRedirectAfterSignup(redirect);
+      
+      // If redirecting from provider registration, pre-select provider type
+      if (redirect === 'provider-registration') {
+        setUserType('provider');
+      }
+    }
+  }, [location]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -32,7 +48,25 @@ const Signup = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle signup logic here
+    
+    // In a real app, you would call your API to register the user
+    console.log('Signing up user with data:', formData);
+    
+    // Simulate successful signup
+    // Store the user data in localStorage (in a real app, you'd store a token or session)
+    localStorage.setItem('user', JSON.stringify({
+      ...formData,
+      userType
+    }));
+    
+    // Redirect based on whether there's a redirect parameter
+    if (redirectAfterSignup === 'provider-registration') {
+      navigate('/provider/registration');
+    } else if (userType === 'provider') {
+      navigate('/provider/dashboard');
+    } else {
+      navigate('/'); // Regular user goes to home page
+    }
   };
 
   return (

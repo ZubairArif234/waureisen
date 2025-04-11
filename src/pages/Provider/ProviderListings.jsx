@@ -1,5 +1,6 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
 import i1 from '../../assets/i1.png';
@@ -52,6 +53,8 @@ const ImageGrid = ({ images, title, subtitle, link }) => (
 );
 
 const ProviderListings = () => {
+  const navigate = useNavigate();
+  
   const yourListings = {
     images: [i1, i2, s1, s2],
     title: "Your Listings",
@@ -71,9 +74,17 @@ const ProviderListings = () => {
       <Navbar />
       
       <main className="max-w-7xl mx-auto px-6 md:px-8 lg:px-12 py-8 md:py-12 mt-20">
-        <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-8 text-center md:text-left">
-          Provider Dashboard
-        </h1>
+        <div className="flex items-center gap-4 mb-8">
+          <button
+            onClick={() => navigate('/provider/dashboard')}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <ArrowLeft className="w-6 h-6 text-gray-600" />
+          </button>
+          <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 text-center md:text-left">
+            Provider Listings
+          </h1>
+        </div>
         
         <div className="flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-12">
           <ImageGrid {...yourListings} />
