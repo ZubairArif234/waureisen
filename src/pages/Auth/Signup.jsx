@@ -6,6 +6,7 @@ import Footer from '../../components/Shared/Footer';
 import Modal from '../../components/Auth/Modal';
 import TermsContent from '../../components/Auth/TermsContent';
 import PrivacyContent from '../../components/Auth/PrivacyContent';
+import { useLanguage } from '../../utils/LanguageContext';
 
 const Signup = () => {
   const [userType, setUserType] = useState('');
@@ -23,6 +24,7 @@ const Signup = () => {
   const [redirectAfterSignup, setRedirectAfterSignup] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useLanguage();
   
   // Check for redirect parameter in URL
   useEffect(() => {
@@ -94,13 +96,13 @@ const Signup = () => {
                 to="/signup" 
                 className="flex-1 text-center py-4 text-gray-900"
               >
-                Sign up
+                {t('sign_up')}
               </Link>
               <Link 
                 to="/login" 
                 className="flex-1 text-center py-4 text-gray-500 hover:text-gray-700"
               >
-                Log in
+                {t('log_in')}
               </Link>
               {/* Active Indicator Line */}
               <div 
@@ -114,7 +116,7 @@ const Signup = () => {
                 {/* User Type Selection */}
                 <div className="space-y-3">
                   <label className="block text-sm font-medium text-gray-700">
-                    User type
+                    {t('user_type')}
                   </label>
                   <div className="relative">
                     <select
@@ -122,9 +124,9 @@ const Signup = () => {
                       onChange={(e) => setUserType(e.target.value)}
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481] appearance-none bg-white"
                     >
-                      <option value="">Choose a user type</option>
-                      <option value="customer">Customer</option>
-                      <option value="provider">Provider</option>
+                      <option value="">{t('choose_user_type')}</option>
+                      <option value="customer">{t('customer')}</option>
+                      <option value="provider">{t('provider')}</option>
                     </select>
                     <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                       <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -139,14 +141,14 @@ const Signup = () => {
                   <>
                     <div className="space-y-3">
                       <label className="block text-sm font-medium text-gray-700">
-                        Email
+                        {t('email')}
                       </label>
                       <input
                         type="email"
                         name="email"
                         value={formData.email}
                         onChange={handleInputChange}
-                        placeholder="jane.doe@example.com"
+                        placeholder={t('email_placeholder')}
                         className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
                       />
                     </div>
@@ -154,28 +156,28 @@ const Signup = () => {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-3">
                         <label className="block text-sm font-medium text-gray-700">
-                          First name
+                          {t('first_name')}
                         </label>
                         <input
                           type="text"
                           name="firstName"
                           value={formData.firstName}
                           onChange={handleInputChange}
-                          placeholder="Jane"
+                          placeholder={t('first_name_placeholder')}
                           className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
                         />
                       </div>
 
                       <div className="space-y-3">
                         <label className="block text-sm font-medium text-gray-700">
-                          Last name
+                          {t('last_name')}
                         </label>
                         <input
                           type="text"
                           name="lastName"
                           value={formData.lastName}
                           onChange={handleInputChange}
-                          placeholder="Doe"
+                          placeholder={t('last_name_placeholder')}
                           className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
                         />
                       </div>
@@ -186,28 +188,28 @@ const Signup = () => {
                       <>
                         <div className="space-y-3">
                           <label className="block text-sm font-medium text-gray-700">
-                            Display Name
+                            {t('display_name')}
                           </label>
                           <input
                             type="text"
                             name="displayName"
                             value={formData.displayName}
                             onChange={handleInputChange}
-                            placeholder="Enter display name"
+                            placeholder={t('display_name_placeholder')}
                             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
                           />
                         </div>
 
                         <div className="space-y-3">
                           <label className="block text-sm font-medium text-gray-700">
-                            Phone Number
+                            {t('phone_number')}
                           </label>
                           <input
                             type="tel"
                             name="phoneNumber"
                             value={formData.phoneNumber}
                             onChange={handleInputChange}
-                            placeholder="Enter phone number"
+                            placeholder={t('phone_number_placeholder')}
                             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
                           />
                         </div>
@@ -216,14 +218,14 @@ const Signup = () => {
 
                     <div className="space-y-3">
                       <label className="block text-sm font-medium text-gray-700">
-                        Password
+                        {t('password')}
                       </label>
                       <input
                         type="password"
                         name="password"
                         value={formData.password}
                         onChange={handleInputChange}
-                        placeholder="Enter your password..."
+                        placeholder={t('password_placeholder')}
                         className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
                       />
                     </div>
@@ -241,21 +243,21 @@ const Signup = () => {
                         className="rounded border-gray-300 text-[#B4A481] focus:ring-[#B4A481]"
                       />
                       <label htmlFor="terms" className="text-sm text-gray-600">
-                        I accept the{' '}
+                        {t('accept_terms')}{' '}
                         <button 
                           type="button"
                           onClick={() => setIsTermsOpen(true)}
                           className="text-[#B4A481] hover:underline"
                         >
-                          Terms of Service
+                          {t('terms_of_service')}
                         </button>
-                        {' '}and the{' '}
+                        {' '}{t('and_the')}{' '}
                         <button
                           type="button"
                           onClick={() => setIsPrivacyOpen(true)}
                           className="text-[#B4A481] hover:underline"
                         >
-                          Privacy Policy
+                          {t('privacy_policy')}
                         </button>
                       </label>
                     </div>
@@ -264,7 +266,7 @@ const Signup = () => {
                     <Modal
                       isOpen={isTermsOpen}
                       onClose={() => setIsTermsOpen(false)}
-                      title="Terms of Service"
+                      title={t('terms_of_service')}
                     >
                       <TermsContent />
                     </Modal>
@@ -273,7 +275,7 @@ const Signup = () => {
                      <Modal
                       isOpen={isPrivacyOpen}
                       onClose={() => setIsPrivacyOpen(false)}
-                      title=""
+                      title={t('privacy_policy')}
                     >
                       <PrivacyContent />
                     </Modal>
@@ -288,7 +290,7 @@ const Signup = () => {
                           : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                       }`}
                     >
-                      Sign up
+                      {t('sign_up')}
                     </button>
 
 

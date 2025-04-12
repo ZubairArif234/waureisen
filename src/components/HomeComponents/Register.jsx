@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PawPrint, ChevronDown, ChevronUp } from 'lucide-react';
 import dogImage from '../../assets/r1.png';
+import { useLanguage } from '../../utils/LanguageContext';
 
 const Benefit = ({ title, description, isOpen, onClick }) => {
   return (
@@ -32,37 +33,38 @@ const Benefit = ({ title, description, isOpen, onClick }) => {
 const Register = () => {
   const [openBenefit, setOpenBenefit] = useState(null);
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const benefits = [
     {
       id: 1,
-      title: "Increased Visibility",
-      description: "🐾 Your accommodation will be showcased to dog owners specifically looking for pet-friendly stays."
+      title: t('increased_visibility'),
+      description: `🐾 ${t('increased_visibility_desc')}`
     },
     {
       id: 2,
-      title: "Easy Booking Process",
-      description: "🐾 Quick and hassle-free bookings – optimized for both hosts and guests with dogs."
+      title: t('easy_booking'),
+      description: `🐾 ${t('easy_booking_desc')}`
     },
     {
       id: 3,
-      title: "Targeted Marketing",
-      description: "🐾 We reach exactly the right audience searching for dog-friendly accommodations."
+      title: t('targeted_marketing'),
+      description: `🐾 ${t('targeted_marketing_desc')}`
     },
     {
       id: 4,
-      title: "Trust & Security",
-      description: "🐾 Verified guests, secure payments, and support from our service team."
+      title: t('trust_security'),
+      description: `🐾 ${t('trust_security_desc')}`
     },
     {
       id: 5,
-      title: "Direct Communication",
-      description: "🐾 Easily connect with dog owners to arrange individual requests."
+      title: t('direct_communication'),
+      description: `🐾 ${t('direct_communication_desc')}`
     },
     {
       id: 6,
-      title: "10% commission on the overnight price",
-      description: "🐾 Fair and transparent – you only pay when a booking is made."
+      title: t('commission'),
+      description: `🐾 ${t('commission_desc')}`
     }
   ];
 
@@ -76,15 +78,15 @@ const Register = () => {
         <div className="flex flex-col md:flex-row">
           {/* Left Content */}
           <div className="w-full md:w-1/2 p-8 md:p-12 lg:p-12">
-            <p className="text-[#B4A481] text-sm font-medium mb-6">BECOME A HOST</p>
+            <p className="text-[#B4A481] text-sm font-medium mb-6">{t('become_host').toUpperCase()}</p>
             
             <h2 className="text-white text-2xl md:text-3xl font-semibold mb-2">
-              Got accommodations to offer? {' '}
-              <span className="text-[#B4A481]">Join us now</span>
+              {t('got_accommodations')} {' '}
+              <span className="text-[#B4A481]">{t('join_us_now')}</span>
             </h2>
             
             <p className="text-gray-300 mb-8">
-              Earn money by list your own offer with us
+              {t('earn_money')}
             </p>
 
             <div className="space-y-4 mb-8">
@@ -113,7 +115,7 @@ const Register = () => {
               }}
               className="bg-[#B4A481] text-white px-6 py-3 rounded-lg hover:bg-[#a3927b] transition-colors"
             >
-              Register accommodation
+              {t('register_accommodation')}
             </button>
           </div>
 

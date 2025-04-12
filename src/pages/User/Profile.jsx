@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Upload, Camera, Edit3, Plus, X } from 'lucide-react';
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
+import { useLanguage } from '../../utils/LanguageContext';
 
 const Profile = () => {
-  // Initialize with all required fields
+  const { t } = useLanguage();
   const [profileData, setProfileData] = useState({
     firstName: 'Hamza',
     lastName: 'Bin Shahid',
@@ -86,15 +87,15 @@ const Profile = () => {
           {/* Header */}
           <div className="bg-brand/10 px-6 py-8 sm:px-8">
             <div className="flex justify-between items-center mb-6">
-              <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">Profile Settings</h1>
+              <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">{t('profile_settings')}</h1>
               <button
-                type="button"
-                onClick={() => setIsEditing(!isEditing)}
-                className="flex items-center gap-2 text-sm text-brand hover:text-brand/80 transition-colors"
-              >
-                <Edit3 className="w-4 h-4" />
-                {isEditing ? 'Cancel editing' : 'Edit profile'}
-              </button>
+  type="button"
+  onClick={() => setIsEditing(!isEditing)}
+  className="flex items-center gap-2 text-sm text-brand hover:text-brand/80 transition-colors"
+>
+  <Edit3 className="w-4 h-4" />
+  {isEditing ? t('cancel_editing') : t('edit_profile')}
+</button>
             </div>
           </div>
 
@@ -132,14 +133,14 @@ const Profile = () => {
                 )}
               </div>
               <p className="text-sm text-gray-500">
-                Supported formats: JPG, PNG (max. 20MB)
+              {t('supported_formats')}
               </p>
             </div>
 
             {/* Basic Information */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">First name</label>
+              <label className="text-sm font-medium text-gray-700">{t('first_name')}</label>
                 <input
                   type="text"
                   name="firstName"
@@ -150,7 +151,7 @@ const Profile = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Last name</label>
+              <label className="text-sm font-medium text-gray-700">{t('last_name')}</label>
                 <input
                   type="text"
                   name="lastName"
@@ -164,24 +165,24 @@ const Profile = () => {
 
             {/* Bio Section */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">About you</label>
+            <label className="text-sm font-medium text-gray-700">{t('about_you')}</label>
               <textarea
                 name="bio"
                 value={profileData.bio}
                 onChange={handleInputChange}
                 disabled={!isEditing}
-                placeholder="Tell us a little bit about yourself..."
+                placeholder={t('bio_placeholder')}
                 className="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-brand/20 focus:border-brand disabled:bg-gray-50 disabled:text-gray-500 min-h-[120px] resize-none"
               />
               <p className="text-sm text-gray-500">
-                Waureisen is built on relationships. Help other people get to know you.
+              {t('relationship_text')}
               </p>
             </div>
 
             {/* Address, DOB, Nationality, Gender */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Street, Number</label>
+              <label className="text-sm font-medium text-gray-700">{t('street_number')}</label>
                 <input
                   type="text"
                   name="streetNumber"
@@ -192,7 +193,7 @@ const Profile = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Date of birth</label>
+              <label className="text-sm font-medium text-gray-700">{t('date_of_birth')}</label>
                 <input
                   type="date"
                   name="dateOfBirth"
@@ -203,7 +204,7 @@ const Profile = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Nationality</label>
+              <label className="text-sm font-medium text-gray-700">{t('nationality')}</label>
                 <input
                   type="text"
                   name="nationality"
@@ -214,7 +215,7 @@ const Profile = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Gender</label>
+              <label className="text-sm font-medium text-gray-700">{t('gender')}</label>
                 <select
                   name="gender"
                   value={profileData.gender}
@@ -222,11 +223,11 @@ const Profile = () => {
                   disabled={!isEditing}
                   className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-brand/20 focus:border-brand disabled:bg-gray-50 disabled:text-gray-500"
                 >
-                  <option value="">Select gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                  <option value="preferNotToSay">Prefer not to say</option>
+                  <option value="">{t('select_gender')}</option>
+                  <option value="male">{t('male')}</option>
+                  <option value="female">{t('female')}</option>
+                  <option value="other">{t('other')}</option>
+                  <option value="preferNotToSay">{t('prefer_not_to_say')}</option>
                 </select>
               </div>
             </div>
@@ -235,11 +236,11 @@ const Profile = () => {
             <div className="py-4 border-t border-b">
               <div className="flex justify-between items-center">
                 <div>
-                  <h3 className="text-lg font-medium text-gray-800">Account Type</h3>
-                  <p className="text-sm text-gray-500">Choose whether you're a customer or provider</p>
+                <h3 className="text-lg font-medium text-gray-800">{t('account_type')}</h3>
+                <p className="text-sm text-gray-500">{t('account_type_desc')}</p>
                 </div>
                 <div className="flex items-center">
-                  <span className={`mr-3 font-medium ${!profileData.isProvider ? 'text-brand' : 'text-gray-500'}`}>Customer</span>
+                  <span className={`mr-3 font-medium ${!profileData.isProvider ? 'text-brand' : 'text-gray-500'}`}>{t('customer')}</span>
                   <button 
                     type="button"
                     disabled={!isEditing}
@@ -254,7 +255,7 @@ const Profile = () => {
                       }`}
                     />
                   </button>
-                  <span className={`ml-3 font-medium ${profileData.isProvider ? 'text-brand' : 'text-gray-500'}`}>Provider</span>
+                  <span className={`ml-3 font-medium ${profileData.isProvider ? 'text-brand' : 'text-gray-500'}`}>{t('provider')}</span>
                 </div>
               </div>
             </div>
@@ -262,7 +263,7 @@ const Profile = () => {
             {/* Dogs Section */}
             <div className="space-y-6">
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-medium text-gray-800">Your Dogs</h3>
+              <h3 className="text-lg font-medium text-gray-800">{t('your_dogs')}</h3>
                 {isEditing && (
                   <button
                     type="button"
@@ -270,7 +271,7 @@ const Profile = () => {
                     className="flex items-center gap-1 text-sm text-brand hover:text-brand/80 transition-colors"
                   >
                     <Plus className="w-4 h-4" />
-                    Add Dog
+                    {t('add_dog')}
                   </button>
                 )}
               </div>
@@ -289,7 +290,7 @@ const Profile = () => {
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-700">Dog name</label>
+                    <label className="text-sm font-medium text-gray-700">{t('dog_name')}</label>
                       <input
                         type="text"
                         value={dog.name}
@@ -300,7 +301,7 @@ const Profile = () => {
                     </div>
                     
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-700">Gender</label>
+                    <label className="text-sm font-medium text-gray-700">{t('gender')}</label>
                       <div className="flex gap-4">
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input
@@ -319,7 +320,7 @@ const Profile = () => {
                           }`}>
                             {dog.gender === 'male' && <div className="w-3 h-3 rounded-full bg-brand" />}
                           </div>
-                          <span>Male</span>
+                          <span>{t('male')}</span>
                         </label>
                         
                         <label className="flex items-center gap-2 cursor-pointer">
@@ -339,7 +340,7 @@ const Profile = () => {
                           }`}>
                             {dog.gender === 'female' && <div className="w-3 h-3 rounded-full bg-brand" />}
                           </div>
-                          <span>Female</span>
+                          <span>{t('female')}</span>
                         </label>
                       </div>
                     </div>
@@ -355,7 +356,7 @@ const Profile = () => {
                   type="submit"
                   className="px-6 py-2 bg-brand text-white rounded-lg hover:bg-brand/90 transition-colors font-medium"
                 >
-                  Save changes
+                  {t('save_changes')}
                 </button>
               </div>
             )}

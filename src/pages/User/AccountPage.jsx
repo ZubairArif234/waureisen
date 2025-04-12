@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FileText, Shield, CreditCard } from 'lucide-react';
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
+import { useLanguage } from '../../utils/LanguageContext';
 
 const AccountCard = ({ icon: Icon, title, description, onClick }) => (
   <div 
@@ -23,24 +24,25 @@ const AccountCard = ({ icon: Icon, title, description, onClick }) => (
 
 const AccountPage = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const accountCards = [
     {
       icon: FileText,
-      title: 'Personal info',
-      description: 'Provide personal details and how we can reach you',
+      title: t('personal_info'),
+      description: t('personal_info_desc'),
       onClick: () => navigate('/profile')
     },
     {
       icon: Shield,
-      title: 'Login & security',
-      description: 'Update your password and secure your account',
+      title: t('login_security'),
+      description: t('login_security_desc'),
       onClick: () => navigate('/account/security')
     },
     {
       icon: CreditCard,
-      title: 'Payments & payouts',
-      description: 'Review payments, payouts, coupons, and gift cards',
+      title: t('payments_payouts'),
+      description: t('payments_payouts_desc'),
       onClick: () => navigate('/account/payments')
     }
   ];
@@ -53,7 +55,7 @@ const AccountPage = () => {
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
           {/* Header */}
           <div className="bg-brand/10 px-6 py-8 sm:px-8">
-            <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 mb-2">Account</h1>
+          <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 mb-2">{t('account')}</h1>
             <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
               <span className="text-gray-600">Muhammad Maaz</span>
               <span className="hidden sm:block text-gray-400">•</span>

@@ -7,6 +7,7 @@ import MockMap from '../../components/SearchComponents/MockMap'; // Import our n
 import MapToggle from '../../components/SearchComponents/MapToggle';
 import Footer from '../../components/Shared/Footer';
 import { searchListings } from '../../api/listingAPI'; // Import API function
+import { useLanguage } from '../../utils/LanguageContext';
 
 // Import dummy images for now
 import i1 from '../../assets/i1.png';
@@ -15,6 +16,7 @@ import i3 from '../../assets/i3.png';
 
 const SearchResults = () => {
   const location = useLocation();
+  const { t } = useLanguage();
   const searchParams = new URLSearchParams(location.search);
   
   // Extract search parameters

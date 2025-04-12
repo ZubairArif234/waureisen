@@ -1,7 +1,9 @@
 import React from 'react';
 import { X } from 'lucide-react';
+import { useLanguage } from '../../utils/LanguageContext';
 
 const FilterModal = ({ isOpen, onClose, title, children }) => {
+  const { t } = useLanguage();
   if (!isOpen) return null;
 
   return (
@@ -33,18 +35,18 @@ const FilterModal = ({ isOpen, onClose, title, children }) => {
         {/* Footer - Fixed at bottom */}
         <div className="flex-shrink-0 p-3 border-t bg-white mt-auto">
           <div className="flex gap-2 safe-bottom">
-            <button
-              onClick={onClose}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              Clear
-            </button>
-            <button
-              onClick={onClose}
-              className="flex-1 px-3 py-2 bg-brand text-white text-sm font-medium rounded-lg hover:bg-brand/90 transition-colors"
-            >
-              Apply
-            </button>
+          <button
+  onClick={onClose}
+  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+>
+  {t('clear')}
+</button>
+<button
+  onClick={onClose}
+  className="flex-1 px-3 py-2 bg-brand text-white text-sm font-medium rounded-lg hover:bg-brand/90 transition-colors"
+>
+  {t('apply')}
+</button>
           </div>
         </div>
       </div>

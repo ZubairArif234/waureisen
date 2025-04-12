@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Search, Sliders, MessageSquare, ArrowLeft } from 'lucide-react';
 import Navbar from '../../components/Shared/Navbar';
 import Avt from '../../assets/avatar.png';
+import { useLanguage } from '../../utils/LanguageContext';
 
 // Dummy data for conversations
 const dummyConversations = [
@@ -112,6 +113,7 @@ const ConversationItem = ({ conversation, isSelected, onClick }) => (
 const Messages = () => {
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const { t } = useLanguage();
   const [selectedChat, setSelectedChat] = useState(null);
   const [conversations, setConversations] = useState(dummyConversations);
 
@@ -134,7 +136,7 @@ const Messages = () => {
           }`}>
             {/* Header */}
             <div className="p-6 border-b">
-              <h1 className="text-2xl font-semibold text-gray-900 mb-6">Messages</h1>
+            <h1 className="text-2xl font-semibold text-gray-900 mb-6">{t('messages')}</h1>
               
               {/* Filter Buttons */}
               <div className="flex gap-2 mb-4">
@@ -146,7 +148,7 @@ const Messages = () => {
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
-                  All
+                 {t('all')}
                 </button>
                 <button
                   onClick={() => setSelectedFilter('unread')}
@@ -156,7 +158,7 @@ const Messages = () => {
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
-                  Unread
+                   {t('unread')}
                 </button>
               </div>
 
@@ -164,7 +166,7 @@ const Messages = () => {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search messages"
+                  placeholder={t('search_messages')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
@@ -182,10 +184,10 @@ const Messages = () => {
                 <div className="flex flex-col items-center justify-center h-full text-center p-6">
                   <MessageSquare className="w-12 h-12 text-gray-300 mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    No messages found
+                  {t('no_messages_found')}
                   </h3>
                   <p className="text-gray-500 text-sm">
-                    Try adjusting your search or filters
+                  {t('adjust_search')}
                   </p>
                 </div>
               ) : (
@@ -222,7 +224,7 @@ const Messages = () => {
                   />
                   <div>
                     <h2 className="font-medium">{selectedChat.name}</h2>
-                    <p className="text-sm text-gray-500">Active Now</p>
+                    <p className="text-sm text-gray-500">{t('active_now')}</p>
                   </div>
                 </div>
 
@@ -242,7 +244,7 @@ const Messages = () => {
                       className="w-full px-4 py-2 border rounded-full focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
                     />
                     <button className="absolute right-3 top-1/2 -translate-y-1/2 px-4 py-1 bg-[#B4A481] text-white rounded-full text-sm">
-                      Send
+                    {t('send')}
                     </button>
                   </div>
                 </div>
@@ -252,10 +254,10 @@ const Messages = () => {
                 <div className="text-center p-6">
                   <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    Select a conversation
+                  {t('select_conversation')}
                   </h3>
                   <p className="text-gray-500 text-sm">
-                    Choose a conversation from the list to start messaging
+                  {t('choose_conversation')}
                   </p>
                 </div>
               </div>

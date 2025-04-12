@@ -8,8 +8,10 @@ import i3 from '../../assets/i3.png';
 import i2 from '../../assets/i2.png';
 import s1 from '../../assets/s1.png';
 import s2 from '../../assets/s2.png';
+import { useLanguage } from '../../utils/LanguageContext';
 
 const RecentlyViewed = () => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   // Mock data - in real app this would come from an API/state
@@ -75,7 +77,7 @@ const RecentlyViewed = () => {
           >
             <ArrowLeft className="w-6 h-6 text-gray-600" />
           </button>
-          <h1 className="text-3xl font-semibold text-gray-900">Recently viewed</h1>
+          <h1 className="text-3xl font-semibold text-gray-900">{t('recently_viewed')}</h1>
         </div>
 
         {/* Listings by Date */}

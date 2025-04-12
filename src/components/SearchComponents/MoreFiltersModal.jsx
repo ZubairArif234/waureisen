@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import RangeSlider from './RangeSlider';
 import * as filterData from './moreFiltersData';
+import { useLanguage } from '../../utils/LanguageContext';
 
 const FilterSection = ({ icon, title, options, selected, onChange }) => (
   <div className="mb-8">
@@ -33,6 +34,7 @@ const FilterSection = ({ icon, title, options, selected, onChange }) => (
 );
 
 const MoreFiltersModal = ({ isOpen, onClose }) => {
+  const { t } = useLanguage();
   const [ranges, setRanges] = useState({
     people: { min: 1, max: 25 },
     dogs: { min: 0, max: 25 },
@@ -77,7 +79,7 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
       <div className="fixed inset-x-0 bottom-0 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 bg-white rounded-t-2xl md:rounded-2xl shadow-xl z-50 max-h-[90vh] md:max-h-[85vh] md:w-[800px] w-full overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-white z-10">
-          <h2 className="text-xl font-semibold text-gray-900">More Filters</h2>
+          <h2 className="text-xl font-semibold text-gray-900">{t('more_filters')}</h2>
           <button 
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -247,13 +249,13 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
               }}
               className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
             >
-              Clear all
+              {t('clear_all')}
             </button>
             <button
               onClick={onClose}
               className="flex-1 px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand/90 transition-colors"
             >
-              Show results
+              {t('show_results')}
             </button>
           </div>
         </div>

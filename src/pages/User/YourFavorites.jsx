@@ -10,8 +10,10 @@ import i1 from '../../assets/i1.png';
 import i2 from '../../assets/i2.png';
 import s1 from '../../assets/s1.png';
 import s2 from '../../assets/s2.png';
+import { useLanguage } from '../../utils/LanguageContext';
 
 const YourFavorites = () => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [showMap, setShowMap] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
@@ -93,7 +95,7 @@ const YourFavorites = () => {
               >
                 <ArrowLeft className="w-6 h-6 text-gray-600" />
               </button>
-              <h1 className="text-3xl font-semibold text-gray-900">Your Favorites</h1>
+              <h1 className="text-3xl font-semibold text-gray-900">{t('your_favorites')}</h1>
             </div>
 
             {/* Listings Grid */}

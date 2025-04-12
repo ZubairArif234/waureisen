@@ -3,12 +3,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Shared/Navbar';
 import authBg from '../../assets/bg.png';
 import Footer from '../../components/Shared/Footer';
+import { useLanguage } from '../../utils/LanguageContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -33,7 +35,7 @@ const Login = () => {
     }
 
     // For now, show error for other users
-    setError('Invalid email or password');
+    setError(t('invalid_credentials'));
   };
 
   return (
@@ -61,13 +63,13 @@ const Login = () => {
                 to="/signup" 
                 className="flex-1 text-center py-4 text-gray-500 hover:text-gray-700"
               >
-                Sign up
+                {t('sign_up')}
               </Link>
               <Link 
                 to="/login" 
                 className="flex-1 text-center py-4 text-gray-900"
               >
-                Log in
+                {t('log_in')}
               </Link>
               {/* Active Indicator Line */}
               <div 
@@ -91,14 +93,14 @@ const Login = () => {
                     htmlFor="email" 
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Email
+                    {t('email')}
                   </label>
                   <input
                     type="email"
                     id="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="jane.doe@example.com"
+                    placeholder={t('email_placeholder')}
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
                   />
                 </div>
@@ -109,26 +111,26 @@ const Login = () => {
                     htmlFor="password" 
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Password
+                    {t('password')}
                   </label>
                   <input
                     type="password"
                     id="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password..."
+                    placeholder={t('password_placeholder')}
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
                   />
                 </div>
 
                 {/* Forgot Password Link */}
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500">Forgot your password?</span>
+                  <span className="text-gray-500">{t('forgot_password')}</span>
                   <button 
                     type="button"
                     className="text-[#B4A481] hover:underline ml-2"
                   >
-                    Reset password
+                    {t('reset_password')}
                   </button>
                 </div>
 
@@ -137,16 +139,16 @@ const Login = () => {
                   type="submit"
                   className="w-full py-3 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors font-medium"
                 >
-                  Log in
+                  {t('log_in')}
                 </button>
                 
                 {/* Login Credentials Help */}
                 <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-lg">
-                  <p className="text-xs text-blue-700 mb-1 font-medium">Demo Credentials:</p>
+                  <p className="text-xs text-blue-700 mb-1 font-medium">{t('demo_credentials')}</p>
                   <ul className="text-xs text-blue-600 space-y-1">
-                    <li>Provider: provider@mail.com / 1234</li>
-                    <li>Admin: admin@mail.com / 1234</li>
-                    <li>User: user@mail.com / 1234</li>
+                    <li>{t('provider_credentials')}</li>
+                    <li>{t('admin_credentials')}</li>
+                    <li>{t('user_credentials')}</li>
                   </ul>
                 </div>
               </div>

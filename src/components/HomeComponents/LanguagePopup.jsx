@@ -1,7 +1,9 @@
 import React from 'react';
 import { X } from 'lucide-react';
+import { useLanguage } from '../../utils/LanguageContext';
 
 const LanguagePopup = ({ isOpen, onClose, onLanguageSelect, currentLanguage }) => {
+  const { t } = useLanguage();
   if (!isOpen) return null;
 
   const languages = [
@@ -21,7 +23,7 @@ const LanguagePopup = ({ isOpen, onClose, onLanguageSelect, currentLanguage }) =
     <div className="fixed md:top-[300px] md:left-[825px] top-[400px] left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-xl z-[101] w-[90%] max-w-md">
       {/* Header */}
       <div className="flex items-center justify-between p-4 md:p-6 border-b">
-        <h2 className="text-lg md:text-xl font-semibold">Language and region</h2>
+        <h2 className="text-lg md:text-xl font-semibold">{t('language_region')}</h2>
         <button 
           onClick={onClose}
           className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -34,9 +36,9 @@ const LanguagePopup = ({ isOpen, onClose, onLanguageSelect, currentLanguage }) =
       <div className="p-4 md:p-5 bg-gray-50 mb-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-medium mb-1">Translation</h3>
+            <h3 className="font-medium mb-1">{t('translation')}</h3>
             <p className="text-sm text-gray-500">
-              Automatically translate descriptions to English.
+              {t('auto_translate')}
             </p>
           </div>
             <label className="relative inline-flex items-center cursor-pointer">

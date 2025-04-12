@@ -8,8 +8,9 @@ import Modal from '../Auth/Modal';
 import TermsContent from '../Auth/TermsContent';
 import FAQ from '../Footer/FAQ';
 import DataPolicy from '../Footer/DataPolicy';
+import { useLanguage } from '../../utils/LanguageContext';
 
-const FooterSection = ({ title, links, onTermsClick, onDataPolicyClick }) => (
+const FooterSection = ({ title, links, onTermsClick, onDataPolicyClick, t }) => (
   <div className="flex flex-col space-y-4">
     <h3 className="text-[#4D484D] font-semibold">{title}</h3>
     <div className="flex flex-col space-y-2">
@@ -21,7 +22,7 @@ const FooterSection = ({ title, links, onTermsClick, onDataPolicyClick }) => (
               onClick={onTermsClick}
               className="text-left text-gray-600 hover:text-gray-800 transition-colors text-sm"
             >
-              {link.label}
+              {t('terms_of_service')}
             </button>
           );
         }
@@ -32,7 +33,7 @@ const FooterSection = ({ title, links, onTermsClick, onDataPolicyClick }) => (
               onClick={onDataPolicyClick}
               className="text-left text-gray-600 hover:text-gray-800 transition-colors text-sm"
             >
-              {link.label}
+              {t('data_policy')}
             </button>
           );
         }
@@ -44,7 +45,7 @@ const FooterSection = ({ title, links, onTermsClick, onDataPolicyClick }) => (
             rel="noopener noreferrer"
             className="text-gray-600 hover:text-gray-800 transition-colors text-sm"
           >
-            {link.label}
+            {t(link.translationKey) || link.label}
           </a>
         ) : (
           <Link
@@ -52,7 +53,7 @@ const FooterSection = ({ title, links, onTermsClick, onDataPolicyClick }) => (
             to={link.path}
             className="text-gray-600 hover:text-gray-800 transition-colors text-sm"
           >
-            {link.label}
+            {t(link.translationKey) || link.label}
           </Link>
         )
       })}
@@ -61,32 +62,32 @@ const FooterSection = ({ title, links, onTermsClick, onDataPolicyClick }) => (
 );
 
 const Footer = () => {
-
+  const { t } = useLanguage();
   const [isTermsOpen, setIsTermsOpen] = useState(false);
   const [isDataPolicyOpen, setIsDataPolicyOpen] = useState(false);
 
   const footerLinks = {
     legal: [
-      { label: 'Terms of Service', path: '#' },
-      { label: 'Imprint', path: '/imprint' },
-      { label: 'Data Policy', path: '/privacy' },
-      { label: 'STAR membership', path: '/star-membership' }
+      { label: 'Terms of Service', path: '#', translationKey: 'terms_of_service' },
+      { label: 'Imprint', path: '/imprint', translationKey: 'imprint' },
+      { label: 'Data Policy', path: '/privacy', translationKey: 'data_policy' },
+      { label: 'STAR membership', path: '/star-membership', translationKey: 'star_membership' }
     ],
     sitemap: [
-      { label: 'Camper rental', path: '/camper-rental' },
-      { label: 'Travel shop', path: '/travelshop' },
-      { label: 'Book an appointment', path: 'https://meet.brevo.com/waureisen', external: true },
-      { label: 'Become a host', path: '/host' }
+      { label: 'Camper rental', path: '/camper-rental', translationKey: 'camper_rental' },
+      { label: 'Travel shop', path: '/travelshop', translationKey: 'travel_shop' },
+      { label: 'Book an appointment', path: 'https://meet.brevo.com/waureisen', external: true, translationKey: 'book_appointment' },
+      { label: 'Become a host', path: '/host', translationKey: 'become_host' }
     ],
     specials: [
-      { label: 'Our partner', path: '/partners' },
-      { label: 'Travelmagazine', path: '/publicmagazine' },
-      { label: 'Travel Insurance', path: 'https://be.erv.ch/?agency=WAUREISEN_01&lang=de', external: true }
+      { label: 'Our partner', path: '/partners', translationKey: 'partners' },
+      { label: 'Travelmagazine', path: '/publicmagazine', translationKey: 'travel_magazine' },
+      { label: 'Travel Insurance', path: 'https://be.erv.ch/?agency=WAUREISEN_01&lang=de', external: true, translationKey: 'travel_insurance' }
     ],
     more: [
-      { label: 'About us', path: '/about-us' },
-      { label: 'FAQ', path: '/faq' },
-      { label: 'Newsletter', path: 'https://91489596.sibforms.com/serve/MUIFAF7RKiUpQ7DfnIHP2yne3AHbtAygWMg737H-NfJOp6_cw77yfolND_xjtHmbCCmVLvfCdiL7hUtdtSVW6JNYOE7NR3ipyNDP-vuHMjdvdMfZxJxSh9PjXo6OPpeTBeWeLFh7pj3KvI6JDo1eaiso6GnvdceOSIdIA6oZ_8qJRtM8Lijlrumqt6kWZhMeLinfNbpefq5NyHFQ', external: true }
+      { label: 'About us', path: '/about-us', translationKey: 'about_us' },
+      { label: 'FAQ', path: '/faq', translationKey: 'faq' },
+      { label: 'Newsletter', path: 'https://91489596.sibforms.com/serve/MUIFAF7RKiUpQ7DfnIHP2yne3AHbtAygWMg737H-NfJOp6_cw77yfolND_xjtHmbCCmVLvfCdiL7hUtdtSVW6JNYOE7NR3ipyNDP-vuHMjdvdMfZxJxSh9PjXo6OPpeTBeWeLFh7pj3KvI6JDo1eaiso6GnvdceOSIdIA6oZ_8qJRtM8Lijlrumqt6kWZhMeLinfNbpefq5NyHFQ', external: true, translationKey: 'newsletter' }
     ]
   };
 
@@ -99,7 +100,7 @@ const Footer = () => {
           <div className="md:col-span-4 space-y-6">
             <img src={logo} alt="Wau Logo" className="h-12 ml-2" />
             <p className="text-gray-600 ml-2">
-              The first Swiss booking platform for dog-friendly travel – exploring Europe with your dog! 🐶 🌍
+              {t('dog_friendly_platform')}
             </p>
             <div className="flex space-x-4 ml-2">
               <a href="https://www.instagram.com/waureisen/" target="_blank" rel="noopener noreferrer" className="text-[#B4A481] hover:text-[#a3927b] transition-colors">
@@ -120,7 +121,7 @@ const Footer = () => {
 
             </div>
             <p className="text-gray-500 text-sm ml-2">
-              © 2025 Waureisen GmbH. All rights reserved.
+              {t('copyright')}
             </p>
           </div>
 
@@ -128,14 +129,15 @@ const Footer = () => {
          <div className="md:col-span-8 md:pt-[72px]">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                 <FooterSection 
-                  title="Legal" 
+                  title={t('legal')} 
                   links={footerLinks.legal} 
                   onTermsClick={() => setIsTermsOpen(true)}
                   onDataPolicyClick={() => setIsDataPolicyOpen(true)}
+                  t={t}
                 />
-                <FooterSection title="Sitemap" links={footerLinks.sitemap} />
-                <FooterSection title="Specials" links={footerLinks.specials} />
-                <FooterSection title="More" links={footerLinks.more} />
+                <FooterSection title={t('sitemap')} links={footerLinks.sitemap} t={t} />
+                <FooterSection title={t('specials')} links={footerLinks.specials} t={t} />
+                <FooterSection title={t('more')} links={footerLinks.more} t={t} />
               </div>
             </div>
           </div>
@@ -146,7 +148,7 @@ const Footer = () => {
       <Modal
         isOpen={isTermsOpen}
         onClose={() => setIsTermsOpen(false)}
-        title="Terms of Service"
+        title={t('terms_of_service')}
       >
         <TermsContent />
       </Modal>
@@ -155,7 +157,7 @@ const Footer = () => {
       <Modal
         isOpen={isDataPolicyOpen}
         onClose={() => setIsDataPolicyOpen(false)}
-        title="Data Protection Policy"
+        title={t('data_policy')}
       >
         <DataPolicy/>
       </Modal>

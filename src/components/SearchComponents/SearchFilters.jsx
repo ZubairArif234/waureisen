@@ -3,6 +3,7 @@ import { Calendar, Home, Filter, Dog, SlidersHorizontal } from 'lucide-react';
 import FilterModal from './FilterModal';
 import { accommodationTypes, mainFilters, dogFilters } from './filterData';
 import MoreFiltersModal from './MoreFiltersModal';
+import { useLanguage } from '../../utils/LanguageContext';
 
 const FilterButton = ({ icon: Icon, label, active, onClick }) => (
   <button
@@ -41,6 +42,7 @@ const FilterGroup = ({ options, selectedFilters, onFilterChange }) => {
 
 const SearchFilters = ({ dateRange }) => {
   const [activeModal, setActiveModal] = useState(null);
+  const { t } = useLanguage();
   const [isMoreFiltersOpen, setIsMoreFiltersOpen] = useState(false);
   const [selectedAccommodations, setSelectedAccommodations] = useState([]);
   const [selectedMainFilters, setSelectedMainFilters] = useState([]);
@@ -81,29 +83,29 @@ const SearchFilters = ({ dateRange }) => {
           />
           <FilterButton
             icon={Home}
-            label="Accommodation Type"
+            label={t('accommodation_type')}
             active={selectedAccommodations.length > 0}
             onClick={() => setActiveModal('accommodation')}
           />
           <FilterButton
             icon={Filter}
-            label="Main Filters"
+            label={t('main_filters')}
             active={selectedMainFilters.length > 0}
             onClick={() => setActiveModal('main')}
           />
           <FilterButton
             icon={Dog}
-            label="Dog Filters"
+            label={t('dog_filters')}
             active={selectedDogFilters.length > 0}
             onClick={() => setActiveModal('dog')}
           />
           <div className="ml-auto">
-            <FilterButton
-              icon={SlidersHorizontal}
-              label="More Filters"
-              active={true}
-              onClick={() => setIsMoreFiltersOpen(true)}
-            />
+          <FilterButton
+            icon={SlidersHorizontal}
+            label={t('more_filters')}
+            active={true}
+            onClick={() => setIsMoreFiltersOpen(true)}
+          />
           </div>
         </div>
       </div>
@@ -112,7 +114,7 @@ const SearchFilters = ({ dateRange }) => {
       <FilterModal
         isOpen={activeModal === 'accommodation'}
         onClose={() => setActiveModal(null)}
-        title="Accommodation Type"
+        title={t('accommodation_type')}
       >
         <FilterGroup
           options={accommodationTypes}
@@ -125,7 +127,7 @@ const SearchFilters = ({ dateRange }) => {
       <FilterModal
         isOpen={activeModal === 'main'}
         onClose={() => setActiveModal(null)}
-        title="Main Filters"
+        title={t('main_filters')}
       >
         <FilterGroup
           options={mainFilters}
@@ -138,7 +140,7 @@ const SearchFilters = ({ dateRange }) => {
       <FilterModal
         isOpen={activeModal === 'dog'}
         onClose={() => setActiveModal(null)}
-        title="Dog Filters"
+        title={t('dog_filters')}
       >
         <FilterGroup
           options={dogFilters}

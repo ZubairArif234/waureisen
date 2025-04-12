@@ -3,27 +3,27 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Globe, Menu, User, X, MessageSquare, Map, Heart, Home, UserCircle, Settings, LogOut, LogIn, UserPlus } from 'lucide-react';
 import logo from '../../assets/logo.png';
 import LanguagePopup from '../HomeComponents/LanguagePopup';
+import { useLanguage } from '../../utils/LanguageContext';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLanguagePopupOpen, setIsLanguagePopupOpen] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState('en');
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const globeButtonRef = useRef(null);
+  const { language, switchLanguage, t } = useLanguage();
 
   const menuItems = [
-    { icon: <MessageSquare className="h-4 w-4" />, label: 'Messages', path: '/messages' },
-    { icon: <Map className="h-4 w-4" />, label: 'Your Trips', path: '/trips' },
-    { icon: <Heart className="h-4 w-4" />, label: 'Favorites', path: '/wishlist' },
-    { icon: <Home className="h-4 w-4" />, label: 'Your Listings', path: '/provider/listings' },
-    { icon: <UserCircle className="h-4 w-4" />, label: 'Profile', path: '/profile' },
-    { icon: <Settings className="h-4 w-4" />, label: 'Account', path: '/account' },
+    { icon: <MessageSquare className="h-4 w-4" />, label: t('messages'), path: '/messages' },
+    { icon: <Map className="h-4 w-4" />, label: t('your_trips'), path: '/trips' },
+    { icon: <Heart className="h-4 w-4" />, label: t('favorites'), path: '/wishlist' },
+    { icon: <Home className="h-4 w-4" />, label: t('your_listings'), path: '/provider/listings' },
+    { icon: <UserCircle className="h-4 w-4" />, label: t('profile'), path: '/profile' },
+    { icon: <Settings className="h-4 w-4" />, label: t('account'), path: '/account' },
   ];
 
   const handleLanguageSelect = (langCode) => {
-    setCurrentLanguage(langCode);
-    // Here you would typically implement language change functionality
+    switchLanguage(langCode);
   };
 
   return (
@@ -51,10 +51,10 @@ const Navbar = () => {
             }}
             className="text-gray-700 hover:text-gray-100 text-sm font-medium whitespace-nowrap"
           >
-            Register Accommodation
+            {t('register_accommodation')}
           </Link>
           <Link to="/camper-rental" className="text-gray-700 hover:text-gray-100 text-sm font-medium whitespace-nowrap">
-            Camper Rental
+            {t('camper_rental')}
           </Link>
           <a 
             href="https://meet.brevo.com/waureisen" 
@@ -62,7 +62,7 @@ const Navbar = () => {
             rel="noopener noreferrer" 
             className="text-gray-700 hover:text-gray-100 text-sm font-medium whitespace-nowrap"
           >
-            Book an appointment
+            {t('book_appointment')}
           </a>
         </div>
 
@@ -86,7 +86,7 @@ const Navbar = () => {
                 <div className="absolute right-0 mt-2 w-[300px] bg-white rounded-lg shadow-lg z-50">
                   <div className="p-4 border-b">
                     <div className="flex items-center justify-between">
-                      <h2 className="text-md font-semibold">Language and region</h2>
+                      <h2 className="text-md font-semibold">{t('language_region')}</h2>
                       <button 
                         onClick={() => setIsLanguagePopupOpen(false)}
                         className="p-2 hover:bg-gray-100 rounded-full"
@@ -100,7 +100,7 @@ const Navbar = () => {
                       <button
                         onClick={() => handleLanguageSelect('en')}
                         className={`w-full text-left px-3 py-2 rounded-lg ${
-                          currentLanguage === 'en' ? 'bg-gray-100' : 'hover:bg-gray-50'
+                          language === 'en' ? 'bg-gray-100' : 'hover:bg-gray-50'
                         }`}
                       >
                         English
@@ -108,7 +108,7 @@ const Navbar = () => {
                       <button
                         onClick={() => handleLanguageSelect('de')}
                         className={`w-full text-left px-3 py-2 rounded-lg ${
-                          currentLanguage === 'de' ? 'bg-gray-100' : 'hover:bg-gray-50'
+                          language === 'de' ? 'bg-gray-100' : 'hover:bg-gray-50'
                         }`}
                       >
                         Deutsch
@@ -144,10 +144,10 @@ const Navbar = () => {
                   {/* Mobile Navigation Links */}
                   <div className="md:hidden border-b border-gray-200 mb-1 pb-1">
                     <Link to="#" className="block px-3 py-1.5 text-gray-700 hover:bg-gray-50 text-sm">
-                    Register Accommodation
+                    {t('register_accommodation')}
                     </Link>
                     <Link to="/camper-rental" className="block px-3 py-1.5 text-gray-700 hover:bg-gray-50 text-sm">
-                      Camper Rental
+                      {t('camper_rental')}
                     </Link>
                     <a 
                       href="https://meet.brevo.com/waureisen"
@@ -155,7 +155,7 @@ const Navbar = () => {
                       rel="noopener noreferrer"
                       className="block px-3 py-1.5 text-gray-700 hover:bg-gray-50 text-sm"
                     >
-                      Book an appointment
+                      {t('book_appointment')}
                     </a>
                   </div>
                   
@@ -200,7 +200,7 @@ const Navbar = () => {
                     onClick={() => setIsProfileMenuOpen(false)}
                   >
                     <LogIn className="h-4 w-4 mr-2" />
-                    <span>Log in</span>
+                    <span>{t('log_in')}</span>
                   </Link>
                   <Link
                     to="/signup"
@@ -208,7 +208,7 @@ const Navbar = () => {
                     onClick={() => setIsProfileMenuOpen(false)}
                   >
                     <UserPlus className="h-4 w-4 mr-2" />
-                    <span>Sign up</span>
+                    <span>{t('sign_up')}</span>
                   </Link>
                   <div className="border-t border-gray-100 my-1" />
                   <button
@@ -219,7 +219,7 @@ const Navbar = () => {
                     className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                   >
                     <LogOut className="h-4 w-4 mr-2" />
-                    <span>Log out</span>
+                    <span>{t('log_out')}</span>
                   </button>
                 </div>
               </>

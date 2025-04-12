@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, X, Send, Image } from 'lucide-react';
+import { useLanguage } from '../../utils/LanguageContext';
 import avatar from '../../assets/avatar.png';
 
 const ChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { t } = useLanguage();
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([
     {
@@ -78,8 +80,8 @@ const ChatWidget = () => {
                 />
               </div>
               <div>
-                <h3 className="font-medium">Waureisen Support</h3>
-                <p className="text-sm opacity-90">Online</p>
+              <h3 className="font-medium">{t('waureisen_support')}</h3>
+              <p className="text-sm opacity-90">{t('online')}</p>
               </div>
             </div>
             <button 
@@ -117,7 +119,7 @@ const ChatWidget = () => {
                 type="text"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Type a message..."
+                placeholder={t('type_message')}
                 className="flex-1 px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand text-sm"
               />
               <button

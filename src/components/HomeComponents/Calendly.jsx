@@ -1,22 +1,24 @@
 import React from 'react';
 import avatar from '../../assets/founder.jpg';
 import { PawPrint } from 'lucide-react';
+import { useLanguage } from '../../utils/LanguageContext';
 
 
 const Calendly = () => {
+  const { t } = useLanguage();
   return (
     <section className="py-20 bg-[#FEFCF5]">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <p className="text-brand text-lg mb-3">Talk with us</p>
+      <p className="text-brand text-lg mb-3">{t('talk_with_us')}</p>
         {/* Heading */}
         <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-          Do you have any questions?
+          {t('questions')}
         </h2>
 
         {/* Subheading with Paw Print */}
         <div className="flex items-center justify-center gap-2 mb-12">
           <h3 className="text-xl md:text-2xl text-gray-800">
-            We are here for you
+            {t('we_are_here')}
           </h3>
           <PawPrint className="w-7 h-7 text-[#B4A481]" />
         </div>
@@ -36,7 +38,7 @@ const Calendly = () => {
             />
           </div>
           <span className="text-lg font-medium text-gray-800">
-            Book a callback
+            {t('book_callback')}
           </span>
         </a>
       </div>

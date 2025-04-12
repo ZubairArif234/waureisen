@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import logo from '../../assets/together.png';
+import { useLanguage } from '../../utils/LanguageContext';
 
 const TestimonialCard = ({ review, author, date }) => {
   return (
@@ -40,6 +41,7 @@ const TestimonialCard = ({ review, author, date }) => {
 
 const Travellers = () => {
   const [currentPage, setCurrentPage] = useState(0);
+  const { t } = useLanguage();
   
   const testimonials = [
     {
@@ -85,9 +87,9 @@ const Travellers = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Headings */}
         <div className="text-center mb-12">
-          <p className="text-brand text-lg mb-3">Travellers</p>
+          <p className="text-brand text-lg mb-3">{t('travelers_love')}</p>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-            What they said about us
+            {t('testimonials')}
           </h2>
         </div>
 

@@ -7,6 +7,7 @@ import i2 from '../../assets/i2.png';
 import s1 from '../../assets/s1.png';
 import s2 from '../../assets/s2.png';
 import i3 from '../../assets/i3.png';
+import { useLanguage } from '../../utils/LanguageContext';
 
 const ImageGrid = ({ images, title, subtitle, link }) => (
     <div className="flex flex-col items-center w-full md:w-auto">
@@ -52,17 +53,18 @@ const ImageGrid = ({ images, title, subtitle, link }) => (
   );
 
 const WishlistHome = () => {
+  const { t } = useLanguage();
   const recentlyViewed = {
     images: [i1, i2, s1, s2],
-    title: "Recently viewed",
-    subtitle: "4 days ago",
+    title: t("recently_viewed"),
+    subtitle: `4 ${t('days_ago')}`,
     link: "/wishlist/recently-viewed"
   };
-
+  
   const favorites = {
     images: [i3],
-    title: "Your Favorites",
-    subtitle: "1 saved",
+    title: t("your_favorites"),
+    subtitle: `1 ${t('saved')}`,
     link: "/wishlist/favorites"
   };
 
@@ -72,7 +74,7 @@ const WishlistHome = () => {
       
       <main className="max-w-7xl mx-auto px-6 md:px-8 lg:px-12 py-8 md:py-12 mt-20">
         <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-8 text-center md:text-left">
-          Wishlists
+        {t('wishlists')}
         </h1>
         
         <div className="flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-12">

@@ -4,6 +4,7 @@ import s1 from '../../assets/s1.svg';
 import s2 from '../../assets/s2.svg';
 import s3 from '../../assets/s3.svg';
 import s4 from '../../assets/s4.svg';
+import { useLanguage } from '../../utils/LanguageContext';
 
 const FeatureCard = ({ icon: IconSrc, title, description }) => {
   return (
@@ -22,26 +23,28 @@ const FeatureCard = ({ icon: IconSrc, title, description }) => {
 };
 
 const Features = () => {
+  const { t } = useLanguage();
+  
   const features = [
     {
       icon: s1,
-      title: "Unique Dog Filters",
-      description: "The first booking platform with 30+ dog filters to find the perfect stay for you and your dog."
+      title: t('unique_dog_filters'),
+      description: t('unique_dog_filters_desc')
     },
     {
       icon: s2,
-      title: "Personal Contact",
-      description: "Book easily on your own or reach out for help anytime - we're here for your questions and requests."
+      title: t('personal_contact'),
+      description: t('personal_contact_desc')
     },
     {
       icon: s3,
-      title: "All in One Place",
-      description: "Explore our travel blog for tips on dog-friendly destinations and book travel gear conveniently."
+      title: t('all_in_one_place'),
+      description: t('all_in_one_place_desc')
     },
     {
       icon: s4,
-      title: "Transparent Pricing",
-      description: "No hidden fees - pay the same as booking directly with the accommodation."
+      title: t('transparent_pricing'),
+      description: t('transparent_pricing_desc')
     }
   ];
 
@@ -49,9 +52,9 @@ const Features = () => {
     <section className="bg-[#FEFCF5] py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <p className="text-brand text-lg mb-3">Features</p>
+          <p className="text-brand text-lg mb-3">{t('features')}</p>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-            Why Waureisen is the best choice for your next trip
+            {t('why_waureisen_best')}
           </h2>
         </div>
 

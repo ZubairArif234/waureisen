@@ -12,6 +12,7 @@ import s5 from '../../assets/s5.png';
 import logo from '../../assets/logo.png';
 import Footer from '../../components/Shared/Footer';
 import ImageGalleryModal from '../../components/Shared/ImageGalleryModal';
+import { useLanguage } from '../../utils/LanguageContext';
 
 
 const PlaceOffer = ({ icon: Icon, text, value }) => (
@@ -103,6 +104,7 @@ const Amenity = ({ icon, text }) => (
 const AccommodationPage = () => {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [isGuestSelectorOpen, setIsGuestSelectorOpen] = useState(false);
+  const { t } = useLanguage();
   const [dateRange, setDateRange] = useState({ start: null, end: null });
   const [guests, setGuests] = useState({
     people: 1,
@@ -111,22 +113,22 @@ const AccommodationPage = () => {
 
  
   const placeOffers = [
-    { icon: Users, text: 'People', value: '6' },
-    { icon: Dog, text: 'Dog', value: '1' },
-    { icon: Home, text: 'Bedrooms', value: '2' },
-    { icon: DoorOpen, text: 'Rooms', value: '2' },
-    { icon: Bath, text: 'Washroom', value: '1' }
+    { icon: Users, text: t('people'), value: '6' },
+    { icon: Dog, text: t('dog'), value: '1' },
+    { icon: Home, text: t('bedrooms'), value: '2' },
+    { icon: DoorOpen, text: t('rooms'), value: '2' },
+    { icon: Bath, text: t('washroom'), value: '1' }
   ];
 
   const details = [
-    { icon: Utensils, text: 'Kitchen' },
-    { icon: Dog, text: 'Dogs Allowed' },
-    { icon: Briefcase, text: 'Dedicated workspace' },
-    { icon: Wind, text: 'Air Conditioning' },
-    { icon: Sparkles, text: 'Firework Free Zone' },
-    { icon: Wifi, text: 'Wifi' },
-    { icon: Waves, text: 'Swimming Pool' },
-    { icon: Tv, text: 'TV' }
+    { icon: Utensils, text: t('kitchen') },
+    { icon: Dog, text: t('dogs_allowed') },
+    { icon: Briefcase, text: t('dedicated_workspace') },
+    { icon: Wind, text: t('air_conditioning') },
+    { icon: Sparkles, text: t('firework_free_zone') },
+    { icon: Wifi, text: t('wifi') },
+    { icon: Waves, text: t('swimming_pool') },
+    { icon: Tv, text: t('tv') }
   ];
 
   return (
@@ -146,9 +148,9 @@ const AccommodationPage = () => {
           <div className="md:flex-[0.9] w-full">
             {/* What this place offers */}
             <section className="mb-10">
-              <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-6">
-                What this place offers
-              </h2>
+            <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-6">
+              {t('what_this_place_offers')}
+            </h2>
               <div className="border border-[#767676] rounded-lg overflow-x-auto">
                 <div className="flex min-w-[600px] md:min-w-0">
                   {placeOffers.map((offer, index) => (
@@ -165,9 +167,9 @@ const AccommodationPage = () => {
 
             {/* Dog Filters */}
             <section className="mb-10">
-              <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
-                Dog Filters
-              </h2>
+            <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
+              {t('dog_filters')}
+            </h2>
               <div className="flex md:flex-row flex-col gap-4">
                 <div className="flex items-center gap-2">
                   <Check className="text-brand" />
@@ -182,9 +184,9 @@ const AccommodationPage = () => {
 
             {/* Description */}
             <section className="mb-10">
-              <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
-                Description
-              </h2>
+            <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
+  {t('description')}
+</h2>
               <p className="text-gray-600 whitespace-pre-line text-sm">
               Innenbereich20 m2. Weitere Angaben des Anbieters: Wir bieten grosszügige Rabatte schon ab 3 Tagen.
                Langzeitaufenthalte möglich. Perfekte Lage: Unsere Unterkunft bietet eine unschlagbare zentrale Lage.
@@ -202,9 +204,9 @@ const AccommodationPage = () => {
 
              {/* Details */}
              <section className="mb-10">
-              <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-6">
-                Details
-              </h2>
+             <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-6">
+  {t('details')}
+</h2>
               <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
                 {details.map((detail, index) => (
                   <Detail
@@ -218,9 +220,10 @@ const AccommodationPage = () => {
 
             {/* Location */}
             <section className="mb-10">
-              <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
-                Location
-              </h2>
+            <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
+  {t('location')}
+</h2>
+
               <div className="h-[250px] md:h-[300px] rounded-lg overflow-hidden">
                 <iframe
                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2725.3184333890953!2d7.331389315715455!3d46.961722279147!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x478e39c0d740c237%3A0x3a64c7675e48da95!2sVaz%2FObervaz%2C%20Switzerland!5e0!3m2!1sen!2sus!4v1647850761619!5m2!1sen!2sus"
@@ -235,9 +238,9 @@ const AccommodationPage = () => {
 
             {/* Cancellation Policy */}
             <section className="mb-10">
-              <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
-                Cancellation Policy
-              </h2>
+            <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
+  {t('cancellation_policy')}
+</h2>
               <p className="text-gray-600 text-sm">
                 Je nach Reisezeitraum 90% Rückerstattung bis 0% Rückerstattung.
               </p>
@@ -245,16 +248,16 @@ const AccommodationPage = () => {
 
             {/* Reviews */}
             <section className="mb-10">
-              <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
-                Review (0)
-              </h2>
+            <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
+  {t('reviews')}
+</h2>
             </section>
 
             {/* About the Listing Provider */}
             <section className="mb-10">
-              <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
-                About the Listing Provider
-              </h2>
+            <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
+  {t('about_listing_provider')}
+</h2>
               <div className="bg-gray-50 p-4 md:p-6 rounded-lg">
                 <div className="flex items-center gap-4 mb-4">
                   <img src={logo} alt="Waureisen" className="w-12 md:w-16 h-12 md:h-16 rounded-full" />
@@ -266,9 +269,9 @@ const AccommodationPage = () => {
                   </div>
                 </div>
                 <div className="flex gap-4">
-                  <button className="text-brand hover:underline text-sm">View profile</button>
-                  <span className="text-gray-400">•</span>
-                  <button className="text-brand hover:underline text-sm">Contact</button>
+                <button className="text-brand hover:underline text-sm">{t('view_profile')}</button>
+                <span className="text-gray-400">•</span>
+                <button className="text-brand hover:underline text-sm">{t('contact')}</button>
                 </div>
               </div>
             </section>
@@ -282,7 +285,7 @@ const AccommodationPage = () => {
                   <span className="line-through text-gray-400 mr-2">360 CHF</span>
                   240 CHF
                 </span>
-                <p className="text-gray-500 text-sm">Cost per Night</p>
+                <p className="text-gray-500 text-sm">{t('cost_per_night')}</p>
               </div>
 
               {/* Date Picker */}
@@ -292,11 +295,11 @@ const AccommodationPage = () => {
               >
                 <div className="grid grid-cols-2">
                   <div>
-                    <p className="text-sm text-gray-500">Check in</p>
+                  <p className="text-sm text-gray-500">{t('check_in')}</p>
                     <p className="text-sm">{dateRange.start ? dateRange.start.toLocaleDateString() : '13/03/2024'}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Check out</p>
+                  <p className="text-sm text-gray-500">{t('check_out')}</p>
                     <p className="text-sm">{dateRange.end ? dateRange.end.toLocaleDateString() : '14/03/2024'}</p>
                   </div>
                 </div>
@@ -308,15 +311,15 @@ const AccommodationPage = () => {
                 onClick={() => setIsGuestSelectorOpen(true)}
               >
                 <div>
-                  <p className="text-sm text-gray-500">Guests</p>
+                <p className="text-sm text-gray-500">{t('guests')}</p>
                   <p className="text-sm">{`${guests.people} people, ${guests.dogs} dog`}</p>
                 </div>
                 <ChevronDown className="w-5 h-5 text-gray-400" />
               </div>
 
               <button className="w-full bg-brand text-white py-3 rounded-lg hover:bg-brand/90 transition-colors">
-                Reserve
-              </button>
+              {t('reserve')}
+            </button>
             </div>
           </div>
         </div>

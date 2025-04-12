@@ -1,5 +1,6 @@
 import React from 'react';
 import { Minus, Plus } from 'lucide-react';
+import { useLanguage } from '../../utils/LanguageContext';
 
 const CounterButton = ({ icon: Icon, onClick, disabled }) => (
   <button
@@ -16,6 +17,7 @@ const CounterButton = ({ icon: Icon, onClick, disabled }) => (
 );
 
 const GuestSelector = ({ isOpen, onClose, guests, onGuestsChange }) => {
+  const { t } = useLanguage();
   if (!isOpen) return null;
 
   const handleIncrement = (type) => {
@@ -47,7 +49,7 @@ const GuestSelector = ({ isOpen, onClose, guests, onGuestsChange }) => {
         <div className="p-6 space-y-6">
           {/* People Counter */}
           <div className="flex items-center justify-between">
-            <span className="text-lg text-gray-700">People</span>
+            <span className="text-lg text-gray-700">{t('people')}</span>
             <div className="flex items-center gap-4">
               <CounterButton
                 icon={Minus}
@@ -65,7 +67,7 @@ const GuestSelector = ({ isOpen, onClose, guests, onGuestsChange }) => {
 
           {/* Dogs Counter */}
           <div className="flex items-center justify-between">
-            <span className="text-lg text-gray-700">Dogs</span>
+            <span className="text-lg text-gray-700">{t('dogs')}</span>
             <div className="flex items-center gap-4">
               <CounterButton
                 icon={Minus}
@@ -86,7 +88,7 @@ const GuestSelector = ({ isOpen, onClose, guests, onGuestsChange }) => {
             onClick={onClose}
             className="w-full py-3 bg-brand text-white rounded-lg hover:bg-brand/90 transition-colors text-lg"
           >
-            Done
+            {t('done') || 'Done'}
           </button>
         </div>
       </div>

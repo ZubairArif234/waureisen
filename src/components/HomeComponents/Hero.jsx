@@ -6,9 +6,11 @@ import GuestSelector from './GuestSelector';
 import { Search, Calendar, Users } from 'lucide-react';
 import bgImage from '../../assets/bg.png';
 import { loadGoogleMapsScript, initAutocomplete } from '../../utils/googleMapsUtils';
+import { useLanguage } from '../../utils/LanguageContext';
 
 const Hero = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [location, setLocation] = useState('');
   const [placeData, setPlaceData] = useState(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
@@ -99,10 +101,10 @@ const Hero = () => {
           <div className="max-w-5xl mx-auto">
             <div className="md:max-w-2xl pl-4 md:pl-0">
               <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-white mb-2 font-poppins">
-                Urlaub mit Hund
+                {t('holiday_with_dog')}
               </h1>
               <p className="text-base sm:text-lg md:text-xl text-white mb-8 font-bold font-poppins">
-                Finden Sie die passende Unterkunft
+                {t('find_suitable_accommodation')}
               </p>
             </div>
 
@@ -115,7 +117,7 @@ const Hero = () => {
                   <input
                     ref={locationInputRef}
                     type="text"
-                    placeholder="Where"
+                    placeholder={t('where')}
                     value={location}
                     onChange={handleLocationChange}
                     className="bg-transparent outline-none w-full text-sm text-gray-700 placeholder-gray-500 focus:placeholder-brand"
@@ -134,7 +136,7 @@ const Hero = () => {
                   <span className="text-sm text-gray-500">
                     {dateRange.start && dateRange.end
                       ? `${dateRange.start.getDate()} ${dateRange.start.toLocaleString('default', { month: 'short' })} - ${dateRange.end.getDate()} ${dateRange.end.toLocaleString('default', { month: 'short' })}`
-                      : 'When'}
+                      : t('when')}
                   </span>
                 </div>
               </div>
@@ -147,7 +149,7 @@ const Hero = () => {
                 >
                   <Users className="h-5 w-5 text-gray-400 flex-shrink-0" />
                   <span className="text-gray-500 text-sm">
-                    {guests.people} {guests.people === 1 ? 'person' : 'people'}, {guests.dogs} {guests.dogs === 1 ? 'dog' : 'dogs'}
+                    {guests.people} {guests.people === 1 ? t('person') : t('people')}, {guests.dogs} {guests.dogs === 1 ? t('dog') : t('dogs')}
                   </span>
                 </div>
                 {isGuestSelectorOpen && (
@@ -165,7 +167,7 @@ const Hero = () => {
                 onClick={handleSearch}
                 className="w-full md:w-auto px-8 py-3 rounded-lg text-sm text-white font-medium flex-shrink-0 bg-brand hover:bg-brand/90 transition-colors"
               >
-                Search
+                {t('search')}
               </button>
             </div>
           </div>

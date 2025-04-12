@@ -6,8 +6,10 @@ import Footer from '../../components/Shared/Footer';
 import i1 from '../../assets/i1.png';
 import i2 from '../../assets/i2.png';
 import i3 from '../../assets/i3.png';
+import { useLanguage } from '../../utils/LanguageContext';
 
 const TripCard = ({ trip }) => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   
   return (
@@ -22,11 +24,11 @@ const TripCard = ({ trip }) => {
             alt={trip.location}
             className="w-full h-full object-cover"
           />
-          {trip.status === 'cancelled' && (
-            <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-sm">
-              Cancelled
-            </div>
-          )}
+         {trip.status === 'cancelled' && (
+  <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-sm">
+    {t('cancelled')}
+  </div>
+)}
         </div>
         
         <div className="p-4 md:p-6 flex-1">
@@ -53,14 +55,14 @@ const TripCard = ({ trip }) => {
             </div>
 
             <div className="flex items-center justify-between mt-auto pt-4 border-t">
-              <div className="text-gray-600">
-                Host: <span className="font-medium">{trip.host}</span>
-              </div>
-              <div className="text-brand font-medium">
-                {trip.status === 'upcoming' ? 'Upcoming' : 
-                 trip.status === 'completed' ? 'Completed' : 
-                 'Cancelled'}
-              </div>
+            <div className="text-gray-600">
+  {t('host')} <span className="font-medium">{trip.host}</span>
+</div>
+<div className="text-brand font-medium">
+  {trip.status === 'upcoming' ? t('upcoming') : 
+   trip.status === 'completed' ? t('completed') : 
+   t('cancelled')}
+</div>
             </div>
           </div>
         </div>
@@ -70,24 +72,25 @@ const TripCard = ({ trip }) => {
 };
 
 const NoTrips = () => (
+
   <div className="text-center py-12">
     <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-      No trips booked...yet!
+      {t('no_trips_booked')}
     </h2>
     <p className="text-gray-600 mb-8">
-      Time to dust off your bags and start planning your next adventure.
+      {t('plan_adventure')}
     </p>
     <button 
       onClick={() => window.location.href = '/'}
       className="px-6 py-3 bg-brand text-white rounded-lg hover:bg-brand/90 transition-colors"
     >
-      Start searching
+      {t('start_searching')}
     </button>
   </div>
 );
 
 const TripsPage = () => {
-  // Dummy data - in real app this would come from an API
+  const { t } = useLanguage();
   const [trips] = useState([
     {
       id: '1',
@@ -131,19 +134,19 @@ const TripsPage = () => {
       <main className="max-w-5xl mx-auto px-4 py-12 mt-20">
       <div className="mb-8">
   <h1 className="text-3xl font-semibold text-gray-900 mb-2">
-    Your trips
+  {t('your_trips')}
   </h1>
   <div className="space-y-3">
     <p className="text-gray-600">
-      View and manage your upcoming and past trips
+    {t('manage_trips')}
     </p>
     <div className="flex items-center gap-2 text-sm text-gray-600 bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
-      <span>Can't find your reservation here?</span>
+    <span>{t('cant_find_reservation')}</span>
       <a 
         href="mailto:hallo@waureisen.com"
         className="text-[#B4A481] hover:underline font-medium"
       >
-        Contact us via email hallo@waureisen.com
+        {t('contact_us_email')}
       </a>
     </div>
   </div>
@@ -157,7 +160,7 @@ const TripsPage = () => {
             {upcomingTrips.length > 0 && (
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                  Upcoming trips
+                {t('upcoming_trips')}
                 </h2>
                 <div className="space-y-4">
                   {upcomingTrips.map(trip => (
@@ -171,7 +174,7 @@ const TripsPage = () => {
             {pastTrips.length > 0 && (
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                  Past trips
+                {t('past_trips')}
                 </h2>
                 <div className="space-y-4">
                   {pastTrips.map(trip => (
@@ -185,9 +188,9 @@ const TripsPage = () => {
 
         {/* Help Center Link */}
         <div className="mt-8 text-gray-600">
-          Can't find your reservation here?{' '}
+        {t('cant_find_reservation')}{' '}
           <button className="text-brand hover:underline">
-            Visit the Help Center
+          {t('help_center')}
           </button>
         </div>
       </main>

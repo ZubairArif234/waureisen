@@ -1,7 +1,9 @@
 import React from 'react';
 import { Map, List } from 'lucide-react';
+import { useLanguage } from '../../utils/LanguageContext';
 
 const MapToggle = ({ showMap, onToggle }) => {
+  const { t } = useLanguage();
   const handleClick = (e, show) => {
     e.preventDefault();
     e.stopPropagation();
@@ -18,7 +20,7 @@ const MapToggle = ({ showMap, onToggle }) => {
           }`}
         >
           <List className="w-4 h-4" />
-          <span>List</span>
+          <span>{t('list')}</span>
         </button>
         <button
           onClick={(e) => handleClick(e, true)}
@@ -27,7 +29,7 @@ const MapToggle = ({ showMap, onToggle }) => {
           }`}
         >
           <Map className="w-4 h-4" />
-          <span>Map</span>
+          <span>{t('map')}</span>
         </button>
       </div>
     </div>

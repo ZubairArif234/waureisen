@@ -3,9 +3,11 @@ import { ArrowLeft, Edit3, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
+import { useLanguage } from '../../utils/LanguageContext';
 
 const LoginSecurityPage = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [isEditing, setIsEditing] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -45,17 +47,17 @@ const LoginSecurityPage = () => {
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
               </button>
               <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">
-                Login & security
+              {t('login_security')}
               </h1>
             </div>
             <div className="flex justify-between items-center">
-              <p className="text-gray-600">Update your login details and secure your account</p>
+            <p className="text-gray-600">{t('login_security_desc')}</p>
               <button
                 onClick={() => setIsEditing(!isEditing)}
                 className="flex items-center gap-2 text-sm text-brand hover:text-brand/80 transition-colors"
               >
                 <Edit3 className="w-4 h-4" />
-                {isEditing ? 'Cancel editing' : 'Edit details'}
+                {isEditing ? t('cancel_editing') : t('edit_profile')}
               </button>
             </div>
           </div>
@@ -63,7 +65,7 @@ const LoginSecurityPage = () => {
           <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-8">
             {/* Email Section */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Email address</label>
+            <label className="text-sm font-medium text-gray-700">{t('email_address')}</label>
               <input
                 type="email"
                 name="email"
@@ -73,7 +75,7 @@ const LoginSecurityPage = () => {
                 className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-brand/20 focus:border-brand disabled:bg-gray-50 disabled:text-gray-500"
               />
               <p className="text-sm text-gray-500">
-                Use an email you'll always have access to
+              {t('email_access_tip')}
               </p>
             </div>
 
@@ -82,7 +84,7 @@ const LoginSecurityPage = () => {
               <>
                 {/* Current Password */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">Current password</label>
+                <label className="text-sm font-medium text-gray-700">{t('current_password')}</label>
                   <div className="relative">
                     <input
                       type={showCurrentPassword ? "text" : "password"}
@@ -106,7 +108,7 @@ const LoginSecurityPage = () => {
 
                 {/* New Password */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">New password</label>
+                <label className="text-sm font-medium text-gray-700">{t('new_password')}</label>
                   <div className="relative">
                     <input
                       type={showNewPassword ? "text" : "password"}
@@ -127,7 +129,7 @@ const LoginSecurityPage = () => {
                     </button>
                   </div>
                   <p className="text-sm text-gray-500">
-                    Password must be at least 8 characters long and include a number
+                  {t('password_requirements')}
                   </p>
                 </div>
               </>
@@ -140,7 +142,7 @@ const LoginSecurityPage = () => {
                   type="submit"
                   className="px-6 py-2 bg-brand text-white rounded-lg hover:bg-brand/90 transition-colors font-medium"
                 >
-                  Save changes
+                   {t('save_changes')}
                 </button>
               </div>
             )}

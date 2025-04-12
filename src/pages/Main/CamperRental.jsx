@@ -4,8 +4,12 @@ import camperBg from '../../assets/camper.png';
 import willyVan from '../../assets/cr1.png';  
 import walterVan from '../../assets/cr2.png'; 
 import Footer from '../../components/Shared/Footer';
+import { useLanguage } from '../../utils/LanguageContext';
 
 const CamperRental = () => {
+
+  const { t } = useLanguage();
+
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
@@ -23,22 +27,19 @@ const CamperRental = () => {
         
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col items-center justify-center text-center text-white">
           <h1 className="text-3xl md:text-5xl font-bold mb-4">
-            Dogfriendly camper rental 🚐 🌍 ⛺️
+            {t('dogfriendly_camper_rental')}
           </h1>
           <p className="text-lg md:text-xl max-w-2xl">
-            Welcome to our dogfriendly camper rental. Here you will find
-            all the information about our two camper Willy and Walter.
+            {t('welcome_camper_rental')}
           </p>
         </div>
       </div>
 
       {/* Quote Section */}
       <div className="py-16 md:py-20">
-        <h2 className="text-2xl md:text-4xl font-bold text-center max-w-4xl mx-auto px-4 leading-tight">
-          "Traveling with a van means
-          freedom and discovering places
-          you never had on your radar."
-        </h2>
+      <h2 className="text-2xl md:text-4xl font-bold text-center max-w-4xl mx-auto px-4 leading-tight">
+  {t('traveling_van_quote')}
+</h2>
       </div>
 
       {/* Camper Vans Section */}
@@ -54,10 +55,10 @@ const CamperRental = () => {
                 />
             </div>
             <button 
-                className="bg-[#B4A481] text-white px-4 py-2 rounded-md text-sm w-fit"
-            >
-                Willy
-            </button>
+    className="bg-[#B4A481] text-white px-4 py-2 rounded-md text-sm w-fit"
+>
+    {t('willy')}
+</button>
             </div>
 
             {/* Walter Van */}
@@ -70,10 +71,10 @@ const CamperRental = () => {
                 />
             </div>
             <div 
-                className="text-black text-sm font-bold"
-            >
-                Coming soon
-            </div>
+    className="text-black text-sm font-bold"
+>
+    {t('coming_soon')}
+</div>
             </div>
         </div>
         </div>

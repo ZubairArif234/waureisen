@@ -3,6 +3,7 @@ import AccommodationCard from './AccommodationCard';
 import i1 from '../../assets/i1.png';
 import i2 from '../../assets/i2.png';
 import i3 from '../../assets/i3.png';
+import { useLanguage } from '../../utils/LanguageContext';
 
 const RecommendationsSection = ({ title }) => {
   const accommodations = [
@@ -49,10 +50,12 @@ const RecommendationsSection = ({ title }) => {
 };
 
 const Recommendations = () => {
+  const { t } = useLanguage();
+  
   const sections = [
-    "Our Top Recommendations",
-    "Popular Accommodations",
-    "Exclusive Finds"
+    t('our_top_recommendations'),
+    t('popular_accommodations'),
+    t('exclusive_finds')
   ];
 
   return (
