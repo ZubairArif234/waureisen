@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useLanguage } from '../../utils/LanguageContext';
 import travelshopBg from '../../assets/travelshop.png';
 import cs1 from '../../assets/cs1.avif';
 import cs2 from '../../assets/cs2.avif';
@@ -109,9 +110,10 @@ import ta9 from '../../assets/ta9.avif';
 
 const TravelShop = () => {
   // Sample product categories - these would typically come from an API
+  const { t } = useLanguage();
   const productCategories = [
     {
-      title: "Car seats",
+      title: t("car_seats"),
       products: [
         { id: 1, image: cs1, url: "https://petandco.ch/collections/reisezubehor-fur-hunde/products/harry-car-seat-cord-teddy-khaki?ref=waureisen" },
         { id: 2, image: cs2, url: "https://petandco.ch/collections/orthopaedische-hundebetten/products/harry-faux-leather-beige?ref=waureisen" },
@@ -121,7 +123,7 @@ const TravelShop = () => {
       ]
     },
     {
-      title: "Travel mats",
+      title: t("travel_mats"),
       products: [
         { id: 1, image: tm1, url: "https://petandco.ch/collections/reisezubehor-fur-hunde/products/garry?ref=waureisen" },
         { id: 2, image: tm2, url: "https://kitsuneandjo.ch/products/nomad-bed-pink?ref=waureisen" },
@@ -134,7 +136,7 @@ const TravelShop = () => {
       ]
     },
     {
-      title: "Travel bags",
+      title:  t("travel_bags"),
       products: [
         { id: 1, image: tb1, url: "https://petandco.ch/collections/reisezubehor-fur-hunde/products/lucky-canvas-cool-gray?ref=waureisen" },
         { id: 2, image: tb2, url: "https://kitsuneandjo.ch/products/olla-petite-dog-carrier?ref=waureisen" },
@@ -149,7 +151,7 @@ const TravelShop = () => {
       ]
     },
     {
-      title: "Dog beds",
+      title: t("dog_beds"),
       products: [
         { id: 1, image: db1, url: "https://petandco.ch/products/kingston-cord-double-face-khaki?ref=waureisen" },
         { id: 2, image: db2, url: "https://petandco.ch/products/cordi-hundebett-charcocal?ref=waureisen" },
@@ -165,7 +167,7 @@ const TravelShop = () => {
       ]
     },
     {
-      title: "Clothing",
+      title: t("clothing"),
       products: [
         { id: 1, image: cl1, url: "https://kitsuneandjo.ch/de/products/raincoat-tropical?ref=waureisen" },
         { id: 2, image: cl2, url: "https://petandco.ch/collections/dog-wear/products/finn-quilted-coat-gray?ref=waureisen" },
@@ -185,7 +187,7 @@ const TravelShop = () => {
       ]
     },
     {
-      title: "Folding bowls",
+      title:  t("folding_bowls"),
       products: [
         { id: 1, image: fb1, url: "https://kitsuneandjo.ch/de/products/foldable-travel-bowl-kaki?ref=waureisen" },
         { id: 2, image: fb2, url: "https://hundelicious.ch/product/napf-to-go-tura-anthrazit/?ref=waureisen" },
@@ -195,7 +197,7 @@ const TravelShop = () => {
       ]
     },
     {
-      title: "Collar, leash and harness",
+      title:  t("collar_leash_harness"),
       products: [
         { id: 1, image: clh1, url: "https://kitsuneandjo.ch/de/products/hug-harness-mint?ref=waureisen" },
         { id: 2, image: clh2, url: "https://kitsuneandjo.ch/de/products/comfort-harness-terracotta?ref=waureisen" },
@@ -219,7 +221,7 @@ const TravelShop = () => {
       ]
     },
     {
-      title: "Snacks",
+      title: t("snacks"),
       products: [
         { id: 1, image: sn1, url: "https://hundelicious.ch/product/beef-lung-nuggets/?ref=waureisen" },
         { id: 2, image: sn2, url: "https://kitsuneandjo.ch/de/products/golden-bones?ref=waureisen" },
@@ -230,7 +232,7 @@ const TravelShop = () => {
       ]
     },
     {
-      title: "Wellness",
+      title: t("wellness"),
       products: [
         { id: 1, image: well1, url: "https://kitsuneandjo.ch/de/products/dog-towel-tan?ref=waureisen" },
         { id: 2, image: well2, url: "https://kitsuneandjo.ch/de/products/amino-acid-pet-shampoo?ref=waureisen" },
@@ -243,7 +245,7 @@ const TravelShop = () => {
       ]
     },
     {
-      title: "Toys & Additional",
+      title: t("toys_additional"),
       products: [
         { id: 1, image: ta1, url: "https://kitsuneandjo.ch/de/products/butternut-toy-s?ref=waureisen" },
         { id: 2, image: ta2, url: "https://hundelicious.ch/product/die-schweiz-mit-hund-erleben/?ref=waureisen" },
@@ -306,7 +308,7 @@ const TravelShop = () => {
                       rel="noopener noreferrer"
                       className="px-6 py-2 bg-[#B4A481] text-white rounded-md hover:bg-[#a3927b] transition-colors"
                     >
-                      View more
+                        {t('view_more')}
                     </a>
                   </div>
                 </div>
@@ -339,7 +341,7 @@ const TravelShop = () => {
       >
         <div className="absolute inset-0 bg-black/40"></div>
         <div className="absolute inset-0 flex items-center justify-center">
-          <h1 className="text-4xl text-center md:text-6xl font-bold text-white">Welcome to our travelshop</h1>
+          <h1 className="text-4xl text-center md:text-6xl font-bold text-white">  {t('welcome_travelshop')}</h1>
         </div>
       </div>
       
@@ -347,9 +349,7 @@ const TravelShop = () => {
       <div className="py-16 bg-gray-50">
         <div className="max-w-5xl mx-auto px-4 text-center">
           <p className="text-lg text-gray-700 leading-relaxed">
-            Here you'll find everything you need for your next trip with your dog. <br/>
-            Each item has been carefully selected and is available through <br/>
-            our three partners, Pet & Co., Kitsune & Jo and Hundelicious.
+            {t('travelshop_intro')}
           </p>
         </div>
       </div>

@@ -5,8 +5,10 @@ import heroImage from '../../assets/tm1.png';
 import travelImage1 from '../../assets/tm2.png';
 import travelImage2 from '../../assets/tm3.png';
 import { PawPrint } from 'lucide-react';
+import { useLanguage } from '../../utils/LanguageContext';
 
 const TravelMagazine = () => {
+  const { t } = useLanguage();
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
@@ -18,17 +20,15 @@ const TravelMagazine = () => {
       >
         <div className="absolute inset-0 bg-black bg-opacity-40"></div>
         <div className="absolute inset-0 flex items-center justify-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-white">Unser Reisemagazin</h1>
+          <h1 className="text-4xl md:text-6xl font-bold text-white">{t('our_travel_magazine')}</h1>
         </div>
       </div>
       
       {/* Welcome Text */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-        <h2 className="text-3xl md:text-4xl font-bold mb-6">Willkommen in unserem Reisemagazin!</h2>
+        <h2 className="text-3xl md:text-4xl font-bold mb-6">{t('welcome_magazine')}</h2>
         <p className="text-gray-700 mb-4">
-          Hier finden Sie wichtige Informationen rund um das Reisen mit Hund. Von
-          hundefreundlichen Reisezielen bis hin zu nützlichen Tipps – wir haben alles, was
-          Sie für ein entspanntes Abenteuer mit Ihrem Vierbeiner brauchen. Gute Reise! 🐾 ✈️
+          {t('magazine_intro')}
         </p>
       </div>
       
@@ -49,7 +49,7 @@ const TravelMagazine = () => {
                 href="https://www.waureisen.com/p/artikel-fliegen-mit-hund" 
                 className="px-6 py-3 bg-brand text-white rounded-md hover:bg-brand/90 transition-colors"
               >
-                Fliegen mit Hund
+                {t('flying_with_dog')}
               </a>
             </div>
           </div>
@@ -68,7 +68,7 @@ const TravelMagazine = () => {
                 href="https://www.waureisen.com/p/reisemagazin-roadtrip" 
                 className="px-6 py-3 bg-brand text-white rounded-md hover:bg-brand/90 transition-colors"
               >
-                Roadtrip durch Spanien, Portugal und Frankreich
+                {t('roadtrip')}
               </a>
             </div>
           </div>

@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar as CalendarIcon, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
+import { useLanguage } from '../../utils/LanguageContext';
+
 
 // Mock data for bookings and availability
 const MOCK_BOOKINGS = [
@@ -129,6 +131,7 @@ const isDateInRange = (date, startDate, endDate) => {
 
 // Calendar component
 const Calendar = ({ currentDate, bookings, listings, unavailableDates, selectedListing, onBookingClick }) => {
+  const { t } = useLanguage();
   const [year, setYear] = useState(currentDate.getFullYear());
   const [month, setMonth] = useState(currentDate.getMonth());
   const calendarDays = generateCalendarDays(year, month);
@@ -202,7 +205,7 @@ const Calendar = ({ currentDate, bookings, listings, unavailableDates, selectedL
         <div className="mt-1 space-y-1">
           {isUnavailable && (
             <div className="h-5 rounded bg-gray-200 text-xs flex items-center justify-center text-gray-600 font-medium">
-              Unavailable
+              {t('unavailable')}
             </div>
           )}
           
@@ -264,7 +267,7 @@ const Calendar = ({ currentDate, bookings, listings, unavailableDates, selectedL
           }}
           className="text-sm text-brand hover:underline"
         >
-          Today
+            {t('today')}
         </button>
       </div>
       
@@ -295,15 +298,15 @@ const Calendar = ({ currentDate, bookings, listings, unavailableDates, selectedL
       <div className="p-4 border-t flex flex-wrap gap-4 text-xs">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-sm bg-green-100"></div>
-          <span>Confirmed</span>
+          <span>{t('confirmed')}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-sm bg-yellow-100"></div>
-          <span>Pending</span>
+          <span>{t('pending')}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-sm bg-gray-200"></div>
-          <span>Unavailable</span>
+          <span>{t('unavailable')}</span>
         </div>
       </div>
     </div>
@@ -312,6 +315,7 @@ const Calendar = ({ currentDate, bookings, listings, unavailableDates, selectedL
 
 // Booking details modal
 const BookingDetailsModal = ({ booking, onClose }) => {
+  const { t } = useLanguage();
   if (!booking) return null;
   
   const checkInDate = new Date(booking.checkIn);
@@ -340,7 +344,7 @@ const BookingDetailsModal = ({ booking, onClose }) => {
           
           <div className="space-y-4">
             <div>
-              <div className="text-sm font-medium text-gray-500 mb-1">Guest</div>
+            <div className="text-sm font-medium text-gray-500 mb-1">{t('guest')}</div>
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-500">
                   {booking.guestName.charAt(0)}
@@ -357,22 +361,22 @@ const BookingDetailsModal = ({ booking, onClose }) => {
             
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <div className="text-sm font-medium text-gray-500 mb-1">Check-in</div>
+              <div className="text-sm font-medium text-gray-500 mb-1">{t('check_in')}</div>
                 <div className="text-sm text-gray-900">{formatDisplayDate(booking.checkIn)}</div>
               </div>
               <div>
-                <div className="text-sm font-medium text-gray-500 mb-1">Check-out</div>
+              <div className="text-sm font-medium text-gray-500 mb-1">{t('check_out')}</div>
                 <div className="text-sm text-gray-900">{formatDisplayDate(booking.checkOut)}</div>
               </div>
             </div>
             
             <div>
-              <div className="text-sm font-medium text-gray-500 mb-1">Duration</div>
-              <div className="text-sm text-gray-900">{nights} {nights === 1 ? 'night' : 'nights'}</div>
+            <div className="text-sm font-medium text-gray-500 mb-1">{t('duration')}</div>
+              <div className="text-sm text-gray-900">{nights} {nights === 1 ? t('night') : t('nights')}</div>
             </div>
             
             <div>
-              <div className="text-sm font-medium text-gray-500 mb-1">Status</div>
+            <div className="text-sm font-medium text-gray-500 mb-1">{t('status')}</div>
               <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                 booking.status === 'confirmed' 
                   ? 'bg-green-100 text-green-800' 
@@ -390,7 +394,7 @@ const BookingDetailsModal = ({ booking, onClose }) => {
               onClick={onClose}
               className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
-              Close
+              {t('close')}
             </button>
             <button
               onClick={() => {
@@ -400,7 +404,7 @@ const BookingDetailsModal = ({ booking, onClose }) => {
               }}
               className="px-4 py-2 bg-brand text-white rounded-md text-sm font-medium hover:bg-brand/90"
             >
-              View Details
+               {t('view_details')}
             </button>
           </div>
         </div>
@@ -443,7 +447,7 @@ const BlockDateModal = ({ isOpen, onClose, listings, selectedDate, onSave }) => 
       <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl z-50 w-full max-w-md">
         <div className="p-6">
           <div className="flex justify-between items-start mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Block Dates</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('block_dates')}</h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-500"
@@ -455,7 +459,7 @@ const BlockDateModal = ({ isOpen, onClose, listings, selectedDate, onSave }) => 
           <div className="space-y-4">
             <div>
               <label htmlFor="listing" className="block text-sm font-medium text-gray-700 mb-1">
-                Property
+              {t('property')}
               </label>
               <select
                 id="listing"
@@ -464,7 +468,7 @@ const BlockDateModal = ({ isOpen, onClose, listings, selectedDate, onSave }) => 
                 className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                 required
               >
-                <option value="" disabled>Select a property</option>
+                <option value="" disabled>{t('select_property')}</option>
                 {listings.map(listing => (
                   <option key={listing.id} value={listing.id}>{listing.title}</option>
                 ))}
@@ -474,7 +478,7 @@ const BlockDateModal = ({ isOpen, onClose, listings, selectedDate, onSave }) => 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
-                  Start Date
+                {t('start_date')}
                 </label>
                 <input
                   type="date"
@@ -487,7 +491,7 @@ const BlockDateModal = ({ isOpen, onClose, listings, selectedDate, onSave }) => 
               </div>
               <div>
                 <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">
-                  End Date
+                {t('end_date')}
                 </label>
                 <input
                   type="date"
@@ -503,7 +507,7 @@ const BlockDateModal = ({ isOpen, onClose, listings, selectedDate, onSave }) => 
             
             <div>
               <label htmlFor="reason" className="block text-sm font-medium text-gray-700 mb-1">
-                Reason
+              {t('reason')}
               </label>
               <select
                 id="reason"
@@ -511,17 +515,17 @@ const BlockDateModal = ({ isOpen, onClose, listings, selectedDate, onSave }) => 
                 onChange={(e) => setReason(e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
               >
-                <option value="maintenance">Maintenance</option>
-                <option value="personal">Personal Use</option>
-                <option value="renovation">Renovation</option>
-                <option value="custom">Other (specify)</option>
+                 <option value="maintenance">{t('maintenance')}</option>
+                <option value="personal">{t('personal_use')}</option>
+                <option value="renovation">{t('renovation')}</option>
+                <option value="custom">{t('other_specify')}</option>
               </select>
             </div>
             
             {reason === 'custom' && (
               <div>
                 <label htmlFor="customReason" className="block text-sm font-medium text-gray-700 mb-1">
-                  Specify Reason
+                {t('specify_reason')}
                 </label>
                 <input
                   type="text"
@@ -529,7 +533,7 @@ const BlockDateModal = ({ isOpen, onClose, listings, selectedDate, onSave }) => 
                   value={customReason}
                   onChange={(e) => setCustomReason(e.target.value)}
                   className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
-                  placeholder="Enter reason"
+                  placeholder={t('enter_reason')}
                   required
                 />
               </div>
@@ -541,7 +545,7 @@ const BlockDateModal = ({ isOpen, onClose, listings, selectedDate, onSave }) => 
               onClick={onClose}
               className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
-              Cancel
+             {t('cancel')}
             </button>
             <button
               onClick={handleSave}
@@ -552,7 +556,7 @@ const BlockDateModal = ({ isOpen, onClose, listings, selectedDate, onSave }) => 
                   : 'hover:bg-brand/90'
               }`}
             >
-              Block Dates
+              {t('block_dates')}
             </button>
           </div>
         </div>
@@ -562,6 +566,7 @@ const BlockDateModal = ({ isOpen, onClose, listings, selectedDate, onSave }) => 
 };
 
 const ProviderCalendar = () => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [selectedListing, setSelectedListing] = useState('all');
   const [currentDate] = useState(new Date());
@@ -610,8 +615,8 @@ const ProviderCalendar = () => {
             >
               <ArrowLeft className="w-6 h-6 text-gray-600" />
             </button>
-            <h1 className="text-3xl font-semibold text-gray-900">Calendar</h1>
-          </div>
+            <h1 className="text-3xl font-semibold text-gray-900">{t('calendar')}</h1>
+            </div>
           
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
@@ -621,7 +626,7 @@ const ProviderCalendar = () => {
                 onChange={(e) => setSelectedListing(e.target.value)}
                 className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand bg-white"
               >
-                <option value="all">All Properties</option>
+                  <option value="all">{t('all_properties')}</option>
                 {MOCK_LISTINGS.map(listing => (
                   <option key={listing.id} value={listing.id}>{listing.title}</option>
                 ))}
@@ -632,7 +637,7 @@ const ProviderCalendar = () => {
               onClick={() => setIsBlockModalOpen(true)}
               className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand/90 transition-colors"
             >
-              Block Dates
+                {t('block_dates')}
             </button>
           </div>
         </div>
@@ -651,24 +656,24 @@ const ProviderCalendar = () => {
         
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
           <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-            <h2 className="text-lg font-medium text-gray-900">Upcoming Bookings</h2>
+          <h2 className="text-lg font-medium text-gray-900">{t('upcoming_bookings')}</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Property
-                  </th>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Guest
-                  </th>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Dates
-                  </th>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t('property')}
+                </th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t('guest')}
+                </th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t('dates')}
+                </th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t('status')}
+                </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -721,11 +726,11 @@ const ProviderCalendar = () => {
                 {(!bookings.length || (selectedListing !== 'all' && !bookings.some(b => b.listingId === selectedListing))) && (
                   <tr>
                     <td colSpan="4" className="px-4 py-12 text-center">
-                      <p className="text-gray-500 text-lg mb-2">No bookings found</p>
+                    <p className="text-gray-500 text-lg mb-2">{t('no_bookings_found')}</p>
                       <p className="text-gray-400 text-sm">
-                        {selectedListing === 'all' 
-                          ? "You don't have any bookings yet." 
-                          : `You don't have any bookings for this property.`}
+                      {selectedListing === 'all' 
+                        ? t('no_bookings_yet') 
+                        : t('no_bookings_for_property')}
                       </p>
                     </td>
                   </tr>

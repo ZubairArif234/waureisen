@@ -4,6 +4,7 @@ import { ArrowLeft, Calendar, Filter, Download, Eye, TrendingUp, TrendingDown, A
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
 import { getProviderDashboardStats } from '../../api/listingAPI';
+import { useLanguage } from '../../utils/LanguageContext';
 
 // Mock Chart Component - In a real app, you'd use a library like Chart.js or Recharts
 const ChartMock = ({ type, title, description, data }) => {
@@ -56,6 +57,7 @@ const ChartMock = ({ type, title, description, data }) => {
 
 // Performance Card Component
 const PerformanceCard = ({ title, current, previous, isPercentage, isCurrency }) => {
+  const { t } = useLanguage();
   const changePercent = ((current - previous) / previous) * 100;
   const isPositive = current >= previous;
   
@@ -84,7 +86,7 @@ const PerformanceCard = ({ title, current, previous, isPercentage, isCurrency })
           {formatValue(current)}
         </div>
         <div className="text-sm text-gray-500 mt-1">
-          Previous: {formatValue(previous)}
+          {t('previous')}: {formatValue(previous)}
         </div>
       </div>
     </div>
@@ -93,6 +95,7 @@ const PerformanceCard = ({ title, current, previous, isPercentage, isCurrency })
 
 // Listing Performance Row
 const ListingPerformanceRow = ({ listing, onViewDetails }) => {
+  const { t } = useLanguage();
   const bookingTrend = listing.bookingChange > 0 ? 'positive' : listing.bookingChange < 0 ? 'negative' : 'neutral';
   
   return (
@@ -135,7 +138,7 @@ const ListingPerformanceRow = ({ listing, onViewDetails }) => {
           className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
         >
           <Eye className="w-4 h-4" />
-          <span>Details</span>
+          <span>{t('details')}</span>
         </button>
       </td>
     </tr>
@@ -143,6 +146,7 @@ const ListingPerformanceRow = ({ listing, onViewDetails }) => {
 };
 
 const ProviderAnalytics = () => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [timeRange, setTimeRange] = useState('month');
   const [isLoading, setIsLoading] = useState(true);
@@ -278,13 +282,13 @@ const ProviderAnalytics = () => {
             >
               <ArrowLeft className="w-6 h-6 text-gray-600" />
             </button>
-            <h1 className="text-3xl font-semibold text-gray-900">Analytics</h1>
+            <h1 className="text-3xl font-semibold text-gray-900">{t('analytics')}</h1>
           </div>
           
           <div className="flex justify-center py-16">
             <div className="flex flex-col items-center">
               <div className="w-12 h-12 border-4 border-gray-200 border-t-brand rounded-full animate-spin mb-4"></div>
-              <p className="text-gray-600">Loading analytics data...</p>
+              <p className="text-gray-600">{t('loading_analytics')}</p>
             </div>
           </div>
         </main>
@@ -307,7 +311,7 @@ const ProviderAnalytics = () => {
             >
               <ArrowLeft className="w-6 h-6 text-gray-600" />
             </button>
-            <h1 className="text-3xl font-semibold text-gray-900">Analytics</h1>
+            <h1 className="text-3xl font-semibold text-gray-900">{t('analytics')}</h1>
           </div>
           
           <div className="flex items-center gap-3">
@@ -318,10 +322,10 @@ const ProviderAnalytics = () => {
                 onChange={(e) => setTimeRange(e.target.value)}
                 className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand bg-white"
               >
-                <option value="week">Last 7 days</option>
-                <option value="month">Last 30 days</option>
-                <option value="quarter">Last 90 days</option>
-                <option value="year">Last 12 months</option>
+                <option value="week">{t('last_7_days')}</option>
+                <option value="month">{t('last_30_days')}</option>
+                <option value="quarter">{t('last_90_days')}</option>
+                <option value="year">{t('last_12_months')}</option>
               </select>
             </div>
             
@@ -332,8 +336,8 @@ const ProviderAnalytics = () => {
                 onChange={(e) => setSelectedCompareMode(e.target.value)}
                 className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand bg-white"
               >
-                <option value="previous">vs. Previous Period</option>
-                <option value="year">vs. Last Year</option>
+          <option value="previous">{t('vs_previous_period')}</option>
+          <option value="year">{t('vs_last_year')}</option>
               </select>
             </div>
             
@@ -342,32 +346,32 @@ const ProviderAnalytics = () => {
               className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <Download className="w-5 h-5 text-gray-500" />
-              <span>Export</span>
+              <span>{t('export')}</span>
             </button>
           </div>
         </div>
         
         {/* Performance Overview */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-          <PerformanceCard
-            title="Total Bookings"
+            <PerformanceCard
+            title={t('total_bookings')}
             current={analyticsData.performance.totalBookings.current}
             previous={analyticsData.performance.totalBookings.previous}
           />
           <PerformanceCard
-            title="Occupancy Rate"
+            title={t('occupancy_rate')}
             current={analyticsData.performance.occupancyRate.current}
             previous={analyticsData.performance.occupancyRate.previous}
             isPercentage={true}
           />
           <PerformanceCard
-            title="Average Nightly Rate"
+            title={t('average_nightly_rate')}
             current={analyticsData.performance.averageNightlyRate.current}
             previous={analyticsData.performance.averageNightlyRate.previous}
             isCurrency={true}
           />
           <PerformanceCard
-            title="Total Revenue"
+            title={t('total_revenue')}
             current={analyticsData.performance.totalRevenue.current}
             previous={analyticsData.performance.totalRevenue.previous}
             isCurrency={true}
@@ -376,24 +380,24 @@ const ProviderAnalytics = () => {
         
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <ChartMock 
-            type="revenue"
-            title="Revenue Trends"
-            description={`Revenue analysis for the ${timeRange === 'week' ? 'past week' : timeRange === 'month' ? 'past month' : timeRange === 'quarter' ? 'past quarter' : 'past year'}`}
-            data={analyticsData.charts.revenue}
-          />
-          <ChartMock 
-            type="bookings"
-            title="Booking Trends"
-            description={`Booking analysis for the ${timeRange === 'week' ? 'past week' : timeRange === 'month' ? 'past month' : timeRange === 'quarter' ? 'past quarter' : 'past year'}`}
-            data={analyticsData.charts.bookings}
-          />
+        <ChartMock 
+        type="revenue"
+        title={t('revenue_trends')}
+        description={`${t('revenue_analysis')} ${timeRange === 'week' ? t('past_week') : timeRange === 'month' ? t('past_month') : timeRange === 'quarter' ? t('past_quarter') : t('past_year')}`}
+        data={analyticsData.charts.revenue}
+      />
+      <ChartMock 
+        type="bookings"
+        title={t('booking_trends')}
+        description={`${t('booking_analysis')} ${timeRange === 'week' ? t('past_week') : timeRange === 'month' ? t('past_month') : timeRange === 'quarter' ? t('past_quarter') : t('past_year')}`}
+        data={analyticsData.charts.bookings}
+      />
         </div>
         
         {/* Insights */}
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm mb-8">
           <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-            <h2 className="text-lg font-medium text-gray-900">Insights & Recommendations</h2>
+          <h2 className="text-lg font-medium text-gray-900">{t('insights_recommendations')}</h2>
           </div>
           <div className="p-6 space-y-4">
             {analyticsData.insights.map((insight, index) => (
@@ -419,15 +423,15 @@ const ProviderAnalytics = () => {
                   {insight.type === 'tip' && <Eye className="w-5 h-5 text-blue-600" />}
                 </div>
                 <div>
-                  <h3 className={`text-sm font-medium ${
-                    insight.type === 'opportunity' 
-                      ? 'text-green-800' 
-                      : insight.type === 'warning'
-                      ? 'text-yellow-800'
-                      : 'text-blue-800'
-                  }`}>
-                    {insight.type === 'opportunity' ? 'Opportunity' : insight.type === 'warning' ? 'Warning' : 'Tip'}
-                  </h3>
+                <h3 className={`text-sm font-medium ${
+                  insight.type === 'opportunity' 
+                    ? 'text-green-800' 
+                    : insight.type === 'warning'
+                    ? 'text-yellow-800'
+                    : 'text-blue-800'
+                }`}>
+                  {insight.type === 'opportunity' ? t('opportunity') : insight.type === 'warning' ? t('warning') : t('tip')}
+                </h3>
                   <p className={`mt-1 text-sm ${
                     insight.type === 'opportunity' 
                       ? 'text-green-700' 
@@ -446,26 +450,29 @@ const ProviderAnalytics = () => {
         {/* Listing Performance */}
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
           <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-            <h2 className="text-lg font-medium text-gray-900">Listing Performance</h2>
+          <h2 className="text-lg font-medium text-gray-900">{t('listing_performance')}</h2>
+
           </div>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Listing
+                  {t('listing')}
                   </th>
                   <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Occupancy
+                  {t('occupancy')}
+
                   </th>
                   <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Bookings
+                  {t('bookings')}
                   </th>
                   <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Revenue
+                  {t('revenue')}
+
                   </th>
                   <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
+                  {t('actions')}
                   </th>
                 </tr>
               </thead>

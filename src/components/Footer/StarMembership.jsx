@@ -2,8 +2,10 @@ import React from 'react';
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
 import heroImage from '../../assets/starmembership.png'; // Make sure you have this image in your assets folder
+import { useLanguage } from '../../utils/LanguageContext';
 
 const StarMembership = () => {
+  const { t } = useLanguage();
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
@@ -22,17 +24,16 @@ const StarMembership = () => {
       
       {/* Content Section */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <h1 className="text-3xl md:text-5xl font-bold text-center mb-8">STAR Swiss Travel Association</h1>
+      <h1 className="text-3xl md:text-5xl font-bold text-center mb-8">
+        {t('star_association')}
+      </h1>
         
         <h2 className="text-xl font-medium text-gray-700 text-center mb-8">
-          Our Membership with the STAR Swiss Travel Association
+        {t('our_membership')}
         </h2>
         
         <p className="text-gray-700 mb-10">
-          Waureisen is proud to be a member of the STAR Swiss Travel Association. As a member of this
-          renowned Swiss travel agency association, we are committed to adhering to the highest
-          quality standards and professional guidelines. This membership guarantees not only excellent
-          service but also reliable and secure travel planning.
+        {t('star_description')}
         </p>
         
         <div className="flex justify-center">
@@ -42,7 +43,7 @@ const StarMembership = () => {
             rel="noopener noreferrer"
             className="px-6 py-3 bg-brand text-white rounded-lg hover:bg-brand/90 transition-colors"
           >
-            View more
+            {t('view_more')}
           </a>
         </div>
       </div>

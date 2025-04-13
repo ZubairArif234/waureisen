@@ -9,6 +9,7 @@ import i1 from '../../assets/i1.png';
 import i2 from '../../assets/i2.png';
 import s1 from '../../assets/s1.png';
 import s2 from '../../assets/s2.png';
+import { useLanguage } from '../../utils/LanguageContext';
 
 // DeleteConfirmationModal component
 const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, listingTitle }) => {
@@ -24,11 +25,11 @@ const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, listingTitle }) =
         <div className="p-6">
           <div className="flex items-center text-red-600 mb-4">
             <AlertTriangle className="w-6 h-6 mr-2" />
-            <h3 className="text-lg font-medium">Delete Listing</h3>
+            <h3 className="text-lg font-medium">{t('delete_listing')}</h3>
           </div>
           
           <p className="text-gray-600 mb-6">
-            Are you sure you want to delete "<span className="font-medium">{listingTitle}</span>"? This action cannot be undone.
+          {t('delete_confirmation', { title: <span className="font-medium">{listingTitle}</span> })}
           </p>
           
           <div className="flex justify-end gap-3">
@@ -36,13 +37,13 @@ const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, listingTitle }) =
               onClick={onClose}
               className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button
               onClick={onConfirm}
               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
             >
-              Delete
+               {t('delete')}
             </button>
           </div>
         </div>
@@ -52,6 +53,7 @@ const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, listingTitle }) =
 };
 
 const ListingCard = ({ listing, onEdit, onDelete, onView }) => {
+  const { t } = useLanguage();
   const [showMenu, setShowMenu] = useState(false);
   
   return (
@@ -71,10 +73,10 @@ const ListingCard = ({ listing, onEdit, onDelete, onView }) => {
             : 'bg-gray-100 text-gray-800'
         }`}>
           {listing.status === 'active' 
-            ? 'Active' 
+            ? t('active_status') 
             : listing.status === 'pending approval'
-            ? 'Pending' 
-            : 'Draft'}
+            ? t('pending_status') 
+            : t('draft_status')}
         </div>
       </div>
       <div className="p-4">
@@ -106,7 +108,7 @@ const ListingCard = ({ listing, onEdit, onDelete, onView }) => {
                     }}
                     className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
-                    View
+                    {t('view')}
                   </button>
                   <button
                     onClick={() => {
@@ -115,7 +117,7 @@ const ListingCard = ({ listing, onEdit, onDelete, onView }) => {
                     }}
                     className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
-                    Edit
+                    {t('edit')}
                   </button>
                   <button
                     onClick={() => {
@@ -124,7 +126,7 @@ const ListingCard = ({ listing, onEdit, onDelete, onView }) => {
                     }}
                     className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                   >
-                    Delete
+                    {t('delete')}
                   </button>
                 </div>
               </>
@@ -142,6 +144,7 @@ const ListingCard = ({ listing, onEdit, onDelete, onView }) => {
 };
 
 const YourListings = () => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -293,7 +296,7 @@ const YourListings = () => {
                 >
                   <ArrowLeft className="w-6 h-6 text-gray-600" />
                 </button>
-                <h1 className="text-3xl font-semibold text-gray-900">Your Listings</h1>
+                <h1 className="text-3xl font-semibold text-gray-900">{t('your_listings')}</h1>
               </div>
               
               <button
@@ -301,7 +304,7 @@ const YourListings = () => {
                 className="flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand/90 transition-colors"
               >
                 <Plus className="w-5 h-5" />
-                <span>Create New Listing</span>
+                <span>{t('create_new_listing')}</span>
               </button>
             </div>
 
@@ -311,7 +314,7 @@ const YourListings = () => {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
-                  placeholder="Search by title, location..."
+                  placeholder={t('search_listings_placeholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
@@ -327,7 +330,7 @@ const YourListings = () => {
                 >
                   {propertyTypes.map((type, index) => (
                     <option key={index} value={type}>
-                      {type === 'all' ? 'All Property Types' : type}
+                       {type === 'all' ? t('all_property_types') : type}
                     </option>
                   ))}
                 </select>
@@ -344,7 +347,7 @@ const YourListings = () => {
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
-                All Listings ({listings.length})
+                  {t('all_listings')} ({listings.length})
               </button>
               <button
                 onClick={() => setActiveTab('active')}
@@ -354,7 +357,7 @@ const YourListings = () => {
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
-                Active ({listings.filter(l => l.status === 'active').length})
+                 {t('active')} ({listings.filter(l => l.status === 'active').length})
               </button>
               <button
                 onClick={() => setActiveTab('pending')}
@@ -364,7 +367,7 @@ const YourListings = () => {
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
-                Pending ({listings.filter(l => l.status === 'pending approval').length})
+                {t('pending')}({listings.filter(l => l.status === 'pending approval').length})
               </button>
               <button
                 onClick={() => setActiveTab('draft')}
@@ -374,7 +377,7 @@ const YourListings = () => {
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
-                Drafts ({listings.filter(l => l.status === 'draft').length})
+                {t('drafts')} ({listings.filter(l => l.status === 'draft').length})
               </button>
             </div>
 
@@ -394,21 +397,21 @@ const YourListings = () => {
             {/* No listings state */}
             {filteredListings.length === 0 && (
               <div className="text-center py-12">
-                <p className="text-gray-500 text-lg mb-2">No listings found</p>
+                <p className="text-gray-500 text-lg mb-2">{t('no_listings_found')}</p>
                 <p className="text-gray-400 mb-6">
                   {activeTab === 'all'
-                    ? "You haven't created any listings yet."
+                    ? t('no_listings_created_yet')
                     : activeTab === 'active'
-                    ? "You don't have any active listings."
+                    ? t('no_active_listings')
                     : activeTab === 'pending'
-                    ? "You don't have any pending listings."
-                    : "You don't have any draft listings."}
+                    ? t('no_pending_listings')
+                    : t('no_draft_listings')}
                 </p>
                 <button
                   onClick={handleCreateListing}
                   className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand/90 transition-colors"
                 >
-                  Create Your First Listing
+                  {t('create_your_first_listing')}
                 </button>
               </div>
             )}

@@ -8,6 +8,7 @@ import i2 from '../../assets/i2.png';
 import s1 from '../../assets/s1.png';
 import s2 from '../../assets/s2.png';
 import i3 from '../../assets/magazine.jpg';
+import { useLanguage } from '../../utils/LanguageContext';
 
 const ImageGrid = ({ images, title, subtitle, link }) => (
   <div className="flex flex-col items-center w-full md:w-auto">
@@ -54,18 +55,19 @@ const ImageGrid = ({ images, title, subtitle, link }) => (
 
 const ProviderListings = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   
   const yourListings = {
     images: [i1, i2, s1, s2],
-    title: "Your Listings",
-    subtitle: "4 properties",
+    title: t('your_listings'),
+    subtitle: t('properties_count'),
     link: "/provider/your-listings"
   };
-
+  
   const bookings = {
     images: [i3],
-    title: "Bookings",
-    subtitle: "View all bookings",
+    title: t('bookings'),
+    subtitle: t('view_all_bookings'),
     link: "/provider/bookings"
   };
 
@@ -82,7 +84,7 @@ const ProviderListings = () => {
             <ArrowLeft className="w-6 h-6 text-gray-600" />
           </button>
           <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 text-center md:text-left">
-            Provider Listings
+          {t('provider_listings')}
           </h1>
         </div>
         

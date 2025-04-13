@@ -8,6 +8,7 @@ import i2 from '../../assets/i2.png';
 import s1 from '../../assets/s1.png';
 import s2 from '../../assets/s2.png';
 import i3 from '../../assets/magazine.jpg';
+import { useLanguage } from '../../utils/LanguageContext';
 
 // StatCard Component
 const StatCard = ({ icon: Icon, title, value, change, changeType }) => {
@@ -100,6 +101,7 @@ const ImageGrid = ({ images, title, subtitle, link }) => (
 
 // Recent Booking Row component
 const BookingRow = ({ booking, onViewBooking }) => {
+  const { t } = useLanguage();
   return (
     <tr className="hover:bg-gray-50">
       <td className="px-3 py-3 whitespace-nowrap">
@@ -111,7 +113,7 @@ const BookingRow = ({ booking, onViewBooking }) => {
       </td>
       <td className="px-3 py-3 whitespace-nowrap">
         <div className="text-sm text-gray-900">{booking.property}</div>
-        <div className="text-xs text-gray-500">{booking.duration} nights</div>
+        <div className="text-xs text-gray-500">{booking.duration} {t('nights')}</div>
       </td>
       <td className="px-3 py-3 whitespace-nowrap">
         <div className="text-sm text-brand font-medium">{booking.amount} CHF</div>
@@ -121,7 +123,7 @@ const BookingRow = ({ booking, onViewBooking }) => {
           onClick={() => onViewBooking(booking.id)}
           className="text-brand hover:text-brand-dark font-medium text-sm"
         >
-          View details
+          {t('view_details')}
         </button>
       </td>
     </tr>
@@ -132,6 +134,7 @@ const ProviderDashboard = () => {
   const navigate = useNavigate();
   const [timeRange, setTimeRange] = useState('month');
   const [isLoading, setIsLoading] = useState(false);
+  const { t } = useLanguage();
   
   useEffect(() => {
     // Simulate loading data
@@ -146,15 +149,15 @@ const ProviderDashboard = () => {
   // Mock data for listings grid
   const yourListings = {
     images: [i1, i2, s1, s2],
-    title: "Your Listings",
-    subtitle: "4 properties",
+    title: t('your_listings'),
+    subtitle: t('properties_count'),
     link: "/provider/your-listings"
   };
 
   const bookings = {
     images: [i3],
-    title: "Bookings",
-    subtitle: "View all bookings",
+    title: t('bookings'),
+    subtitle: t('view_all_bookings'),
     link: "/provider/bookings"
   };
   
@@ -196,7 +199,7 @@ const ProviderDashboard = () => {
             >
               <ArrowLeft className="w-6 h-6 text-gray-600" />
             </button>
-            <h1 className="text-3xl font-semibold text-gray-900">Provider Dashboard</h1>
+            <h1 className="text-3xl font-semibold text-gray-900">  {t('provider_dashboard')} </h1>
           </div>
           
           <div className="flex items-center space-x-2">
@@ -205,9 +208,9 @@ const ProviderDashboard = () => {
               onChange={(e) => setTimeRange(e.target.value)}
               className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand bg-white"
             >
-              <option value="week">Last 7 days</option>
-              <option value="month">Last 30 days</option>
-              <option value="year">Last 12 months</option>
+              <option value="week">{t('last_7_days')}</option>
+              <option value="month">{t('last_30_days')}</option>
+              <option value="year">{t('last_12_months')}</option>
             </select>
           </div>
         </div>
@@ -220,71 +223,71 @@ const ProviderDashboard = () => {
         
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-          <StatCard
-            icon={Briefcase}
-            title="Total Bookings"
-            value={stats.totalBookings}
-            change={stats.bookingChange}
-            changeType="positive"
-          />
-          <StatCard
-            icon={DollarSign}
-            title="Total Revenue"
-            value={stats.totalRevenue}
-            change={stats.revenueChange}
-            changeType="positive"
-          />
-          <StatCard
-            icon={Award}
-            title="Occupancy Rate"
-            value={stats.occupancyRate}
-            change={stats.occupancyChange}
-            changeType="negative"
-          />
-          <StatCard
-            icon={Calendar}
-            title="Avg. Length of Stay"
-            value={stats.avgNights}
-            change={stats.nightsChange}
-            changeType="positive"
-          />
+        <StatCard
+          icon={Briefcase}
+          title={t('total_bookings')}
+          value={stats.totalBookings}
+          change={stats.bookingChange}
+          changeType="positive"
+        />
+        <StatCard
+          icon={DollarSign}
+          title={t('total_revenue')}
+          value={stats.totalRevenue}
+          change={stats.revenueChange}
+          changeType="positive"
+        />
+        <StatCard
+          icon={Award}
+          title={t('occupancy_rate')}
+          value={stats.occupancyRate}
+          change={stats.occupancyChange}
+          changeType="negative"
+        />
+        <StatCard
+          icon={Calendar}
+          title={t('avg_length_stay')}
+          value={stats.avgNights}
+          change={stats.nightsChange}
+          changeType="positive"
+        />
         </div>
         
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <ChartComponent 
-            title="Revenue Overview"
-            description="Revenue analysis based on your timeframe"
-          />
-          <ChartComponent 
-            title="Booking Trends"
-            description="Booking trends analysis over time"
-          />
+        <ChartComponent 
+          title={t('revenue_overview')}
+          description={t('revenue_analysis')}
+        />
+        <ChartComponent 
+          title={t('booking_trends')}
+          description={t('booking_analysis')}
+        />
         </div>
         
         {/* Recent Bookings */}
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm mb-8">
           <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-            <h2 className="text-lg font-medium text-gray-900">Recent Bookings</h2>
+          <h2 className="text-lg font-medium text-gray-900">{t('recent_bookings')}</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Booking ID
+                  {t('booking_id')}
                   </th>
                   <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Guest
+                  {t('guest')}
                   </th>
                   <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Property
+                  {t('property')}
                   </th>
                   <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Amount
+                  {t('amount')}
                   </th>
                   <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
+                  {t('actions')}
                   </th>
                 </tr>
               </thead>
@@ -304,7 +307,7 @@ const ProviderDashboard = () => {
               onClick={() => navigate('/provider/bookings')}
               className="text-brand hover:text-brand-dark font-medium"
             >
-              View all bookings →
+              {t('view_all_bookings')} →
             </button>
           </div>
         </div>
@@ -312,7 +315,7 @@ const ProviderDashboard = () => {
         {/* Quick Links */}
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-medium text-gray-900">Quick Actions</h2>
+          <h2 className="text-lg font-medium text-gray-900">{t('quick_actions')}</h2>
           </div>
           <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <button
@@ -320,49 +323,49 @@ const ProviderDashboard = () => {
               className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
             >
               <Briefcase className="w-5 h-5 text-brand" />
-              <span className="text-gray-700">Create Listing</span>
+              <span className="text-gray-700">{t('create_listing')}</span>
             </button>
             <button
               onClick={() => navigate('/provider/your-listings')}
               className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
             >
               <Eye className="w-5 h-5 text-brand" />
-              <span className="text-gray-700">View Listings</span>
+              <span className="text-gray-700">{t('view_listings')}</span>
             </button>
             <button
               onClick={() => navigate('/provider/bookings')}
               className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
             >
               <Calendar className="w-5 h-5 text-brand" />
-              <span className="text-gray-700">Manage Bookings</span>
+              <span className="text-gray-700">{t('manage_bookings')}</span>
             </button>
             <button
               onClick={() => navigate('/provider/earnings')}
               className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
             >
               <CreditCard className="w-5 h-5 text-brand" />
-              <span className="text-gray-700">View Earnings</span>
+              <span className="text-gray-700">{t('view_earnings')}</span>
             </button>
             <button
               onClick={() => navigate('/provider/analytics')}
               className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
             >
               <BarChart2 className="w-5 h-5 text-brand" />
-              <span className="text-gray-700">Analytics</span>
+              <span className="text-gray-700">{t('analytics')}</span>
             </button>
             <button
               onClick={() => navigate('/provider/calendar')}
               className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
             >
               <Calendar className="w-5 h-5 text-brand" />
-              <span className="text-gray-700">Calendar</span>
+              <span className="text-gray-700">{t('calendar')}</span>
             </button>
             <button
               onClick={() => navigate('/provider/messages')}
               className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
             >
               <MessageSquare className="w-5 h-5 text-brand" />
-              <span className="text-gray-700">Messages</span>
+              <span className="text-gray-700">{t('messages')}</span>
             </button>
           </div>
         </div>

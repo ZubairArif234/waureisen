@@ -309,6 +309,318 @@ const translations = {
     'save_payment_card': 'Save payment card',
 
 
+    // Imprint Page
+
+    'imprint': 'Imprint',
+    'website_operator': 'Website Operator',
+    'concept_design': 'Concept and Design',
+    'technical_development': 'Technical Development',
+    'liability_notice': 'Liability Notice',
+    'liability_text': 'The content of our website is maintained with the greatest possible care. However, no liability is assumed for the content. Waureisen GmbH expressly and completely disclaims any liability for any claims in connection with its website, the information and data on its website and/or the use of its website. In particular, Waureisen GmbH assumes no liability and/or responsibility for references and/or links to third-party websites listed on its website and for any problems that may arise in connection with them.',
+    'general_provisions': 'General Provisions',
+    'copyright_info': 'Copyright: 2024 Waureisen GmbH',
+    'content_copyright': 'The content of all texts, logos, and images are protected by copyright.',
+
+
+    // Star Membership Page
+
+    'star_association': 'STAR Swiss Travel Association',
+    'our_membership': 'Our Membership with the STAR Swiss Travel Association',
+    'star_description': 'Waureisen is proud to be a member of the STAR Swiss Travel Association. As a member of this renowned Swiss travel agency association, we are committed to adhering to the highest quality standards and professional guidelines. This membership guarantees not only excellent service but also reliable and secure travel planning.',
+    'view_more': 'View more',
+
+
+    // Travel Shop Page
+
+
+    'welcome_travelshop': 'Welcome to our travelshop',
+    'travelshop_intro': 'Here you\'ll find everything you need for your next trip with your dog. Each item has been carefully selected and is available through our three partners, Pet & Co., Kitsune & Jo and Hundelicious.',
+    'car_seats': 'Car seats',
+    'travel_mats': 'Travel mats',
+    'travel_bags': 'Travel bags',
+    'dog_beds': 'Dog beds',
+    'clothing': 'Clothing',
+    'folding_bowls': 'Folding bowls',
+    'collar_leash_harness': 'Collar, leash and harness',
+    'snacks': 'Snacks',
+    'wellness': 'Wellness',
+    'toys_additional': 'Toys & Additional',
+    'view_more': 'View more',
+
+
+    // Become a Host page
+
+    'become_a_host': 'Become a Host',
+    'back_to_home': 'Back to Home',
+    'host_intro': 'Join our community of dog-friendly accommodation providers and start earning income while creating wonderful experiences for guests and their furry companions.',
+    'benefits_hosting': 'Benefits of Hosting with Waureisen',
+    'benefit_1': 'Reach a targeted audience of dog owners looking for pet-friendly stays',
+    'benefit_2': 'Flexible hosting options - rent your entire property or just a room',
+    'benefit_3': 'Set your own availability, prices, and house rules',
+    'benefit_4': '24/7 host support and dedicated account management',
+    'benefit_5': 'Professional photography and listing optimization assistance',
+    'benefit_6': 'Comprehensive host insurance and damage protection',
+    'how_it_works': 'How It Works',
+    'how_it_works_1': 'Create your listing - Add photos, description, and set your price',
+    'how_it_works_2': 'Welcome guests and their dogs - Provide a memorable stay experience',
+    'how_it_works_3': 'Get paid - Receive secure payments for each booking',
+    'ready_to_start': 'Ready to Get Started?',
+    'start_hosting_text': 'Complete our simple registration process and start hosting in as little as 24 hours.',
+    'register_as_host': 'Register as a Host',
+
+
+    // Partners page
+
+    'learn_about_partners': 'Learn more about our partners!',
+    'read_more': 'Read more',
+    'interhome_description': 'Interhome was founded in London in 1965 by Bruno Franzen and Werner Frey under the name Swiss Chalets and renamed Interhome after a merger in 1977. The company became known for innovative approaches such as the attempt to establish a paperless office. In 1984, the distinctive "migratory bird" logo was introduced, which has served as the recognizable symbol since 2008. In 1999, the first online bookings followed, which already accounted for around 60% of total bookings in 2009. In 2015, Interhome celebrated its 50th anniversary and took 6th place in the "Swiss Arbeitgeber Awards" in the 50-99 employee category.',
+    'europarcs_description': 'EuroParcs was founded in the 1980s by Wim Vos and specializes in managing holiday parks. The company grew rapidly and acquired the competitor Droomparken in 2019. In 2021, EuroParcs opened an office in Cologne. In November 2024, EuroParcs was acquired by Waterland Private Equity. The EuroParcs Charity Foundation offers free stays for families with seriously ill children and people with disabilities.',
+    'petco_description': 'PET & Co. was founded in 2021 by siblings Kerstin and Sarah. With a great passion and attention to detail, the team designs comfortable, easy-care, and aesthetically pleasing products, tailored to the needs of dogs, cats, and their owners. True to the motto: "Create good vibes in your home and live in a happy place."',
+    'kitsune_description': 'Kitsune & Jo (and Alex) At Kitsune & Jo, we aim to improve the lifestyle of dogs. Alex and I share a deep passion for design, and we firmly believe that our dogs deserve only the best. After spending some time abroad and frequently traveling with Kitsune, we were inspired to enhance the dog lifestyle here in Switzerland by curating a selection of products we are proud of. Products that you don\'t hide, but proudly showcase in your home, and integrate into your lifestyle. This project was born from a genuine desire to provide dogs and their parents with healthy food, because yes, we consider ourselves parents too.',
+    'hundelicious_description': 'In 2019 HUNDELICIOUS was founded by Julia and Sérgio with one simple idea: all living creatures are unique and deserve the best. With several decades of experience in gastronomy and animal nutrition, they have dedicated their life\'s work to understanding the way food can bring comfort, health, and joy. «We are striving for sharing our knowledge and experience with others so their relationship to real food and healthy holistic pet nutrition can evolve.» (Julia, 2021) In 2022 Anne-Catherine with Emma and Bettina with Gia joined the Team.',
+    'partners': 'Partners',
+
+
+    // Travel Magazine Page
+
+    'travel_magazine': 'Travel Magazine',
+    'our_travel_magazine': 'Our Travel Magazine',
+    'welcome_magazine': 'Welcome to our travel magazine!',
+    'magazine_intro': 'Here you\'ll find important information about traveling with your dog. From dog-friendly destinations to useful tips - we have everything you need for a relaxed adventure with your four-legged friend. Have a great trip! 🐾 ✈️',
+    'flying_with_dog': 'Flying with dog',
+    'roadtrip': 'Road trip through Spain, Portugal and France',
+
+
+    // About Us Page
+
+    'about_us': 'About us',
+    'about_text': 'We are Simone and Charlie, and together we are Waureisen! 🐾 With over 10 years of experience in the tourism industry and a great passion for travel, we are the first Swiss travel company specializing in unforgettable vacation adventures for you and your dog. For the past two years, Charlie has officially been joining us on our travels, ensuring that no destination is too far when it comes to finding dog-friendly spots. 🌍✈️ Our journeys always start together – as a team on an adventure! We know exactly what it takes to make sure both you as a dog owner and your furry friend feel right at home. As a dog mom, Simone understands exactly what our four-legged companions need to feel not just "tolerated" but truly welcomed. 🐶❤️ We discover the best dog-friendly accommodations, activities, and restaurants – not only while traveling but also in our everyday lives. It\'s the special places we find that make a vacation unforgettable for all of us: a dog paradise to run around in, a café where dogs are welcome, or a hiking trail with breathtaking views that we can enjoy together. 🌲🏞️ Our mission at Waureisen is to help you and your dog have the perfect vacation. We take care of everything: from finding the best accommodations to handling entry requirements, dog-friendly restaurants, and beaches where your dog can happily run around. 🏖️🍴🐕 With our extensive experience in tourism and love for dogs, we are your personal travel partner – so you can focus on what matters most: the adventure with your dog! 💼🐕 Let\'s plan your next vacation together – with the best tips for dog-friendly activities, hiking trails, and everything that will make your stay even more enjoyable. We make sure nothing is missing so you can create unforgettable memories with your dog! 🌟🐾 Ready for your next adventure? We\'re excited to help you find the perfect destination for both of you! 🐕💫',
+    'the_team': 'The team',
+    'simone_title': '👧 Simone, CEO and Founder',
+    'simone_bio': 'Hi, I\'m Simone! With over 10 years of experience in the tourism industry, a heart full of love for dogs, and a passion for exploring unique accommodations, I\'ve made it my mission to craft unforgettable travel experiences for you and your four-legged companion. Whether you\'re seeking a peaceful retreat or an adventurous getaway, I know just the right places where both you and your dog will feel completely at home. Let\'s create memories that will last a lifetime, together!',
+    'charlie_title': '🐶 Charlie, Co-Founder, Office Princess',
+    'charlie_bio': 'Hi, I\'m Charlie, a curious and playful Maltipoo female with two years of travel experience – and yes, I\'m also the "office princess"! Together with my best friend Simone, I explore the world and test the most beautiful accommodations. My mission? To make sure that my furry friends have just as much fun as I do! Whether traveling or in the office – we never get bored!',
+
+
+    // FAQ Page
+
+    'frequently_asked_questions': 'Frequently Asked Questions',
+    'faq_title': 'FAQ',
+    'faq1_question': 'How can I find dog-friendly accommodations in Europe through Waureisen?',
+    'faq1_answer': 'You can easily find dog-friendly accommodations using our specialized search filters. Simply enter your destination, dates, and select \'traveling with dog\' in the search options. Our platform offers over 30+ dog-specific filters to help you find the perfect stay that matches both your and your dog\'s needs.',
+    'faq2_question': 'Do I need travel insurance for my dog?',
+    'faq2_answer': 'While not always mandatory, we highly recommend getting pet travel insurance. It can cover veterinary emergencies, trip cancellations due to pet illness, and other unexpected situations. Check with your regular pet insurance provider about international coverage or consider specialized pet travel insurance.',
+    'faq3_question': 'What are the entry requirements for dogs in the Netherlands?',
+    'faq3_answer': 'Dogs entering the Netherlands must have a valid EU Pet Passport or veterinary certificate, a microchip, current rabies vaccination, and be at least 15 weeks old. The rabies vaccination must be given at least 21 days before travel. Additional requirements may apply depending on your country of origin.',
+    'faq4_question': 'What accessories should I bring for my trip with my dog?',
+    'faq4_answer': 'Essential items include: leash and collar with ID tags, food and water bowls, familiar bedding, waste bags, grooming supplies, any regular medications, copies of health records, and favorite toys. For longer trips, consider bringing a portable water bottle and collapsible bowls.',
+    'faq5_question': 'Should I visit a veterinarian before traveling?',
+    'faq5_answer': 'Yes, it\'s recommended to visit your vet 2-4 weeks before travel. They can ensure vaccinations are up-to-date, provide necessary health certificates, check your dog\'s fitness for travel, and offer specific advice based on your destination and dog\'s health condition.',
+    'faq6_question': 'How can I prepare my dog for a long car ride?',
+    'faq6_answer': 'Start with short car trips to build positive associations. Ensure your dog has a comfortable, secure space with familiar bedding. Plan regular breaks every 2-3 hours for water, bathroom, and exercise. Consider using a crash-tested car harness or carrier for safety.',
+    'faq7_question': 'Can I travel with my dog on public transportation in Spain?',
+    'faq7_answer': 'Most public transportation in Spain allows dogs, but rules vary by region and transport type. Generally, small dogs in carriers are allowed on most trains and metros. Larger dogs may need to be leashed and muzzled, and you might need to pay an additional fee. Always check specific carrier policies before traveling.',
+    'faq8_question': 'Are food and water bowls provided in all accommodations for my dog?',
+    'faq8_answer': 'While many of our dog-friendly accommodations provide basic pet amenities, we recommend checking the specific listing details. Some properties offer complete pet packages including bowls, beds, and treats, while others may require you to bring your own supplies.',
+    'faq9_question': 'Are there dog bans on beaches in Europe?',
+    'faq9_answer': 'Beach access for dogs varies by location and season. Many European beaches have specific dog-friendly sections or allow dogs during off-peak hours/seasons. Some beaches may completely restrict dog access, especially during peak tourist season. Check local regulations for your specific destination.',
+
+
+    // Provider Dashboard
+
+    'provider_dashboard': 'Provider Dashboard',
+    'view_details': 'View details',
+    'last_7_days': 'Last 7 days',
+    'last_30_days': 'Last 30 days',
+    'last_12_months': 'Last 12 months',
+    'your_listings': 'Your Listings',
+    'properties_count': '4 properties',
+    'bookings': 'Bookings',
+    'view_all_bookings': 'View all bookings',
+    'total_bookings': 'Total Bookings',
+    'total_revenue': 'Total Revenue',
+    'occupancy_rate': 'Occupancy Rate',
+    'avg_length_stay': 'Avg. Length of Stay',
+    'revenue_overview': 'Revenue Overview',
+    'revenue_analysis': 'Revenue analysis based on your timeframe',
+    'booking_trends': 'Booking Trends',
+    'booking_analysis': 'Booking trends analysis over time',
+    'recent_bookings': 'Recent Bookings',
+    'booking_id': 'Booking ID',
+    'guest': 'Guest',
+    'property': 'Property',
+    'amount': 'Amount',
+    'actions': 'Actions',
+    'quick_actions': 'Quick Actions',
+    'create_listing': 'Create Listing',
+    'view_listings': 'View Listings',
+    'manage_bookings': 'Manage Bookings',
+    'view_earnings': 'View Earnings',
+    'analytics': 'Analytics',
+    'calendar': 'Calendar',
+
+
+    // Provider Listings
+
+   'your_listings': 'Your Listings',
+    'create_new_listing': 'Create New Listing',
+    'search_listings_placeholder': 'Search by title, location...',
+    'all_property_types': 'All Property Types',
+    'all_listings': 'All Listings',
+    'active': 'Active',
+    'pending': 'Pending',
+    'drafts': 'Drafts',
+    'no_listings_found': 'No listings found',
+    'no_listings_created_yet': "You haven't created any listings yet.",
+    'no_active_listings': "You don't have any active listings.",
+    'no_pending_listings': "You don't have any pending listings.",
+    'no_draft_listings': "You don't have any draft listings.",
+    'create_your_first_listing': 'Create Your First Listing',
+    'view': 'View',
+    'edit': 'Edit',
+    'delete': 'Delete',
+    'delete_listing': 'Delete Listing',
+    'delete_confirmation': 'Are you sure you want to delete "{title}"? This action cannot be undone.',
+    'cancel': 'Cancel',
+    'active_status': 'Active',
+    'pending_status': 'Pending',
+    'draft_status': 'Draft',
+    'provider_listings': 'Provider Listings',
+
+
+    // Provider Earnings
+
+    'earnings_payouts': 'Earnings & Payouts',
+    'last_30_days': 'Last 30 days',
+    'last_90_days': 'Last 90 days',
+    'last_12_months': 'Last 12 months',
+    'all_time': 'All time',
+    'all_transactions': 'All transactions',
+    'earnings_only': 'Earnings only',
+    'payouts_only': 'Payouts only',
+    'total_earnings': 'Total Earnings',
+    'pending_balance': 'Pending Balance',
+    'to_be_paid_out': 'To be paid out',
+    'next_payout': 'Next Payout',
+    'scheduled_for': 'Scheduled for',
+    'transactions': 'Transactions',
+    'payment_methods': 'Payment Methods',
+    'date': 'Date',
+    'description': 'Description',
+    'booking': 'Booking',
+    'amount': 'Amount',
+    'actions': 'Actions',
+    'no_transactions_found': 'No transactions found',
+    'transactions_will_appear': 'Transactions will appear here once you start earning.',
+    'set_as_default': 'Set as default',
+    'edit': 'Edit',
+    'delete': 'Delete',
+    'default_payment_method': 'Default payment method',
+    'add_payment_method': '+ Add Payment Method',
+    'invoice': 'Invoice',
+
+
+    // Provider Analytics
+
+
+    'analytics': 'Analytics',
+    'previous': 'Previous',
+    'vs_previous_period': 'vs. Previous Period',
+    'vs_last_year': 'vs. Last Year',
+    'export': 'Export',
+    'revenue_trends': 'Revenue Trends',
+    'revenue_analysis': 'Revenue analysis for the',
+    'past_week': 'past week',
+    'past_month': 'past month',
+    'past_quarter': 'past quarter',
+    'past_year': 'past year',
+    'booking_trends': 'Booking Trends',
+    'booking_analysis': 'Booking analysis for the',
+    'insights_recommendations': 'Insights & Recommendations',
+    'opportunity': 'Opportunity',
+    'warning': 'Warning',
+    'tip': 'Tip',
+    'listing_performance': 'Listing Performance',
+    'listing': 'Listing',
+    'occupancy': 'Occupancy',
+    'revenue': 'Revenue',
+    'details': 'Details',
+    'loading_analytics': 'Loading analytics data...',
+    'average_nightly_rate': 'Average Nightly Rate',
+
+
+    // Provider Bookings
+
+
+    'bookings': 'Bookings',
+    'search_bookings_placeholder': 'Search bookings by listing, guest, or ID...',
+    'all_bookings': 'All Bookings',
+    'confirmed': 'Confirmed',
+    'pending': 'Pending',
+    'canceled': 'Canceled',
+    'sort_by_checkin': 'Sort by Check-in Date',
+    'sort_by_booking_date': 'Sort by Booking Date',
+    'sort_by_price': 'Sort by Price',
+    'booking_details': 'Booking Details',
+    'guest': 'Guest',
+    'dates': 'Dates',
+    'total': 'Total',
+    'status': 'Status',
+    'actions': 'Actions',
+    'message': 'Message',
+    'accept': 'Accept',
+    'cancel': 'Cancel',
+    'no_bookings_found': 'No bookings found',
+    'no_bookings_yet': "You don't have any bookings yet.",
+    'no_bookings_with_status': "You don't have any {status} bookings.",
+    'guests': 'Guests',
+    'show_less': 'Show less',
+    'show_more_details': 'Show more details',
+    'customer': 'Customer',
+    'booking_id': 'Booking ID',
+    'total_amount': 'Total Amount',
+    'booked_on': 'Booked on',
+    'message_guest': 'Message Guest',
+    'cancel_booking': 'Cancel Booking',
+
+
+    // Provider Calendar
+
+    'calendar': 'Calendar',
+    'all_properties': 'All Properties',
+    'block_dates': 'Block Dates',
+    'today': 'Today',
+    'confirmed': 'Confirmed',
+    'pending': 'Pending',
+    'unavailable': 'Unavailable',
+    'upcoming_bookings': 'Upcoming Bookings',
+    'property': 'Property',
+    'guest': 'Guest',
+    'dates': 'Dates',
+    'status': 'Status',
+    'no_bookings_found': 'No bookings found',
+    'no_bookings_yet': "You don't have any bookings yet.",
+    'no_bookings_for_property': "You don't have any bookings for this property.",
+    'select_property': 'Select a property',
+    'start_date': 'Start Date',
+    'end_date': 'End Date',
+    'reason': 'Reason',
+    'maintenance': 'Maintenance',
+    'personal_use': 'Personal Use',
+    'renovation': 'Renovation',
+    'other_specify': 'Other (specify)',
+    'specify_reason': 'Specify Reason',
+    'enter_reason': 'Enter reason',
+    'cancel': 'Cancel',
+    'booking_details': 'Booking Details',
+    'check_in': 'Check-in',
+    'check_out': 'Check-out',
+    'duration': 'Duration',
+    'night': 'night',
+    'nights': 'nights',
+    'close': 'Close',
+    'view_details': 'View Details',
+
   },
 
 
@@ -622,6 +934,326 @@ const translations = {
 'country': 'Land',
 'select_country': 'Wählen Sie ein Land...',
 'save_payment_card': 'Zahlungskarte speichern',
+
+
+// Imprint Page
+
+'imprint': 'Impressum',
+'website_operator': 'Betreiber der Website',
+'concept_design': 'Konzept und Design',
+'technical_development': 'Technische Entwicklung',
+'liability_notice': 'Haftungshinweis',
+'liability_text': 'Der Inhalt unserer Webseiten wird mit grösstmöglicher Sorgfalt gepflegt. Es wird jedoch für den Inhalt keine Haftung übernommen. Die Waureisen GmbH lehnt jede Haftung für allfällige Ansprüche im Zusammenhang mit ihrer Website, den Angaben und Informationen auf ihrer Website und/oder der Benützung ihrer Website ausdrücklich und vollumfänglich ab. Insbesondere übernimmt die eisen GmbH keinerlei Haftung und/oder Verantwortung für auf ihrer Website verzeichnete Hinweise und/oder links auf Website Dritter und für im Zusammenhang damit möglicherweise auftretende Probleme.',
+'general_provisions': 'Allgemeine Bestimmungen',
+'copyright_info': 'Copyright: 2024 Waureisen GmbH',
+'content_copyright': 'Der Inhalt aller Texte, Logos und Bilder sind urheberrechtlich geschützt.',
+
+
+
+// Star Membership Page
+
+'star_association': 'STAR Schweizer Reiseverband',
+'our_membership': 'Unsere Mitgliedschaft im STAR Schweizer Reiseverband',
+'star_description': 'Waureisen ist stolz darauf, Mitglied der STAR Swiss Travel Association zu sein. Als Mitglied dieser renommierten Schweizer Reisebüro-Vereinigung verpflichten wir uns zur Einhaltung höchster Qualitätsstandards und professioneller Richtlinien. Diese Mitgliedschaft garantiert nicht nur ausgezeichneten Service, sondern auch zuverlässige und sichere Reiseplanung.',
+'view_more': 'Mehr anzeigen',
+
+
+// Travel Shop Page
+
+
+'welcome_travelshop': 'Willkommen in unserem Reiseshop',
+'travelshop_intro': 'Hier finden Sie alles, was Sie für Ihre nächste Reise mit Ihrem Hund benötigen. Jeder Artikel wurde sorgfältig ausgewählt und ist über unsere drei Partner Pet & Co., Kitsune & Jo und Hundelicious erhältlich.',
+'car_seats': 'Autositze',
+'travel_mats': 'Reisematten',
+'travel_bags': 'Reisetaschen',
+'dog_beds': 'Hundebetten',
+'clothing': 'Kleidung',
+'folding_bowls': 'Faltbare Näpfe',
+'collar_leash_harness': 'Halsband, Leine und Geschirr',
+'snacks': 'Snacks',
+'wellness': 'Wellness',
+'toys_additional': 'Spielzeug & Zubehör',
+'view_more': 'Mehr anzeigen',
+
+
+// Become a Host page
+
+'become_a_host': 'Werden Sie Gastgeber',
+'back_to_home': 'Zurück zur Startseite',
+'host_intro': 'Schließen Sie sich unserer Gemeinschaft von hundefreundlichen Unterkunftsanbietern an und erzielen Sie ein Einkommen, während Sie wunderbare Erlebnisse für Gäste und ihre pelzigen Begleiter schaffen.',
+'benefits_hosting': 'Vorteile als Gastgeber bei Waureisen',
+'benefit_1': 'Erreichen Sie eine gezielte Zielgruppe von Hundebesitzern, die nach haustierfreundlichen Unterkünften suchen',
+'benefit_2': 'Flexible Gastgeber-Optionen - vermieten Sie Ihre gesamte Immobilie oder nur ein Zimmer',
+'benefit_3': 'Legen Sie Ihre eigene Verfügbarkeit, Preise und Hausregeln fest',
+'benefit_4': '24/7 Gastgeber-Support und dediziertes Account-Management',
+'benefit_5': 'Professionelle Fotografie und Optimierung Ihres Angebots',
+'benefit_6': 'Umfassende Gastgeber-Versicherung und Schadensschutz',
+'how_it_works': 'Wie es funktioniert',
+'how_it_works_1': 'Erstellen Sie Ihr Angebot - Fügen Sie Fotos und Beschreibungen hinzu und legen Sie Ihren Preis fest',
+'how_it_works_2': 'Begrüßen Sie Gäste und ihre Hunde - Bieten Sie ein unvergessliches Aufenthaltserlebnis',
+'how_it_works_3': 'Erhalten Sie Zahlungen - Sichere Zahlungen für jede Buchung',
+'ready_to_start': 'Bereit loszulegen?',
+'start_hosting_text': 'Schließen Sie unseren einfachen Registrierungsprozess ab und beginnen Sie in nur 24 Stunden mit dem Hosten.',
+'register_as_host': 'Als Gastgeber registrieren',
+
+
+// Partners page
+
+
+'learn_about_partners': 'Erfahren Sie mehr über unsere Partner!',
+'read_more': 'Mehr lesen',
+'interhome_description': 'Interhome wurde 1965 in London von Bruno Franzen und Werner Frey unter dem Namen Swiss Chalets gegründet und nach einer Fusion 1977 in Interhome umbenannt. Bekannt wurde das Unternehmen durch innovative Ansätze wie den Versuch, ein papierloses Büro zu etablieren. 1984 wurde das markante "Zugvogel"-Logo eingeführt, das seit 2008 als Erkennungszeichen dient. 1999 folgten die ersten Onlinebuchungen, die 2009 bereits rund 60% der Gesamtbuchungen ausmachten. 2015 feierte Interhome sein 50-jähriges Jubiläum und belegte den 6. Platz bei den "Swiss Arbeitgeber Awards" in der Kategorie 50–99 Mitarbeiter.',
+'europarcs_description': 'EuroParcs wurde in den 1980er Jahren von Wim Vos gegründet und hat sich auf die Verwaltung von Ferienparks spezialisiert. Das Unternehmen wuchs schnell und übernahm 2019 den Konkurrenten Droomparken. 2021 eröffnete EuroParcs ein Büro in Köln. Im November 2024 wurde EuroParcs von Waterland Private Equity übernommen. Die EuroParcs Charity Foundation bietet kostenlose Aufenthalte für Familien mit schwerkranken Kindern und Menschen mit Behinderungen.',
+'petco_description': 'PET & Co. wurde 2021 von den Geschwistern Kerstin und Sarah gegründet. Mit großer Leidenschaft und Liebe zum Detail entwirft das Team komfortable, pflegeleichte und ästhetisch ansprechende Produkte, die auf die Bedürfnisse von Hunden, Katzen und deren Besitzern zugeschnitten sind. Getreu dem Motto: "Schaffe gute Stimmung in deinem Zuhause und lebe an einem glücklichen Ort."',
+'kitsune_description': 'Kitsune & Jo (und Alex) Bei Kitsune & Jo wollen wir den Lebensstil von Hunden verbessern. Alex und ich teilen eine tiefe Leidenschaft für Design, und wir glauben fest daran, dass unsere Hunde nur das Beste verdienen. Nachdem wir einige Zeit im Ausland verbracht und häufig mit Kitsune gereist sind, wurden wir inspiriert, den Hundelifestyle hier in der Schweiz zu verbessern, indem wir eine Auswahl an Produkten zusammenstellen, auf die wir stolz sind. Produkte, die man nicht versteckt, sondern stolz in seinem Zuhause präsentiert und in seinen Lebensstil integriert. Dieses Projekt entstand aus dem echten Wunsch heraus, Hunden und ihren Eltern gesundes Futter anzubieten, denn ja, wir betrachten uns auch als Eltern.',
+'hundelicious_description': 'Im Jahr 2019 wurde HUNDELICIOUS von Julia und Sérgio mit einer einfachen Idee gegründet: Alle Lebewesen sind einzigartig und verdienen das Beste. Mit mehreren Jahrzehnten Erfahrung in der Gastronomie und Tierernährung haben sie ihr Lebenswerk dem Verständnis gewidmet, wie Nahrung Komfort, Gesundheit und Freude bringen kann. «Wir streben danach, unser Wissen und unsere Erfahrungen mit anderen zu teilen, damit ihre Beziehung zu echtem Essen und gesunder ganzheitlicher Haustierernährung sich weiterentwickeln kann.» (Julia, 2021) Im Jahr 2022 kamen Anne-Catherine mit Emma und Bettina mit Gia zum Team.',
+'partners': 'Partner',
+
+
+// Travel Magazine Page
+
+
+'travel_magazine': 'Reisemagazin',
+'our_travel_magazine': 'Unser Reisemagazin',
+'welcome_magazine': 'Willkommen in unserem Reisemagazin!',
+'magazine_intro': 'Hier finden Sie wichtige Informationen rund um das Reisen mit Hund. Von hundefreundlichen Reisezielen bis hin zu nützlichen Tipps – wir haben alles, was Sie für ein entspanntes Abenteuer mit Ihrem Vierbeiner brauchen. Gute Reise! 🐾 ✈️',
+'flying_with_dog': 'Fliegen mit Hund',
+'roadtrip': 'Roadtrip durch Spanien, Portugal und Frankreich',
+
+
+// About Us Page
+
+'about_us': 'Über uns',
+'about_text': 'Wir sind Simone und Charlie, und zusammen sind wir Waureisen! 🐾 Mit über 10 Jahren Erfahrung in der Tourismusbranche und einer großen Leidenschaft fürs Reisen sind wir das erste Schweizer Reiseunternehmen, das sich auf unvergessliche Urlaubsabenteuer für dich und deinen Hund spezialisiert hat. Seit zwei Jahren begleitet uns Charlie offiziell auf unseren Reisen und stellt sicher, dass kein Ziel zu weit ist, wenn es darum geht, hundefreundliche Orte zu finden. 🌍✈️ Unsere Reisen beginnen immer gemeinsam – als Team auf einem Abenteuer! Wir wissen genau, was nötig ist, damit sich sowohl du als Hundebesitzer als auch dein pelziger Freund wie zu Hause fühlen. Als Hundemama versteht Simone genau, was unsere vierbeinigen Begleiter brauchen, um sich nicht nur "toleriert", sondern wirklich willkommen zu fühlen. 🐶❤️ Wir entdecken die besten hundefreundlichen Unterkünfte, Aktivitäten und Restaurants – nicht nur auf Reisen, sondern auch in unserem Alltag. Es sind die besonderen Orte, die wir finden, die einen Urlaub für uns alle unvergesslich machen: ein Hundeparadies zum Herumtollen, ein Café, in dem Hunde willkommen sind, oder ein Wanderweg mit atemberaubender Aussicht, den wir gemeinsam genießen können. 🌲🏞️ Unsere Mission bei Waureisen ist es, dir und deinem Hund den perfekten Urlaub zu ermöglichen. Wir kümmern uns um alles: von der Suche nach den besten Unterkünften bis hin zur Bewältigung von Einreiseanforderungen, hundefreundlichen Restaurants und Stränden, an denen dein Hund fröhlich herumlaufen kann. 🏖️🍴🐕 Mit unserer umfangreichen Erfahrung im Tourismus und der Liebe zu Hunden sind wir dein persönlicher Reisepartner – damit du dich auf das Wichtigste konzentrieren kannst: das Abenteuer mit deinem Hund! 💼🐕 Lass uns gemeinsam deinen nächsten Urlaub planen – mit den besten Tipps für hundefreundliche Aktivitäten, Wanderwege und alles, was deinen Aufenthalt noch angenehmer macht. Wir sorgen dafür, dass nichts fehlt, damit du unvergessliche Erinnerungen mit deinem Hund schaffen kannst! 🌟🐾 Bereit für dein nächstes Abenteuer? Wir freuen uns darauf, dir das perfekte Reiseziel für euch beide zu finden! 🐕💫',
+'the_team': 'Das Team',
+'simone_title': '👧 Simone, CEO und Gründerin',
+'simone_bio': 'Hallo, ich bin Simone! Mit über 10 Jahren Erfahrung in der Tourismusbranche, einem Herz voller Liebe für Hunde und einer Leidenschaft für die Erkundung einzigartiger Unterkünfte habe ich es mir zur Aufgabe gemacht, unvergessliche Reiseerlebnisse für dich und deinen vierbeinigen Begleiter zu gestalten. Ob du eine ruhige Auszeit oder einen abenteuerlichen Urlaub suchst, ich kenne genau die richtigen Orte, an denen sich sowohl du als auch dein Hund rundum wohlfühlen werden. Lass uns gemeinsam Erinnerungen schaffen, die ein Leben lang halten!',
+'charlie_title': '🐶 Charlie, Mitgründerin, Büroprinzessin',
+'charlie_bio': 'Hallo, ich bin Charlie, eine neugierige und verspielte Maltipoo-Dame mit zwei Jahren Reiseerfahrung – und ja, ich bin auch die "Büroprinzessin"! Zusammen mit meiner besten Freundin Simone erkunde ich die Welt und teste die schönsten Unterkünfte. Meine Mission? Sicherzustellen, dass meine pelzigen Freunde genauso viel Spaß haben wie ich! Ob auf Reisen oder im Büro – uns wird nie langweilig!',
+
+
+// FAQ Page
+
+
+'frequently_asked_questions': 'Häufig gestellte Fragen',
+'faq_title': 'FAQ',
+'faq1_question': 'Wie kann ich hundefreundliche Unterkünfte in Europa über Waureisen finden?',
+'faq1_answer': 'Sie können ganz einfach hundefreundliche Unterkünfte mit unseren spezialisierten Suchfiltern finden. Geben Sie einfach Ihr Reiseziel, die Daten ein und wählen Sie \'Reisen mit Hund\' in den Suchoptionen. Unsere Plattform bietet über 30 hundespezifische Filter, um Ihnen zu helfen, den perfekten Aufenthalt zu finden, der sowohl Ihren als auch den Bedürfnissen Ihres Hundes entspricht.',
+'faq2_question': 'Benötige ich eine Reiseversicherung für meinen Hund?',
+'faq2_answer': 'Obwohl es nicht immer obligatorisch ist, empfehlen wir dringend eine Haustier-Reiseversicherung abzuschließen. Sie kann tierärztliche Notfälle, Reisestornierungen aufgrund von Haustiererkrankungen und andere unerwartete Situationen abdecken. Erkundigen Sie sich bei Ihrem regulären Haustierversicherer nach internationaler Deckung oder erwägen Sie eine spezialisierte Haustier-Reiseversicherung.',
+'faq3_question': 'Welche Einreisebestimmungen gelten für Hunde in den Niederlanden?',
+'faq3_answer': 'Hunde, die in die Niederlande einreisen, müssen einen gültigen EU-Heimtierausweis oder ein tierärztliches Zeugnis, einen Mikrochip, eine aktuelle Tollwutimpfung haben und mindestens 15 Wochen alt sein. Die Tollwutimpfung muss mindestens 21 Tage vor der Reise verabreicht worden sein. Je nach Herkunftsland können zusätzliche Anforderungen gelten.',
+'faq4_question': 'Welches Zubehör sollte ich für meine Reise mit meinem Hund mitbringen?',
+'faq4_answer': 'Wesentliche Gegenstände sind: Leine und Halsband mit ID-Tags, Futter- und Wassernäpfe, vertraute Bettwäsche, Kotbeutel, Pflegeprodukte, regelmäßige Medikamente, Kopien der Gesundheitsdokumente und Lieblingsspielzeuge. Für längere Reisen sollten Sie eine tragbare Wasserflasche und zusammenklappbare Näpfe in Betracht ziehen.',
+'faq5_question': 'Sollte ich vor der Reise einen Tierarzt aufsuchen?',
+'faq5_answer': 'Ja, es wird empfohlen, Ihren Tierarzt 2-4 Wochen vor der Reise zu besuchen. Er kann sicherstellen, dass die Impfungen aktuell sind, notwendige Gesundheitszeugnisse ausstellen, die Reisetauglichkeit Ihres Hundes überprüfen und spezifische Ratschläge basierend auf Ihrem Reiseziel und dem Gesundheitszustand Ihres Hundes geben.',
+'faq6_question': 'Wie kann ich meinen Hund auf eine lange Autofahrt vorbereiten?',
+'faq6_answer': 'Beginnen Sie mit kurzen Autofahrten, um positive Assoziationen aufzubauen. Stellen Sie sicher, dass Ihr Hund einen komfortablen, sicheren Platz mit vertrauter Bettwäsche hat. Planen Sie regelmäßige Pausen alle 2-3 Stunden für Wasser, Toilette und Bewegung ein. Erwägen Sie die Verwendung eines crash-getesteten Auto-Geschirrs oder einer Transportbox für die Sicherheit.',
+'faq7_question': 'Kann ich mit meinem Hund in Spanien öffentliche Verkehrsmittel nutzen?',
+'faq7_answer': 'Die meisten öffentlichen Verkehrsmittel in Spanien erlauben Hunde, aber die Regeln variieren je nach Region und Transportart. Generell sind kleine Hunde in Transportboxen in den meisten Zügen und U-Bahnen erlaubt. Größere Hunde müssen möglicherweise angeleint und mit Maulkorb versehen sein, und Sie müssen eventuell eine zusätzliche Gebühr zahlen. Überprüfen Sie immer die spezifischen Richtlinien des Transportunternehmens vor der Reise.',
+'faq8_question': 'Werden in allen Unterkünften Futter- und Wassernäpfe für meinen Hund bereitgestellt?',
+'faq8_answer': 'Während viele unserer hundefreundlichen Unterkünfte grundlegende Haustier-Annehmlichkeiten bieten, empfehlen wir, die spezifischen Details der Anzeige zu überprüfen. Einige Unterkünfte bieten komplette Haustier-Pakete einschließlich Näpfe, Betten und Leckerbissen an, während andere voraussetzen könnten, dass Sie Ihre eigenen Utensilien mitbringen.',
+'faq9_question': 'Gibt es Hundeverbote an Stränden in Europa?',
+'faq9_answer': 'Der Strandzugang für Hunde variiert je nach Ort und Jahreszeit. Viele europäische Strände haben spezielle hundefreundliche Bereiche oder erlauben Hunde während der Nebensaison/außerhalb der Hauptzeiten. Einige Strände können den Hundezugang vollständig einschränken, besonders während der Haupttouristensaison. Überprüfen Sie die lokalen Vorschriften für Ihr spezifisches Reiseziel.',
+
+
+// Provider Dashboard
+
+  'provider_dashboard': 'Anbieter-Dashboard',
+  'view_details': 'Details anzeigen',
+  'last_7_days': 'Letzte 7 Tage',
+  'last_30_days': 'Letzte 30 Tage',
+  'last_12_months': 'Letzte 12 Monate',
+  'your_listings': 'Ihre Inserate',
+  'properties_count': '4 Immobilien',
+  'bookings': 'Buchungen',
+  'view_all_bookings': 'Alle Buchungen anzeigen',
+  'total_bookings': 'Gesamtbuchungen',
+  'total_revenue': 'Gesamteinnahmen',
+  'occupancy_rate': 'Belegungsrate',
+  'avg_length_stay': 'Durchschn. Aufenthaltsdauer',
+  'revenue_overview': 'Umsatzübersicht',
+  'revenue_analysis': 'Umsatzanalyse basierend auf Ihrem Zeitraum',
+  'booking_trends': 'Buchungstrends',
+  'booking_analysis': 'Analyse der Buchungstrends im Zeitverlauf',
+  'recent_bookings': 'Aktuelle Buchungen',
+  'booking_id': 'Buchungs-ID',
+  'guest': 'Gast',
+  'property': 'Immobilie',
+  'amount': 'Betrag',
+  'actions': 'Aktionen',
+  'quick_actions': 'Schnellaktionen',
+  'create_listing': 'Inserat erstellen',
+  'view_listings': 'Inserate anzeigen',
+  'manage_bookings': 'Buchungen verwalten',
+  'view_earnings': 'Einnahmen anzeigen',
+  'analytics': 'Analysen',
+  'calendar': 'Kalender',
+
+
+  // Provider Listings
+
+  'your_listings': 'Ihre Inserate',
+  'create_new_listing': 'Neues Inserat erstellen',
+  'search_listings_placeholder': 'Nach Titel, Ort suchen...',
+  'all_property_types': 'Alle Immobilientypen',
+  'all_listings': 'Alle Inserate',
+  'active': 'Aktiv',
+  'pending': 'Ausstehend',
+  'drafts': 'Entwürfe',
+  'no_listings_found': 'Keine Inserate gefunden',
+  'no_listings_created_yet': "Sie haben noch keine Inserate erstellt.",
+  'no_active_listings': "Sie haben keine aktiven Inserate.",
+  'no_pending_listings': "Sie haben keine ausstehenden Inserate.",
+  'no_draft_listings': "Sie haben keine Entwurfsinserate.",
+  'create_your_first_listing': 'Erstellen Sie Ihr erstes Inserat',
+  'view': 'Ansehen',
+  'edit': 'Bearbeiten',
+  'delete': 'Löschen',
+  'delete_listing': 'Inserat löschen',
+  'delete_confirmation': 'Sind Sie sicher, dass Sie "{title}" löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.',
+  'cancel': 'Abbrechen',
+  'active_status': 'Aktiv',
+  'pending_status': 'Ausstehend',
+  'draft_status': 'Entwurf',
+  'provider_listings': 'Anbieterinserate',
+
+
+  // Provider Earnings
+
+  'earnings_payouts': 'Einnahmen & Auszahlungen',
+  'last_30_days': 'Letzte 30 Tage',
+  'last_90_days': 'Letzte 90 Tage',
+  'last_12_months': 'Letzte 12 Monate',
+  'all_time': 'Gesamte Zeit',
+  'all_transactions': 'Alle Transaktionen',
+  'earnings_only': 'Nur Einnahmen',
+  'payouts_only': 'Nur Auszahlungen',
+  'total_earnings': 'Gesamteinnahmen',
+  'pending_balance': 'Ausstehender Betrag',
+  'to_be_paid_out': 'Zur Auszahlung',
+  'next_payout': 'Nächste Auszahlung',
+  'scheduled_for': 'Geplant für',
+  'transactions': 'Transaktionen',
+  'payment_methods': 'Zahlungsmethoden',
+  'date': 'Datum',
+  'description': 'Beschreibung',
+  'booking': 'Buchung',
+  'amount': 'Betrag',
+  'actions': 'Aktionen',
+  'no_transactions_found': 'Keine Transaktionen gefunden',
+  'transactions_will_appear': 'Transaktionen werden hier angezeigt, sobald Sie Einnahmen erzielen.',
+  'set_as_default': 'Als Standard festlegen',
+  'edit': 'Bearbeiten',
+  'delete': 'Löschen',
+  'default_payment_method': 'Standard-Zahlungsmethode',
+  'add_payment_method': '+ Zahlungsmethode hinzufügen',
+  'invoice': 'Rechnung',
+
+
+  // Provider Analytics
+
+
+  'analytics': 'Analytik',
+  'previous': 'Vorherige',
+  'vs_previous_period': 'vs. Vorherige Periode',
+  'vs_last_year': 'vs. Letztes Jahr',
+  'export': 'Exportieren',
+  'revenue_trends': 'Umsatztrends',
+  'revenue_analysis': 'Umsatzanalyse für die',
+  'past_week': 'letzte Woche',
+  'past_month': 'letzten Monat',
+  'past_quarter': 'letzten Quartal',
+  'past_year': 'letztes Jahr',
+  'booking_trends': 'Buchungstrends',
+  'booking_analysis': 'Buchungsanalyse für die',
+  'insights_recommendations': 'Erkenntnisse & Empfehlungen',
+  'opportunity': 'Chance',
+  'warning': 'Warnung',
+  'tip': 'Tipp',
+  'listing_performance': 'Inserat-Leistung',
+  'listing': 'Inserat',
+  'occupancy': 'Belegung',
+  'revenue': 'Umsatz',
+  'details': 'Details',
+  'loading_analytics': 'Analytik-Daten werden geladen...',
+  'average_nightly_rate': 'Durchschnittlicher Nachtpreis',
+
+
+  // Provider Bookings
+
+'bookings': 'Buchungen',
+'search_bookings_placeholder': 'Buchungen nach Inserat, Gast oder ID durchsuchen...',
+'all_bookings': 'Alle Buchungen',
+'confirmed': 'Bestätigt',
+'pending': 'Ausstehend',
+'canceled': 'Storniert',
+'sort_by_checkin': 'Nach Check-in-Datum sortieren',
+'sort_by_booking_date': 'Nach Buchungsdatum sortieren',
+'sort_by_price': 'Nach Preis sortieren',
+'booking_details': 'Buchungsdetails',
+'guest': 'Gast',
+'dates': 'Daten',
+'total': 'Gesamt',
+'status': 'Status',
+'actions': 'Aktionen',
+'message': 'Nachricht',
+'accept': 'Akzeptieren',
+'cancel': 'Stornieren',
+'no_bookings_found': 'Keine Buchungen gefunden',
+'no_bookings_yet': "Sie haben noch keine Buchungen.",
+'no_bookings_with_status': "Sie haben keine {status} Buchungen.",
+'guests': 'Gäste',
+'show_less': 'Weniger anzeigen',
+'show_more_details': 'Mehr Details anzeigen',
+'customer': 'Kunde',
+'booking_id': 'Buchungs-ID',
+'total_amount': 'Gesamtbetrag',
+'booked_on': 'Gebucht am',
+'message_guest': 'Gast kontaktieren',
+'cancel_booking': 'Buchung stornieren',
+
+
+
+// Provider Calendar
+
+'calendar': 'Kalender',
+'all_properties': 'Alle Immobilien',
+'block_dates': 'Termine blockieren',
+'today': 'Heute',
+'confirmed': 'Bestätigt',
+'pending': 'Ausstehend',
+'unavailable': 'Nicht verfügbar',
+'upcoming_bookings': 'Kommende Buchungen',
+'property': 'Immobilie',
+'guest': 'Gast',
+'dates': 'Daten',
+'status': 'Status',
+'no_bookings_found': 'Keine Buchungen gefunden',
+'no_bookings_yet': "Sie haben noch keine Buchungen.",
+'no_bookings_for_property': "Sie haben keine Buchungen für diese Immobilie.",
+'select_property': 'Wählen Sie eine Immobilie',
+'start_date': 'Startdatum',
+'end_date': 'Enddatum',
+'reason': 'Grund',
+'maintenance': 'Wartung',
+'personal_use': 'Persönliche Nutzung',
+'renovation': 'Renovierung',
+'other_specify': 'Anderes (angeben)',
+'specify_reason': 'Grund angeben',
+'enter_reason': 'Grund eingeben',
+'cancel': 'Abbrechen',
+'booking_details': 'Buchungsdetails',
+'check_in': 'Check-in',
+'check_out': 'Check-out',
+'duration': 'Dauer',
+'night': 'Nacht',
+'nights': 'Nächte',
+'close': 'Schließen',
+'view_details': 'Details anzeigen',
+
+
+
 
   }
 };

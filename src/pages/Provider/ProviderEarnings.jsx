@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Download, Filter, Calendar, CreditCard, DollarSign, Building2, ChevronsUpDown } from 'lucide-react';
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
+import { useLanguage } from '../../utils/LanguageContext';
 
 // EarningsSummaryCard Component
 const EarningsSummaryCard = ({ title, amount, subtitle, icon: Icon, color }) => {
@@ -22,6 +23,7 @@ const EarningsSummaryCard = ({ title, amount, subtitle, icon: Icon, color }) => 
 
 // Transactions table component
 const TransactionsTable = ({ transactions, onDownloadInvoice }) => {
+  const { t } = useLanguage();
   const [sortConfig, setSortConfig] = useState({ key: 'date', direction: 'desc' });
 
   const requestSort = (key) => {
@@ -61,7 +63,7 @@ const TransactionsTable = ({ transactions, onDownloadInvoice }) => {
               onClick={() => requestSort('date')}
             >
               <div className="flex items-center gap-1">
-                Date
+              {t('date')}
                 {sortConfig.key === 'date' && (
                   <ChevronsUpDown className={`w-4 h-4 ${sortConfig.direction === 'asc' ? 'transform rotate-180' : ''}`} />
                 )}
@@ -73,7 +75,7 @@ const TransactionsTable = ({ transactions, onDownloadInvoice }) => {
               onClick={() => requestSort('description')}
             >
               <div className="flex items-center gap-1">
-                Description
+              {t('description')}
                 {sortConfig.key === 'description' && (
                   <ChevronsUpDown className={`w-4 h-4 ${sortConfig.direction === 'asc' ? 'transform rotate-180' : ''}`} />
                 )}
@@ -85,7 +87,7 @@ const TransactionsTable = ({ transactions, onDownloadInvoice }) => {
               onClick={() => requestSort('booking')}
             >
               <div className="flex items-center gap-1">
-                Booking
+              {t('booking')}
                 {sortConfig.key === 'booking' && (
                   <ChevronsUpDown className={`w-4 h-4 ${sortConfig.direction === 'asc' ? 'transform rotate-180' : ''}`} />
                 )}
@@ -97,14 +99,14 @@ const TransactionsTable = ({ transactions, onDownloadInvoice }) => {
               onClick={() => requestSort('amount')}
             >
               <div className="flex items-center gap-1">
-                Amount
+              {t('amount')}
                 {sortConfig.key === 'amount' && (
                   <ChevronsUpDown className={`w-4 h-4 ${sortConfig.direction === 'asc' ? 'transform rotate-180' : ''}`} />
                 )}
               </div>
             </th>
             <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Actions
+            {t('actions')}
             </th>
           </tr>
         </thead>
@@ -135,7 +137,7 @@ const TransactionsTable = ({ transactions, onDownloadInvoice }) => {
                     className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
                   >
                     <Download className="w-4 h-4" />
-                    <span>Invoice</span>
+                    <span>{t('invoice')}</span>
                   </button>
                 )}
               </td>
@@ -143,15 +145,15 @@ const TransactionsTable = ({ transactions, onDownloadInvoice }) => {
           ))}
           
           {transactions.length === 0 && (
-            <tr>
-              <td colSpan="5" className="px-4 py-12 text-center">
-                <p className="text-gray-500 text-lg mb-2">No transactions found</p>
-                <p className="text-gray-400 text-sm">
-                  Transactions will appear here once you start earning.
-                </p>
-              </td>
-            </tr>
-          )}
+          <tr>
+            <td colSpan="5" className="px-4 py-12 text-center">
+              <p className="text-gray-500 text-lg mb-2">{t('no_transactions_found')}</p>
+              <p className="text-gray-400 text-sm">
+                {t('transactions_will_appear')}
+              </p>
+            </td>
+          </tr>
+        )}
         </tbody>
       </table>
     </div>
@@ -180,7 +182,7 @@ const PaymentMethodCard = ({ paymentMethod, isDefault, onEdit, onDelete, onSetDe
             </p>
             {isDefault && (
               <span className="mt-1 inline-block px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full">
-                Default payment method
+                {t('default_payment_method')}
               </span>
             )}
           </div>
@@ -200,20 +202,20 @@ const PaymentMethodCard = ({ paymentMethod, isDefault, onEdit, onDelete, onSetDe
                   onClick={() => onSetDefault(paymentMethod.id)}
                   className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
-                  Set as default
+                  {t('set_as_default')}
                 </button>
               )}
               <button
                 onClick={() => onEdit(paymentMethod.id)}
                 className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
               >
-                Edit
+                 {t('edit')}
               </button>
               <button
                 onClick={() => onDelete(paymentMethod.id)}
                 className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
               >
-                Delete
+                {t('delete')}
               </button>
             </div>
           </div>
@@ -225,6 +227,7 @@ const PaymentMethodCard = ({ paymentMethod, isDefault, onEdit, onDelete, onSetDe
 
 const ProviderEarnings = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [timeRange, setTimeRange] = useState('all');
   const [transactionType, setTransactionType] = useState('all');
   const [activeTab, setActiveTab] = useState('transactions');
@@ -358,30 +361,30 @@ const ProviderEarnings = () => {
           >
             <ArrowLeft className="w-6 h-6 text-gray-600" />
           </button>
-          <h1 className="text-3xl font-semibold text-gray-900">Earnings & Payouts</h1>
+          <h1 className="text-3xl font-semibold text-gray-900">{t('earnings_payouts')}</h1>
         </div>
         
         {/* Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-          <EarningsSummaryCard
-            icon={DollarSign}
-            title="Total Earnings"
-            amount={earningsSummary.totalEarnings}
-            subtitle="All time"
-          />
-          <EarningsSummaryCard
-            icon={CreditCard}
-            title="Pending Balance"
-            amount={earningsSummary.pendingPayouts}
-            subtitle="To be paid out"
-          />
-          <EarningsSummaryCard
-            icon={Building2}
-            title="Next Payout"
-            amount={earningsSummary.nextPayout}
-            subtitle={`Scheduled for ${earningsSummary.nextPayoutDate}`}
-            color="bg-brand text-white"
-          />
+        <EarningsSummaryCard
+        icon={DollarSign}
+        title={t('total_earnings')}
+        amount={earningsSummary.totalEarnings}
+        subtitle={t('all_time')}
+      />
+      <EarningsSummaryCard
+        icon={CreditCard}
+        title={t('pending_balance')}
+        amount={earningsSummary.pendingPayouts}
+        subtitle={t('to_be_paid_out')}
+      />
+      <EarningsSummaryCard
+        icon={Building2}
+        title={t('next_payout')}
+        amount={earningsSummary.nextPayout}
+        subtitle={`${t('scheduled_for')} ${earningsSummary.nextPayoutDate}`}
+        color="bg-brand text-white"
+      />
         </div>
         
         {/* Tabs */}
@@ -394,7 +397,7 @@ const ProviderEarnings = () => {
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            Transactions
+            {t('transactions')}
           </button>
           <button
             onClick={() => setActiveTab('payment-methods')}
@@ -404,7 +407,7 @@ const ProviderEarnings = () => {
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            Payment Methods
+            {t('payment_methods')}
           </button>
         </div>
         
@@ -419,10 +422,10 @@ const ProviderEarnings = () => {
                   onChange={(e) => setTimeRange(e.target.value)}
                   className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                 >
-                  <option value="month">Last 30 days</option>
-                  <option value="quarter">Last 90 days</option>
-                  <option value="year">Last 12 months</option>
-                  <option value="all">All time</option>
+              <option value="month">{t('last_30_days')}</option>
+              <option value="quarter">{t('last_90_days')}</option>
+              <option value="year">{t('last_12_months')}</option>
+              <option value="all">{t('all_time')}</option>
                 </select>
               </div>
               
@@ -433,9 +436,9 @@ const ProviderEarnings = () => {
                   onChange={(e) => setTransactionType(e.target.value)}
                   className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                 >
-                  <option value="all">All transactions</option>
-                  <option value="earning">Earnings only</option>
-                  <option value="payout">Payouts only</option>
+               <option value="all">{t('all_transactions')}</option>
+              <option value="earning">{t('earnings_only')}</option>
+              <option value="payout">{t('payouts_only')}</option>
                 </select>
               </div>
             </div>
@@ -469,7 +472,7 @@ const ProviderEarnings = () => {
               onClick={handleAddPaymentMethod}
               className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand"
             >
-              + Add Payment Method
+                {t('add_payment_method')}
             </button>
           </>
         )}

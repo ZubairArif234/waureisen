@@ -8,6 +8,7 @@ import i2 from '../../assets/i2.png';
 import s1 from '../../assets/s1.png';
 import s2 from '../../assets/s2.png';
 import avatar from '../../assets/avatar.png';
+import { useLanguage } from '../../utils/LanguageContext';
 
 // Status Badge Component
 const StatusBadge = ({ status }) => {
@@ -57,14 +58,14 @@ const BookingCardMobile = ({ booking, onMessage, onAcceptBooking, onCancelBookin
         {/* Basic info */}
         <div className="grid grid-cols-2 gap-2 mb-3">
           <div className="text-xs text-gray-600">
-            <span className="block text-gray-400">Dates</span>
+          <span className="block text-gray-400">{t('dates')}</span>
             <div className="flex items-center gap-1">
               <Calendar className="w-3 h-3" />
               <span>{booking.checkInDate} - {booking.checkOutDate}</span>
             </div>
           </div>
           <div className="text-xs text-gray-600">
-            <span className="block text-gray-400">Guests</span>
+          <span className="block text-gray-400">{t('guests')}</span>
             <div className="flex items-center gap-1">
               <Users className="w-3 h-3" />
               <span>{booking.guests} {booking.guests === 1 ? 'person' : 'people'}, {booking.dogs} {booking.dogs === 1 ? 'dog' : 'dogs'}</span>
@@ -77,7 +78,7 @@ const BookingCardMobile = ({ booking, onMessage, onAcceptBooking, onCancelBookin
           onClick={() => setExpanded(!expanded)}
           className="flex items-center justify-between w-full py-1 text-xs text-brand"
         >
-          <span>{expanded ? 'Show less' : 'Show more details'}</span>
+          <span>{expanded ? t('show_less') : t('show_more_details')}</span>
           {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </button>
 
@@ -86,26 +87,26 @@ const BookingCardMobile = ({ booking, onMessage, onAcceptBooking, onCancelBookin
           <div className="mt-3 pt-3 border-t space-y-3">
             <div className="grid grid-cols-2 gap-2">
               <div className="text-xs text-gray-600">
-                <span className="block text-gray-400">Customer</span>
+              <span className="block text-gray-400">{t('customer')}</span>
                 <div className="flex items-center gap-1 mt-1">
                   <img src={avatar} alt="Guest" className="w-4 h-4 rounded-full" />
                   <span>{booking.customer.name}</span>
                 </div>
               </div>
               <div className="text-xs text-gray-600">
-                <span className="block text-gray-400">Booking ID</span>
+              <span className="block text-gray-400">{t('booking_id')}</span>
                 <span>#{booking.id}</span>
               </div>
             </div>
             
             <div className="grid grid-cols-2 gap-2">
               <div className="text-xs text-gray-600">
-                <span className="block text-gray-400">Total Amount</span>
+              <span className="block text-gray-400">{t('total_amount')}</span>
                 <span className="font-medium text-brand">{booking.totalPrice} {booking.currency}</span>
               </div>
               <div className="text-xs text-gray-600">
-                <span className="block text-gray-400">Booked on</span>
-                <span>{booking.bookingDate}</span>
+              <span className="block text-gray-400">{t('booked_on')}</span>
+              <span>{booking.bookingDate}</span>
               </div>
             </div>
 
@@ -115,8 +116,8 @@ const BookingCardMobile = ({ booking, onMessage, onAcceptBooking, onCancelBookin
                 className="w-full flex items-center justify-center gap-1 bg-gray-100 text-gray-700 rounded-lg p-2 text-xs"
               >
                 <MessageSquare className="w-3 h-3" />
-                <span>Message Guest</span>
-              </button>
+                <span>{t('message_guest')}</span>
+                </button>
               
               {booking.status === 'pending' && (
                 <div className="flex space-x-2">
@@ -125,16 +126,16 @@ const BookingCardMobile = ({ booking, onMessage, onAcceptBooking, onCancelBookin
                     className="flex-1 flex items-center justify-center gap-1 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg p-2 text-xs"
                   >
                     <Check className="w-3 h-3" />
-                    <span>Accept</span>
-                  </button>
+                    <span>{t('accept')}</span>
+                    </button>
                   
                   <button
                     onClick={() => onCancelBooking(booking.id)}
                     className="flex-1 flex items-center justify-center gap-1 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg p-2 text-xs"
                   >
                     <X className="w-3 h-3" />
-                    <span>Cancel</span>
-                  </button>
+                    <span>{t('cancel')}</span>
+                    </button>
                 </div>
               )}
               
@@ -144,8 +145,8 @@ const BookingCardMobile = ({ booking, onMessage, onAcceptBooking, onCancelBookin
                   className="w-full flex items-center justify-center gap-1 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg p-2 text-xs"
                 >
                   <X className="w-3 h-3" />
-                  <span>Cancel Booking</span>
-                </button>
+                  <span>{t('cancel_booking')}</span>
+                  </button>
               )}
             </div>
           </div>
@@ -156,6 +157,7 @@ const BookingCardMobile = ({ booking, onMessage, onAcceptBooking, onCancelBookin
 };
 
 const ProviderBookings = () => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -360,7 +362,7 @@ const ProviderBookings = () => {
           >
             <ArrowLeft className="w-6 h-6 text-gray-600" />
           </button>
-          <h1 className="text-3xl font-semibold text-gray-900">Bookings</h1>
+          <h1 className="text-3xl font-semibold text-gray-900">{t('bookings')}</h1>
         </div>
 
         {/* Filters and Search */}
@@ -369,7 +371,7 @@ const ProviderBookings = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
-              placeholder="Search bookings by listing, guest, or ID..."
+              placeholder={t('search_bookings_placeholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
@@ -384,10 +386,10 @@ const ProviderBookings = () => {
                 onChange={(e) => setActiveTab(e.target.value)}
                 className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
               >
-                <option value="all">All Bookings</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="pending">Pending</option>
-                <option value="canceled">Canceled</option>
+                <option value="all">{t('all_bookings')}</option>
+                <option value="confirmed">{t('confirmed')}</option>
+                <option value="pending">{t('pending')}</option>
+                <option value="canceled">{t('canceled')}</option>
               </select>
             </div>
             
@@ -398,9 +400,9 @@ const ProviderBookings = () => {
                 onChange={(e) => setSortBy(e.target.value)}
                 className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
               >
-                <option value="checkInDate">Sort by Check-in Date</option>
-                <option value="bookingDate">Sort by Booking Date</option>
-                <option value="price">Sort by Price</option>
+                <option value="checkInDate">{t('sort_by_checkin')}</option>
+                <option value="bookingDate">{t('sort_by_booking_date')}</option>
+                <option value="price">{t('sort_by_price')}</option>
               </select>
             </div>
           </div>
@@ -421,7 +423,7 @@ const ProviderBookings = () => {
             
             {filteredBookings.length === 0 && (
               <div className="text-center py-10">
-                <p className="text-gray-500 text-lg mb-2">No bookings found</p>
+                <p className="text-gray-500 text-lg mb-2">{t('no_bookings_found')}</p>
                 <p className="text-gray-400 text-sm">
                   {activeTab === 'all'
                     ? "You don't have any bookings yet."
@@ -438,24 +440,24 @@ const ProviderBookings = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Booking Details
-                  </th>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Guest
-                  </th>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Dates
-                  </th>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Total
-                  </th>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t('booking_details')}
+                </th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t('guest')}
+                </th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t('dates')}
+                </th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t('total')}
+                </th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t('status')}
+                </th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t('actions')}
+                </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -509,7 +511,7 @@ const ProviderBookings = () => {
                           className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
                         >
                           <MessageSquare className="w-4 h-4" />
-                          <span>Message</span>
+                          <span>{t('message')}</span>
                         </button>
                         
                         {booking.status === 'pending' && (
@@ -519,7 +521,7 @@ const ProviderBookings = () => {
                               className="flex items-center gap-1 px-3 py-1.5 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg transition-colors"
                             >
                               <Check className="w-4 h-4" />
-                              <span>Accept</span>
+                              <span>{t('accept')}</span>
                             </button>
                             
                             <button
@@ -527,7 +529,7 @@ const ProviderBookings = () => {
                               className="flex items-center gap-1 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors"
                             >
                               <X className="w-4 h-4" />
-                              <span>Cancel</span>
+                              <span>{t('cancel')}</span>
                             </button>
                           </>
                         )}
@@ -538,8 +540,8 @@ const ProviderBookings = () => {
                             className="flex items-center gap-1 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors"
                           >
                             <X className="w-4 h-4" />
-                            <span>Cancel</span>
-                          </button>
+                            <span>{t('cancel')}</span>
+                            </button>
                         )}
                       </div>
                     </td>
@@ -549,11 +551,11 @@ const ProviderBookings = () => {
                 {filteredBookings.length === 0 && (
                   <tr>
                     <td colSpan="6" className="px-4 py-12 text-center">
-                      <p className="text-gray-500 text-lg mb-2">No bookings found</p>
+                    <p className="text-gray-500 text-lg mb-2">{t('no_bookings_found')}</p>
                       <p className="text-gray-400 text-sm">
                         {activeTab === 'all'
-                          ? "You don't have any bookings yet."
-                          : `You don't have any ${activeTab} bookings.`}
+                          ? t('no_bookings_yet')
+                          : `${t('no_bookings_with_status', { status: t(activeTab) })}`}
                       </p>
                     </td>
                   </tr>
