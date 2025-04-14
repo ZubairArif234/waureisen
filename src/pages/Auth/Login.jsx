@@ -4,38 +4,40 @@ import Navbar from '../../components/Shared/Navbar';
 import authBg from '../../assets/bg.png';
 import Footer from '../../components/Shared/Footer';
 import { useLanguage } from '../../utils/LanguageContext';
+import { userLogin } from '../../api/authAPI';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { t } = useLanguage();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError(''); // Reset error on new submission
+    setIsLoading(true);
 
-    // Check for admin credentials
-    if (email === 'admin@mail.com' && password === '1234') {
-      navigate('/admin');
-      return;
+    try {
+      const response = await userLogin({ email, password });
+      
+      // Store the token
+      localStorage.setItem('token', response.token);
+      
+      // Navigate based on user type
+      if (response.userType === 'admin') {
+        navigate('/admin');
+      } else if (response.userType === 'provider') {
+        navigate('/provider/dashboard');
+      } else {
+        navigate('/');
+      }
+    } catch (error) {
+      setError(error.response?.data?.message || t('invalid_credentials'));
+    } finally {
+      setIsLoading(false);
     }
-
-    // Check for provider credentials
-    if (email === 'provider@mail.com' && password === '1234') {
-      navigate('/provider/dashboard');
-      return;
-    }
-
-    // Check for user credentials
-    if (email === 'user@mail.com' && password === '1234') {
-      navigate('/');
-      return;
-    }
-
-    // For now, show error for other users
-    setError(t('invalid_credentials'));
   };
 
   return (
@@ -137,9 +139,14 @@ const Login = () => {
                 {/* Login Button */}
                 <button
                   type="submit"
-                  className="w-full py-3 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                  disabled={isLoading}
+                  className={`w-full py-3 px-4 rounded-lg font-medium ${
+                    isLoading
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                  }`}
                 >
-                  {t('log_in')}
+                  {isLoading ? t('logging_in') : t('log_in')}
                 </button>
                 
                 {/* Login Credentials Help */}

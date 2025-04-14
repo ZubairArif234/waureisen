@@ -7,11 +7,14 @@ import Modal from '../../components/Auth/Modal';
 import TermsContent from '../../components/Auth/TermsContent';
 import PrivacyContent from '../../components/Auth/PrivacyContent';
 import { useLanguage } from '../../utils/LanguageContext';
+import { userSignup } from '../../api/authAPI';
 
 const Signup = () => {
   const [userType, setUserType] = useState('');
   const [isTermsOpen, setIsTermsOpen] = useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     firstName: '',
@@ -48,26 +51,47 @@ const Signup = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // In a real app, you would call your API to register the user
-    console.log('Signing up user with data:', formData);
-    
-    // Simulate successful signup
-    // Store the user data in localStorage (in a real app, you'd store a token or session)
-    localStorage.setItem('user', JSON.stringify({
-      ...formData,
-      userType
-    }));
-    
-    // Redirect based on whether there's a redirect parameter
-    if (redirectAfterSignup === 'provider-registration') {
-      navigate('/provider/registration');
-    } else if (userType === 'provider') {
-      navigate('/provider/dashboard');
-    } else {
-      navigate('/'); // Regular user goes to home page
+    if (!acceptTerms) {
+      return;
+    }
+
+    setError('');
+    setIsLoading(true);
+
+    try {
+      // Only proceed with API call if userType is 'customer'
+      if (userType === 'customer') {
+        const userData = {
+          email: formData.email,
+          password: formData.password,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phoneNumber: formData.phoneNumber,
+          username: `${formData.firstName} ${formData.lastName}` // Creating username from name
+        };
+
+        const response = await userSignup(userData);
+        
+        // Store the token
+        localStorage.setItem('token', response.token);
+        
+        // Navigate to home page after successful signup
+        navigate('/');
+      } else if (userType === 'provider') {
+        // Existing provider logic
+        if (redirectAfterSignup === 'provider-registration') {
+          navigate('/provider/registration');
+        } else {
+          navigate('/provider/dashboard');
+        }
+      }
+    } catch (error) {
+      setError(error.response?.data?.message || 'An error occurred during signup');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -113,6 +137,12 @@ const Signup = () => {
             {/* Signup Form */}
             <form onSubmit={handleSubmit} className="p-8">
               <div className="space-y-8">
+                {error && (
+                  <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
+                    {error}
+                  </div>
+                )}
+                
                 {/* User Type Selection */}
                 <div className="space-y-3">
                   <label className="block text-sm font-medium text-gray-700">
@@ -283,14 +313,14 @@ const Signup = () => {
                     {/* Signup Button */}
                     <button
                       type="submit"
-                      disabled={!acceptTerms}
+                      disabled={!acceptTerms || isLoading}
                       className={`w-full py-3 rounded-lg font-medium ${
-                        acceptTerms 
+                        acceptTerms && !isLoading
                           ? 'bg-gray-100 text-gray-800 hover:bg-gray-200' 
                           : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                       }`}
                     >
-                      {t('sign_up')}
+                      {isLoading ? t('signing_up') : t('sign_up')}
                     </button>
 
 
