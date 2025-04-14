@@ -23,4 +23,18 @@ API.interceptors.request.use(
   }
 );
 
+// Add response interceptor to handle common error cases
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Handle unauthorized errors (token expired or invalid)
+    if (error.response && error.response.status === 401) {
+      // Clear local storage and redirect to login
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default API;

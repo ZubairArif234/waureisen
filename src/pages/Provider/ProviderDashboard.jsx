@@ -9,6 +9,11 @@ import s1 from '../../assets/s1.png';
 import s2 from '../../assets/s2.png';
 import i3 from '../../assets/magazine.jpg';
 import { useLanguage } from '../../utils/LanguageContext';
+import { 
+  getProviderDashboardStats, 
+  getProviderBookings,
+  getProviderListings 
+} from '../../utils/apiClient';
 
 // StatCard Component
 const StatCard = ({ icon: Icon, title, value, change, changeType }) => {
@@ -133,24 +138,61 @@ const BookingRow = ({ booking, onViewBooking }) => {
 const ProviderDashboard = () => {
   const navigate = useNavigate();
   const [timeRange, setTimeRange] = useState('month');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { t } = useLanguage();
   
+  // State for API data
+  const [dashboardStats, setDashboardStats] = useState(null);
+  const [recentBookings, setRecentBookings] = useState([]);
+  const [listings, setListings] = useState([]);
+  
   useEffect(() => {
-    // Simulate loading data
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 500);
+    // Fetch dashboard data
+    const fetchDashboardData = async () => {
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        // Fetch dashboard stats
+        const stats = await getProviderDashboardStats(timeRange);
+        setDashboardStats(stats);
+        
+        // Fetch recent bookings
+        const bookingsData = await getProviderBookings('all', 5);
+        
+        // Transform booking data structure to match component expectations
+        const formattedBookings = bookingsData.map(booking => ({
+          id: booking.id || booking._id,
+          date: new Date(booking.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+          guest: booking.user?.username || booking.user?.firstName + ' ' + booking.user?.lastName,
+          property: booking.listing?.title,
+          duration: Math.ceil((new Date(booking.checkOutDate) - new Date(booking.checkInDate)) / (1000 * 60 * 60 * 24)),
+          amount: booking.totalPrice
+        }));
+        
+        setRecentBookings(formattedBookings);
+        
+        // Fetch listings count
+        const listingsData = await getProviderListings();
+        setListings(listingsData);
+        
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err);
+        setError('Failed to load dashboard data. Please try again later.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
     
-    return () => clearTimeout(timer);
+    fetchDashboardData();
   }, [timeRange]);
   
-  // Mock data for listings grid
+  // Mock data for listings grid (still using mock images until file upload integration)
   const yourListings = {
     images: [i1, i2, s1, s2],
     title: t('your_listings'),
-    subtitle: t('properties_count'),
+    subtitle: listings.length > 0 ? `${listings.length} ${t('properties')}` : t('properties_count'),
     link: "/provider/your-listings"
   };
 
@@ -161,29 +203,86 @@ const ProviderDashboard = () => {
     link: "/provider/bookings"
   };
   
-  // Mock data for stats
-  const stats = {
-    totalBookings: '47',
-    bookingChange: 12,
-    totalRevenue: '9,230 CHF',
-    revenueChange: 8,
-    occupancyRate: '78%',
-    occupancyChange: -3,
-    avgNights: '4.2',
-    nightsChange: 5
-  };
-  
-  const recentBookings = [
-    { id: 'B1005', date: 'Apr 10, 2025', guest: 'Michael Brown', property: 'Mountain View Chalet', duration: 3, amount: '690' },
-    { id: 'B1004', date: 'Apr 8, 2025', guest: 'Emma Wilson', property: 'Cozy Cottage', duration: 5, amount: '750' },
-    { id: 'B1003', date: 'Apr 5, 2025', guest: 'Robert Smith', property: 'Lakeside Apartment', duration: 2, amount: '380' },
-    { id: 'B1002', date: 'Apr 3, 2025', guest: 'Alice Johnson', property: 'Mountain View Chalet', duration: 3, amount: '690' },
-    { id: 'B1001', date: 'Apr 1, 2025', guest: 'John Doe', property: 'Modern Studio', duration: 4, amount: '480' }
-  ];
-  
   const handleViewBooking = (bookingId) => {
     navigate(`/provider/bookings?id=${bookingId}`);
   };
+  
+  // Render loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 mt-20">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate('/')}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <ArrowLeft className="w-6 h-6 text-gray-600" />
+              </button>
+              <h1 className="text-3xl font-semibold text-gray-900">{t('provider_dashboard')}</h1>
+            </div>
+          </div>
+          
+          <div className="flex justify-center py-16">
+            <div className="w-12 h-12 border-4 border-gray-200 border-t-brand rounded-full animate-spin mb-4"></div>
+            <p className="text-gray-600 ml-3 text-lg">{t('loading_dashboard')}</p>
+          </div>
+        </main>
+        
+        <Footer />
+      </div>
+    );
+  }
+  
+  // Render error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 mt-20">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate('/')}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <ArrowLeft className="w-6 h-6 text-gray-600" />
+              </button>
+              <h1 className="text-3xl font-semibold text-gray-900">{t('provider_dashboard')}</h1>
+            </div>
+          </div>
+          
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+            <p>{error}</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="mt-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              {t('retry')}
+            </button>
+          </div>
+        </main>
+        
+        <Footer />
+      </div>
+    );
+  }
+  
+  // Extract values from dashboardStats or use fallbacks
+  const totalBookings = dashboardStats?.totalBookings?.current || '0';
+  const bookingChange = dashboardStats?.totalBookings?.percentChange || 0;
+  const totalRevenue = dashboardStats?.totalRevenue?.current 
+    ? `${dashboardStats.totalRevenue.current} ${dashboardStats.totalRevenue.currency || 'CHF'}` 
+    : '0 CHF';
+  const revenueChange = dashboardStats?.totalRevenue?.percentChange || 0;
+  const occupancyRate = dashboardStats?.occupancyRate?.current ? `${dashboardStats.occupancyRate.current}%` : '0%';
+  const occupancyChange = dashboardStats?.occupancyRate?.percentChange || 0;
+  const avgNights = dashboardStats?.avgStayLength?.current || '0';
+  const nightsChange = dashboardStats?.avgStayLength?.percentChange || 0;
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -199,7 +298,7 @@ const ProviderDashboard = () => {
             >
               <ArrowLeft className="w-6 h-6 text-gray-600" />
             </button>
-            <h1 className="text-3xl font-semibold text-gray-900">  {t('provider_dashboard')} </h1>
+            <h1 className="text-3xl font-semibold text-gray-900">{t('provider_dashboard')}</h1>
           </div>
           
           <div className="flex items-center space-x-2">
@@ -223,82 +322,90 @@ const ProviderDashboard = () => {
         
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-        <StatCard
-          icon={Briefcase}
-          title={t('total_bookings')}
-          value={stats.totalBookings}
-          change={stats.bookingChange}
-          changeType="positive"
-        />
-        <StatCard
-          icon={DollarSign}
-          title={t('total_revenue')}
-          value={stats.totalRevenue}
-          change={stats.revenueChange}
-          changeType="positive"
-        />
-        <StatCard
-          icon={Award}
-          title={t('occupancy_rate')}
-          value={stats.occupancyRate}
-          change={stats.occupancyChange}
-          changeType="negative"
-        />
-        <StatCard
-          icon={Calendar}
-          title={t('avg_length_stay')}
-          value={stats.avgNights}
-          change={stats.nightsChange}
-          changeType="positive"
-        />
+          <StatCard
+            icon={Briefcase}
+            title={t('total_bookings')}
+            value={totalBookings}
+            change={bookingChange}
+            changeType={bookingChange >= 0 ? "positive" : "negative"}
+          />
+          <StatCard
+            icon={DollarSign}
+            title={t('total_revenue')}
+            value={totalRevenue}
+            change={revenueChange}
+            changeType={revenueChange >= 0 ? "positive" : "negative"}
+          />
+          <StatCard
+            icon={Award}
+            title={t('occupancy_rate')}
+            value={occupancyRate}
+            change={occupancyChange}
+            changeType={occupancyChange >= 0 ? "positive" : "negative"}
+          />
+          <StatCard
+            icon={Calendar}
+            title={t('avg_length_stay')}
+            value={avgNights}
+            change={nightsChange}
+            changeType={nightsChange >= 0 ? "positive" : "negative"}
+          />
         </div>
         
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <ChartComponent 
-          title={t('revenue_overview')}
-          description={t('revenue_analysis')}
-        />
-        <ChartComponent 
-          title={t('booking_trends')}
-          description={t('booking_analysis')}
-        />
+          <ChartComponent 
+            title={t('revenue_overview')}
+            description={t('revenue_analysis')}
+          />
+          <ChartComponent 
+            title={t('booking_trends')}
+            description={t('booking_analysis')}
+          />
         </div>
         
         {/* Recent Bookings */}
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm mb-8">
           <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-          <h2 className="text-lg font-medium text-gray-900">{t('recent_bookings')}</h2>
+            <h2 className="text-lg font-medium text-gray-900">{t('recent_bookings')}</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('booking_id')}
+                    {t('booking_id')}
                   </th>
                   <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('guest')}
+                    {t('guest')}
                   </th>
                   <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('property')}
+                    {t('property')}
                   </th>
                   <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('amount')}
+                    {t('amount')}
                   </th>
                   <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('actions')}
+                    {t('actions')}
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {recentBookings.map((booking) => (
-                  <BookingRow 
-                    key={booking.id} 
-                    booking={booking} 
-                    onViewBooking={handleViewBooking}
-                  />
-                ))}
+                {recentBookings.length > 0 ? (
+                  recentBookings.map((booking) => (
+                    <BookingRow 
+                      key={booking.id} 
+                      booking={booking} 
+                      onViewBooking={handleViewBooking}
+                    />
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="px-3 py-6 text-center text-gray-500">
+                      {t('no_bookings_yet')}
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -315,7 +422,7 @@ const ProviderDashboard = () => {
         {/* Quick Links */}
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
           <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-medium text-gray-900">{t('quick_actions')}</h2>
+            <h2 className="text-lg font-medium text-gray-900">{t('quick_actions')}</h2>
           </div>
           <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <button

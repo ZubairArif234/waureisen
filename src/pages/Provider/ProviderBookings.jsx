@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, Users, Search, Filter, MessageSquare, Calendar as CalendarIcon, ChevronDown, ChevronUp, Check, X } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { ArrowLeft, Send, Search, Filter, Calendar as CalendarIcon, ChevronDown, ChevronUp, Check, X, Users } from 'lucide-react';
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
-import i1 from '../../assets/i1.png';
-import i2 from '../../assets/i2.png';
-import s1 from '../../assets/s1.png';
-import s2 from '../../assets/s2.png';
 import avatar from '../../assets/avatar.png';
 import { useLanguage } from '../../utils/LanguageContext';
+import { getProviderBookings } from '../../utils/apiClient';
+import API from '../../api/config';
 
 // Status Badge Component
 const StatusBadge = ({ status }) => {
+  const { t } = useLanguage();
+  
   const getStatusColor = () => {
     switch (status) {
       case 'confirmed':
@@ -34,7 +34,11 @@ const StatusBadge = ({ status }) => {
 
 // Mobile view booking card
 const BookingCardMobile = ({ booking, onMessage, onAcceptBooking, onCancelBooking }) => {
+  const { t } = useLanguage();
   const [expanded, setExpanded] = useState(false);
+  
+  // Get the listing image or use placeholder
+  const listingImage = booking.listing?.photos?.[0] || avatar;
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm mb-4">
@@ -42,33 +46,38 @@ const BookingCardMobile = ({ booking, onMessage, onAcceptBooking, onCancelBookin
         {/* Header with thumbnail and status */}
         <div className="flex items-start gap-3 mb-3">
           <img 
-            src={booking.listing.image} 
-            alt={booking.listing.title}
+            src={listingImage} 
+            alt={booking.listing?.title || 'Property'}
             className="w-16 h-16 object-cover rounded-md"
           />
           <div className="flex-1">
             <div className="flex items-start justify-between">
-              <h3 className="font-medium text-gray-900 text-sm">{booking.listing.title}</h3>
+              <h3 className="font-medium text-gray-900 text-sm">{booking.listing?.title || 'Property'}</h3>
               <StatusBadge status={booking.status} />
             </div>
-            <p className="text-xs text-gray-500">{booking.listing.location}</p>
+            <p className="text-xs text-gray-500">{booking.listing?.location?.address || 'Unknown location'}</p>
           </div>
         </div>
 
         {/* Basic info */}
         <div className="grid grid-cols-2 gap-2 mb-3">
           <div className="text-xs text-gray-600">
-          <span className="block text-gray-400">{t('dates')}</span>
+            <span className="block text-gray-400">{t('dates')}</span>
             <div className="flex items-center gap-1">
-              <Calendar className="w-3 h-3" />
-              <span>{booking.checkInDate} - {booking.checkOutDate}</span>
+              <CalendarIcon className="w-3 h-3" />
+              <span>
+                {new Date(booking.checkInDate).toLocaleDateString()} - {new Date(booking.checkOutDate).toLocaleDateString()}
+              </span>
             </div>
           </div>
           <div className="text-xs text-gray-600">
-          <span className="block text-gray-400">{t('guests')}</span>
+            <span className="block text-gray-400">{t('guests')}</span>
             <div className="flex items-center gap-1">
               <Users className="w-3 h-3" />
-              <span>{booking.guests} {booking.guests === 1 ? 'person' : 'people'}, {booking.dogs} {booking.dogs === 1 ? 'dog' : 'dogs'}</span>
+              <span>
+                {booking.capacity?.people || 1} {booking.capacity?.people !== 1 ? t('people') : t('person')}, 
+                {' '}{booking.capacity?.dogs || 0} {booking.capacity?.dogs !== 1 ? t('dogs') : t('dog')}
+              </span>
             </div>
           </div>
         </div>
@@ -87,66 +96,66 @@ const BookingCardMobile = ({ booking, onMessage, onAcceptBooking, onCancelBookin
           <div className="mt-3 pt-3 border-t space-y-3">
             <div className="grid grid-cols-2 gap-2">
               <div className="text-xs text-gray-600">
-              <span className="block text-gray-400">{t('customer')}</span>
+                <span className="block text-gray-400">{t('customer')}</span>
                 <div className="flex items-center gap-1 mt-1">
                   <img src={avatar} alt="Guest" className="w-4 h-4 rounded-full" />
-                  <span>{booking.customer.name}</span>
+                  <span>{booking.user?.username || booking.user?.firstName + ' ' + booking.user?.lastName || 'Guest'}</span>
                 </div>
               </div>
               <div className="text-xs text-gray-600">
-              <span className="block text-gray-400">{t('booking_id')}</span>
-                <span>#{booking.id}</span>
+                <span className="block text-gray-400">{t('booking_id')}</span>
+                <span>#{booking.id || booking._id}</span>
               </div>
             </div>
             
             <div className="grid grid-cols-2 gap-2">
               <div className="text-xs text-gray-600">
-              <span className="block text-gray-400">{t('total_amount')}</span>
-                <span className="font-medium text-brand">{booking.totalPrice} {booking.currency}</span>
+                <span className="block text-gray-400">{t('total_amount')}</span>
+                <span className="font-medium text-brand">{booking.totalPrice} {booking.currency || 'CHF'}</span>
               </div>
               <div className="text-xs text-gray-600">
-              <span className="block text-gray-400">{t('booked_on')}</span>
-              <span>{booking.bookingDate}</span>
+                <span className="block text-gray-400">{t('booked_on')}</span>
+                <span>{new Date(booking.createdAt).toLocaleDateString()}</span>
               </div>
             </div>
 
             <div className="w-full flex flex-col space-y-2 mt-2">
               <button
-                onClick={() => onMessage(booking.id)}
+                onClick={() => onMessage(booking.id || booking._id)}
                 className="w-full flex items-center justify-center gap-1 bg-gray-100 text-gray-700 rounded-lg p-2 text-xs"
               >
-                <MessageSquare className="w-3 h-3" />
+                <Send className="w-3 h-3" />
                 <span>{t('message_guest')}</span>
-                </button>
+              </button>
               
               {booking.status === 'pending' && (
                 <div className="flex space-x-2">
                   <button
-                    onClick={() => onAcceptBooking(booking.id)}
+                    onClick={() => onAcceptBooking(booking.id || booking._id)}
                     className="flex-1 flex items-center justify-center gap-1 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg p-2 text-xs"
                   >
                     <Check className="w-3 h-3" />
                     <span>{t('accept')}</span>
-                    </button>
+                  </button>
                   
                   <button
-                    onClick={() => onCancelBooking(booking.id)}
+                    onClick={() => onCancelBooking(booking.id || booking._id)}
                     className="flex-1 flex items-center justify-center gap-1 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg p-2 text-xs"
                   >
                     <X className="w-3 h-3" />
                     <span>{t('cancel')}</span>
-                    </button>
+                  </button>
                 </div>
               )}
               
               {booking.status === 'confirmed' && (
                 <button
-                  onClick={() => onCancelBooking(booking.id)}
+                  onClick={() => onCancelBooking(booking.id || booking._id)}
                   className="w-full flex items-center justify-center gap-1 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg p-2 text-xs"
                 >
                   <X className="w-3 h-3" />
                   <span>{t('cancel_booking')}</span>
-                  </button>
+                </button>
               )}
             </div>
           </div>
@@ -159,10 +168,20 @@ const BookingCardMobile = ({ booking, onMessage, onAcceptBooking, onCancelBookin
 const ProviderBookings = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('checkInDate');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // Parse query params to get booking ID if it exists
+  const queryParams = new URLSearchParams(location.search);
+  const bookingIdParam = queryParams.get('id');
+  
+  // State for bookings data
+  const [bookings, setBookings] = useState([]);
   
   // Update isMobile on window resize
   useEffect(() => {
@@ -171,141 +190,81 @@ const ProviderBookings = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Mock data for the bookings - would be fetched from API in real implementation
-  // This aligns with the backend Booking model structure
-  const [bookings, setBookings] = useState([
-    {
-      id: 'B1001',
-      listing: {
-        id: 'L101',
-        title: 'Modern Studio in City Center',
-        location: 'Zurich, Switzerland',
-        image: i1
-      },
-      customer: {
-        id: 'U201',
-        name: 'John Doe',
-        email: 'john@example.com',
-        image: avatar
-      },
-      checkInDate: '2025-04-12',
-      checkOutDate: '2025-04-16',
-      formattedCheckIn: 'Apr 12, 2025',
-      formattedCheckOut: 'Apr 16, 2025',
-      bookingDate: '2025-03-01',
-      guests: 2,
-      dogs: 1,
-      status: 'confirmed',
-      totalPrice: 480,
-      currency: 'CHF',
-      specialRequests: 'Early check-in if possible'
-    },
-    {
-      id: 'B1002',
-      listing: {
-        id: 'L102',
-        title: 'Mountain View Chalet',
-        location: 'Swiss Alps, Switzerland',
-        image: i2
-      },
-      customer: {
-        id: 'U202',
-        name: 'Alice Johnson',
-        email: 'alice@example.com',
-        image: avatar
-      },
-      checkInDate: '2025-04-20',
-      checkOutDate: '2025-04-23',
-      formattedCheckIn: 'Apr 20, 2025',
-      formattedCheckOut: 'Apr 23, 2025',
-      bookingDate: '2025-03-05',
-      guests: 4,
-      dogs: 2,
-      status: 'pending',
-      totalPrice: 690,
-      currency: 'CHF',
-      specialRequests: 'Dog bed for large dog needed'
-    },
-    {
-      id: 'B1003',
-      listing: {
-        id: 'L103',
-        title: 'Lakeside Apartment',
-        location: 'Lucerne, Switzerland',
-        image: s1
-      },
-      customer: {
-        id: 'U203',
-        name: 'Robert Smith',
-        email: 'robert@example.com',
-        image: avatar
-      },
-      checkInDate: '2025-05-05',
-      checkOutDate: '2025-05-10',
-      formattedCheckIn: 'May 5, 2025',
-      formattedCheckOut: 'May 10, 2025',
-      bookingDate: '2025-03-20',
-      guests: 3,
-      dogs: 1,
-      status: 'confirmed',
-      totalPrice: 570,
-      currency: 'CHF',
-      specialRequests: ''
-    },
-    {
-      id: 'B1004',
-      listing: {
-        id: 'L104',
-        title: 'Cozy Cottage in the Woods',
-        location: 'Black Forest, Germany',
-        image: s2
-      },
-      customer: {
-        id: 'U204',
-        name: 'Emma Wilson',
-        email: 'emma@example.com',
-        image: avatar
-      },
-      checkInDate: '2025-04-02',
-      checkOutDate: '2025-04-08',
-      formattedCheckIn: 'Apr 2, 2025',
-      formattedCheckOut: 'Apr 8, 2025',
-      bookingDate: '2025-02-15',
-      guests: 2,
-      dogs: 2,
-      status: 'canceled',
-      totalPrice: 450,
-      currency: 'CHF',
-      specialRequests: 'Late checkout requested'
-    }
-  ]);
+  // Fetch bookings when tab changes or on initial load
+  useEffect(() => {
+    const fetchBookings = async () => {
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        // Map UI tab status to API status parameter
+        const statusParam = activeTab === 'all' ? '' : activeTab;
+        const response = await getProviderBookings(statusParam);
+        
+        setBookings(response);
+      } catch (err) {
+        console.error("Error fetching bookings:", err);
+        setError("Failed to load bookings. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchBookings();
+  }, [activeTab]);
 
   const handleMessage = (bookingId) => {
     navigate(`/provider/messages?booking=${bookingId}`);
   };
 
-  const handleAcceptBooking = (bookingId) => {
-    // In a real app, this would call an API to accept the booking
-    setBookings(prevBookings => 
-      prevBookings.map(booking => 
-        booking.id === bookingId 
-          ? { ...booking, status: 'confirmed' } 
-          : booking
-      )
-    );
-    alert(`Booking ${bookingId} has been accepted.`);
+  const handleAcceptBooking = async (bookingId) => {
+    try {
+      setIsLoading(true);
+      
+      // API call to accept booking
+      const response = await API.put(`/providers/bookings/${bookingId}/accept`);
+      
+      // Update local state with the updated booking
+      setBookings(prevBookings => 
+        prevBookings.map(booking => 
+          booking.id === bookingId || booking._id === bookingId
+            ? { ...booking, status: 'confirmed' } 
+            : booking
+        )
+      );
+      
+      alert(`Booking ${bookingId} has been accepted.`);
+    } catch (error) {
+      console.error("Error accepting booking:", error);
+      alert("Failed to accept booking. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleCancelBooking = (bookingId) => {
-    // In a real app, this would call an API to cancel the booking
-    setBookings(prevBookings => 
-      prevBookings.map(booking => 
-        booking.id === bookingId 
-          ? { ...booking, status: 'canceled' } 
-          : booking
-      )
-    );
-    alert(`Booking ${bookingId} has been canceled.`);
+  const handleCancelBooking = async (bookingId) => {
+    try {
+      setIsLoading(true);
+      
+      // API call to cancel booking
+      const response = await API.put(`/providers/bookings/${bookingId}/cancel`);
+      
+      // Update local state with the canceled booking
+      setBookings(prevBookings => 
+        prevBookings.map(booking => 
+          booking.id === bookingId || booking._id === bookingId
+            ? { ...booking, status: 'canceled' } 
+            : booking
+        )
+      );
+      
+      alert(`Booking ${bookingId} has been canceled.`);
+    } catch (error) {
+      console.error("Error canceling booking:", error);
+      alert("Failed to cancel booking. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const sortBookings = (bookings, sortBy) => {
@@ -314,7 +273,7 @@ const ProviderBookings = () => {
         case 'checkInDate':
           return new Date(a.checkInDate) - new Date(b.checkInDate);
         case 'bookingDate':
-          return new Date(a.bookingDate) - new Date(b.bookingDate);
+          return new Date(a.createdAt) - new Date(b.createdAt);
         case 'price':
           return b.totalPrice - a.totalPrice;
         default:
@@ -326,19 +285,19 @@ const ProviderBookings = () => {
   // Apply filters to bookings
   const filteredBookings = sortBookings(
     bookings.filter(booking => {
-      // Filter by tab (status)
-      const statusMatch = 
-        activeTab === 'all' ? true : 
-        booking.status === activeTab;
-      
       // Filter by search query
-      const searchMatch = 
-        booking.listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        booking.listing.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        booking.customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        booking.id.toLowerCase().includes(searchQuery.toLowerCase());
+      const listingTitle = booking.listing?.title || '';
+      const listingLocation = booking.listing?.location?.address || '';
+      const guestName = booking.user?.username || booking.user?.firstName + ' ' + booking.user?.lastName || '';
+      const bookingId = booking.id || booking._id || '';
       
-      return statusMatch && searchMatch;
+      const searchMatch = 
+        listingTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        listingLocation.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        guestName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        bookingId.toString().toLowerCase().includes(searchQuery.toLowerCase());
+      
+      return searchMatch;
     }),
     sortBy
   );
@@ -348,6 +307,67 @@ const ProviderBookings = () => {
     const options = { month: 'short', day: 'numeric', year: 'numeric' };
     return new Date(dateString).toLocaleDateString('en-US', options);
   };
+
+  // Render loading state
+  if (isLoading && bookings.length === 0) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Navbar />
+        
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 mt-20">
+          <div className="flex items-center gap-4 mb-8">
+            <button
+              onClick={() => navigate('/provider/dashboard')}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <ArrowLeft className="w-6 h-6 text-gray-600" />
+            </button>
+            <h1 className="text-3xl font-semibold text-gray-900">{t('bookings')}</h1>
+          </div>
+          
+          <div className="flex justify-center py-12">
+            <div className="w-12 h-12 border-4 border-gray-200 border-t-brand rounded-full animate-spin mb-4"></div>
+            <p className="text-gray-600 ml-3">{t('loading_bookings')}</p>
+          </div>
+        </main>
+        
+        <Footer />
+      </div>
+    );
+  }
+
+  // Render error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Navbar />
+        
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 mt-20">
+          <div className="flex items-center gap-4 mb-8">
+            <button
+              onClick={() => navigate('/provider/dashboard')}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <ArrowLeft className="w-6 h-6 text-gray-600" />
+            </button>
+            <h1 className="text-3xl font-semibold text-gray-900">{t('bookings')}</h1>
+          </div>
+          
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+            <p>{error}</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="mt-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              {t('retry')}
+            </button>
+          </div>
+        </main>
+        
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -411,9 +431,15 @@ const ProviderBookings = () => {
         {/* Mobile View */}
         {isMobile && (
           <div className="space-y-4">
+            {isLoading && (
+              <div className="flex justify-center py-4">
+                <div className="w-8 h-8 border-4 border-gray-200 border-t-brand rounded-full animate-spin"></div>
+              </div>
+            )}
+            
             {filteredBookings.map(booking => (
               <BookingCardMobile 
-                key={booking.id} 
+                key={booking.id || booking._id} 
                 booking={booking} 
                 onMessage={handleMessage}
                 onAcceptBooking={handleAcceptBooking}
@@ -421,13 +447,13 @@ const ProviderBookings = () => {
               />
             ))}
             
-            {filteredBookings.length === 0 && (
+            {filteredBookings.length === 0 && !isLoading && (
               <div className="text-center py-10">
                 <p className="text-gray-500 text-lg mb-2">{t('no_bookings_found')}</p>
                 <p className="text-gray-400 text-sm">
                   {activeTab === 'all'
-                    ? "You don't have any bookings yet."
-                    : `You don't have any ${activeTab} bookings.`}
+                    ? t('no_bookings_yet')
+                    : `${t('no_bookings_with_status', { status: t(activeTab) })}`}
                 </p>
               </div>
             )}
@@ -437,43 +463,49 @@ const ProviderBookings = () => {
         {/* Desktop View - Table */}
         {!isMobile && (
           <div className="overflow-x-auto bg-white border rounded-lg">
+            {isLoading && (
+              <div className="flex justify-center py-4 border-b">
+                <div className="w-8 h-8 border-4 border-gray-200 border-t-brand rounded-full animate-spin"></div>
+              </div>
+            )}
+            
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('booking_details')}
-                </th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('guest')}
-                </th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('dates')}
-                </th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('total')}
-                </th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('status')}
-                </th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('actions')}
-                </th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {t('booking_details')}
+                  </th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {t('guest')}
+                  </th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {t('dates')}
+                  </th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {t('total')}
+                  </th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {t('status')}
+                  </th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {t('actions')}
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredBookings.map((booking) => (
-                  <tr key={booking.id} className="hover:bg-gray-50">
+                  <tr key={booking.id || booking._id} className="hover:bg-gray-50">
                     <td className="px-4 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-3">
                         <img 
-                          src={booking.listing.image} 
-                          alt={booking.listing.title} 
+                          src={booking.listing?.photos?.[0] || avatar} 
+                          alt={booking.listing?.title || 'Property'} 
                           className="w-12 h-12 rounded-md object-cover"
                         />
                         <div>
-                          <div className="font-medium text-gray-900">{booking.listing.title}</div>
-                          <div className="text-sm text-gray-500">{booking.listing.location}</div>
-                          <div className="text-xs text-gray-400">#{booking.id}</div>
+                          <div className="font-medium text-gray-900">{booking.listing?.title || 'Property'}</div>
+                          <div className="text-sm text-gray-500">{booking.listing?.location?.address || 'Unknown location'}</div>
+                          <div className="text-xs text-gray-400">#{booking.id || booking._id}</div>
                         </div>
                       </div>
                     </td>
@@ -481,9 +513,12 @@ const ProviderBookings = () => {
                       <div className="flex items-center gap-2">
                         <img src={avatar} alt="Guest" className="w-8 h-8 rounded-full" />
                         <div>
-                          <div className="text-sm font-medium text-gray-900">{booking.customer.name}</div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {booking.user?.username || booking.user?.firstName + ' ' + booking.user?.lastName || 'Guest'}
+                          </div>
                           <div className="text-xs text-gray-500">
-                            {booking.guests} {booking.guests === 1 ? 'person' : 'people'}, {booking.dogs} {booking.dogs === 1 ? 'dog' : 'dogs'}
+                            {booking.capacity?.people || 1} {booking.capacity?.people !== 1 ? t('people') : t('person')}, 
+                            {' '}{booking.capacity?.dogs || 0} {booking.capacity?.dogs !== 1 ? t('dogs') : t('dog')}
                           </div>
                         </div>
                       </div>
@@ -493,12 +528,12 @@ const ProviderBookings = () => {
                         {formatDate(booking.checkInDate)} - {formatDate(booking.checkOutDate)}
                       </div>
                       <div className="text-xs text-gray-500">
-                        Booked on {formatDate(booking.bookingDate)}
+                        {t('booked_on')} {formatDate(booking.createdAt)}
                       </div>
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-brand">
-                        {booking.totalPrice} {booking.currency}
+                        {booking.totalPrice} {booking.currency || 'CHF'}
                       </div>
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap">
@@ -507,17 +542,17 @@ const ProviderBookings = () => {
                     <td className="px-4 py-4 whitespace-nowrap text-sm">
                       <div className="flex space-x-2">
                         <button
-                          onClick={() => handleMessage(booking.id)}
+                          onClick={() => handleMessage(booking.id || booking._id)}
                           className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
                         >
-                          <MessageSquare className="w-4 h-4" />
+                          <Send className="w-4 h-4" />
                           <span>{t('message')}</span>
                         </button>
                         
                         {booking.status === 'pending' && (
                           <>
                             <button
-                              onClick={() => handleAcceptBooking(booking.id)}
+                              onClick={() => handleAcceptBooking(booking.id || booking._id)}
                               className="flex items-center gap-1 px-3 py-1.5 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg transition-colors"
                             >
                               <Check className="w-4 h-4" />
@@ -525,7 +560,7 @@ const ProviderBookings = () => {
                             </button>
                             
                             <button
-                              onClick={() => handleCancelBooking(booking.id)}
+                              onClick={() => handleCancelBooking(booking.id || booking._id)}
                               className="flex items-center gap-1 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors"
                             >
                               <X className="w-4 h-4" />
@@ -536,22 +571,22 @@ const ProviderBookings = () => {
                         
                         {booking.status === 'confirmed' && (
                           <button
-                            onClick={() => handleCancelBooking(booking.id)}
+                            onClick={() => handleCancelBooking(booking.id || booking._id)}
                             className="flex items-center gap-1 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors"
                           >
                             <X className="w-4 h-4" />
                             <span>{t('cancel')}</span>
-                            </button>
+                          </button>
                         )}
                       </div>
                     </td>
                   </tr>
                 ))}
                 
-                {filteredBookings.length === 0 && (
+                {filteredBookings.length === 0 && !isLoading && (
                   <tr>
                     <td colSpan="6" className="px-4 py-12 text-center">
-                    <p className="text-gray-500 text-lg mb-2">{t('no_bookings_found')}</p>
+                      <p className="text-gray-500 text-lg mb-2">{t('no_bookings_found')}</p>
                       <p className="text-gray-400 text-sm">
                         {activeTab === 'all'
                           ? t('no_bookings_yet')
