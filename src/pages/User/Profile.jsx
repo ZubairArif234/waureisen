@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Upload, Camera, Edit3, Plus, X } from 'lucide-react';
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
 import { useLanguage } from '../../utils/LanguageContext';
+import { getUserProfile, updateUserProfile } from '../../api/authAPI';
 
 const Profile = () => {
   const { t } = useLanguage();
+  // Update the initial state to use streetNumber instead of street
   const [profileData, setProfileData] = useState({
-    firstName: 'Hamza',
-    lastName: 'Bin Shahid',
-    bio: '',
-    streetNumber: '',
+    firstName: '',
+    lastName: '',
+    aboutYou: '',  // Changed from bio to aboutYou
+    streetNumber: '', // This is already correct
     dateOfBirth: '',
     nationality: '',
     gender: '',
@@ -23,6 +25,59 @@ const Profile = () => {
 
   const [previewImage, setPreviewImage] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  // Fetch user profile data when component mounts
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        setIsLoading(true);
+        // Get user ID from localStorage or context
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('No authentication token found');
+        }
+        
+        // Decode token to get user ID
+        const tokenData = JSON.parse(atob(token.split('.')[1]));
+        const userId = tokenData.id;
+        
+        const userData = await getUserProfile(userId);
+        
+        // Map backend data to component state
+        setProfileData({
+          firstName: userData.firstName || '',
+          lastName: userData.lastName || '',
+          aboutYou: userData.aboutYou || '',  // Consistent naming
+          streetNumber: userData.paymentMethod?.streetNumber || '', // Changed from street to streetNumber
+          dateOfBirth: userData.dateOfBirth || '',
+          nationality: userData.nationality || '',
+          gender: userData.gender || '',
+          isProvider: userData.isProvider || false, // Now mapping from the backend
+          profilePicture: null,
+          dogs: userData.dogs?.map(dog => ({
+            id: Math.random().toString(36).substr(2, 9), // Generate a unique ID for frontend
+            name: dog.name || '',
+            gender: dog.gender || ''
+          })) || [{ id: 1, name: '', gender: '' }]
+        });
+        
+        // Set profile picture if available
+        if (userData.profilePicture && userData.profilePicture !== 'N/A') {
+          setPreviewImage(userData.profilePicture);
+        }
+        
+      } catch (error) {
+        console.error('Failed to fetch profile:', error);
+        setError('Failed to load profile data. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -55,27 +110,84 @@ const Profile = () => {
   };
 
   const addDog = () => {
-    const newDogId = Math.max(0, ...profileData.dogs.map(dog => dog.id)) + 1;
+    const newId = profileData.dogs.length > 0 
+      ? Math.max(...profileData.dogs.map(dog => dog.id)) + 1 
+      : 1;
+    
     setProfileData(prev => ({
       ...prev,
-      dogs: [...prev.dogs, { id: newDogId, name: '', gender: '' }]
+      dogs: [...prev.dogs, { id: newId, name: '', gender: '' }]
     }));
   };
 
   const removeDog = (id) => {
-    if (profileData.dogs.length > 1) {
-      setProfileData(prev => ({
-        ...prev,
-        dogs: prev.dogs.filter(dog => dog.id !== id)
-      }));
-    }
+    setProfileData(prev => ({
+      ...prev,
+      dogs: prev.dogs.filter(dog => dog.id !== id)
+    }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log("Profile data to be submitted:", profileData);
-    setIsEditing(false);
+    
+    try {
+      setIsLoading(true);
+      
+      // Get user ID from token
+      const token = localStorage.getItem('token');
+      const tokenData = JSON.parse(atob(token.split('.')[1]));
+      const userId = tokenData.id;
+      
+      // Prepare data for API - include ALL fields from the form
+      const updateData = {
+        firstName: profileData.firstName,
+        lastName: profileData.lastName,
+        aboutYou: profileData.aboutYou,
+        dateOfBirth: profileData.dateOfBirth,
+        nationality: profileData.nationality,
+        gender: profileData.gender,
+        isProvider: profileData.isProvider,
+        // For nested objects, make sure to include the entire structure
+        paymentMethod: {
+          streetNumber: profileData.streetNumber,
+          // Include other payment fields to avoid overwriting them with undefined
+          cardNumber: 'N/A',
+          cardHolderName: 'N/A',
+          optional: 'N/A',
+          postalCode: 'N/A',
+          city: 'N/A',
+          state: 'N/A',
+          country: 'N/A',
+          expiryDate: 'N/A'
+        },
+        // Format dogs array for backend
+        dogs: profileData.dogs.map(dog => ({
+          name: dog.name,
+          gender: dog.gender
+        }))
+      };
+      
+      // If profile picture was updated
+      if (profileData.profilePicture && typeof profileData.profilePicture !== 'string') {
+        // In a real app, you'd upload the image to a server/cloud storage
+        // and get back a URL to store in the database
+        updateData.profilePicture = previewImage;
+      }
+      
+      console.log('Sending update data:', updateData); // Add logging to debug
+      
+      const result = await updateUserProfile(userId, updateData);
+      console.log('Update result:', result); // Add logging to debug
+      
+      setIsEditing(false);
+      // Show success message or notification
+      
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      setError('Failed to update profile. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -167,8 +279,8 @@ const Profile = () => {
             <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">{t('about_you')}</label>
               <textarea
-                name="bio"
-                value={profileData.bio}
+                name="aboutYou"  // Changed from bio to aboutYou
+                value={profileData.aboutYou}  // Changed from bio to aboutYou
                 onChange={handleInputChange}
                 disabled={!isEditing}
                 placeholder={t('bio_placeholder')}
@@ -367,6 +479,42 @@ const Profile = () => {
       <Footer />
     </div>
   );
+
+  // Show loading state
+  if (isLoading && !isEditing) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8 mt-20">
+          <div className="flex justify-center items-center h-64">
+            <p className="text-gray-500">Loading profile...</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error && !isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8 mt-20">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            {error}
+          </div>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+          >
+            Try Again
+          </button>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 };
 
 export default Profile;

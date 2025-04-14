@@ -53,3 +53,27 @@ export const adminLogin = async (credentials) => {
     throw error;
   }
 };
+
+// Add this function to your existing authAPI.js file
+
+// Get user profile
+export const getUserProfile = async (userId) => {
+  try {
+    const response = await API.get(`/users/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    throw error;
+  }
+};
+
+// Update user profile
+export const updateUserProfile = async (userId, profileData) => {
+  try {
+    const response = await API.put(`/users/${userId}`, profileData);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating user profile:', error);
+    throw error;
+  }
+};
