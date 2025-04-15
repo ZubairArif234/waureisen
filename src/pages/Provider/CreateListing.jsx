@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Save, Pencil } from 'lucide-react';
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
+import { useLanguage } from '../../utils/LanguageContext';
 
 // Reusing existing form components from Admin
 import BasicInfoForm from '../../components/Admin/BasicInfoForm';
@@ -12,13 +13,14 @@ import DescriptionForm from '../../components/Admin/DescriptionForm';
 import PoliciesLocationForm from '../../components/Admin/PoliciesLocationForm';
 
 const CreateListing = () => {
+  const {t} =  useLanguage();
   const navigate = useNavigate();
   const { id } = useParams();
   const isEditMode = !!id;
   const [isLoading, setIsLoading] = useState(isEditMode);
   const [activeStep, setActiveStep] = useState(1);
   const [formData, setFormData] = useState({
-    // Basic Info
+    
     title: '',
     propertyType: 'Studio',
     listingSource: 'Provider',
@@ -308,7 +310,7 @@ const CreateListing = () => {
             <ArrowLeft className="w-5 h-5 text-gray-600" />
           </button>
           <h1 className="text-2xl font-semibold text-gray-900">
-            {isEditMode ? 'Edit Listing' : 'Create New Listing'}
+          {isEditMode ? t('edit_listing') : t('create_new_listing')}
           </h1>
         </div>
 
