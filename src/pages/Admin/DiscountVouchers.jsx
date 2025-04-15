@@ -5,9 +5,10 @@ import { Search, Plus, Edit, Trash, Download } from 'lucide-react';
 const VoucherModal = ({ isOpen, onClose, onSave, editVoucher = null }) => {
   const [formData, setFormData] = useState({
     code: editVoucher?.code || '',
-    discountCHF: editVoucher?.discountCHF || '',
-    discountEUR: editVoucher?.discountEUR || '',
-    discountPercentage: editVoucher?.discountPercentage || '',
+    discountValue: editVoucher?.discount ? parseFloat(editVoucher.discount) : '',
+    discountType: editVoucher?.discount ? 
+      (editVoucher.discount.includes('%') ? '%' : 
+       editVoucher.discount.includes('EUR') ? 'EUR' : 'CHF') : 'CHF',
     validFrom: editVoucher?.validFrom || '',
     validUntil: editVoucher?.validUntil || '',
     maxUses: editVoucher?.maxUses || '',
@@ -24,7 +25,14 @@ const VoucherModal = ({ isOpen, onClose, onSave, editVoucher = null }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(formData);
+    const combinedDiscount = `${formData.discountValue} ${formData.discountType}`;
+    const submissionData = {
+      ...formData,
+      discount: combinedDiscount,
+    };
+    delete submissionData.discountValue;
+    delete submissionData.discountType;
+    onSave(submissionData);
   };
 
   if (!isOpen) return null;
@@ -52,54 +60,35 @@ const VoucherModal = ({ isOpen, onClose, onSave, editVoucher = null }) => {
             />
           </div>
           
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Discount Amount (CHF)
-            </label>
-            <input
-              type="number"
-              name="discountCHF"
-              value={formData.discountCHF}
-              onChange={handleChange}
-              min="1"
-              className="w-full px-3 py-2 border rounded-lg"
-              required
-            />
-          </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Discount Amount (EUR)
-            </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Discount
+          </label>
+          <div className="flex gap-2">
             <input
               type="number"
-              name="discountEUR"
-              value={formData.discountEUR}
+              name="discountValue"
+              value={formData.discountValue}
               onChange={handleChange}
-              min="1"
-              className="w-full px-3 py-2 border rounded-lg"
+              className="flex-1 px-3 py-2 border rounded-lg"
+              placeholder="Enter value"
+              min="0"
+              step={formData.discountType === '%' ? '0.1' : '1'}
               required
             />
+            <select
+              name="discountType"
+              value={formData.discountType}
+              onChange={handleChange}
+              className="px-3 py-2 border rounded-lg bg-white"
+            >
+              <option value="CHF">CHF</option>
+              <option value="EUR">EUR</option>
+              <option value="%">%</option>
+            </select>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Discount Percentage
-            </label>
-            <div className="relative">
-              <input
-                type="number"
-                name="discountPercentage"
-                value={formData.discountPercentage}
-                onChange={handleChange}
-                min="0"
-                max="100"
-                className="w-full px-3 py-2 border rounded-lg pr-8"
-                required
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">%</span>
-            </div>
-          </div>
+        </div>
           
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -223,9 +212,7 @@ const DiscountVouchers = () => {
     {
       id: 1,
       code: 'SUMMER2025',
-      discountCHF: 50,
-      discountEUR: 45,
-      discountPercentage: 10,
+      discount: '50 CHF',
       validFrom: '2025-06-01',
       validUntil: '2025-08-31',
       maxUses: 100,
@@ -235,14 +222,22 @@ const DiscountVouchers = () => {
     {
       id: 2,
       code: 'WELCOME10',
-      discountCHF: 25,
-      discountEUR: 22,
-      discountPercentage: 5,
+      discount: '45 EUR',
       validFrom: '2025-01-01',
       validUntil: '2025-12-31',
       maxUses: 500,
       usedCount: 187,
       description: 'Welcome discount for new customers'
+    },
+    {
+      id: 3,
+      code: 'SPRING2025',
+      discount: '10%',
+      validFrom: '2025-03-01',
+      validUntil: '2025-05-31',
+      maxUses: 200,
+      usedCount: 15,
+      description: 'Spring season discount'
     }
   ]);
 
@@ -282,9 +277,7 @@ const DiscountVouchers = () => {
     // Create data for export
     const exportData = filteredVouchers.map(voucher => ({
       Code: voucher.code,
-      DiscountCHF: voucher.discountCHF,
-      DiscountEUR: voucher.discountEUR,
-      DiscountPercentage: voucher.discountPercentage,
+      Discount: voucher.discount,
       ValidFrom: voucher.validFrom,
       ValidUntil: voucher.validUntil,
       MaxUses: voucher.maxUses,
@@ -374,9 +367,7 @@ const DiscountVouchers = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Code</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Discount CHF</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Discount EUR</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Discount %</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Discount</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Valid Period</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Usage</th>
                 <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
@@ -391,9 +382,7 @@ const DiscountVouchers = () => {
                       <div className="text-sm text-gray-500">{voucher.description}</div>
                     </div>
                   </td>
-                  <td className="px-4 py-4 text-brand font-medium">{voucher.discountCHF} CHF</td>
-                  <td className="px-4 py-4 text-brand font-medium">{voucher.discountEUR} EUR</td>
-                  <td className="px-4 py-4 text-brand font-medium">{voucher.discountPercentage}%</td>
+                  <td className="px-4 py-4 text-brand font-medium">{voucher.discount}</td>
                   <td className="px-4 py-4 text-sm text-gray-500">
                     {new Date(voucher.validFrom).toLocaleDateString()} - {new Date(voucher.validUntil).toLocaleDateString()}
                   </td>

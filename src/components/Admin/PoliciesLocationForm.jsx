@@ -1,7 +1,105 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { MapPin, FileText, X, Upload } from 'lucide-react';
+import { loadGoogleMapsScript, initAutocomplete, createMap } from '../../utils/googleMapsUtils';
 
 const PoliciesLocationForm = ({ formData, handleInputChange, handleNestedInputChange }) => {
+
+  const fullAddressRef = useRef(null);
+const mapRef = useRef(null);
+const [mapInstance, setMapInstance] = useState(null);
+const [marker, setMarker] = useState(null);
+
+// Load Google Maps script and initialize autocomplete
+useEffect(() => {
+  let mapInstanceRef = null;
+  let markerRef = null;
+
+  const initializeMap = () => {
+    console.log("Initializing map...");
+    // Check if refs are available
+    if (!mapRef.current || !fullAddressRef.current) {
+      console.warn("Map or address input refs not available yet");
+      return;
+    }
+    
+    try {
+      // Initialize map with default center
+      mapInstanceRef = new window.google.maps.Map(mapRef.current, {
+        center: { lat: 46.818188, lng: 8.227512 }, // Switzerland
+        zoom: 8,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: true,
+      });
+      
+      setMapInstance(mapInstanceRef);
+      
+      // Initialize autocomplete
+      const autocomplete = new window.google.maps.places.Autocomplete(fullAddressRef.current, {
+        fields: ['formatted_address', 'geometry', 'name'],
+      });
+      
+      // Add listener for place selection
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        if (place && place.formatted_address && place.geometry) {
+          console.log("Place selected:", place);
+          
+          // Update the form with the selected address
+          handleLocationChange('fullAddress', place.formatted_address);
+          
+          // Get position
+          const position = {
+            lat: place.geometry.location.lat(),
+            lng: place.geometry.location.lng()
+          };
+          
+          // Update form data with location coordinates
+          handleLocationChange('mapLocation', position);
+          
+          // Center map on selected location
+          mapInstanceRef.setCenter(position);
+          mapInstanceRef.setZoom(15);
+          
+          // Remove previous marker if exists
+          if (markerRef) markerRef.setMap(null);
+          
+          // Add new marker
+          markerRef = new window.google.maps.Marker({
+            position,
+            map: mapInstanceRef,
+            animation: window.google.maps.Animation.DROP
+          });
+          
+          setMarker(markerRef);
+        }
+      });
+    } catch (error) {
+      console.error("Error initializing Google Maps:", error);
+    }
+  };
+
+  loadGoogleMapsScript(() => {
+    console.log("Google Maps script loaded");
+    if (window.google && window.google.maps) {
+      // Make sure the DOM is fully rendered before initializing the map
+      setTimeout(initializeMap, 100);
+    } else {
+      console.error("Google Maps failed to load properly");
+    }
+  });
+
+  // Cleanup function
+  return () => {
+    if (mapInstanceRef) {
+      // Clean up resources if needed
+    }
+  };
+}, []);
+
+
+
+
   const [uploadedFile, setUploadedFile] = useState(null);
 
   const handleLocationChange = (field, value) => {
@@ -72,19 +170,25 @@ const PoliciesLocationForm = ({ formData, handleInputChange, handleNestedInputCh
             />
           </div> */}
 
-          <div className="space-y-2">
-            <label htmlFor="fullAddress" className="block text-sm font-medium text-gray-700">
-              Full Address
-            </label>
-            <input
-              type="text"
-              id="fullAddress"
-              value={formData.location.fullAddress}
-              onChange={(e) => handleLocationChange('fullAddress', e.target.value)}
-              placeholder="e.g. 7082 Vaz/Obervaz, Switzerland"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
-            />
-          </div>
+        <div className="space-y-2">
+          <label htmlFor="fullAddress" className="block text-sm font-medium text-gray-700">
+            Full Address
+          </label>
+          <input
+            type="text"
+            id="fullAddress"
+            ref={fullAddressRef}
+            value={formData.location.fullAddress}
+            onChange={(e) => handleLocationChange('fullAddress', e.target.value)}
+            placeholder="e.g. 7082 Vaz/Obervaz, Switzerland"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+              }
+            }}
+          />
+        </div>
         </div>
 
         {/* Map Location */}
@@ -92,19 +196,12 @@ const PoliciesLocationForm = ({ formData, handleInputChange, handleNestedInputCh
           <label className="block text-sm font-medium text-gray-700">
             Map Location
           </label>
-          <div className="border border-gray-300 rounded-md overflow-hidden h-64 bg-gray-100 flex items-center justify-center">
-            <div className="text-center p-4">
-              <MapPin className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-              <p className="text-gray-600 text-sm">
-                Map preview would appear here
-              </p>
-              <p className="text-gray-500 text-xs mt-1">
-                In the actual implementation, this would show a Google Maps view
-              </p>
-            </div>
-          </div>
+          <div 
+            ref={mapRef}
+            className="border border-gray-300 rounded-md overflow-hidden h-64 bg-gray-100"
+          ></div>
           <p className="text-xs text-gray-500">
-            Drag the pin to set the exact location of your property. For privacy reasons, guests will only see the approximate location until they book.
+            Search for your address above and the map will update automatically. For privacy reasons, guests will only see the approximate location until they book.
           </p>
         </div>
       </div>

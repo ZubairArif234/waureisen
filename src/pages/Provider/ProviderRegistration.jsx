@@ -4,8 +4,11 @@ import { ArrowLeft, Check, HelpCircle } from 'lucide-react';
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
 import { providerSignup } from '../../api/authAPI';
+import { useLanguage } from '../../utils/LanguageContext';
+
 
 const ProviderRegistration = () => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -176,12 +179,12 @@ const ProviderRegistration = () => {
       case 1:
         return (
           <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900">Personal Information</h2>
+            <h2 className="text-xl font-semibold text-gray-900">{t('personal_information')}</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
-                  First Name *
+                {t('first_name')} *
                 </label>
                 <input
                   type="text"
@@ -200,7 +203,7 @@ const ProviderRegistration = () => {
               
               <div>
                 <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-                  Last Name *
+                {t('last_name')} *
                 </label>
                 <input
                   type="text"
@@ -220,7 +223,7 @@ const ProviderRegistration = () => {
             
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email Address *
+              {t('email_address')} *
               </label>
               <input
                 type="email"
@@ -240,7 +243,7 @@ const ProviderRegistration = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                  Password *
+                {t('password')} *
                 </label>
                 <input
                   type="password"
@@ -257,13 +260,13 @@ const ProviderRegistration = () => {
                   <p className="mt-1 text-sm text-red-600">{errors.password}</p>
                 )}
                 <p className="mt-1 text-sm text-gray-500">
-                  Must be at least 8 characters
+                {t('password_min_length')}
                 </p>
               </div>
               
               <div>
                 <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                  Confirm Password *
+                {t('confirm_password')} *
                 </label>
                 <input
                   type="password"
@@ -284,7 +287,7 @@ const ProviderRegistration = () => {
             
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                Phone Number *
+              {t('phone_number')} *
               </label>
               <input
                 type="tel"
@@ -303,7 +306,7 @@ const ProviderRegistration = () => {
             
             <div>
               <label htmlFor="street" className="block text-sm font-medium text-gray-700 mb-1">
-                Street Address *
+              {t('street_address')} *
               </label>
               <input
                 type="text"
@@ -323,7 +326,7 @@ const ProviderRegistration = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
-                  City *
+                {t('city')} *
                 </label>
                 <input
                   type="text"
@@ -342,7 +345,7 @@ const ProviderRegistration = () => {
               
               <div>
                 <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700 mb-1">
-                  Postal Code *
+                {t('postal_code')} *
                 </label>
                 <input
                   type="text"
@@ -361,7 +364,7 @@ const ProviderRegistration = () => {
               
               <div>
                 <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-1">
-                  Country *
+                {t('country')} *
                 </label>
                 <select
                   id="country"
@@ -381,7 +384,7 @@ const ProviderRegistration = () => {
             
             <div>
               <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700 mb-1">
-                Date of Birth
+              {t('date_of_birth')}
               </label>
               <input
                 type="date"
@@ -398,11 +401,11 @@ const ProviderRegistration = () => {
       case 2:
         return (
           <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900">Business Information</h2>
+            <h2 className="text-xl font-semibold text-gray-900">{t('business_information')}</h2>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Business Type
+              {t('business_type')}
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div
@@ -421,10 +424,10 @@ const ProviderRegistration = () => {
                         <div className="w-3 h-3 rounded-full bg-brand"></div>
                       )}
                     </div>
-                    <span className="font-medium">Individual</span>
+                    <span className="font-medium">{t('individual')}</span>
                   </div>
                   <p className="mt-2 text-xs text-gray-500">
-                    I'm renting my personal property
+                    {t('renting_personal_property')}
                   </p>
                 </div>
                 
@@ -444,10 +447,10 @@ const ProviderRegistration = () => {
                         <div className="w-3 h-3 rounded-full bg-brand"></div>
                       )}
                     </div>
-                    <span className="font-medium">Company</span>
+                    <span className="font-medium">{t('company')}</span>
                   </div>
                   <p className="mt-2 text-xs text-gray-500">
-                    I represent a registered business
+                  {t('represent_registered_business')}
                   </p>
                 </div>
                 
@@ -467,10 +470,10 @@ const ProviderRegistration = () => {
                         <div className="w-3 h-3 rounded-full bg-brand"></div>
                       )}
                     </div>
-                    <span className="font-medium">Property Manager</span>
+                    <span className="font-medium">{t('property_manager')}</span>
                   </div>
                   <p className="mt-2 text-xs text-gray-500">
-                    I manage properties for others
+                  {t('manage_properties_for_others')}
                   </p>
                 </div>
               </div>
@@ -479,7 +482,7 @@ const ProviderRegistration = () => {
             {formData.businessType !== 'individual' && (
               <div>
                 <label htmlFor="businessName" className="block text-sm font-medium text-gray-700 mb-1">
-                  Business Name *
+                {t('business_name')} *
                 </label>
                 <input
                   type="text"
@@ -499,7 +502,7 @@ const ProviderRegistration = () => {
             
             <div>
               <label htmlFor="vatNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                VAT Number (Optional)
+              {t('vat_number')} ({t('optional')})
               </label>
               <input
                 type="text"
@@ -513,7 +516,7 @@ const ProviderRegistration = () => {
             
             <div>
               <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-1">
-                Website (Optional)
+              {t('website')} ({t('optional')})
               </label>
               <input
                 type="url"
@@ -528,7 +531,7 @@ const ProviderRegistration = () => {
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                How many properties do you plan to list?
+              {t('properties_to_list')}
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {['1', '2-5', '6-10', '10+'].map((count) => (
@@ -558,7 +561,7 @@ const ProviderRegistration = () => {
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Do you have previous hosting experience?
+              {t('hosting_experience')}
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {[
@@ -595,14 +598,14 @@ const ProviderRegistration = () => {
       case 3:
         return (
           <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900">Banking Details</h2>
+            <h2 className="text-xl font-semibold text-gray-900">{t('banking_details')}</h2>
             <p className="text-sm text-gray-500 mb-4">
-              Your banking details are required to process payouts for bookings.
+            {t('banking_details_required')}
             </p>
             
             <div>
               <label htmlFor="bankName" className="block text-sm font-medium text-gray-700 mb-1">
-                Bank Name *
+              {t('bank_name')} *
               </label>
               <input
                 type="text"
@@ -621,7 +624,7 @@ const ProviderRegistration = () => {
             
             <div>
               <label htmlFor="accountHolder" className="block text-sm font-medium text-gray-700 mb-1">
-                Account Holder Name *
+              {t('account_holder_name')} *
               </label>
               <input
                 type="text"
@@ -637,13 +640,13 @@ const ProviderRegistration = () => {
                 <p className="mt-1 text-sm text-red-600">{errors.accountHolder}</p>
               )}
               <p className="mt-1 text-sm text-gray-500">
-                Must match the name on your bank account
+              {t('match_bank_account_name')}
               </p>
             </div>
             
             <div>
               <label htmlFor="iban" className="block text-sm font-medium text-gray-700 mb-1">
-                IBAN *
+              {t('iban')} *
               </label>
               <input
                 type="text"
@@ -663,7 +666,7 @@ const ProviderRegistration = () => {
             
             <div>
               <label htmlFor="swift" className="block text-sm font-medium text-gray-700 mb-1">
-                SWIFT/BIC Code (Optional)
+              {t('swift_code')} ({t('optional')})
               </label>
               <input
                 type="text"
@@ -679,10 +682,9 @@ const ProviderRegistration = () => {
               <div className="flex items-start gap-3">
                 <HelpCircle className="w-5 h-5 text-blue-500 mt-0.5" />
                 <div>
-                  <h3 className="text-sm font-medium text-blue-800">Payment Information</h3>
+                <h3 className="text-sm font-medium text-blue-800">{t('payment_information')}</h3>
                   <p className="mt-1 text-sm text-blue-600">
-                    You'll receive payments for bookings at the end of each month. 
-                    Bookings must be completed before payment is processed.
+                  {t('payment_explanation')}
                   </p>
                 </div>
               </div>
@@ -693,11 +695,11 @@ const ProviderRegistration = () => {
       case 4:
         return (
           <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900">Final Steps</h2>
+            <h2 className="text-xl font-semibold text-gray-900">{t('final_steps')}</h2>
             
             <div>
               <label htmlFor="heardAboutUs" className="block text-sm font-medium text-gray-700 mb-1">
-                How did you hear about us?
+              {t('heard_about_us')}
               </label>
               <select
                 id="heardAboutUs"
@@ -706,12 +708,12 @@ const ProviderRegistration = () => {
                 onChange={handleInputChange}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
               >
-                <option value="">Select an option</option>
-                <option value="search">Search Engine</option>
-                <option value="social">Social Media</option>
-                <option value="friend">Friend or Colleague</option>
-                <option value="advertisement">Advertisement</option>
-                <option value="other">Other</option>
+                <option value="">{t('select_option')}</option>
+                <option value="search">{t('search_engine')}</option>
+                <option value="social">{t('social_media')}</option>
+                <option value="friend">{t('friend_colleague')}</option>
+                <option value="advertisement">{t('advertisement')}</option>
+                <option value="other">{t('other')}</option>
               </select>
             </div>
             
@@ -731,7 +733,7 @@ const ProviderRegistration = () => {
                 </div>
                 <div>
                   <label htmlFor="terms" className="text-sm text-gray-700">
-                    I agree to the <a href="/terms" className="text-brand hover:underline">Terms and Conditions</a> and <a href="/privacy-policy" className="text-brand hover:underline">Privacy Policy</a>
+                  {t('agree_to')} <a href="/terms" className="text-brand hover:underline">{t('terms_and_conditions')}</a> {t('and')} <a href="/privacy-policy" className="text-brand hover:underline">{t('privacy_policy')}</a>
                   </label>
                   {errors.terms && (
                     <p className="mt-1 text-sm text-red-600">{errors.terms}</p>
@@ -752,14 +754,14 @@ const ProviderRegistration = () => {
                 </div>
                 <div>
                   <label htmlFor="newsletter" className="text-sm text-gray-700">
-                    I would like to receive newsletters and marketing communications
+                  {t('newsletter_opt_in')}
                   </label>
                 </div>
               </div>
             </div>
             
             <div className="bg-gray-50 p-6 rounded-lg mt-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">What happens next?</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('what_happens_next')}</h3>
               
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
@@ -767,7 +769,7 @@ const ProviderRegistration = () => {
                     <span className="text-xs font-medium">1</span>
                   </div>
                   <p className="text-sm text-gray-600">
-                    We'll review your application within 1-2 business days
+                  {t('application_review')}
                   </p>
                 </div>
                 
@@ -776,7 +778,7 @@ const ProviderRegistration = () => {
                     <span className="text-xs font-medium">2</span>
                   </div>
                   <p className="text-sm text-gray-600">
-                    Once approved, you can start creating listings for your properties
+                  {t('create_listings_when_approved')}
                   </p>
                 </div>
                 
@@ -785,7 +787,7 @@ const ProviderRegistration = () => {
                     <span className="text-xs font-medium">3</span>
                   </div>
                   <p className="text-sm text-gray-600">
-                    Our team will help you optimize your listings to attract more guests
+                  {t('optimize_listings')}
                   </p>
                 </div>
               </div>
@@ -817,7 +819,7 @@ const ProviderRegistration = () => {
             <ArrowLeft className="w-5 h-5 text-gray-600" />
           </button>
           <h1 className="text-2xl font-semibold text-gray-900">
-            Register as a Provider
+          {t('register_as_provider')}
           </h1>
         </div>
         
@@ -852,10 +854,10 @@ const ProviderRegistration = () => {
           </div>
           
           <div className="flex justify-between mt-2">
-            <span className="text-xs font-medium text-gray-500">Personal Info</span>
-            <span className="text-xs font-medium text-gray-500">Business Info</span>
-            <span className="text-xs font-medium text-gray-500">Banking Details</span>
-            <span className="text-xs font-medium text-gray-500">Final Steps</span>
+          <span className="text-xs font-medium text-gray-500">{t('personal_info')}</span>
+          <span className="text-xs font-medium text-gray-500">{t('business_info')}</span>
+          <span className="text-xs font-medium text-gray-500">{t('banking_details')}</span>
+          <span className="text-xs font-medium text-gray-500">{t('final_steps')}</span>
           </div>
         </div>
         
@@ -872,7 +874,7 @@ const ProviderRegistration = () => {
                 currentStep === 1 ? 'invisible' : ''
               }`}
             >
-              Previous
+                {t('previous')}
             </button>
             
             {currentStep < 4 ? (
@@ -881,7 +883,7 @@ const ProviderRegistration = () => {
                 onClick={nextStep}
                 className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand/90 transition-colors"
               >
-                Next
+                {t('next')}
               </button>
             ) : (
               <button
@@ -893,7 +895,7 @@ const ProviderRegistration = () => {
                 {isSubmitting ? (
                   <div className="flex items-center">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                    <span>Submitting...</span>
+                    <span>{t('complete_registration')}</span>
                   </div>
                 ) : (
                   'Complete Registration'

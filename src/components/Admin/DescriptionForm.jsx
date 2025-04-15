@@ -72,7 +72,7 @@ const DescriptionForm = ({ formData, handleInputChange }) => {
         </p>
       </div>
 
-      {/* What this place offers */}
+      {/* What this place offers
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-700">
           What this place offers
@@ -82,7 +82,7 @@ const DescriptionForm = ({ formData, handleInputChange }) => {
             This section is automatically generated based on the amenities you selected.
           </p>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

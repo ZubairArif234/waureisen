@@ -25,9 +25,13 @@ const mockAccommodationData = {
     discountedPrice: 240
   },
   availability: {
-    checkInDates: 'Mar 20, 2025 - Mar 21, 2025',
-    allowInstantBooking: true,
-    active: true
+    checkInDates: '',
+    checkInDate: null,
+    checkOutDate: null,
+    checkInTime: { hour: '', period: '' },
+    checkOutTime: { hour: '', period: '' },
+    allowInstantBooking: false,
+    active: false
   },
   mainImage: null,
   galleryImages: [],
@@ -91,6 +95,10 @@ const AddAccommodation = () => {
     },
     availability: {
       checkInDates: '',
+      checkInDate: null,
+      checkOutDate: null,
+      checkInTime: { hour: '', period: '' },
+      checkOutTime: { hour: '', period: '' },
       allowInstantBooking: false,
       active: false
     },
@@ -184,9 +192,7 @@ const AddAccommodation = () => {
     });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
+  const handleSubmit = () => {
     // Here you would typically send the data to your backend
     if (isEditMode) {
       console.log(`Updating listing ${id} with data:`, formData);
@@ -297,7 +303,7 @@ const AddAccommodation = () => {
               <p className="text-gray-600">Loading listing data...</p>
             </div>
           ) : (
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={(e) => e.preventDefault()}>
               {renderForm()}
             </form>
           )}
@@ -313,7 +319,7 @@ const AddAccommodation = () => {
             Cancel
           </button>
           <button
-            type="submit"
+            type="button"
             onClick={handleSubmit}
             className="px-4 py-2 bg-black text-white rounded-lg hover:bg-black/80 transition-colors flex items-center gap-2"
           >

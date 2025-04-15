@@ -6,6 +6,7 @@ import Footer from '../../components/Shared/Footer';
 import avatar from '../../assets/avatar.png';
 import i1 from '../../assets/i1.png';
 import i2 from '../../assets/i2.png';
+import { useLanguage } from '../../utils/LanguageContext';
 
 // ContactCard component for the sidebar
 const ContactCard = ({ contact, isActive, onClick }) => {
@@ -64,10 +65,11 @@ const MessageBubble = ({ message, isOwn }) => {
 
 // Booking Info Card component
 const BookingInfoCard = ({ booking }) => {
+  const { t } = useLanguage();
   return (
     <div className="border border-gray-200 rounded-lg overflow-hidden shadow-sm mb-4">
       <div className="p-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-        <h3 className="font-medium text-gray-900">Booking Details</h3>
+      <h3 className="font-medium text-gray-900">{t('booking_details')}</h3>
         <span className={`text-xs font-medium px-2 py-1 rounded-full ${
           booking.status === 'confirmed' 
             ? 'bg-green-100 text-green-800' 
@@ -99,7 +101,7 @@ const BookingInfoCard = ({ booking }) => {
                 {booking.checkIn} - {booking.checkOut}
               </span>
               <span className="text-gray-500 ml-1">
-                ({booking.nights} {booking.nights === 1 ? 'night' : 'nights'})
+              ({booking.nights} {booking.nights === 1 ? t('night') : t('nights')})
               </span>
             </div>
           </div>
@@ -107,20 +109,20 @@ const BookingInfoCard = ({ booking }) => {
           <div className="flex items-center gap-2">
             <User className="w-4 h-4 text-gray-400" />
             <span className="text-sm text-gray-900">
-              {booking.guests} {booking.guests === 1 ? 'guest' : 'guests'}, {booking.dogs} {booking.dogs === 1 ? 'dog' : 'dogs'}
+            {booking.guests} {booking.guests === 1 ? t('guest') : t('guests')}, {booking.dogs} {booking.dogs === 1 ? t('dog') : t('dogs')}
             </span>
           </div>
           
           <div className="flex items-center gap-2">
             <Info className="w-4 h-4 text-gray-400" />
             <span className="text-sm text-gray-900">
-              Booking ID: #{booking.id}
+            {t('booking_id')}: #{booking.id}
             </span>
           </div>
           
           <div className="pt-2 mt-2 border-t border-gray-200">
             <div className="flex justify-between">
-              <span className="text-sm text-gray-500">Total Amount</span>
+            <span className="text-sm text-gray-500">{t('total_amount')}</span>
               <span className="text-sm font-medium text-brand">{booking.totalAmount} CHF</span>
             </div>
           </div>
@@ -131,6 +133,7 @@ const BookingInfoCard = ({ booking }) => {
 };
 
 const ProviderMessages = () => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const messageInputRef = useRef(null);
@@ -344,7 +347,7 @@ const ProviderMessages = () => {
             >
               <ArrowLeft className="w-6 h-6 text-gray-600" />
             </button>
-            <h1 className="text-2xl font-semibold text-gray-900 ml-4">Messages</h1>
+            <h1 className="text-2xl font-semibold text-gray-900 ml-4">{t('messages')}</h1>
           </div>
           
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm mb-8">
@@ -356,7 +359,7 @@ const ProviderMessages = () => {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                     <input
                       type="text"
-                      placeholder="Search messages..."
+                      placeholder={t('search_messages')}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
@@ -376,7 +379,7 @@ const ProviderMessages = () => {
                   
                   {filteredContacts.length === 0 && (
                     <div className="p-4 text-center text-gray-500">
-                      No conversations found.
+                      {t('no_conversations_found')}
                     </div>
                   )}
                 </div>
@@ -402,7 +405,7 @@ const ProviderMessages = () => {
                         <div>
                           <h3 className="font-medium text-gray-900">{currentContact.name}</h3>
                           <p className="text-xs text-gray-500">
-                            {currentContact.isOnline ? 'Online' : 'Last active: Yesterday'}
+                          {currentContact.isOnline ? t('online') : t('last_active_yesterday')}
                           </p>
                         </div>
                       </div>
@@ -452,7 +455,7 @@ const ProviderMessages = () => {
                         <div className="flex-1 relative">
                           <textarea
                             ref={messageInputRef}
-                            placeholder="Type a message..."
+                            placeholder={t('type_message')}
                             value={newMessage}
                             onChange={(e) => setNewMessage(e.target.value)}
                             onKeyDown={handleKeyDown}
@@ -477,8 +480,8 @@ const ProviderMessages = () => {
                 ) : (
                   <div className="flex-1 flex items-center justify-center">
                     <div className="text-center">
-                      <p className="text-gray-500 mb-2">Select a conversation</p>
-                      <p className="text-gray-400 text-sm">Choose a contact from the left to start chatting</p>
+                    <p className="text-gray-500 mb-2">{t('select_conversation')}</p>
+                    <p className="text-gray-400 text-sm">{t('choose_contact_to_chat')}</p>
                     </div>
                   </div>
                 )}

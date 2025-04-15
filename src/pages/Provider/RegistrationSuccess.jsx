@@ -4,6 +4,7 @@ import { CheckCircle, ArrowRight } from 'lucide-react';
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
 
+
 const RegistrationSuccess = () => {
   const navigate = useNavigate();
   

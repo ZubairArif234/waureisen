@@ -20,6 +20,9 @@ const Profile = () => {
     profilePicture: null,
     dogs: [
       { id: 1, name: '', gender: '' }
+    ],
+    travellers: [
+      { id: 1, name: '', gender: '', relationship: '' }
     ]
   });
 
@@ -121,10 +124,38 @@ const Profile = () => {
   };
 
   const removeDog = (id) => {
+    if (profileData.dogs.length > 1) {
+      setProfileData(prev => ({
+        ...prev,
+        dogs: prev.dogs.filter(dog => dog.id !== id)
+      }));
+    }
+  };
+
+  const handleTravellerInputChange = (id, field, value) => {
     setProfileData(prev => ({
       ...prev,
-      dogs: prev.dogs.filter(dog => dog.id !== id)
+      travellers: prev.travellers.map(traveller => 
+        traveller.id === id ? { ...traveller, [field]: value } : traveller
+      )
     }));
+  };
+  
+  const addTraveller = () => {
+    const newTravellerId = Math.max(0, ...profileData.travellers.map(t => t.id)) + 1;
+    setProfileData(prev => ({
+      ...prev,
+      travellers: [...prev.travellers, { id: newTravellerId, name: '', gender: '', relationship: '' }]
+    }));
+  };
+  
+  const removeTraveller = (id) => {
+    if (profileData.travellers.length > 1) {
+      setProfileData(prev => ({
+        ...prev,
+        travellers: prev.travellers.filter(t => t.id !== id)
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -460,6 +491,112 @@ const Profile = () => {
                 </div>
               ))}
             </div>
+
+
+              {/* Other Travellers Section */}
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-medium text-gray-800">{t('other_travellers')}</h3>
+                  {isEditing && (
+                    <button
+                      type="button"
+                      onClick={addTraveller}
+                      className="flex items-center gap-1 text-sm text-brand hover:text-brand/80 transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                      {t('add_traveller')}
+                    </button>
+                  )}
+                </div>
+
+                {profileData.travellers.map((traveller) => (
+                  <div key={traveller.id} className="p-4 border rounded-lg bg-gray-50 relative">
+                    {isEditing && profileData.travellers.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeTraveller(traveller.id)}
+                        className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    )}
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700">{t('name')}</label>
+                        <input
+                          type="text"
+                          value={traveller.name}
+                          onChange={(e) => handleTravellerInputChange(traveller.id, 'name', e.target.value)}
+                          disabled={!isEditing}
+                          className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-brand/20 focus:border-brand disabled:bg-gray-50 disabled:text-gray-500"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700">{t('relationship')}</label>
+                        <select
+                          value={traveller.relationship}
+                          onChange={(e) => handleTravellerInputChange(traveller.id, 'relationship', e.target.value)}
+                          disabled={!isEditing}
+                          className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-brand/20 focus:border-brand disabled:bg-gray-50 disabled:text-gray-500"
+                        >
+                          <option value="">{t('select_relationship')}</option>
+                          <option value="partner">{t('partner')}</option>
+                          <option value="friend">{t('friend')}</option>
+                          <option value="family">{t('family')}</option>
+                          <option value="other">{t('other')}</option>
+                        </select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700">{t('gender')}</label>
+                        <div className="flex gap-4">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              name={`traveller-gender-${traveller.id}`}
+                              value="male"
+                              checked={traveller.gender === 'male'}
+                              onChange={() => handleTravellerInputChange(traveller.id, 'gender', 'male')}
+                              disabled={!isEditing}
+                              className="hidden"
+                            />
+                            <div className={`w-6 h-6 rounded-full border flex items-center justify-center ${
+                              traveller.gender === 'male' 
+                                ? 'border-brand bg-brand/10' 
+                                : 'border-gray-300'
+                            }`}>
+                              {traveller.gender === 'male' && <div className="w-3 h-3 rounded-full bg-brand" />}
+                            </div>
+                            <span>{t('male')}</span>
+                          </label>
+                          
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              name={`traveller-gender-${traveller.id}`}
+                              value="female"
+                              checked={traveller.gender === 'female'}
+                              onChange={() => handleTravellerInputChange(traveller.id, 'gender', 'female')}
+                              disabled={!isEditing}
+                              className="hidden"
+                            />
+                            <div className={`w-6 h-6 rounded-full border flex items-center justify-center ${
+                              traveller.gender === 'female' 
+                                ? 'border-brand bg-brand/10' 
+                                : 'border-gray-300'
+                            }`}>
+                              {traveller.gender === 'female' && <div className="w-3 h-3 rounded-full bg-brand" />}
+                            </div>
+                            <span>{t('female')}</span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
 
             {/* Submit Button */}
             {isEditing && (

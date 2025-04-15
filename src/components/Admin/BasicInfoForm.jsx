@@ -1,7 +1,11 @@
 import React from 'react';
 import { Calendar } from 'lucide-react';
+import { useState } from 'react';
+import DateRangePicker from '../HomeComponents/DateRangePicker';
+
 
 const BasicInfoForm = ({ formData, handleInputChange, handleNestedInputChange }) => {
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   return (
     <div className="space-y-8">
       <div>
@@ -56,6 +60,23 @@ const BasicInfoForm = ({ formData, handleInputChange, handleNestedInputChange })
             <option value="Tent">Tent</option>
             <option value="Tree House">Tree House</option>
           </select>
+
+           {/* Room Category input - only shows when Hotel is selected */}
+    {formData.propertyType === 'Hotel' && (
+      <div className="mt-4">
+        <label htmlFor="roomCategory" className="block text-sm font-medium text-gray-700">
+          Room Category
+        </label>
+        <input
+          type="text"
+          id="roomCategory"
+          value={formData.roomCategory || ''}
+          onChange={(e) => handleInputChange('roomCategory', e.target.value)}
+          placeholder="e.g. Deluxe Room, Suite, etc."
+          className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+        />
+      </div>
+    )}
         </div>
 
         <div className="space-y-2">
@@ -210,67 +231,170 @@ const BasicInfoForm = ({ formData, handleInputChange, handleNestedInputChange })
       </div>
 
       {/* Availability Section */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Availability</h3>
-        
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">Check-in/Check-out Dates</label>
-            <div className="relative">
-              <input
-                type="text"
-                value={formData.availability.checkInDates}
-                placeholder="Check-in/Check-out"
-                onChange={(e) => handleNestedInputChange('availability', 'checkInDates', e.target.value)}
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
-              />
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            </div>
-            <p className="text-xs text-gray-500">Example format: Mar 20, 2025 - Mar 21, 2025</p>
-          </div>
+<div className="space-y-4">
+  <h3 className="text-lg font-medium text-gray-900">Availability</h3>
+  
+  <div className="space-y-6">
+    <div className="space-y-2">
+      <label className="block text-sm font-medium text-gray-700">
+        Check-in/Check-out Dates
+      </label>
+      <div 
+        className="relative border border-gray-300 rounded-md px-3 py-2 cursor-pointer flex items-center"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsDatePickerOpen(true);
+        }}
+      >
+        <Calendar className="w-5 h-5 text-gray-400 mr-2" />
+        <span className="text-sm text-gray-700">
+          {formData.availability.checkInDates || "Select check-in and check-out dates"}
+        </span>
+      </div>
+    </div>
 
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <label htmlFor="instantBooking" className="text-sm font-medium text-gray-700">
-                Allow Instant Booking
-              </label>
-              <div className="relative inline-block w-10 align-middle select-none">
-                <input
-                  type="checkbox"
-                  id="instantBooking"
-                  checked={formData.availability.allowInstantBooking}
-                  onChange={(e) => handleNestedInputChange('availability', 'allowInstantBooking', e.target.checked)}
-                  className="absolute block w-6 h-6 bg-white border-2 border-gray-300 rounded-full appearance-none cursor-pointer checked:right-0 checked:border-brand checked:bg-brand"
-                />
-                <label
-                  htmlFor="instantBooking"
-                  className="block h-6 overflow-hidden bg-gray-200 rounded-full cursor-pointer"
-                ></label>
-              </div>
-            </div>
+    {/* Check-in and Check-out Times */}
+    <div className="grid grid-cols-2 gap-4">
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">
+          Check-in Time
+        </label>
+        <div className="flex">
+          <select
+            value={formData.availability.checkInTime?.hour || ""}
+            onChange={(e) => handleNestedInputChange('availability', 'checkInTime', {
+              ...formData.availability.checkInTime || {},
+              hour: e.target.value
+            })}
+            className="flex-1 border border-gray-300 rounded-l-md py-2 px-3"
+          >
+            <option value="">Hour</option>
+            {Array.from({ length: 12 }, (_, i) => (
+              <option key={i} value={i + 1}>{i + 1}</option>
+            ))}
+          </select>
+          <select
+            value={formData.availability.checkInTime?.period || ""}
+            onChange={(e) => handleNestedInputChange('availability', 'checkInTime', {
+              ...formData.availability.checkInTime || {},
+              period: e.target.value
+            })}
+            className="w-20 border-t border-b border-r border-gray-300 rounded-r-md py-2 px-3"
+          >
+            <option value="">--</option>
+            <option value="AM">AM</option>
+            <option value="PM">PM</option>
+          </select>
+        </div>
+      </div>
 
-            <div className="flex items-center gap-2">
-              <label htmlFor="activeListing" className="text-sm font-medium text-gray-700">
-                Active Listing
-              </label>
-              <div className="relative inline-block w-10 align-middle select-none">
-                <input
-                  type="checkbox"
-                  id="activeListing"
-                  checked={formData.availability.active}
-                  onChange={(e) => handleNestedInputChange('availability', 'active', e.target.checked)}
-                  className="absolute block w-6 h-6 bg-white border-2 border-gray-300 rounded-full appearance-none cursor-pointer checked:right-0 checked:border-brand checked:bg-brand"
-                />
-                <label
-                  htmlFor="activeListing"
-                  className="block h-6 overflow-hidden bg-gray-200 rounded-full cursor-pointer"
-                ></label>
-              </div>
-            </div>
-          </div>
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">
+          Check-out Time
+        </label>
+        <div className="flex">
+          <select
+            value={formData.availability.checkOutTime?.hour || ""}
+            onChange={(e) => handleNestedInputChange('availability', 'checkOutTime', {
+              ...formData.availability.checkOutTime || {},
+              hour: e.target.value
+            })}
+            className="flex-1 border border-gray-300 rounded-l-md py-2 px-3"
+          >
+            <option value="">Hour</option>
+            {Array.from({ length: 12 }, (_, i) => (
+              <option key={i} value={i + 1}>{i + 1}</option>
+            ))}
+          </select>
+          <select
+            value={formData.availability.checkOutTime?.period || ""}
+            onChange={(e) => handleNestedInputChange('availability', 'checkOutTime', {
+              ...formData.availability.checkOutTime || {},
+              period: e.target.value
+            })}
+            className="w-20 border-t border-b border-r border-gray-300 rounded-r-md py-2 px-3"
+          >
+            <option value="">--</option>
+            <option value="AM">AM</option>
+            <option value="PM">PM</option>
+          </select>
         </div>
       </div>
     </div>
+
+    <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center gap-2">
+        <label htmlFor="instantBooking" className="text-sm font-medium text-gray-700">
+          Allow Instant Booking
+        </label>
+        <div className="relative inline-block w-10 align-middle select-none">
+          <input
+            type="checkbox"
+            id="instantBooking"
+            checked={formData.availability.allowInstantBooking}
+            onChange={(e) => handleNestedInputChange('availability', 'allowInstantBooking', e.target.checked)}
+            className="absolute block w-6 h-6 bg-white border-2 border-gray-300 rounded-full appearance-none cursor-pointer checked:right-0 checked:border-brand checked:bg-brand"
+          />
+          <label
+            htmlFor="instantBooking"
+            className="block h-6 overflow-hidden bg-gray-200 rounded-full cursor-pointer"
+          ></label>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <label htmlFor="activeListing" className="text-sm font-medium text-gray-700">
+          Active Listing
+        </label>
+        <div className="relative inline-block w-10 align-middle select-none">
+          <input
+            type="checkbox"
+            id="activeListing"
+            checked={formData.availability.active}
+            onChange={(e) => handleNestedInputChange('availability', 'active', e.target.checked)}
+            className="absolute block w-6 h-6 bg-white border-2 border-gray-300 rounded-full appearance-none cursor-pointer checked:right-0 checked:border-brand checked:bg-brand"
+          />
+          <label
+            htmlFor="activeListing"
+            className="block h-6 overflow-hidden bg-gray-200 rounded-full cursor-pointer"
+          ></label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{/* Date Range Picker */}
+<DateRangePicker
+  isOpen={isDatePickerOpen}
+  onClose={() => setIsDatePickerOpen(false)}
+  selectedRange={{
+    start: formData.availability.checkInDate ? new Date(formData.availability.checkInDate) : null,
+    end: formData.availability.checkOutDate ? new Date(formData.availability.checkOutDate) : null
+  }}
+  onRangeSelect={(range) => {
+    if (range.start && range.end) {
+      // Format dates for display
+      const startDate = range.start.toLocaleDateString();
+      const endDate = range.end.toLocaleDateString();
+      const dateString = `${startDate} - ${endDate}`;
+      
+      // Update form data with the formatted string
+      handleNestedInputChange('availability', 'checkInDates', dateString);
+      
+      // Also store the actual date objects
+      handleNestedInputChange('availability', 'checkInDate', range.start);
+      handleNestedInputChange('availability', 'checkOutDate', range.end);
+      
+      // Close the picker
+      setIsDatePickerOpen(false);
+    }
+  }}
+/>
+    </div>
+
+    
   );
 };
 
