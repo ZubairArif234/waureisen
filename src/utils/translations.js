@@ -290,6 +290,7 @@ const translations = {
     // Accounts page, Login & Security and Payments page
 
     'account': 'Account',
+    'login_as': 'Login as',
     'personal_info': 'Personal info',
     'personal_info_desc': 'Provide personal details and how we can reach you',
     'login_security': 'Login & security',
@@ -826,6 +827,9 @@ const translations = {
     'create_listing': 'Create Listing',
     'update_listing': 'Update Listing',
     'night': 'Night',
+
+
+    'invalid_credentials': 'Invalid email or password',
 
 
   },
@@ -1665,6 +1669,10 @@ const translations = {
 'update_listing': 'Inserat aktualisieren',
 'night': 'Nacht',
 
+
+'invalid_credentials': 'Ungültige E-Mail oder Passwort',
+
+'login_as': 'Anmelden als',
 
   }
 };

@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Filter, MoreHorizontal, UserX, User, AlertTriangle, Eye, Download } from 'lucide-react';
+import { getAllUsers, updateUserStatus, deleteUser } from '../../api/adminAPI';
 import avatar from '../../assets/avatar.png';
 
 // CustomerDetailModal component for viewing customer details
-const CustomerDetailModal = ({ customer, isOpen, onClose }) => {
-  if (!isOpen) return null;
+const CustomerDetailModal = ({ customer, isOpen, onClose, onBanUnban }) => {
+  if (!isOpen || !customer) return null;
   
   return (
     <>
@@ -33,17 +34,31 @@ const CustomerDetailModal = ({ customer, isOpen, onClose }) => {
           {/* Customer Profile */}
           <div className="flex items-center mb-6">
             <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200 mr-4">
-              <img src={avatar} alt={customer.name} className="w-full h-full object-cover" />
+              <img 
+                src={customer.profilePicture && customer.profilePicture !== 'N/A' 
+                    ? customer.profilePicture 
+                    : avatar} 
+                alt={customer.username} 
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = avatar;
+                }}
+              />
             </div>
             <div>
-              <h4 className="text-lg font-medium text-gray-900">{customer.name}</h4>
+              <h4 className="text-lg font-medium text-gray-900">{customer.firstName} {customer.lastName}</h4>
               <p className="text-gray-600">{customer.email}</p>
               <div className={`mt-1 text-sm ${
-                customer.status === 'active' 
+                customer.profileStatus === 'verified' || customer.profileStatus === 'pending verification'
                   ? 'text-green-600' 
                   : 'text-red-600'
               }`}>
-                {customer.status === 'active' ? 'Active Account' : 'Banned Account'}
+                {customer.profileStatus === 'verified' 
+                  ? 'Verified Account' 
+                  : customer.profileStatus === 'banned'
+                    ? 'Banned Account'
+                    : 'Pending Verification'}
               </div>
             </div>
           </div>
@@ -53,25 +68,50 @@ const CustomerDetailModal = ({ customer, isOpen, onClose }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-gray-500">Phone Number</p>
-                <p className="font-medium">{customer.phone || 'Not provided'}</p>
+                <p className="font-medium">{customer.phoneNumber || 'Not provided'}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Customer Number</p>
+                <p className="font-medium">#{customer.customerNumber || 'N/A'}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Joined Date</p>
-                <p className="font-medium">{customer.joinedDate}</p>
+                <p className="font-medium">{new Date(customer.createdAt).toLocaleDateString()}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Total Bookings</p>
-                <p className="font-medium">{customer.bookings}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Account Type</p>
-                <p className="font-medium">{customer.accountType}</p>
+                <p className="font-medium">{customer.totalBookings || 0}</p>
               </div>
             </div>
           </div>
           
+          {/* Dogs Information */}
+          {customer.dogs && customer.dogs.length > 0 && (
+            <div className="mb-6">
+              <h4 className="font-medium text-gray-900 mb-3">Dogs</h4>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                {customer.dogs.map((dog, index) => (
+                  <div key={index} className="flex items-center gap-3 mb-2 last:mb-0">
+                    <div className="w-8 h-8 bg-brand/10 rounded-full flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B4A481" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M10 5.172C10 3.12 12.5 2 14 2c0 3.33 2 4 2 8a6 6 0 1 1-12 0c0-2 2-5 2-5"></path>
+                        <path d="M18 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"></path>
+                        <path d="M6 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"></path>
+                        <path d="M14 19c0 1-1 2-2 2s-2-1-2-2"></path>
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-800">{dog.name || 'Unnamed'}</p>
+                      <p className="text-xs text-gray-500">{dog.gender || 'Gender not specified'}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
           {/* Recent Bookings */}
-          {customer.recentBookings && customer.recentBookings.length > 0 && (
+          {customer.bookings && customer.bookings.length > 0 && (
             <div className="mb-6">
               <h4 className="font-medium text-gray-900 mb-3">Recent Bookings</h4>
               <div className="bg-gray-50 rounded-lg overflow-hidden border">
@@ -90,16 +130,16 @@ const CustomerDetailModal = ({ customer, isOpen, onClose }) => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {customer.recentBookings.map((booking, index) => (
+                    {customer.bookings.map((booking, index) => (
                       <tr key={index}>
                         <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {booking.property}
+                          {booking.listing?.title || 'Unknown Property'}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                          {booking.date}
+                          {new Date(booking.checkInDate).toLocaleDateString()} - {new Date(booking.checkOutDate).toLocaleDateString()}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                          {booking.amount} CHF
+                          {booking.totalPrice} CHF
                         </td>
                       </tr>
                     ))}
@@ -117,8 +157,9 @@ const CustomerDetailModal = ({ customer, isOpen, onClose }) => {
             >
               Close
             </button>
-            {customer.status === 'active' ? (
+            {customer.profileStatus !== 'banned' ? (
               <button
+                onClick={() => onBanUnban(customer._id, 'banned')}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
               >
                 <UserX className="w-4 h-4" />
@@ -126,6 +167,7 @@ const CustomerDetailModal = ({ customer, isOpen, onClose }) => {
               </button>
             ) : (
               <button
+                onClick={() => onBanUnban(customer._id, 'verified')}
                 className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
               >
                 <User className="w-4 h-4" />
@@ -187,7 +229,9 @@ const CustomerRow = ({ customer, onAction }) => {
   const buttonRef = useRef(null);
 
   const statusColors = {
-    active: 'bg-green-100 text-green-800',
+    verified: 'bg-green-100 text-green-800',
+    'pending verification': 'bg-blue-100 text-blue-800',
+    'not verified': 'bg-amber-100 text-amber-800',
     banned: 'bg-red-100 text-red-800'
   };
 
@@ -230,7 +274,7 @@ const CustomerRow = ({ customer, onAction }) => {
   };
 
   const handleBanUnban = () => {
-    onAction(customer.status === 'active' ? 'ban' : 'unban', customer);
+    onAction(customer.profileStatus === 'banned' ? 'unban' : 'ban', customer);
     setShowMenu(false);
   };
 
@@ -244,11 +288,21 @@ const CustomerRow = ({ customer, onAction }) => {
       <td className="px-4 py-4 whitespace-nowrap">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
-            <img src={avatar} alt={customer.name} className="w-full h-full object-cover" />
+            <img 
+              src={customer.profilePicture && customer.profilePicture !== 'N/A' 
+                  ? customer.profilePicture 
+                  : avatar} 
+              alt={customer.username} 
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = avatar;
+              }}
+            />
           </div>
           <div>
-            <div className="font-medium text-gray-900">{customer.name}</div>
-            <div className="text-xs text-gray-500">{customer.initials}</div>
+            <div className="font-medium text-gray-900">{customer.firstName} {customer.lastName}</div>
+            <div className="text-xs text-gray-500">{customer.username}</div>
           </div>
         </div>
       </td>
@@ -256,14 +310,20 @@ const CustomerRow = ({ customer, onAction }) => {
         {customer.email}
       </td>
       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
-        #{customer.customerNumber}
+        #{customer.customerNumber || 'N/A'}
       </td>
       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600 text-center">
-        {customer.bookings}
+        {customer.totalBookings || 0}
       </td>
       <td className="px-4 py-4 whitespace-nowrap">
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[customer.status]}`}>
-          {customer.status === 'active' ? 'Active' : 'Banned'}
+        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+          statusColors[customer.profileStatus] || 'bg-gray-100 text-gray-800'
+        }`}>
+          {customer.profileStatus === 'verified' 
+            ? 'Active' 
+            : customer.profileStatus === 'banned'
+              ? 'Banned'
+              : 'Pending'}
         </span>
       </td>
       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -295,7 +355,7 @@ const CustomerRow = ({ customer, onAction }) => {
                   <span>View details</span>
                 </button>
                 
-                {customer.status === 'active' ? (
+                {customer.profileStatus !== 'banned' ? (
                   <button
                     onClick={handleBanUnban}
                     className="w-full text-left px-4 py-3 text-sm flex items-center gap-2 border-b border-gray-100"
@@ -350,7 +410,7 @@ const CustomerRow = ({ customer, onAction }) => {
                 <span>View details</span>
               </button>
               
-              {customer.status === 'active' ? (
+              {customer.profileStatus !== 'banned' ? (
                 <button
                   onClick={handleBanUnban}
                   className="w-full text-left px-3 py-2 text-sm flex items-center gap-2 hover:bg-gray-50"
@@ -390,11 +450,21 @@ const CustomerCard = ({ customer, onAction }) => {
       <div className="flex justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
-            <img src={avatar} alt={customer.name} className="w-full h-full object-cover" />
+            <img 
+              src={customer.profilePicture && customer.profilePicture !== 'N/A' 
+                  ? customer.profilePicture 
+                  : avatar} 
+              alt={customer.username} 
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = avatar;
+              }}
+            />
           </div>
           <div>
-            <div className="font-medium text-gray-900">{customer.name}</div>
-            <div className="text-xs text-gray-500">#{customer.customerNumber}</div>
+            <div className="font-medium text-gray-900">{customer.firstName} {customer.lastName}</div>
+            <div className="text-xs text-gray-500">#{customer.customerNumber || 'N/A'}</div>
             <div className="text-sm text-gray-500">{customer.email}</div>
           </div>
         </div>
@@ -410,14 +480,20 @@ const CustomerCard = ({ customer, onAction }) => {
       
       <div className="mt-3 flex justify-between items-center">
         <div className="text-sm text-gray-600">
-          <span className="font-medium">{customer.bookings}</span> bookings
+          <span className="font-medium">{customer.totalBookings || 0}</span> bookings
         </div>
         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-          customer.status === 'active' 
+          customer.profileStatus === 'verified' 
             ? 'bg-green-100 text-green-800' 
-            : 'bg-red-100 text-red-800'
+            : customer.profileStatus === 'banned'
+              ? 'bg-red-100 text-red-800'
+              : 'bg-amber-100 text-amber-800'
         }`}>
-          {customer.status === 'active' ? 'Active' : 'Banned'}
+          {customer.profileStatus === 'verified' 
+            ? 'Active' 
+            : customer.profileStatus === 'banned'
+              ? 'Banned'
+              : 'Pending'}
         </span>
       </div>
       
@@ -428,7 +504,7 @@ const CustomerCard = ({ customer, onAction }) => {
         >
           View
         </button>
-        {customer.status === 'active' ? (
+        {customer.profileStatus !== 'banned' ? (
           <button
             onClick={() => onAction('ban', customer)}
             className="flex-1 text-sm text-center py-1 text-red-600 hover:bg-red-50 rounded"
@@ -454,6 +530,50 @@ const CustomerCard = ({ customer, onAction }) => {
   );
 };
 
+// Utility function to export data to CSV
+const exportToCSV = (data, filename) => {
+  // Create headers
+  const headers = ['Name', 'Email', 'CustomerNumber', 'Bookings', 'Status', 'JoinedDate'];
+  
+  // Convert data to CSV rows
+  const csvRows = [
+    // Headers row
+    headers.join(','),
+    // Data rows
+    ...data.map(item => {
+      const joinedDate = new Date(item.createdAt).toLocaleDateString();
+      const values = [
+        `${item.firstName} ${item.lastName}`,
+        item.email,
+        item.customerNumber || 'N/A',
+        item.totalBookings || 0,
+        item.profileStatus,
+        joinedDate
+      ];
+      
+      // Handle CSV special characters
+      return values.map(value => {
+        const stringValue = String(value);
+        if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+          return `"${stringValue.replace(/"/g, '""')}"`;
+        }
+        return stringValue;
+      }).join(',');
+    })
+  ].join('\n');
+  
+  // Create and download the file
+  const blob = new Blob([csvRows], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `${filename}.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
 const Customers = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
@@ -462,121 +582,99 @@ const Customers = () => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [customerToDelete, setCustomerToDelete] = useState(null);
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
-  // Mock data for customers
-  const [customers, setCustomers] = useState([
-    {
-      id: 1,
-      name: 'John Doe',
-      customerNumber: '238491',
-      initials: 'JD',
-      email: 'john.doe@example.com',
-      phone: '+41 76 123 4567',
-      bookings: 12,
-      status: 'active',
-      joinedDate: 'Jan 10, 2023',
-      accountType: 'Customer',
-      recentBookings: [
-        { property: 'Mountain View Chalet', date: 'Mar 15-20, 2023', amount: '1,200' },
-        { property: 'Beachfront Villa', date: 'Jun 5-12, 2023', amount: '2,400' },
-        { property: 'Lake House', date: 'Aug 20-25, 2023', amount: '950' }
-      ]
-    },
-    {
-      id: 2,
-      name: 'Jane Smith',
-      customerNumber: '238491',
-      initials: 'JS',
-      email: 'jane.smith@example.com',
-      phone: '+41 78 456 7890',
-      bookings: 8,
-      status: 'active',
-      joinedDate: 'Feb 22, 2023',
-      accountType: 'Customer',
-      recentBookings: [
-        { property: 'City Apartment', date: 'Apr 10-15, 2023', amount: '850' },
-        { property: 'Forest Cabin', date: 'Jul 1-7, 2023', amount: '1,100' }
-      ]
-    },
-    {
-      id: 3,
-      name: 'Robert Brown',
-      customerNumber: '238491',
-      initials: 'RB',
-      email: 'robert.brown@example.com',
-      phone: '+41 79 789 0123',
-      bookings: 3,
-      status: 'banned',
-      joinedDate: 'Mar 5, 2023',
-      accountType: 'Customer',
-      recentBookings: [
-        { property: 'Mountain View Chalet', date: 'Mar 10-15, 2023', amount: '1,200' }
-      ]
-    },
-    {
-      id: 4,
-      name: 'Emma Wilson',
-      customerNumber: '238491',
-      initials: 'EW',
-      email: 'emma.wilson@example.com',
-      phone: '+41 76 234 5678',
-      bookings: 5,
-      status: 'active',
-      joinedDate: 'Apr 12, 2023',
-      accountType: 'Customer',
-      recentBookings: [
-        { property: 'Beachfront Villa', date: 'May 15-20, 2023', amount: '2,400' },
-        { property: 'City Apartment', date: 'Jul 8-12, 2023', amount: '850' }
-      ]
-    },
-    {
-      id: 5,
-      name: 'Michael Johnson',
-      customerNumber: '238491',
-      initials: 'MJ',
-      email: 'michael.johnson@example.com',
-      phone: '+41 78 567 8901',
-      bookings: 9,
-      status: 'active',
-      joinedDate: 'Feb 8, 2023',
-      accountType: 'Customer & Provider',
-      recentBookings: [
-        { property: 'Lake House', date: 'Apr 20-25, 2023', amount: '950' },
-        { property: 'Forest Cabin', date: 'Jun 15-22, 2023', amount: '1,100' },
-        { property: 'Mountain View Chalet', date: 'Aug 5-10, 2023', amount: '1,200' }
-      ]
-    }
-  ]);
+  // Fetch customers on component mount
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        setLoading(true);
+        const data = await getAllUsers();
+        setCustomers(data);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching customers:", err);
+        setError("Failed to load customers. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCustomers();
+  }, []);
 
   // Filter customers based on search query and status
   const filteredCustomers = customers.filter(customer => 
-    (selectedStatus === 'all' || customer.status === selectedStatus) &&
-    (customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-     customer.email.toLowerCase().includes(searchQuery.toLowerCase()))
+    (selectedStatus === 'all' || 
+     (selectedStatus === 'active' && customer.profileStatus === 'verified') ||
+     (selectedStatus === 'banned' && customer.profileStatus === 'banned') ||
+     (selectedStatus === 'pending' && 
+      (customer.profileStatus === 'pending verification' || customer.profileStatus === 'not verified'))) &&
+    (customer.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+     customer.lastName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+     customer.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+     customer.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+     (customer.customerNumber && customer.customerNumber.includes(searchQuery)))
   );
 
   // Handle customer actions
-  const handleCustomerAction = (action, customer) => {
+  const handleCustomerAction = async (action, customer) => {
     switch (action) {
       case 'view':
         setSelectedCustomer(customer);
         setDetailModalOpen(true);
         break;
       case 'ban':
-        // Toggle status to banned
-        setCustomers(prev => 
-          prev.map(c => 
-            c.id === customer.id ? { ...c, status: 'banned' } : c
-          )
-        );
+        try {
+          setLoading(true);
+          await updateUserStatus(customer._id, 'banned');
+          
+          // Update local state
+          setCustomers(prev => 
+            prev.map(c => 
+              c._id === customer._id ? { ...c, profileStatus: 'banned' } : c
+            )
+          );
+          
+          // Update selected customer if detail modal is open
+          if (selectedCustomer && selectedCustomer._id === customer._id) {
+            setSelectedCustomer({...selectedCustomer, profileStatus: 'banned'});
+          }
+          
+          setError(null);
+        } catch (err) {
+          console.error("Error banning customer:", err);
+          setError("Failed to ban customer. Please try again.");
+        } finally {
+          setLoading(false);
+        }
         break;
       case 'unban':
-        // Toggle status to active
-        setCustomers(prev => 
-          prev.map(c => 
-            c.id === customer.id ? { ...c, status: 'active' } : c
-          )
-        );
+        try {
+          setLoading(true);
+          await updateUserStatus(customer._id, 'verified');
+          
+          // Update local state
+          setCustomers(prev => 
+            prev.map(c => 
+              c._id === customer._id ? { ...c, profileStatus: 'verified' } : c
+            )
+          );
+          
+          // Update selected customer if detail modal is open
+          if (selectedCustomer && selectedCustomer._id === customer._id) {
+            setSelectedCustomer({...selectedCustomer, profileStatus: 'verified'});
+          }
+          
+          setError(null);
+        } catch (err) {
+          console.error("Error unbanning customer:", err);
+          setError("Failed to unban customer. Please try again.");
+        } finally {
+          setLoading(false);
+        }
         break;
       case 'delete':
         setCustomerToDelete(customer);
@@ -588,54 +686,54 @@ const Customers = () => {
   };
 
   // Handle confirming customer deletion
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (customerToDelete) {
-      setCustomers(prev => prev.filter(c => c.id !== customerToDelete.id));
-      setDeleteModalOpen(false);
-      setCustomerToDelete(null);
+      try {
+        setLoading(true);
+        await deleteUser(customerToDelete._id);
+        
+        // Remove the deleted customer from state
+        setCustomers(prev => prev.filter(c => c._id !== customerToDelete._id));
+        setError(null);
+      } catch (err) {
+        console.error("Error deleting customer:", err);
+        setError("Failed to delete customer. Please try again.");
+      } finally {
+        setLoading(false);
+        setDeleteModalOpen(false);
+        setCustomerToDelete(null);
+      }
+    }
+  };
+
+  // Handle ban/unban in the detail modal
+  const handleDetailBanUnban = async (id, status) => {
+    try {
+      setLoading(true);
+      await updateUserStatus(id, status);
+      
+      // Update local state
+      setCustomers(prev => 
+        prev.map(c => 
+          c._id === id ? { ...c, profileStatus: status } : c
+        )
+      );
+      
+      // Update selected customer
+      setSelectedCustomer(prev => ({...prev, profileStatus: status}));
+      
+      setError(null);
+    } catch (err) {
+      console.error("Error updating customer status:", err);
+      setError("Failed to update customer status. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   // Export data to Excel
-  const exportToExcel = () => {
-    // Create data for export
-    const exportData = filteredCustomers.map(customer => ({
-      Name: customer.name,
-      Email: customer.email,
-      CustomerNumber: customer.customerNumber,
-      Bookings: customer.bookings,
-      Status: customer.status === 'active' ? 'Active' : 'Banned',
-      JoinedDate: customer.joinedDate,
-      AccountType: customer.accountType,
-      Phone: customer.phone || 'Not provided'
-    }));
-
-    // Convert data to CSV format
-    const headers = Object.keys(exportData[0]);
-    let csvContent = headers.join(',') + '\n';
-    
-    exportData.forEach(row => {
-      const values = headers.map(header => {
-        const value = row[header] != null ? row[header].toString() : '';
-        // Escape values with commas, quotes or newlines
-        if (value.includes(',') || value.includes('"') || value.includes('\n')) {
-          return `"${value.replace(/"/g, '""')}"`;
-        }
-        return value;
-      });
-      csvContent += values.join(',') + '\n';
-    });
-
-    // Create and download the file
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'customers-export.csv');
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleExport = () => {
+    exportToCSV(filteredCustomers, 'customers-export');
   };
 
   return (
@@ -649,6 +747,13 @@ const Customers = () => {
           View and manage customers on the platform
         </p>
       </div>
+
+      {/* Error Display */}
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
+          {error}
+        </div>
+      )}
 
       {/* Search and Filters */}
       <div className="flex flex-col md:flex-row gap-4 mb-8">
@@ -677,116 +782,129 @@ const Customers = () => {
             <option value="all">All Statuses</option>
             <option value="active">Active</option>
             <option value="banned">Banned</option>
+            <option value="pending">Pending</option>
           </select>
         </div>
 
         {/* Export Button */}
         <button
-          onClick={exportToExcel}
+          onClick={handleExport}
           className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+          disabled={loading || filteredCustomers.length === 0}
         >
           <Download className="w-5 h-5" />
           <span>Export</span>
         </button>
       </div>
 
-      {/* Desktop View - Table */}
-      <div className="hidden md:block bg-white border rounded-lg shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Customer
-                </th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Email
-                </th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Number
-                </th>
-                <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Bookings
-                </th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredCustomers.length > 0 ? (
-                filteredCustomers.map(customer => (
-                  <CustomerRow 
-                    key={customer.id} 
-                    customer={customer} 
-                    onAction={handleCustomerAction}
-                  />
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="5" className="px-4 py-6 text-center text-gray-500">
-                    No customers found matching your criteria
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+      {/* Loading State */}
+      {loading && (
+        <div className="flex justify-center items-center py-20">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand"></div>
         </div>
+      )}
 
-        {/* Pagination */}
-        {filteredCustomers.length > 0 && (
-          <div className="px-4 py-3 border-t flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="text-sm text-gray-500">
-              Showing <span className="font-medium">1</span> to <span className="font-medium">{filteredCustomers.length}</span> of <span className="font-medium">{customers.length}</span> customers
-            </div>
-            <div className="flex gap-2">
-              <button disabled className="px-3 py-1 border rounded text-sm text-gray-400 bg-gray-50 cursor-not-allowed">
-                Previous
-              </button>
-              <button className="px-3 py-1 border rounded text-sm text-gray-600 hover:bg-gray-50">
-                Next
-              </button>
-            </div>
+      {/* Desktop View - Table */}
+      {!loading && (
+        <div className="hidden md:block bg-white border rounded-lg shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Customer
+                  </th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Email
+                  </th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Number
+                  </th>
+                  <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Bookings
+                  </th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredCustomers.length > 0 ? (
+                  filteredCustomers.map(customer => (
+                    <CustomerRow 
+                      key={customer._id} 
+                      customer={customer} 
+                      onAction={handleCustomerAction}
+                    />
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="px-4 py-6 text-center text-gray-500">
+                      No customers found matching your criteria
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
-        )}
-      </div>
+
+          {/* Pagination */}
+          {filteredCustomers.length > 0 && (
+            <div className="px-4 py-3 border-t flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="text-sm text-gray-500">
+                Showing <span className="font-medium">1</span> to <span className="font-medium">{filteredCustomers.length}</span> of <span className="font-medium">{customers.length}</span> customers
+              </div>
+              <div className="flex gap-2">
+                <button disabled className="px-3 py-1 border rounded text-sm text-gray-400 bg-gray-50 cursor-not-allowed">
+                  Previous
+                </button>
+                <button className="px-3 py-1 border rounded text-sm text-gray-600 hover:bg-gray-50">
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Mobile View - Cards */}
-      <div className="md:hidden space-y-4">
-        {filteredCustomers.length > 0 ? (
-          filteredCustomers.map(customer => (
-            <CustomerCard 
-              key={customer.id} 
-              customer={customer} 
-              onAction={handleCustomerAction}
-            />
-          ))
-        ) : (
-          <div className="bg-white rounded-lg border p-6 text-center text-gray-500">
-            No customers found matching your criteria
-          </div>
-        )}
-        
-        {/* Mobile Pagination */}
-        {filteredCustomers.length > 0 && (
-          <div className="mt-4 flex items-center justify-between">
-            <div className="text-xs text-gray-500">
-              Showing {filteredCustomers.length} of {customers.length}
+      {!loading && (
+        <div className="md:hidden space-y-4">
+          {filteredCustomers.length > 0 ? (
+            filteredCustomers.map(customer => (
+              <CustomerCard 
+                key={customer._id} 
+                customer={customer} 
+                onAction={handleCustomerAction}
+              />
+            ))
+          ) : (
+            <div className="bg-white rounded-lg border p-6 text-center text-gray-500">
+              No customers found matching your criteria
             </div>
-            <div className="flex gap-2">
-              <button disabled className="px-3 py-1 border rounded text-xs text-gray-400 bg-gray-50 cursor-not-allowed">
-                Previous
-              </button>
-              <button className="px-3 py-1 border rounded text-xs text-gray-600 hover:bg-gray-50">
-                Next
-              </button>
+          )}
+          
+          {/* Mobile Pagination */}
+          {filteredCustomers.length > 0 && (
+            <div className="mt-4 flex items-center justify-between">
+              <div className="text-xs text-gray-500">
+                Showing {filteredCustomers.length} of {customers.length}
+              </div>
+              <div className="flex gap-2">
+                <button disabled className="px-3 py-1 border rounded text-xs text-gray-400 bg-gray-50 cursor-not-allowed">
+                  Previous
+                </button>
+                <button className="px-3 py-1 border rounded text-xs text-gray-600 hover:bg-gray-50">
+                  Next
+                </button>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       {/* Customer Detail Modal */}
       {selectedCustomer && (
@@ -794,6 +912,7 @@ const Customers = () => {
           customer={selectedCustomer}
           isOpen={detailModalOpen}
           onClose={() => setDetailModalOpen(false)}
+          onBanUnban={handleDetailBanUnban}
         />
       )}
 
@@ -803,7 +922,7 @@ const Customers = () => {
           isOpen={deleteModalOpen}
           onClose={() => setDeleteModalOpen(false)}
           onConfirm={handleConfirmDelete}
-          customerName={customerToDelete.name}
+          customerName={`${customerToDelete.firstName} ${customerToDelete.lastName}`}
         />
       )}
     </div>

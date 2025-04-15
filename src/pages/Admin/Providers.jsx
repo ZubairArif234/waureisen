@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Filter, MoreHorizontal, Building2, User, UserX, AlertTriangle, Eye, Download } from 'lucide-react';
+import { getAllProviders, updateProviderStatus, deleteProvider } from '../../api/adminAPI';
 import avatar from '../../assets/avatar.png';
 
-// CustomerDetailModal component for viewing provider details
-const ProviderDetailModal = ({ provider, isOpen, onClose }) => {
-  if (!isOpen) return null;
+// ProviderDetailModal component for viewing provider details
+const ProviderDetailModal = ({ provider, isOpen, onClose, onBanUnban }) => {
+  if (!isOpen || !provider) return null;
   
   return (
     <>
@@ -33,18 +34,29 @@ const ProviderDetailModal = ({ provider, isOpen, onClose }) => {
           {/* Provider Profile */}
           <div className="flex items-center mb-6">
             <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200 mr-4">
-              <img src={avatar} alt={provider.name} className="w-full h-full object-cover" />
+              <img 
+                src={provider.profilePicture ? provider.profilePicture : avatar} 
+                alt={provider.displayName || provider.username} 
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = avatar;
+                }}
+              />
             </div>
             <div>
-              <h4 className="text-lg font-medium text-gray-900">{provider.name}</h4>
+              <h4 className="text-lg font-medium text-gray-900">{provider.displayName || `${provider.firstName} ${provider.lastName}`}</h4>
               <p className="text-gray-600">{provider.email}</p>
-              <p className="text-gray-600">#{provider.customerNumber}</p>
               <div className={`mt-1 text-sm ${
-                provider.status === 'active' 
+                provider.profileStatus === 'verified' || provider.profileStatus === 'pending verification'
                   ? 'text-green-600' 
                   : 'text-red-600'
               }`}>
-                {provider.status === 'active' ? 'Active Account' : 'Banned Account'}
+                {provider.profileStatus === 'verified' 
+                  ? 'Verified Account' 
+                  : provider.profileStatus === 'banned'
+                    ? 'Banned Account'
+                    : 'Pending Verification'}
               </div>
             </div>
           </div>
@@ -54,25 +66,33 @@ const ProviderDetailModal = ({ provider, isOpen, onClose }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-gray-500">Phone Number</p>
-                <p className="font-medium">{provider.phone || 'Not provided'}</p>
+                <p className="font-medium">{provider.phoneNumber || 'Not provided'}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Joined Date</p>
-                <p className="font-medium">{provider.joinedDate}</p>
+                <p className="font-medium">{new Date(provider.createdAt).toLocaleDateString()}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Total Listings</p>
-                <p className="font-medium">{provider.listings}</p>
+                <p className="font-medium">{provider.listings?.length || 0}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Account Type</p>
-                <p className="font-medium">{provider.accountType}</p>
+                <p className="font-medium">{provider.role === 'provider' ? 'Provider' : 'User'}</p>
               </div>
             </div>
           </div>
           
+          {/* Provider's Bio */}
+          {provider.bio && (
+            <div className="mb-6">
+              <h4 className="font-medium text-gray-900 mb-2">About</h4>
+              <p className="text-gray-600 bg-gray-50 p-4 rounded-lg">{provider.bio}</p>
+            </div>
+          )}
+          
           {/* Provider's Listings */}
-          {provider.activeListings && provider.activeListings.length > 0 && (
+          {provider.listings && provider.listings.length > 0 && (
             <div className="mb-6">
               <h4 className="font-medium text-gray-900 mb-3">Active Listings</h4>
               <div className="bg-gray-50 rounded-lg overflow-hidden border">
@@ -91,16 +111,16 @@ const ProviderDetailModal = ({ provider, isOpen, onClose }) => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {provider.activeListings.map((listing, index) => (
-                      <tr key={index}>
+                    {provider.listings.map((listing, index) => (
+                      <tr key={listing._id || index}>
                         <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {listing.property}
+                          {listing.title || 'Unnamed listing'}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                          {listing.location}
+                          {listing.location?.address || 'Unknown location'}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                          {listing.price} CHF/night
+                          {listing.pricePerNight?.price || 'N/A'} {listing.pricePerNight?.currency || 'CHF'}/night
                         </td>
                       </tr>
                     ))}
@@ -118,8 +138,9 @@ const ProviderDetailModal = ({ provider, isOpen, onClose }) => {
             >
               Close
             </button>
-            {provider.status === 'active' ? (
+            {provider.profileStatus !== 'banned' ? (
               <button
+                onClick={() => onBanUnban(provider._id, 'banned')}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
               >
                 <UserX className="w-4 h-4" />
@@ -127,6 +148,7 @@ const ProviderDetailModal = ({ provider, isOpen, onClose }) => {
               </button>
             ) : (
               <button
+                onClick={() => onBanUnban(provider._id, 'verified')}
                 className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
               >
                 <User className="w-4 h-4" />
@@ -188,7 +210,9 @@ const ProviderRow = ({ provider, onAction }) => {
   const buttonRef = useRef(null);
 
   const statusColors = {
-    active: 'bg-green-100 text-green-800',
+    verified: 'bg-green-100 text-green-800',
+    'pending verification': 'bg-blue-100 text-blue-800',
+    'not verified': 'bg-amber-100 text-amber-800',
     banned: 'bg-red-100 text-red-800'
   };
 
@@ -231,7 +255,7 @@ const ProviderRow = ({ provider, onAction }) => {
   };
 
   const handleBanUnban = () => {
-    onAction(provider.status === 'active' ? 'ban' : 'unban', provider);
+    onAction(provider.profileStatus === 'banned' ? 'unban' : 'ban', provider);
     setShowMenu(false);
   };
 
@@ -245,11 +269,19 @@ const ProviderRow = ({ provider, onAction }) => {
       <td className="px-4 py-4 whitespace-nowrap">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
-            <img src={avatar} alt={provider.name} className="w-full h-full object-cover" />
+            <img 
+              src={provider.profilePicture ? provider.profilePicture : avatar} 
+              alt={provider.displayName || provider.username} 
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = avatar;
+              }}
+            />
           </div>
           <div>
-            <div className="font-medium text-gray-900">{provider.name}</div>
-            <div className="text-xs text-gray-500">{provider.initials}</div>
+            <div className="font-medium text-gray-900">{provider.displayName || `${provider.firstName || ''} ${provider.lastName || ''}`}</div>
+            <div className="text-xs text-gray-500">{provider.username}</div>
           </div>
         </div>
       </td>
@@ -257,11 +289,17 @@ const ProviderRow = ({ provider, onAction }) => {
         {provider.email}
       </td>
       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600 text-center">
-        {provider.listings}
+        {provider.listings?.length || 0}
       </td>
       <td className="px-4 py-4 whitespace-nowrap">
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[provider.status]}`}>
-          {provider.status === 'active' ? 'Active' : 'Banned'}
+        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+          statusColors[provider.profileStatus] || 'bg-gray-100 text-gray-800'
+        }`}>
+          {provider.profileStatus === 'verified' 
+            ? 'Active' 
+            : provider.profileStatus === 'banned'
+              ? 'Banned'
+              : 'Pending'}
         </span>
       </td>
       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -293,7 +331,7 @@ const ProviderRow = ({ provider, onAction }) => {
                   <span>View details</span>
                 </button>
                 
-                {provider.status === 'active' ? (
+                {provider.profileStatus !== 'banned' ? (
                   <button
                     onClick={handleBanUnban}
                     className="w-full text-left px-4 py-3 text-sm flex items-center gap-2 border-b border-gray-100"
@@ -348,7 +386,7 @@ const ProviderRow = ({ provider, onAction }) => {
                 <span>View details</span>
               </button>
               
-              {provider.status === 'active' ? (
+              {provider.profileStatus !== 'banned' ? (
                 <button
                   onClick={handleBanUnban}
                   className="w-full text-left px-3 py-2 text-sm flex items-center gap-2 hover:bg-gray-50"
@@ -388,10 +426,18 @@ const ProviderCard = ({ provider, onAction }) => {
       <div className="flex justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
-            <img src={avatar} alt={provider.name} className="w-full h-full object-cover" />
+            <img 
+              src={provider.profilePicture ? provider.profilePicture : avatar} 
+              alt={provider.displayName || provider.username} 
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = avatar;
+              }}
+            />
           </div>
           <div>
-            <div className="font-medium text-gray-900">{provider.name}</div>
+            <div className="font-medium text-gray-900">{provider.displayName || `${provider.firstName || ''} ${provider.lastName || ''}`}</div>
             <div className="text-sm text-gray-500">{provider.email}</div>
           </div>
         </div>
@@ -407,14 +453,20 @@ const ProviderCard = ({ provider, onAction }) => {
       
       <div className="mt-3 flex justify-between items-center">
         <div className="text-sm text-gray-600">
-          <span className="font-medium">{provider.listings}</span> listings
+          <span className="font-medium">{provider.listings?.length || 0}</span> listings
         </div>
         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-          provider.status === 'active' 
+          provider.profileStatus === 'verified' 
             ? 'bg-green-100 text-green-800' 
-            : 'bg-red-100 text-red-800'
+            : provider.profileStatus === 'banned'
+              ? 'bg-red-100 text-red-800'
+              : 'bg-amber-100 text-amber-800'
         }`}>
-          {provider.status === 'active' ? 'Active' : 'Banned'}
+          {provider.profileStatus === 'verified' 
+            ? 'Active' 
+            : provider.profileStatus === 'banned'
+              ? 'Banned'
+              : 'Pending'}
         </span>
       </div>
       
@@ -425,7 +477,7 @@ const ProviderCard = ({ provider, onAction }) => {
         >
           View
         </button>
-        {provider.status === 'active' ? (
+        {provider.profileStatus !== 'banned' ? (
           <button
             onClick={() => onAction('ban', provider)}
             className="flex-1 text-sm text-center py-1 text-red-600 hover:bg-red-50 rounded"
@@ -451,6 +503,50 @@ const ProviderCard = ({ provider, onAction }) => {
   );
 };
 
+// Utility function to export data to CSV
+const exportToCSV = (data, filename) => {
+  // Create headers
+  const headers = ['Name', 'Email', 'Listings', 'Status', 'JoinedDate'];
+  
+  // Convert data to CSV rows
+  const csvRows = [
+    // Headers row
+    headers.join(','),
+    // Data rows
+    ...data.map(item => {
+      const displayName = item.displayName || `${item.firstName || ''} ${item.lastName || ''}`.trim() || item.username;
+      const joinedDate = new Date(item.createdAt).toLocaleDateString();
+      const values = [
+        displayName,
+        item.email,
+        item.listings?.length || 0,
+        item.profileStatus,
+        joinedDate
+      ];
+      
+      // Handle CSV special characters
+      return values.map(value => {
+        const stringValue = String(value);
+        if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+          return `"${stringValue.replace(/"/g, '""')}"`;
+        }
+        return stringValue;
+      }).join(',');
+    })
+  ].join('\n');
+  
+  // Create and download the file
+  const blob = new Blob([csvRows], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `${filename}.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
 const Providers = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
@@ -459,117 +555,99 @@ const Providers = () => {
   const [selectedProvider, setSelectedProvider] = useState(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [providerToDelete, setProviderToDelete] = useState(null);
+  const [providers, setProviders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
-  // Mock data for providers
-  const [providers, setProviders] = useState([
-    {
-      id: 1,
-      name: 'Luxury Properties Inc.',
-      initials: 'LP',
-      email: 'contact@luxuryproperties.com',
-      phone: '+41 76 123 4567',
-      listings: 24,
-      status: 'active',
-      joinedDate: 'Jan 10, 2023',
-      accountType: 'Property Management Company',
-      activeListings: [
-        { property: 'Mountain View Chalet', location: 'Swiss Alps', price: '320' },
-        { property: 'Beachfront Villa', location: 'Costa Brava, Spain', price: '450' },
-        { property: 'Lake House', location: 'Lake Como, Italy', price: '280' }
-      ]
-    },
-    {
-      id: 2,
-      name: 'Alpine Homes',
-      initials: 'AH',
-      email: 'info@alpinehomes.com',
-      phone: '+41 78 456 7890',
-      listings: 16,
-      status: 'active',
-      joinedDate: 'Feb 22, 2023',
-      accountType: 'Independent Host',
-      activeListings: [
-        { property: 'Cozy Mountain Cabin', location: 'Zermatt, Switzerland', price: '180' },
-        { property: 'Ski-in Apartment', location: 'Verbier, Switzerland', price: '220' }
-      ]
-    },
-    {
-      id: 3,
-      name: 'Beach Villas Co.',
-      initials: 'BV',
-      email: 'bookings@beachvillas.com',
-      phone: '+41 79 789 0123',
-      listings: 9,
-      status: 'banned',
-      joinedDate: 'Mar 5, 2023',
-      accountType: 'Property Management Company',
-      activeListings: [
-        { property: 'Luxury Beach House', location: 'Mallorca, Spain', price: '380' },
-        { property: 'Oceanfront Condo', location: 'Ibiza, Spain', price: '290' }
-      ]
-    },
-    {
-      id: 4,
-      name: 'City Stays',
-      initials: 'CS',
-      email: 'info@citystays.com',
-      phone: '+41 76 234 5678',
-      listings: 18,
-      status: 'active',
-      joinedDate: 'Apr 12, 2023',
-      accountType: 'Property Management Company',
-      activeListings: [
-        { property: 'Downtown Loft', location: 'Zürich, Switzerland', price: '210' },
-        { property: 'Modern Apartment', location: 'Geneva, Switzerland', price: '190' },
-        { property: 'Riverside Suite', location: 'Basel, Switzerland', price: '170' }
-      ]
-    },
-    {
-      id: 5,
-      name: 'Mountain Retreats',
-      initials: 'MR',
-      email: 'bookings@mountainretreats.com',
-      phone: '+41 78 567 8901',
-      listings: 12,
-      status: 'active',
-      joinedDate: 'Feb 8, 2023',
-      accountType: 'Independent Host',
-      activeListings: [
-        { property: 'Alpine Lodge', location: 'Interlaken, Switzerland', price: '240' },
-        { property: 'Mountain Cabin', location: 'Grindelwald, Switzerland', price: '195' }
-      ]
-    }
-  ]);
+  // Fetch providers on component mount
+  useEffect(() => {
+    const fetchProviders = async () => {
+      try {
+        setLoading(true);
+        const data = await getAllProviders();
+        setProviders(data);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching providers:", err);
+        setError("Failed to load providers. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProviders();
+  }, []);
 
   // Filter providers based on search query and status
   const filteredProviders = providers.filter(provider => 
-    (selectedStatus === 'all' || provider.status === selectedStatus) &&
-    (provider.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-     provider.email.toLowerCase().includes(searchQuery.toLowerCase()))
+    (selectedStatus === 'all' || 
+     (selectedStatus === 'active' && provider.profileStatus === 'verified') ||
+     (selectedStatus === 'banned' && provider.profileStatus === 'banned') ||
+     (selectedStatus === 'pending' && 
+      (provider.profileStatus === 'pending verification' || provider.profileStatus === 'not verified'))) &&
+    (provider.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+     provider.lastName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+     provider.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+     provider.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+     (provider.displayName && provider.displayName.toLowerCase().includes(searchQuery.toLowerCase())))
   );
 
   // Handle provider actions
-  const handleProviderAction = (action, provider) => {
+  const handleProviderAction = async (action, provider) => {
     switch (action) {
       case 'view':
         setSelectedProvider(provider);
         setDetailModalOpen(true);
         break;
       case 'ban':
-        // Toggle status to banned
-        setProviders(prev => 
-          prev.map(p => 
-            p.id === provider.id ? { ...p, status: 'banned' } : p
-          )
-        );
+        try {
+          setLoading(true);
+          await updateProviderStatus(provider._id, 'banned');
+          
+          // Update local state
+          setProviders(prev => 
+            prev.map(p => 
+              p._id === provider._id ? { ...p, profileStatus: 'banned' } : p
+            )
+          );
+          
+          // Update selected provider if detail modal is open
+          if (selectedProvider && selectedProvider._id === provider._id) {
+            setSelectedProvider({...selectedProvider, profileStatus: 'banned'});
+          }
+          
+          setError(null);
+        } catch (err) {
+          console.error("Error banning provider:", err);
+          setError("Failed to ban provider. Please try again.");
+        } finally {
+          setLoading(false);
+        }
         break;
       case 'unban':
-        // Toggle status to active
-        setProviders(prev => 
-          prev.map(p => 
-            p.id === provider.id ? { ...p, status: 'active' } : p
-          )
-        );
+        try {
+          setLoading(true);
+          await updateProviderStatus(provider._id, 'verified');
+          
+          // Update local state
+          setProviders(prev => 
+            prev.map(p => 
+              p._id === provider._id ? { ...p, profileStatus: 'verified' } : p
+            )
+          );
+          
+          // Update selected provider if detail modal is open
+          if (selectedProvider && selectedProvider._id === provider._id) {
+            setSelectedProvider({...selectedProvider, profileStatus: 'verified'});
+          }
+          
+          setError(null);
+        } catch (err) {
+          console.error("Error unbanning provider:", err);
+          setError("Failed to unban provider. Please try again.");
+        } finally {
+          setLoading(false);
+        }
         break;
       case 'delete':
         setProviderToDelete(provider);
@@ -581,53 +659,54 @@ const Providers = () => {
   };
 
   // Handle confirming provider deletion
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (providerToDelete) {
-      setProviders(prev => prev.filter(p => p.id !== providerToDelete.id));
-      setDeleteModalOpen(false);
-      setProviderToDelete(null);
+      try {
+        setLoading(true);
+        await deleteProvider(providerToDelete._id);
+        
+        // Remove the deleted provider from state
+        setProviders(prev => prev.filter(p => p._id !== providerToDelete._id));
+        setError(null);
+      } catch (err) {
+        console.error("Error deleting provider:", err);
+        setError("Failed to delete provider. Please try again.");
+      } finally {
+        setLoading(false);
+        setDeleteModalOpen(false);
+        setProviderToDelete(null);
+      }
+    }
+  };
+
+  // Handle ban/unban in the detail modal
+  const handleDetailBanUnban = async (id, status) => {
+    try {
+      setLoading(true);
+      await updateProviderStatus(id, status);
+      
+      // Update local state
+      setProviders(prev => 
+        prev.map(p => 
+          p._id === id ? { ...p, profileStatus: status } : p
+        )
+      );
+      
+      // Update selected provider
+      setSelectedProvider(prev => ({...prev, profileStatus: status}));
+      
+      setError(null);
+    } catch (err) {
+      console.error("Error updating provider status:", err);
+      setError("Failed to update provider status. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   // Export data to Excel
-  const exportToExcel = () => {
-    // Create data for export
-    const exportData = filteredProviders.map(provider => ({
-      Name: provider.name,
-      Email: provider.email,
-      Listings: provider.listings,
-      Status: provider.status === 'active' ? 'Active' : 'Banned',
-      JoinedDate: provider.joinedDate,
-      AccountType: provider.accountType,
-      Phone: provider.phone || 'Not provided'
-    }));
-
-    // Convert data to CSV format
-    const headers = Object.keys(exportData[0]);
-    let csvContent = headers.join(',') + '\n';
-    
-    exportData.forEach(row => {
-      const values = headers.map(header => {
-        const value = row[header] != null ? row[header].toString() : '';
-        // Escape values with commas, quotes or newlines
-        if (value.includes(',') || value.includes('"') || value.includes('\n')) {
-          return `"${value.replace(/"/g, '""')}"`;
-        }
-        return value;
-      });
-      csvContent += values.join(',') + '\n';
-    });
-
-    // Create and download the file
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'providers-export.csv');
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleExport = () => {
+    exportToCSV(filteredProviders, 'providers-export');
   };
 
   return (
@@ -641,6 +720,13 @@ const Providers = () => {
           View and manage accommodation providers on the platform
         </p>
       </div>
+
+      {/* Error Display */}
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
+          {error}
+        </div>
+      )}
 
       {/* Search and Filters */}
       <div className="flex flex-col md:flex-row gap-4 mb-8">
@@ -669,113 +755,126 @@ const Providers = () => {
             <option value="all">All Statuses</option>
             <option value="active">Active</option>
             <option value="banned">Banned</option>
+            <option value="pending">Pending</option>
           </select>
         </div>
 
         {/* Export Button */}
         <button
-          onClick={exportToExcel}
+          onClick={handleExport}
           className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+          disabled={loading || filteredProviders.length === 0}
         >
           <Download className="w-5 h-5" />
           <span>Export</span>
         </button>
       </div>
 
-      {/* Desktop View - Table */}
-      <div className="hidden md:block bg-white border rounded-lg shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Provider
-                </th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Email
-                </th>
-                <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Listings
-                </th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredProviders.length > 0 ? (
-                filteredProviders.map(provider => (
-                  <ProviderRow 
-                    key={provider.id} 
-                    provider={provider} 
-                    onAction={handleProviderAction}
-                  />
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="5" className="px-4 py-6 text-center text-gray-500">
-                    No providers found matching your criteria
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+      {/* Loading State */}
+      {loading && (
+        <div className="flex justify-center items-center py-20">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand"></div>
         </div>
+      )}
 
-        {/* Pagination */}
-        {filteredProviders.length > 0 && (
-          <div className="px-4 py-3 border-t flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="text-sm text-gray-500">
-              Showing <span className="font-medium">1</span> to <span className="font-medium">{filteredProviders.length}</span> of <span className="font-medium">{providers.length}</span> providers
-            </div>
-            <div className="flex gap-2">
-              <button disabled className="px-3 py-1 border rounded text-sm text-gray-400 bg-gray-50 cursor-not-allowed">
-                Previous
-              </button>
-              <button className="px-3 py-1 border rounded text-sm text-gray-600 hover:bg-gray-50">
-                Next
-              </button>
-            </div>
+      {/* Desktop View - Table */}
+      {!loading && (
+        <div className="hidden md:block bg-white border rounded-lg shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Provider
+                  </th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Email
+                  </th>
+                  <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Listings
+                  </th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredProviders.length > 0 ? (
+                  filteredProviders.map(provider => (
+                    <ProviderRow 
+                      key={provider._id} 
+                      provider={provider} 
+                      onAction={handleProviderAction}
+                    />
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="px-4 py-6 text-center text-gray-500">
+                      No providers found matching your criteria
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
-        )}
-      </div>
+
+          {/* Pagination */}
+          {filteredProviders.length > 0 && (
+            <div className="px-4 py-3 border-t flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="text-sm text-gray-500">
+                Showing <span className="font-medium">1</span> to <span className="font-medium">{filteredProviders.length}</span> of <span className="font-medium">{providers.length}</span> providers
+              </div>
+              <div className="flex gap-2">
+                <button disabled className="px-3 py-1 border rounded text-sm text-gray-400 bg-gray-50 cursor-not-allowed">
+                  Previous
+                </button>
+                <button className="px-3 py-1 border rounded text-sm text-gray-600 hover:bg-gray-50">
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Mobile View - Cards */}
-      <div className="md:hidden space-y-4">
-        {filteredProviders.length > 0 ? (
-          filteredProviders.map(provider => (
-            <ProviderCard 
-              key={provider.id} 
-              provider={provider} 
-              onAction={handleProviderAction}
-            />
-          ))
-        ) : (
-          <div className="bg-white rounded-lg border p-6 text-center text-gray-500">
-            No providers found matching your criteria
-          </div>
-        )}
-        
-        {/* Mobile Pagination */}
-        {filteredProviders.length > 0 && (
-          <div className="mt-4 flex items-center justify-between">
-            <div className="text-xs text-gray-500">
-              Showing {filteredProviders.length} of {providers.length}
+      {!loading && (
+        <div className="md:hidden space-y-4">
+          {filteredProviders.length > 0 ? (
+            filteredProviders.map(provider => (
+              <ProviderCard 
+                key={provider._id} 
+                provider={provider} 
+                onAction={handleProviderAction}
+              />
+            ))
+          ) : (
+            <div className="bg-white rounded-lg border p-6 text-center text-gray-500">
+              No providers found matching your criteria
             </div>
-            <div className="flex gap-2">
-              <button disabled className="px-3 py-1 border rounded text-xs text-gray-400 bg-gray-50 cursor-not-allowed">
-                Previous
-              </button>
-              <button className="px-3 py-1 border rounded text-xs text-gray-600 hover:bg-gray-50">
-                Next
-              </button>
+          )}
+          
+          {/* Mobile Pagination */}
+          {filteredProviders.length > 0 && (
+            <div className="mt-4 flex items-center justify-between">
+              <div className="text-xs text-gray-500">
+                Showing {filteredProviders.length} of {providers.length}
+              </div>
+              <div className="flex gap-2">
+                <button disabled className="px-3 py-1 border rounded text-xs text-gray-400 bg-gray-50 cursor-not-allowed">
+                  Previous
+                </button>
+                <button className="px-3 py-1 border rounded text-xs text-gray-600 hover:bg-gray-50">
+                  Next
+                </button>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       {/* Provider Detail Modal */}
       {selectedProvider && (
@@ -783,6 +882,7 @@ const Providers = () => {
           provider={selectedProvider}
           isOpen={detailModalOpen}
           onClose={() => setDetailModalOpen(false)}
+          onBanUnban={handleDetailBanUnban}
         />
       )}
 
@@ -792,7 +892,7 @@ const Providers = () => {
           isOpen={deleteModalOpen}
           onClose={() => setDeleteModalOpen(false)}
           onConfirm={handleConfirmDelete}
-          providerName={providerToDelete.name}
+          providerName={providerToDelete.displayName || `${providerToDelete.firstName || ''} ${providerToDelete.lastName || ''}`.trim() || providerToDelete.username}
         />
       )}
     </div>

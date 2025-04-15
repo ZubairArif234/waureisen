@@ -22,6 +22,16 @@ export const userSignup = async (userData) => {
   }
 };
 
+export const adminSignup = async (adminData) => {
+  try {
+    const response = await API.post('/admins/signup', adminData);
+    return response.data;
+  } catch (error) {
+    console.error('Admin signup error:', error);
+    throw error;
+  }
+};
+
 // Provider authentication
 export const providerLogin = async (credentials) => {
   try {

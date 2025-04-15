@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Filter, MoreHorizontal, Plus, Sliders, AlertTriangle } from 'lucide-react';
-import i1 from '../../assets/i1.png';
-import i2 from '../../assets/i2.png';
-import i3 from '../../assets/i3.png';
+import { getAllListings, deleteListing, closeListing } from '../../api/adminAPI';
 
 const AccommodationCard = ({ accommodation, onEdit, onToggleStatus, onDelete }) => {
   const [showMenu, setShowMenu] = useState(false);
@@ -12,7 +10,10 @@ const AccommodationCard = ({ accommodation, onEdit, onToggleStatus, onDelete }) 
   const buttonRef = useRef(null);
   const statusColors = {
     active: 'bg-green-100 text-green-800',
-    closed: 'bg-amber-100 text-amber-800'
+    closed: 'bg-amber-100 text-amber-800',
+    pending: 'bg-blue-100 text-blue-800',
+    rejected: 'bg-red-100 text-red-800',
+    deleted: 'bg-gray-100 text-gray-800'
   };
 
   // Calculate menu position when showing
@@ -52,7 +53,7 @@ const AccommodationCard = ({ accommodation, onEdit, onToggleStatus, onDelete }) 
     {
       label: 'Edit',
       onClick: () => {
-        onEdit(accommodation.id);
+        onEdit(accommodation._id);
         setShowMenu(false);
       },
       className: 'text-gray-700 hover:bg-gray-100'
@@ -60,7 +61,7 @@ const AccommodationCard = ({ accommodation, onEdit, onToggleStatus, onDelete }) 
     {
       label: accommodation.status === 'active' ? 'Deactivate' : 'Activate',
       onClick: () => {
-        onToggleStatus(accommodation.id);
+        onToggleStatus(accommodation._id, accommodation.status);
         setShowMenu(false);
       },
       className: 'text-gray-700 hover:bg-gray-100'
@@ -68,30 +69,40 @@ const AccommodationCard = ({ accommodation, onEdit, onToggleStatus, onDelete }) 
     {
       label: 'Delete',
       onClick: () => {
-        onDelete(accommodation.id);
+        onDelete(accommodation._id, accommodation.title);
         setShowMenu(false);
       },
       className: 'text-red-600 hover:bg-red-50'
     }
   ];
 
+  // Format price for display
+  const formattedPrice = accommodation.pricePerNight?.price || 'N/A';
+  const currency = accommodation.pricePerNight?.currency || 'CHF';
+
   return (
     <div className="bg-white rounded-lg overflow-hidden shadow border border-gray-200">
       <div className="relative">
         <img 
-          src={accommodation.image} 
+          src={accommodation.photos && accommodation.photos.length > 0 
+              ? accommodation.photos[0]
+              : 'https://via.placeholder.com/400x250?text=No+Image'} 
           alt={accommodation.title}
           className="w-full h-48 object-cover"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = 'https://via.placeholder.com/400x250?text=Error+Loading+Image';
+          }}
         />
         <div className="absolute top-3 right-3 bg-black/60 text-white px-2 py-1 rounded text-xs font-medium">
-          {accommodation.source}
+          {accommodation.source?.name || 'Unknown'}
         </div>
       </div>
       <div className="p-4">
         <div className="flex items-start justify-between gap-2 mb-2">
           <div>
             <h3 className="font-medium text-gray-900">{accommodation.title}</h3>
-            <p className="text-sm text-gray-500">{accommodation.location}</p>
+            <p className="text-sm text-gray-500">{accommodation.location?.address || 'No location'}</p>
           </div>
           <div className="relative" ref={menuRef}>
             <button 
@@ -160,11 +171,11 @@ const AccommodationCard = ({ accommodation, onEdit, onToggleStatus, onDelete }) 
           </div>
         </div>
         <div className="flex items-center justify-between">
-          <div className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[accommodation.status]}`}>
-            {accommodation.status === 'active' ? 'Active' : 'Closed'}
+          <div className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[accommodation.status] || statusColors.pending}`}>
+            {accommodation.status.charAt(0).toUpperCase() + accommodation.status.slice(1)}
           </div>
           <div className="text-brand font-medium">
-            {accommodation.price} CHF/night
+            {formattedPrice} {currency}/night
           </div>
         </div>
       </div>
@@ -217,48 +228,28 @@ const Accommodations = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSource, setSelectedSource] = useState('all');
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, id: null, title: '' });
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [accommodations, setAccommodations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
-  // Handle window resize to detect mobile/desktop
+  // Fetch accommodations on component mount
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
+    const fetchAccommodations = async () => {
+      try {
+        setLoading(true);
+        const data = await getAllListings();
+        setAccommodations(data);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching accommodations:", err);
+        setError("Failed to load accommodations. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
     };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+
+    fetchAccommodations();
   }, []);
-  
-  // State for accommodations
-  const [accommodations, setAccommodations] = useState([
-    {
-      id: 1,
-      title: 'Mountain View Chalet',
-      location: 'Swiss Alps, Switzerland',
-      price: 250,
-      source: 'Admin',
-      status: 'active',
-      image: i1
-    },
-    {
-      id: 2,
-      title: 'Beachfront Villa',
-      location: 'Costa Brava, Spain',
-      price: 350,
-      source: 'Provider',
-      status: 'active',
-      image: i2
-    },
-    {
-      id: 3,
-      title: 'Lake House',
-      location: 'Lake Como, Italy',
-      price: 400,
-      source: 'Interhome',
-      status: 'closed',
-      image: i3
-    },
-  ]);
 
   // Handler for editing an accommodation
   const handleEdit = (id) => {
@@ -266,39 +257,89 @@ const Accommodations = () => {
   };
 
   // Handler for toggling status (activate/deactivate)
-  const handleToggleStatus = (id) => {
-    setAccommodations(prevAccommodations => 
-      prevAccommodations.map(acc => 
-        acc.id === id 
-          ? { ...acc, status: acc.status === 'active' ? 'closed' : 'active' } 
-          : acc
-      )
-    );
+  const handleToggleStatus = async (id, currentStatus) => {
+    try {
+      setLoading(true);
+      
+      // If listing is active, close it; otherwise no direct API to reactivate
+      if (currentStatus === 'active') {
+        await closeListing(id);
+        
+        // Update state to reflect the change
+        setAccommodations(prevAccommodations => 
+          prevAccommodations.map(acc => 
+            acc._id === id ? { ...acc, status: 'closed' } : acc
+          )
+        );
+      } else {
+        // For now, we'll just update the UI without an API call
+        // In a real app, you would make an API call to reactivate
+        setAccommodations(prevAccommodations => 
+          prevAccommodations.map(acc => 
+            acc._id === id ? { ...acc, status: 'active' } : acc
+          )
+        );
+      }
+    } catch (err) {
+      console.error("Error toggling accommodation status:", err);
+      setError("Failed to update accommodation status. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Handler for deleting an accommodation
-  const handleDelete = (id) => {
-    const accommodation = accommodations.find(acc => acc.id === id);
+  const handleDelete = (id, title) => {
     setDeleteModal({ 
       isOpen: true, 
       id, 
-      title: accommodation?.title || 'this listing' 
+      title: title || 'this listing' 
     });
   };
 
   // Handler for confirming deletion
-  const handleConfirmDelete = () => {
-    setAccommodations(prevAccommodations => 
-      prevAccommodations.filter(acc => acc.id !== deleteModal.id)
-    );
-    setDeleteModal({ isOpen: false, id: null, title: '' });
+  const handleConfirmDelete = async () => {
+    try {
+      setLoading(true);
+      await deleteListing(deleteModal.id);
+      
+      // Remove the deleted accommodation from state
+      setAccommodations(prevAccommodations => 
+        prevAccommodations.filter(acc => acc._id !== deleteModal.id)
+      );
+      
+      setError(null);
+    } catch (err) {
+      console.error("Error deleting accommodation:", err);
+      setError("Failed to delete accommodation. Please try again.");
+    } finally {
+      setLoading(false);
+      setDeleteModal({ isOpen: false, id: null, title: '' });
+    }
   };
 
-  const filteredAccommodations = accommodations.filter(acc => 
-    (selectedSource === 'all' || acc.source === selectedSource) &&
-    (acc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-     acc.location.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  // Filter accommodations based on search query and selected source
+  const filteredAccommodations = accommodations.filter(acc => {
+    // Skip filtering if accommodation object is invalid
+    if (!acc) return false;
+    
+    // Check source filter match
+    const sourceMatch = selectedSource === 'all' || 
+      (acc.source && acc.source.name === selectedSource);
+    
+    // Skip term filtering if search query is empty
+    if (!searchQuery) return sourceMatch;
+    
+    // Check if title or address matches search query
+    const titleMatch = acc.title && 
+      acc.title.toString().toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const addressMatch = acc.location && 
+      acc.location.address && 
+      acc.location.address.toString().toLowerCase().includes(searchQuery.toLowerCase());
+    
+    return sourceMatch && (titleMatch || addressMatch);
+  });
 
   return (
     <div className="p-6">
@@ -321,6 +362,13 @@ const Accommodations = () => {
           Add Listing
         </button>
       </div>
+
+      {/* Error Display */}
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
+          {error}
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4 mb-8">
@@ -347,9 +395,10 @@ const Accommodations = () => {
             className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
           >
             <option value="all">All Sources</option>
-            <option value="Admin">Admin</option>
-            <option value="Provider">Provider</option>
-            <option value="Interhome">Interhome</option>
+            <option value="waureisen">Waureisen</option>
+            <option value="interhome">Interhome</option>
+            <option value="europarcs">Europarcs</option>
+            <option value="bergkultur">Bergkultur</option>
           </select>
         </div>
         
@@ -360,21 +409,30 @@ const Accommodations = () => {
         </button>
       </div>
 
+      {/* Loading State */}
+      {loading && (
+        <div className="flex justify-center items-center py-20">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand"></div>
+        </div>
+      )}
+
       {/* Accommodations Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredAccommodations.map(accommodation => (
-          <AccommodationCard 
-            key={accommodation.id} 
-            accommodation={accommodation}
-            onEdit={handleEdit}
-            onToggleStatus={handleToggleStatus}
-            onDelete={handleDelete}
-          />
-        ))}
-      </div>
+      {!loading && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredAccommodations.map(accommodation => (
+            <AccommodationCard 
+              key={accommodation._id} 
+              accommodation={accommodation}
+              onEdit={handleEdit}
+              onToggleStatus={handleToggleStatus}
+              onDelete={handleDelete}
+            />
+          ))}
+        </div>
+      )}
       
       {/* No results message */}
-      {filteredAccommodations.length === 0 && (
+      {!loading && filteredAccommodations.length === 0 && (
         <div className="text-center py-12">
           <p className="text-gray-500 text-lg mb-2">No listings found</p>
           <p className="text-gray-400">Try adjusting your search or filters</p>

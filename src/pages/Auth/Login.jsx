@@ -4,10 +4,11 @@ import Navbar from '../../components/Shared/Navbar';
 import authBg from '../../assets/bg.png';
 import Footer from '../../components/Shared/Footer';
 import { useLanguage } from '../../utils/LanguageContext';
-import { userLogin } from '../../api/authAPI';
+import { userLogin, adminLogin, providerLogin } from '../../api/authAPI';
 
 const Login = () => {
   const [email, setEmail] = useState('');
+  const [userType, setUserType] = useState('user');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -18,17 +19,27 @@ const Login = () => {
     e.preventDefault();
     setError(''); // Reset error on new submission
     setIsLoading(true);
-
+  
     try {
-      const response = await userLogin({ email, password });
+      let response;
+      
+      // Use the appropriate login function based on user type
+      if (userType === 'admin') {
+        response = await adminLogin({ email, password });
+      } else if (userType === 'provider') {
+        response = await providerLogin({ email, password });
+      } else {
+        response = await userLogin({ email, password });
+      }
       
       // Store the token
       localStorage.setItem('token', response.token);
+      localStorage.setItem('userType', userType); // Store user type
       
       // Navigate based on user type
-      if (response.userType === 'admin') {
-        navigate('/admin');
-      } else if (response.userType === 'provider') {
+      if (userType === 'admin') {
+        navigate('/admin/accommodations');
+      } else if (userType === 'provider') {
         navigate('/provider/dashboard');
       } else {
         navigate('/');
@@ -88,6 +99,30 @@ const Login = () => {
                     {error}
                   </div>
                 )}
+
+                
+                <div className="space-y-3">
+                  <label className="block text-sm font-medium text-gray-700">
+                    {t('login_as')}
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={userType}
+                      onChange={(e) => setUserType(e.target.value)}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481] appearance-none bg-white"
+                    >
+                      <option value="user">{t('customer')}</option>
+                      <option value="provider">{t('provider')}</option>
+                      <option value="admin">{t('admin')}</option>
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
 
                 {/* Email Field */}
                 <div className="space-y-3">
