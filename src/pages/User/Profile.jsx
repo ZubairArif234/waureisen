@@ -63,7 +63,14 @@ const Profile = () => {
             id: Math.random().toString(36).substr(2, 9), // Generate a unique ID for frontend
             name: dog.name || '',
             gender: dog.gender || ''
-          })) || [{ id: 1, name: '', gender: '' }]
+          })) || [{ id: 1, name: '', gender: '' }],
+          // Initialize travellers array even if it doesn't exist in backend data
+          travellers: userData.travellers?.map(traveller => ({
+            id: Math.random().toString(36).substr(2, 9),
+            name: traveller.name || '',
+            gender: traveller.gender || '',
+            relationship: traveller.relationship || ''
+          })) || [{ id: 1, name: '', gender: '', relationship: '' }]
         });
         
         // Set profile picture if available
