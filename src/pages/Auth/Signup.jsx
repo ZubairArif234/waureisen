@@ -7,7 +7,7 @@ import Modal from '../../components/Auth/Modal';
 import TermsContent from '../../components/Auth/TermsContent';
 import PrivacyContent from '../../components/Auth/PrivacyContent';
 import { useLanguage } from '../../utils/LanguageContext';
-import { userSignup } from '../../api/authAPI';
+import { userSignup, providerSignup } from '../../api/authAPI';
 
 const Signup = () => {
   const [userType, setUserType] = useState('');
@@ -55,6 +55,7 @@ const Signup = () => {
     e.preventDefault();
     
     if (!acceptTerms) {
+      setError(t('please_accept_terms') || 'Please accept the terms and conditions');
       return;
     }
 
@@ -62,34 +63,76 @@ const Signup = () => {
     setIsLoading(true);
 
     try {
-      // Only proceed with API call if userType is 'customer'
-      if (userType === 'customer') {
-        const userData = {
-          email: formData.email,
-          password: formData.password,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          phoneNumber: formData.phoneNumber,
-          username: `${formData.firstName} ${formData.lastName}` // Creating username from name
-        };
+      // Create common user data object
+      const userData = {
+        email: formData.email,
+        password: formData.password,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phoneNumber: formData.phoneNumber || '',
+        username: formData.displayName || `${formData.firstName} ${formData.lastName}`
+      };
 
-        const response = await userSignup(userData);
+      let response;
+      
+      // Different API call based on user type
+      if (userType === 'customer') {
+        console.log('Attempting customer signup with:', userData);
+        response = await userSignup(userData);
+        console.log('Customer signup response:', response);
         
-        // Store the token
-        localStorage.setItem('token', response.token);
-        
-        // Navigate to home page after successful signup
-        navigate('/');
+        // Store the token and user data
+        if (response && response.token) {
+          localStorage.setItem('token', response.token);
+          localStorage.setItem('userType', 'user');
+          
+          if (response.user) {
+            localStorage.setItem('user_data', JSON.stringify(response.user));
+          }
+          
+          // Navigate to home page after successful signup
+          navigate('/');
+        } else {
+          throw new Error('Invalid response from server - no token received');
+        }
       } else if (userType === 'provider') {
-        // Existing provider logic
+        // Add any provider-specific fields
+        const providerData = {
+          ...userData,
+          displayName: formData.displayName || `${formData.firstName} ${formData.lastName}`
+        };
+        
+        // If the redirect is for provider registration, just navigate there
         if (redirectAfterSignup === 'provider-registration') {
+          // Store data temporarily to be used in the registration form
+          sessionStorage.setItem('providerSignupData', JSON.stringify(providerData));
           navigate('/provider/registration');
         } else {
-          navigate('/provider/dashboard');
+          // Otherwise, make the actual API call
+          console.log('Attempting provider signup with:', providerData);
+          response = await providerSignup(providerData);
+          console.log('Provider signup response:', response);
+          
+          // Store the token and provider data
+          if (response && response.token) {
+            localStorage.setItem('token', response.token);
+            localStorage.setItem('userType', 'provider');
+            
+            if (response.provider) {
+              localStorage.setItem('provider_user', JSON.stringify(response.provider));
+            }
+            
+            navigate('/provider/dashboard');
+          } else {
+            throw new Error('Invalid response from server - no token received');
+          }
         }
+      } else {
+        throw new Error('Please select a user type');
       }
     } catch (error) {
-      setError(error.response?.data?.message || 'An error occurred during signup');
+      console.error('Signup error:', error);
+      setError(error.response?.data?.message || error.message || 'An error occurred during signup');
     } finally {
       setIsLoading(false);
     }
@@ -180,6 +223,7 @@ const Signup = () => {
                         onChange={handleInputChange}
                         placeholder={t('email_placeholder')}
                         className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
+                        required
                       />
                     </div>
 
@@ -195,6 +239,7 @@ const Signup = () => {
                           onChange={handleInputChange}
                           placeholder={t('first_name_placeholder')}
                           className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
+                          required
                         />
                       </div>
 
@@ -209,6 +254,7 @@ const Signup = () => {
                           onChange={handleInputChange}
                           placeholder={t('last_name_placeholder')}
                           className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
+                          required
                         />
                       </div>
                     </div>
@@ -227,6 +273,7 @@ const Signup = () => {
                             onChange={handleInputChange}
                             placeholder={t('display_name_placeholder')}
                             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
+                            required
                           />
                         </div>
 
@@ -241,6 +288,7 @@ const Signup = () => {
                             onChange={handleInputChange}
                             placeholder={t('phone_number_placeholder')}
                             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
+                            required
                           />
                         </div>
                       </>
@@ -257,6 +305,8 @@ const Signup = () => {
                         onChange={handleInputChange}
                         placeholder={t('password_placeholder')}
                         className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
+                        required
+                        minLength="8"
                       />
                     </div>
                   </>
@@ -313,17 +363,15 @@ const Signup = () => {
                     {/* Signup Button */}
                     <button
                       type="submit"
-                      disabled={!acceptTerms || isLoading}
+                      disabled={!acceptTerms || isLoading || !userType}
                       className={`w-full py-3 rounded-lg font-medium ${
-                        acceptTerms && !isLoading
+                        acceptTerms && !isLoading && userType
                           ? 'bg-gray-100 text-gray-800 hover:bg-gray-200' 
                           : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                       }`}
                     >
                       {isLoading ? t('signing_up') : t('sign_up')}
                     </button>
-
-
               </div>
             </form>
 

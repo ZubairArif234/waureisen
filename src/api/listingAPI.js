@@ -111,10 +111,11 @@ export const getProviderTransactions = async (params = {}) => {
   }
 };
 
-// For provider to get dashboard stats
+// For provider to get dashboard stats - UPDATED with correct endpoint
 export const getProviderDashboardStats = async (timeFrame = 'month') => {
   try {
-    const response = await API.get('/providers/dashboard', { params: { timeFrame } });
+    // Changed from '/dashboard' to '/analytics' to match backend route
+    const response = await API.get('/providers/analytics', { params: { timeRange: timeFrame } });
     return response.data;
   } catch (error) {
     console.error('Error fetching provider dashboard stats:', error);

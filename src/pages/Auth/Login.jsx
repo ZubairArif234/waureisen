@@ -4,7 +4,7 @@ import Navbar from '../../components/Shared/Navbar';
 import authBg from '../../assets/bg.png';
 import Footer from '../../components/Shared/Footer';
 import { useLanguage } from '../../utils/LanguageContext';
-import { userLogin, adminLogin, providerLogin } from '../../api/authAPI';
+import { login } from '../../utils/authService';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -21,20 +21,10 @@ const Login = () => {
     setIsLoading(true);
   
     try {
-      let response;
+      // Use the centralized login function from authService
+      const response = await login({ email, password }, userType);
       
-      // Use the appropriate login function based on user type
-      if (userType === 'admin') {
-        response = await adminLogin({ email, password });
-      } else if (userType === 'provider') {
-        response = await providerLogin({ email, password });
-      } else {
-        response = await userLogin({ email, password });
-      }
-      
-      // Store the token
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('userType', userType); // Store user type
+      console.log('Login successful:', response);
       
       // Navigate based on user type
       if (userType === 'admin') {
@@ -45,6 +35,7 @@ const Login = () => {
         navigate('/');
       }
     } catch (error) {
+      console.error('Login error:', error);
       setError(error.response?.data?.message || t('invalid_credentials'));
     } finally {
       setIsLoading(false);

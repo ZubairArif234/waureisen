@@ -7,34 +7,112 @@ const API = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 15000, // 15 seconds timeout
 });
+
+// Set constant token key
+const TOKEN_KEY = 'token';
 
 // Add request interceptor to include auth token for protected routes
 API.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem(TOKEN_KEY);
     if (token) {
+      // Ensure we're using the correct Bearer format
       config.headers['Authorization'] = `Bearer ${token}`;
+      console.log(`Setting Authorization header for ${config.url}`);
     }
+    
+    // Log the request for debugging
+    console.log(`API Request to ${config.url}:`, {
+      method: config.method,
+      headers: config.headers,
+      params: config.params,
+      // Don't log password or sensitive data
+      data: config.data ? sanitizeRequestData(config.data) : undefined
+    });
+    
     return config;
   },
   (error) => {
+    console.error('Request interceptor error:', error);
     return Promise.reject(error);
   }
 );
 
 // Add response interceptor to handle common error cases
 API.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Log successful responses for debugging
+    console.log(`API Response from ${response.config.url}:`, {
+      status: response.status,
+      data: response.data
+    });
+    return response;
+  },
   (error) => {
-    // Handle unauthorized errors (token expired or invalid)
-    if (error.response && error.response.status === 401) {
-      // Clear local storage and redirect to login
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+    // Handle network errors
+    if (!error.response) {
+      console.error('Network error - no response from server');
+      return Promise.reject(
+        new Error('Network error - please check your connection')
+      );
     }
+
+    // Log specific errors for debugging
+    if (error.response) {
+      console.error(`API Error ${error.response.status} (${error.response.config.url}):`, 
+        error.response.data);
+      
+      // Handle token expiration/invalid token
+      if (error.response.status === 401) {
+        console.error('401 Unauthorized - Token invalid or expired');
+        
+        // Clear auth data from localStorage
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem('userType');
+        localStorage.removeItem('user_data');
+        localStorage.removeItem('provider_user');
+        localStorage.removeItem('admin_data');
+        
+        // Redirect to login page if not already there
+        const currentPath = window.location.pathname;
+        if (!currentPath.includes('/login')) {
+          window.location.href = '/login?session_expired=true';
+        }
+      } else if (error.response.status === 403) {
+        console.error('403 Forbidden - Permission denied');
+      }
+    }
+    
     return Promise.reject(error);
   }
 );
+
+// Helper function to sanitize request data for logging (removes passwords)
+function sanitizeRequestData(data) {
+  if (!data) return data;
+  
+  // Create a copy to avoid modifying the original data
+  const sanitized = { ...data };
+  
+  // Remove sensitive fields
+  if (sanitized.password) sanitized.password = '[REDACTED]';
+  if (sanitized.newPassword) sanitized.newPassword = '[REDACTED]';
+  if (sanitized.currentPassword) sanitized.currentPassword = '[REDACTED]';
+  
+  return sanitized;
+}
+
+// Helper function to reinitialize auth headers - useful after page refresh
+export const initializeAuthHeaders = () => {
+  const token = localStorage.getItem(TOKEN_KEY);
+  if (token) {
+    API.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    console.log('Auth headers initialized from localStorage');
+    return true;
+  }
+  return false;
+};
 
 export default API;
