@@ -1,14 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Eye, Filter, X, Download } from 'lucide-react';
+import { getAllTransactions, updateTransaction } from '../../api/adminAPI';
+import { exportToExcel } from '../../utils/exportUtils';
 
 const TransactionDetailModal = ({ transaction, isOpen, onClose, onCancel }) => {
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleCancel = () => {
-    onCancel(transaction.id);
-    setShowCancelConfirm(false);
+  const handleCancel = async () => {
+    setIsLoading(true);
+    try {
+      await onCancel(transaction._id);
+      setShowCancelConfirm(false);
+    } catch (error) {
+      console.error('Error cancelling transaction:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const getStatusColor = (status) => {
@@ -17,11 +27,34 @@ const TransactionDetailModal = ({ transaction, isOpen, onClose, onCancel }) => {
         return 'bg-green-100 text-green-800';
       case 'refunded':
         return 'bg-red-100 text-red-800';
+      case 'canceled':
       case 'cancelled':
         return 'bg-gray-100 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  // Format user name from transaction
+  const getUserName = () => {
+    if (!transaction.user) return 'Unknown User';
+    if (typeof transaction.user === 'object') {
+      return `${transaction.user.firstName || ''} ${transaction.user.lastName || ''}`.trim() || transaction.user.username || 'Unknown User';
+    }
+    return 'Unknown User';
+  };
+
+  // Format transaction amount
+  const getAmount = () => {
+    if (!transaction.amount) return 'N/A';
+    
+    if (transaction.amount.chf && transaction.amount.chf > 0) {
+      return `${transaction.amount.chf} CHF`;
+    } else if (transaction.amount.eur && transaction.amount.eur > 0) {
+      return `${transaction.amount.eur} EUR`;
+    }
+    
+    return 'N/A';
   };
   
   return (
@@ -46,45 +79,45 @@ const TransactionDetailModal = ({ transaction, isOpen, onClose, onCancel }) => {
           <div className="space-y-4">
             <div className="flex justify-between items-center pb-3 border-b">
               <span className="text-gray-600">Transaction ID:</span>
-              <span className="font-medium">{transaction.id}</span>
+              <span className="font-medium">{transaction.transactionId || transaction._id}</span>
             </div>
             
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Amount:</span>
               <span className="font-medium text-brand">
-                {transaction.amount} {transaction.currency}
+                {getAmount()}
               </span>
             </div>
             
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Date:</span>
-              <span>{transaction.date}</span>
+              <span>{new Date(transaction.date).toLocaleDateString()}</span>
             </div>
             
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Customer:</span>
-              <span>{transaction.customer}</span>
+              <span>{getUserName()}</span>
             </div>
             
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Customer Number:</span>
-              <span>{transaction.customerNumber}</span>
+              <span>{transaction.user?.customerNumber || 'N/A'}</span>
             </div>
             
             <div className="flex justify-between items-center">
-              <span className="text-gray-600">Listing:</span>
-              <span>{transaction.listing}</span>
+              <span className="text-gray-600">Payment Method:</span>
+              <span>{transaction.method || 'N/A'}</span>
             </div>
             
             <div className="flex justify-between items-center">
-              <span className="text-gray-600">Source:</span>
-              <span>{transaction.source}</span>
+              <span className="text-gray-600">Details:</span>
+              <span>{transaction.details || 'N/A'}</span>
             </div>
             
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Status:</span>
               <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(transaction.status)}`}>
-                {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
+                {transaction.status ? (transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)) : 'Unknown'}
               </span>
             </div>
           </div>
@@ -94,8 +127,9 @@ const TransactionDetailModal = ({ transaction, isOpen, onClose, onCancel }) => {
               <button
                 onClick={() => setShowCancelConfirm(true)}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                disabled={isLoading}
               >
-                Cancel Booking
+                {isLoading ? 'Processing...' : 'Cancel Booking'}
               </button>
             )}
             <button
@@ -121,14 +155,16 @@ const TransactionDetailModal = ({ transaction, isOpen, onClose, onCancel }) => {
               <button
                 onClick={() => setShowCancelConfirm(false)}
                 className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                disabled={isLoading}
               >
                 No, Keep it
               </button>
               <button
                 onClick={handleCancel}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                disabled={isLoading}
               >
-                Yes, Cancel Booking
+                {isLoading ? 'Processing...' : 'Yes, Cancel Booking'}
               </button>
             </div>
           </div>
@@ -145,6 +181,7 @@ const TransactionRow = ({ transaction, onViewDetails }) => {
         return 'bg-green-100 text-green-800';
       case 'refunded':
         return 'bg-red-100 text-red-800';
+      case 'canceled':
       case 'cancelled':
         return 'bg-gray-100 text-gray-800';
       default:
@@ -152,32 +189,60 @@ const TransactionRow = ({ transaction, onViewDetails }) => {
     }
   };
 
+  // Format user name from transaction
+  const getUserName = () => {
+    if (!transaction.user) return 'Unknown User';
+    if (typeof transaction.user === 'object') {
+      return `${transaction.user.firstName || ''} ${transaction.user.lastName || ''}`.trim() || transaction.user.username || 'Unknown User';
+    }
+    return 'Unknown User';
+  };
+  
+  // Format customer number
+  const getCustomerNumber = () => {
+    if (!transaction.user) return 'N/A';
+    return transaction.user.customerNumber ? `#${transaction.user.customerNumber}` : 'N/A';
+  };
+
+  // Format transaction amount
+  const getAmount = () => {
+    if (!transaction.amount) return 'N/A';
+    
+    if (transaction.amount.chf && transaction.amount.chf > 0) {
+      return `${transaction.amount.chf} CHF`;
+    } else if (transaction.amount.eur && transaction.amount.eur > 0) {
+      return `${transaction.amount.eur} EUR`;
+    }
+    
+    return 'N/A';
+  };
+
   return (
     <tr className="border-b hover:bg-gray-50">
       <td className="px-4 py-4 text-sm font-medium text-gray-900">
-        {transaction.id}
+        {transaction.transactionId || transaction._id}
       </td>
       <td className="px-4 py-4 text-sm text-gray-700">
-        {transaction.customer}
+        {getUserName()}
       </td>
       <td className="px-4 py-4 text-sm text-gray-700">
-        #{transaction.customerNumber}
+        {getCustomerNumber()}
       </td>
       <td className="px-4 py-4 text-sm text-gray-700">
-        {transaction.listing}
+        {transaction.details || 'N/A'}
       </td>
       <td className="px-4 py-4 text-sm text-gray-700">
-        {transaction.date}
+        {transaction.date ? new Date(transaction.date).toLocaleDateString() : 'N/A'}
       </td>
       <td className="px-4 py-4 text-sm font-medium text-gray-900">
-        {transaction.amount} {transaction.currency}
+        {getAmount()}
       </td>
       <td className="px-4 py-4 text-sm text-gray-700">
-        {transaction.source}
+        {transaction.method || 'N/A'}
       </td>
       <td className="px-4 py-4">
         <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusStyle(transaction.status)}`}>
-          {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
+          {transaction.status ? (transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)) : 'Unknown'}
         </span>
       </td>
       <td className="px-4 py-4 text-sm text-gray-500">
@@ -196,128 +261,110 @@ const Transactions = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
-  const [transactions, setTransactions] = useState([
-    {
-      id: '#TRX-2023-001',
-      customer: 'John Doe',
-      customerNumber: '238491',
-      listing: 'Mountain View Chalet',
-      date: '2023-03-15',
-      amount: '750',
-      currency: 'CHF',
-      source: 'Platform',
-      status: 'paid'
-    },
-    {
-      id: '#TRX-2023-002',
-      customer: 'Jane Smith',
-      customerNumber: '238492',
-      listing: 'Beachfront Villa',
-      date: '2023-03-18',
-      amount: '580',
-      currency: 'EUR',
-      source: 'Platform',
-      status: 'paid'
-    },
-    {
-      id: '#TRX-2023-003',
-      customer: 'Robert Brown',
-      customerNumber: '238493',
-      listing: 'Lake House',
-      date: '2023-03-20',
-      amount: '1750',
-      currency: 'CHF',
-      source: 'API',
-      status: 'refunded'
-    },
-    {
-      id: '#TRX-2023-004',
-      customer: 'Emily Johnson',
-      customerNumber: '238494',
-      listing: 'Forest Cabin',
-      date: '2023-03-22',
-      amount: '480',
-      currency: 'EUR',
-      source: 'Platform',
-      status: 'paid'
-    },
-    {
-      id: '#TRX-2023-005',
-      customer: 'Michael Wilson',
-      customerNumber: '238495',
-      listing: 'City Apartment',
-      date: '2023-03-25',
-      amount: '1380',
-      currency: 'EUR',
-      source: 'API',
-      status: 'cancelled'
-    }
-  ]);
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const handleCancelBooking = (transactionId) => {
-    setTransactions(prevTransactions =>
-      prevTransactions.map(transaction =>
-        transaction.id === transactionId
-          ? { ...transaction, status: 'cancelled' }
-          : transaction
-      )
-    );
-    
-    setSelectedTransaction(prev => 
-      prev?.id === transactionId
-        ? { ...prev, status: 'cancelled' }
-        : prev
-    );
+  // Fetch transactions on component mount
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
+
+  const fetchTransactions = async () => {
+    try {
+      setLoading(true);
+      const data = await getAllTransactions();
+      setTransactions(data);
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching transactions:", err);
+      setError("Failed to load transactions. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const filteredTransactions = transactions.filter(transaction => 
-    transaction.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    transaction.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    transaction.listing.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    transaction.customerNumber.includes(searchQuery)
-  );
+  const handleCancelBooking = async (transactionId) => {
+    try {
+      // Update the transaction status to 'canceled'
+      await updateTransaction(transactionId, { status: 'canceled' });
+      
+      // Update the local state
+      setTransactions(prevTransactions =>
+        prevTransactions.map(transaction =>
+          transaction._id === transactionId
+            ? { ...transaction, status: 'canceled' }
+            : transaction
+        )
+      );
+      
+      // Also update the selected transaction if it's open in the modal
+      if (selectedTransaction && selectedTransaction._id === transactionId) {
+        setSelectedTransaction(prev => ({ ...prev, status: 'canceled' }));
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error canceling booking:', error);
+      setError('Failed to cancel booking. Please try again.');
+      return false;
+    }
+  };
 
-  // Export data to Excel
-  const exportToExcel = () => {
-    // Create data for export
-    const exportData = filteredTransactions.map(transaction => ({
-      TransactionID: transaction.id,
-      Customer: transaction.customer,
-      CustomerNumber: transaction.customerNumber,
-      Listing: transaction.listing,
-      Date: transaction.date,
-      Amount: transaction.amount,
-      Currency: transaction.currency,
-      Source: transaction.source,
-      Status: transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)
-    }));
-
-    // Convert data to CSV format
-    const headers = Object.keys(exportData[0]);
-    let csvContent = headers.join(',') + '\n';
+  const filteredTransactions = transactions.filter(transaction => {
+    const transactionId = transaction.transactionId || transaction._id || '';
+    const customer = typeof transaction.user === 'object' 
+      ? `${transaction.user.firstName || ''} ${transaction.user.lastName || ''} ${transaction.user.username || ''}` 
+      : '';
+    const customerNumber = transaction.user?.customerNumber || '';
+    const details = transaction.details || '';
     
-    exportData.forEach(row => {
-      const values = headers.map(header => {
-        const value = row[header] != null ? row[header].toString() : '';
-        // Escape values with commas, quotes or newlines
-        if (value.includes(',') || value.includes('"') || value.includes('\n')) {
-          return `"${value.replace(/"/g, '""')}"`;
-        }
-        return value;
-      });
-      csvContent += values.join(',') + '\n';
-    });
+    const searchTerms = [
+      transactionId,
+      customer,
+      customerNumber,
+      details
+    ].join(' ').toLowerCase();
+    
+    return searchTerms.includes(searchQuery.toLowerCase());
+  });
 
-    // Create and download the file
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'transactions-export.csv');
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  // Handle export to CSV/Excel
+  const handleExport = () => {
+    // Prepare data for export
+    const exportData = filteredTransactions.map(transaction => {
+      const userName = typeof transaction.user === 'object' 
+        ? `${transaction.user.firstName || ''} ${transaction.user.lastName || ''}`.trim() || transaction.user.username 
+        : 'Unknown User';
+      
+      const customerNumber = transaction.user?.customerNumber || 'N/A';
+      
+      let amount = 'N/A';
+      let currency = '';
+      if (transaction.amount) {
+        if (transaction.amount.chf && transaction.amount.chf > 0) {
+          amount = transaction.amount.chf;
+          currency = 'CHF';
+        } else if (transaction.amount.eur && transaction.amount.eur > 0) {
+          amount = transaction.amount.eur;
+          currency = 'EUR';
+        }
+      }
+      
+      return {
+        'Transaction ID': transaction.transactionId || transaction._id,
+        'Customer': userName,
+        'Customer Number': customerNumber,
+        'Details': transaction.details || 'N/A',
+        'Date': transaction.date ? new Date(transaction.date).toLocaleDateString() : 'N/A',
+        'Amount': amount,
+        'Currency': currency,
+        'Method': transaction.method || 'N/A',
+        'Status': transaction.status ? (transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)) : 'Unknown'
+      };
+    });
+    
+    exportToExcel(exportData, 'transactions-export');
   };
 
   return (
@@ -331,6 +378,13 @@ const Transactions = () => {
           View and manage all transactions on the platform
         </p>
       </div>
+
+      {/* Error Display */}
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
+          {error}
+        </div>
+      )}
 
       {/* Search and Filters */}
       <div className="flex flex-col md:flex-row gap-4 mb-8">
@@ -357,8 +411,9 @@ const Transactions = () => {
           
           {/* Export Button */}
           <button
-            onClick={exportToExcel}
+            onClick={handleExport}
             className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+            disabled={loading || filteredTransactions.length === 0}
           >
             <Download className="w-5 h-5" />
             <span>Export</span>
@@ -366,79 +421,90 @@ const Transactions = () => {
         </div>
       </div>
 
-      {/* Transactions Table */}
-      <div className="bg-white border rounded-lg shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Transaction ID
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Customer
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Customer Number
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Listing
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Amount
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Source
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredTransactions.length > 0 ? (
-                filteredTransactions.map((transaction) => (
-                  <TransactionRow 
-                    key={transaction.id} 
-                    transaction={transaction} 
-                    onViewDetails={(transaction) => {
-                      setSelectedTransaction(transaction);
-                      setDetailModalOpen(true);
-                    }}
-                  />
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="9" className="px-4 py-6 text-center text-gray-500">
-                    No transactions found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+      {/* Loading State */}
+      {loading && (
+        <div className="flex justify-center items-center py-20">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand"></div>
         </div>
+      )}
 
-        {/* Pagination */}
-        <div className="px-4 py-3 border-t flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="text-sm text-gray-500">
-            Showing <span className="font-medium">1</span> to <span className="font-medium">{filteredTransactions.length}</span> of <span className="font-medium">{transactions.length}</span> transactions
+      {/* Transactions Table */}
+      {!loading && (
+        <div className="bg-white border rounded-lg shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full">
+              <thead className="bg-gray-50 border-b">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Transaction ID
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Customer
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Customer Number
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Details
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Date
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Amount
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Method
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredTransactions.length > 0 ? (
+                  filteredTransactions.map((transaction) => (
+                    <TransactionRow 
+                      key={transaction._id} 
+                      transaction={transaction} 
+                      onViewDetails={(transaction) => {
+                        setSelectedTransaction(transaction);
+                        setDetailModalOpen(true);
+                      }}
+                    />
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="9" className="px-4 py-6 text-center text-gray-500">
+                      No transactions found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
-          <div className="flex gap-2">
-            <button disabled className="px-3 py-1 border rounded text-sm text-gray-400 bg-gray-50 cursor-not-allowed">
-              Previous
-            </button>
-            <button className="px-3 py-1 border rounded text-sm text-gray-600 hover:bg-gray-50">
-              Next
-            </button>
-          </div>
+
+          {/* Pagination */}
+          {filteredTransactions.length > 0 && (
+            <div className="px-4 py-3 border-t flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="text-sm text-gray-500">
+                Showing <span className="font-medium">1</span> to <span className="font-medium">{filteredTransactions.length}</span> of <span className="font-medium">{transactions.length}</span> transactions
+              </div>
+              <div className="flex gap-2">
+                <button disabled className="px-3 py-1 border rounded text-sm text-gray-400 bg-gray-50 cursor-not-allowed">
+                  Previous
+                </button>
+                <button className="px-3 py-1 border rounded text-sm text-gray-600 hover:bg-gray-50">
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-      </div>
+      )}
       
       {/* Transaction Detail Modal */}
       {selectedTransaction && (
