@@ -126,22 +126,21 @@ const SearchResults = () => {
   const fetchListings = useCallback(async (lat, lng, pageNum, append = false) => {
     setIsUpdating(true);
     try {
-      // Include additional search parameters from URL
+      console.log('Fetching listings at coordinates:', lat, lng, 'page:', pageNum);
       const response = await searchListings({
         lat,
         lng,
         page: pageNum,
-        pageSize: 10,
-        people: people,
-        dogs: dogs,
-        dateRange: dateRange
+        pageSize: 10
       });
       
-      console.log('API Response:', response); // Add this for debugging
+      console.log('API Response:', response);
       
       // Make sure we have a valid response with listings property
       const newListings = response?.listings || [];
       const moreAvailable = response?.hasMore || false;
+      
+      console.log('Received listings:', newListings.length, 'hasMore:', moreAvailable);
       
       if (append) {
         setListings(prev => [...(prev || []), ...newListings]);
@@ -170,25 +169,37 @@ const SearchResults = () => {
       setIsUpdating(false);
       setLoading(false);
     }
-  }, [getLocationName, people, dogs, dateRange]);
+  }, [getLocationName]);
 
   // Transform listings for map display
   const getMapReadyListings = useCallback((listingsData) => {
-    if (!listingsData || !Array.isArray(listingsData)) return [];
+    if (!listingsData || !Array.isArray(listingsData) || listingsData.length === 0) {
+      console.log('No listings data available for map');
+      return [];
+    }
+    
+    console.log('Preparing map data for', listingsData.length, 'listings');
     
     return listingsData.map(listing => {
-      if (!listing) return null;
+      // Make sure location coordinates exist and are in the correct format
+      if (!listing.location || !listing.location.coordinates || 
+          !Array.isArray(listing.location.coordinates) || 
+          listing.location.coordinates.length !== 2) {
+        console.warn('Invalid location data for listing:', listing._id);
+        return null;
+      }
+      
+      // GeoJSON uses [lng, lat] order, but Google Maps uses {lat, lng}
+      const [lng, lat] = listing.location.coordinates;
       
       return {
-        ...listing,
-        location: {
-          // Ensure coordinates are in the format expected by the map
-          coordinates: listing.location && listing.location.coordinates ? 
-            listing.location.coordinates : 
-            [0, 0]
-        }
+        id: listing._id,
+        position: { lat, lng },
+        price: listing.pricePerNight?.price || 0,
+        title: listing.title || 'Accommodation',
+        image: listing.images && listing.images.length > 0 ? listing.images[0] : null
       };
-    }).filter(Boolean); // Remove any null items
+    }).filter(Boolean); // Remove any null entries
   }, []);
 
   // Handle window resize

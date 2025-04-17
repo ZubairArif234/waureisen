@@ -31,6 +31,8 @@ export const searchListings = async (params) => {
     if (typeof params === 'number' || typeof params === 'string') {
       const [lat, lng, page = 1, pageSize = 10] = arguments;
       
+      console.log('Searching with coordinates:', lat, lng);
+      
       // Use the geospatial search endpoint
       const response = await API.get('/listings/search', {
         params: {
@@ -41,6 +43,8 @@ export const searchListings = async (params) => {
         }
       });
       
+      console.log('API Response:', response.data);
+      
       // Ensure we return a consistent structure even if the API response is unexpected
       return {
         listings: response?.data?.listings || [],
@@ -50,7 +54,10 @@ export const searchListings = async (params) => {
     }
     
     // Otherwise use the regular search with provided params object
-    const response = await API.get('/listings', { params });
+    console.log('Searching with params object:', params);
+    const response = await API.get('/listings/search', { params });
+    
+    console.log('API Response:', response.data);
     
     // Ensure we return a consistent structure
     return {
