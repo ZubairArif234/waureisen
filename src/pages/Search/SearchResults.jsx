@@ -269,23 +269,32 @@ const SearchResults = () => {
       ...newViewport
     }));
     
-    // Only update listings if center has changed significantly
-    if (mapViewport.center) {
+    // Only update listings if center has changed significantly AND zoom hasn't changed
+    // This prevents refreshing when just zooming in/out
+    if (mapViewport.center && newViewport.center) {
       const oldCenter = mapViewport.center;
       const newCenter = newViewport.center;
       
+      // Calculate distance between old and new center
       const distance = Math.sqrt(
         Math.pow(newCenter.lat - oldCenter.lat, 2) +
         Math.pow(newCenter.lng - oldCenter.lng, 2)
       );
       
-      // Only update if we've moved significantly (more than ~1km)
-      if (distance > 0.01) {
+      // Check if this is just a zoom change or a very small movement
+      const isZoomChange = newViewport.zoom !== mapViewport.zoom;
+      const isSmallMovement = distance < 0.05; // Increased threshold for movement
+      
+      // Only fetch new listings if:
+      // 1. The map has been dragged significantly (not just zoomed)
+      // 2. It's not a small movement caused by slight map adjustments
+      if (!isZoomChange && !isSmallMovement && distance > 0.05) {
+        console.log('Map moved significantly, fetching new listings');
         setPage(1);
         fetchListings(newCenter.lat, newCenter.lng, 1, false);
       }
     }
-  }, [mapViewport.center, fetchListings]);
+  }, [mapViewport.center, mapViewport.zoom, fetchListings]);
 
   // Get the listings ready for the map component
   const mapReadyListings = getMapReadyListings(listings);

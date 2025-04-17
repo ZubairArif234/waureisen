@@ -51,17 +51,32 @@ const MockMap = ({
       // Get the center position
       const center = map.getCenter();
       
-      // Callback with bounds and center information
-      onMapChange && onMapChange({
-        bounds: {
-          northeast: { lat: ne.lat(), lng: ne.lng() },
-          southwest: { lat: sw.lat(), lng: sw.lng() }
-        },
-        center: { lat: center.lat(), lng: center.lng() },
-        zoom: map.getZoom()
-      });
+      // Get the current zoom level
+      const zoom = map.getZoom();
+      
+      // Only call the callback if we have a valid viewport
+      if (onMapChange && center && bounds && !isInitializingRef.current) {
+        // Debounce the map change event to prevent too many updates
+        if (mapChangeTimeoutRef.current) {
+          clearTimeout(mapChangeTimeoutRef.current);
+        }
+        
+        mapChangeTimeoutRef.current = setTimeout(() => {
+          onMapChange({
+            center: { 
+              lat: center.lat(), 
+              lng: center.lng() 
+            },
+            bounds: {
+              ne: { lat: ne.lat(), lng: ne.lng() },
+              sw: { lat: sw.lat(), lng: sw.lng() }
+            },
+            zoom
+          });
+        }, 500); // Wait 500ms after the user stops interacting
+      }
     } catch (error) {
-      console.error('Error in map change handler:', error);
+      console.error('Error getting map viewport:', error);
     }
   };
 
