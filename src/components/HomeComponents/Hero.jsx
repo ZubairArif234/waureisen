@@ -68,17 +68,28 @@ const Hero = () => {
   };
 
   const handleSearch = () => {
-    if (location && dateRange.start && dateRange.end && guests.people >= 1 && guests.dogs >= 1) {
-      const startDate = `${dateRange.start.getDate()} ${dateRange.start.toLocaleString('default', { month: 'short' })}`;
-      const endDate = `${dateRange.end.getDate()} ${dateRange.end.toLocaleString('default', { month: 'short' })}`;
-      const dateString = `${startDate} - ${endDate}`;
-      
-      // Navigate to search page with parameters
-      navigate(`/search?location=${encodeURIComponent(location)}&dates=${encodeURIComponent(dateString)}&people=${guests.people}&dogs=${guests.dogs}${placeData ? `&lat=${placeData.location.lat}&lng=${placeData.location.lng}` : ''}`);
-    } else {
-      // If any required field is missing, navigate to search page with map view
-      navigate('/search');
+    if (!location) {
+      // Show error or notification that location is required
+      return;
     }
+
+    // Format dates for URL if they exist
+    let dateParam = '';
+    if (dateRange.start && dateRange.end) {
+      const startDate = dateRange.start.toLocaleDateString('en-US', { day: '2-digit', month: 'short' });
+      const endDate = dateRange.end.toLocaleDateString('en-US', { day: '2-digit', month: 'short' });
+      dateParam = `&dates=${startDate} - ${endDate}`;
+    }
+
+    // Build the search URL with coordinates if available
+    let searchUrl = `/search?location=${encodeURIComponent(location)}${dateParam}&people=${guests.people}&dogs=${guests.dogs}`;
+    
+    // Add coordinates if available from placeData
+    if (placeData && placeData.location) {
+      searchUrl += `&lat=${placeData.location.lat}&lng=${placeData.location.lng}`;
+    }
+
+    navigate(searchUrl);
   };
 
   return (

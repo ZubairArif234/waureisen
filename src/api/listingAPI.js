@@ -1,5 +1,6 @@
 // src/api/listingAPI.js
 import API from './config';
+import axios from 'axios';
 
 // Get all listings
 export const getAllListings = async () => {
@@ -23,14 +24,44 @@ export const getListingById = async (id) => {
   }
 };
 
-// Search listings with parameters
+// Search listings with parameters (combined function)
 export const searchListings = async (params) => {
   try {
+    // If lat and lng are provided directly as arguments, format them as params
+    if (typeof params === 'number' || typeof params === 'string') {
+      const [lat, lng, page = 1, pageSize = 10] = arguments;
+      
+      // Use the geospatial search endpoint
+      const response = await API.get('/listings/search', {
+        params: {
+          lat,
+          lng,
+          page,
+          pageSize
+        }
+      });
+      
+      // Ensure we return a consistent structure even if the API response is unexpected
+      return {
+        listings: response?.data?.listings || [],
+        hasMore: response?.data?.hasMore || false,
+        ...response.data
+      };
+    }
+    
+    // Otherwise use the regular search with provided params object
     const response = await API.get('/listings', { params });
-    return response.data;
+    
+    // Ensure we return a consistent structure
+    return {
+      listings: response?.data?.listings || [],
+      hasMore: response?.data?.hasMore || false,
+      ...response.data
+    };
   } catch (error) {
     console.error('Error searching listings:', error);
-    throw error;
+    // Return a valid empty response on error
+    return { listings: [], hasMore: false };
   }
 };
 

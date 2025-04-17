@@ -7,6 +7,9 @@ import MockMap from '../../components/SearchComponents/MockMap';
 import MapToggle from '../../components/SearchComponents/MapToggle';
 import Footer from '../../components/Shared/Footer';
 import { useLanguage } from '../../utils/LanguageContext';
+// Add the missing import for searchListings
+import { searchListings } from '../../api/listingAPI';
+import axios from 'axios';
 
 // Import dummy images for now
 import i1 from '../../assets/i1.png';
@@ -20,25 +23,26 @@ const SearchResults = () => {
   
   // Extract search parameters
   const locationParam = searchParams.get('location') || '';
-  const dateRange = searchParams.get('dates') || '12Mar - 16Mar';
+  const dateRange = searchParams.get('dates') || '';
   const people = searchParams.get('people') || 1;
   const dogs = searchParams.get('dogs') || 1;
   
   // Get latitude and longitude from URL if available
-  const initialLat = parseFloat(searchParams.get('lat')) || null;
-  const initialLng = parseFloat(searchParams.get('lng')) || null;
+  const initialLat = parseFloat(searchParams.get('lat')) || 46.818188;
+  const initialLng = parseFloat(searchParams.get('lng')) || 8.227512;
   
   const [showMap, setShowMap] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
-  const hasSearchParams = locationParam || searchParams.get('dates');
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [areaName, setAreaName] = useState(locationParam || 'this area');
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   
   // State for tracking map viewport
   const [mapViewport, setMapViewport] = useState({
-    center: initialLat && initialLng ? { lat: initialLat, lng: initialLng } : null,
+    center: { lat: initialLat, lng: initialLng },
     bounds: null,
     zoom: 12
   });
@@ -46,10 +50,8 @@ const SearchResults = () => {
   // Refs for state preservation between renders
   const listingsRef = useRef(listings);
   const areaNameRef = useRef(areaName);
-  const initialLoadRef = useRef(true);
-  const mapDidMoveRef = useRef(false);
-  const lastViewportRef = useRef(null);
-  const listingIdCacheRef = useRef(new Map());
+  const observerRef = useRef(null);
+  const loadingRef = useRef(null);
   
   // Create styles for proper layout and spacing
   const pageContentStyle = {
@@ -120,102 +122,55 @@ const SearchResults = () => {
     }
   }, [locationParam]);
 
-  // Generate mock listings based on map viewport
-  const generateMockListingsForViewport = useCallback(async (viewport) => {
-    if (!viewport || !viewport.center) return [];
-    
-    const center = viewport.center;
-    let spread = 0.03; // Default spread for listings
-    
-    // Adjust spread based on zoom level
-    if (viewport.zoom) {
-      // The higher the zoom, the smaller the spread
-      spread = 0.1 / (viewport.zoom / 10);
-    }
-    
+  // Fetch listings from API
+  const fetchListings = useCallback(async (lat, lng, pageNum, append = false) => {
+    setIsUpdating(true);
     try {
-      // Get the current state values from refs to avoid dependency issues
-      const currentListings = listingsRef.current;
+      // Include additional search parameters from URL
+      const response = await searchListings({
+        lat,
+        lng,
+        page: pageNum,
+        pageSize: 10,
+        people: people,
+        dogs: dogs,
+        dateRange: dateRange
+      });
       
-      // Try to get a location name for the center
-      let areaDisplayName = await getLocationName(center.lat, center.lng);
+      console.log('API Response:', response); // Add this for debugging
       
-      // Update the area name state - but only if it actually changed
+      // Make sure we have a valid response with listings property
+      const newListings = response?.listings || [];
+      const moreAvailable = response?.hasMore || false;
+      
+      if (append) {
+        setListings(prev => [...(prev || []), ...newListings]);
+      } else {
+        setListings(newListings);
+      }
+      
+      setHasMore(moreAvailable);
+      
+      // Update area name based on coordinates
+      const areaDisplayName = await getLocationName(lat, lng);
       if (areaDisplayName !== areaNameRef.current) {
         setAreaName(areaDisplayName);
       }
       
-      // Get a set of existing IDs to maintain some consistency
-      const existingIds = new Set(currentListings.map(listing => listing.id));
-      
-      // Generate random listings around the center
-      return Array(10).fill().map((_, index) => {
-        // Generate random coordinates
-        const lng = center.lng + (Math.random() * spread - spread/2);
-        const lat = center.lat + (Math.random() * spread - spread/2);
-        
-        // Try to reuse an existing ID for stability
-        let id;
-        if (existingIds.size > index && Math.random() > 0.3) {
-          // Reuse an existing ID 70% of the time when available
-          id = Array.from(existingIds)[index];
-        } else {
-          // Generate a stable ID based on coordinates
-          const coordKey = `${lat.toFixed(4)}-${lng.toFixed(4)}`;
-          if (listingIdCacheRef.current.has(coordKey)) {
-            id = listingIdCacheRef.current.get(coordKey);
-          } else {
-            id = `acc-${index}-${Math.random().toString(36).substring(2, 9)}`;
-            listingIdCacheRef.current.set(coordKey, id);
-          }
-        }
-        
-        // Create a formatted location string with the area name
-        const displayLocation = `Accommodation in ${areaDisplayName}`;
-        
-        // Determine if this is a reused listing or new one
-        const existingListing = currentListings.find(l => l.id === id);
-        
-        // If it's an existing listing, keep some properties the same
-        const image = existingListing ? existingListing.image : [i1, i2, i3][index % 3];
-        const provider = existingListing ? existingListing.provider : (index % 3 === 2 ? "Interhome" : "Waureisen");
-        
-        // Generate a somewhat stable price (changes less frequently)
-        const basePrice = (lat * 100 + lng * 100) % 100; // Deterministic base on coordinates
-        const price = 180 + Math.round(basePrice); // Range from 180-280
-        
-        return {
-          id,
-          image,
-          price,
-          location: displayLocation,
-          provider,
-          // The coordinates for mapping
-          coordinates: {
-            lat,
-            lng
-          }
-        };
-      });
+      return newListings;
     } catch (error) {
-      console.error('Error generating listings:', error);
-      
-      // Fallback - generate simple listings without geocoding
-      return Array(10).fill().map((_, index) => {
-        const lng = center.lng + (Math.random() * spread - spread/2);
-        const lat = center.lat + (Math.random() * spread - spread/2);
-        
-        return {
-          id: `acc-fallback-${index}`,
-          image: [i1, i2, i3][index % 3],
-          price: 180 + Math.floor(Math.random() * 100),
-          location: `Accommodation in ${locationParam || 'this area'}`,
-          provider: index % 3 === 2 ? "Interhome" : "Waureisen",
-          coordinates: { lat, lng }
-        };
-      });
+      console.error('Error fetching listings:', error);
+      // Set listings to empty array on error
+      if (!append) {
+        setListings([]);
+      }
+      setHasMore(false);
+      return [];
+    } finally {
+      setIsUpdating(false);
+      setLoading(false);
     }
-  }, [getLocationName, locationParam]);
+  }, [getLocationName, people, dogs, dateRange]);
 
   // Transform listings for map display
   const getMapReadyListings = useCallback((listingsData) => {
@@ -228,8 +183,8 @@ const SearchResults = () => {
         ...listing,
         location: {
           // Ensure coordinates are in the format expected by the map
-          coordinates: listing.coordinates ? 
-            [listing.coordinates.lng, listing.coordinates.lat] : 
+          coordinates: listing.location && listing.location.coordinates ? 
+            listing.location.coordinates : 
             [0, 0]
         }
       };
@@ -251,101 +206,75 @@ const SearchResults = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, [showMap]);
 
-  // Fetch listings on initial load
+  // Fetch listings on initial load or when coordinates change
   useEffect(() => {
-    const fetchInitialListings = async () => {
-      setLoading(true);
-      try {
-        const mockListings = await generateMockListingsForViewport({
-          center: initialLat && initialLng 
-            ? { lat: initialLat, lng: initialLng }
-            : { lat: 46.818188, lng: 8.227512 },
-          zoom: 12
-        });
-        
-        setListings(mockListings);
-      } catch (error) {
-        console.error('Error fetching listings:', error);
-        setListings([]);
-      } finally {
-        setLoading(false);
-        initialLoadRef.current = false;
+    setLoading(true);
+    setPage(1);
+    fetchListings(initialLat, initialLng, 1, false);
+    
+    // Update map viewport
+    setMapViewport(prev => ({
+      ...prev,
+      center: { lat: initialLat, lng: initialLng }
+    }));
+  }, [initialLat, initialLng, fetchListings]);
+
+  // Set up intersection observer for infinite scrolling
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasMore && !isUpdating && !loading) {
+          setPage(prevPage => prevPage + 1);
+        }
+      },
+      { threshold: 0.5 }
+    );
+    
+    observerRef.current = observer;
+    
+    if (loadingRef.current) {
+      observer.observe(loadingRef.current);
+    }
+    
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
       }
     };
+  }, [hasMore, isUpdating, loading]);
 
-    fetchInitialListings();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array so this runs once
+  // Fetch more listings when page changes
+  useEffect(() => {
+    if (page > 1) {
+      fetchListings(mapViewport.center.lat, mapViewport.center.lng, page, true);
+    }
+  }, [page, fetchListings, mapViewport.center]);
 
   // Handle map viewport changes
   const handleMapChange = useCallback((newViewport) => {
-    // Skip if we're still in initial loading
-    if (initialLoadRef.current) return;
-    
     // Update viewport state
     setMapViewport(prev => ({
       ...prev,
       ...newViewport
     }));
     
-    // Mark that the map has moved (enables the "Update listings" button)
-    mapDidMoveRef.current = true;
-    
-    // Automatically update listings after map movement
-    // This removes the need for the "Update listings" button
-    const updateListingsForNewViewport = async () => {
-      // Skip if still initializing
-      if (initialLoadRef.current) return;
+    // Only update listings if center has changed significantly
+    if (mapViewport.center) {
+      const oldCenter = mapViewport.center;
+      const newCenter = newViewport.center;
       
-      // Calculate distance between centers to avoid unnecessary updates
-      if (lastViewportRef.current && lastViewportRef.current.center) {
-        const oldCenter = lastViewportRef.current.center;
-        const newCenter = newViewport.center;
-        
-        const distance = Math.sqrt(
-          Math.pow(newCenter.lat - oldCenter.lat, 2) +
-          Math.pow(newCenter.lng - oldCenter.lng, 2)
-        );
-        
-        // Only update if we've moved significantly (more than ~1km)
-        if (distance < 0.01) return;
+      const distance = Math.sqrt(
+        Math.pow(newCenter.lat - oldCenter.lat, 2) +
+        Math.pow(newCenter.lng - oldCenter.lng, 2)
+      );
+      
+      // Only update if we've moved significantly (more than ~1km)
+      if (distance > 0.01) {
+        setPage(1);
+        fetchListings(newCenter.lat, newCenter.lng, 1, false);
       }
-      
-      setIsUpdating(true);
-      
-      try {
-        const newListings = await generateMockListingsForViewport(newViewport);
-        setListings(newListings);
-        mapDidMoveRef.current = false;
-        lastViewportRef.current = { ...newViewport };
-      } catch (error) {
-        console.error('Error updating listings for new viewport:', error);
-      } finally {
-        setIsUpdating(false);
-      }
-    };
-    
-    // Use a small timeout to avoid excessive updates during continuous map movement
-    setTimeout(updateListingsForNewViewport, 500);
-  }, [generateMockListingsForViewport]);
-
-  // Button handler to manually update listings
-  const updateListings = async () => {
-    if (!mapDidMoveRef.current) return;
-    
-    setIsUpdating(true);
-    
-    try {
-      const newListings = await generateMockListingsForViewport(mapViewport);
-      setListings(newListings);
-      mapDidMoveRef.current = false;
-      lastViewportRef.current = { ...mapViewport };
-    } catch (error) {
-      console.error('Error updating listings:', error);
-    } finally {
-      setIsUpdating(false);
     }
-  };
+  }, [mapViewport.center, fetchListings]);
 
   // Get the listings ready for the map component
   const mapReadyListings = getMapReadyListings(listings);
@@ -364,6 +293,8 @@ const SearchResults = () => {
 
         {/* Main Content */}
         <div className="relative flex flex-col lg:flex-row min-h-[calc(100vh-170px)]">
+          
+          
           {/* List View */}
           <main 
             className={`w-full px-4 sm:px-6 lg:px-8 py-8 lg:w-2/3 ${
@@ -378,23 +309,13 @@ const SearchResults = () => {
               <>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-semibold text-gray-900">
-                    {listings.length} accommodations found
+                    {listings && listings.length ? listings.length : 0} accommodations found
                     {areaName && (
                       <span className="font-normal text-gray-600 text-base ml-2">
                         in {areaName}
                       </span>
                     )}
                   </h2>
-                  
-                  {/* Show update button when map has moved */}
-                  {mapDidMoveRef.current && (
-                    <button
-                      onClick={updateListings}
-                      className="px-4 py-2 bg-brand text-white rounded-lg text-sm"
-                    >
-                      Update listings for this map area
-                    </button>
-                  )}
                 </div>
                 
                 {/* Loading indicator when updating */}
@@ -409,19 +330,31 @@ const SearchResults = () => {
                     isUpdating ? 'opacity-70' : 'opacity-100'
                   }`}
                 >
-                  {listings.map((accommodation) => (
+                  {listings && listings.length > 0 ? listings.map((accommodation) => (
                     <AccommodationCard
-                      key={accommodation.id}
-                      id={accommodation.id}
-                      image={accommodation.image}
-                      price={accommodation.price}
-                      location={accommodation.location}
-                      provider={accommodation.provider}
+                      key={accommodation._id || accommodation.id}
+                      id={accommodation._id || accommodation.id}
+                      image={accommodation.images && accommodation.images.length > 0 ? accommodation.images[0] : null}
+                      price={accommodation.pricePerNight?.price || 0}
+                      location={accommodation.location?.address || 'Unknown location'}
+                      provider={accommodation.provider || 'Waureisen'}
                     />
-                  ))}
+                  )) : null}
                 </div>
                 
-                {listings.length === 0 && !loading && (
+                {/* Loading indicator for infinite scroll */}
+                {hasMore && (
+                  <div 
+                    ref={loadingRef}
+                    className="flex justify-center items-center py-8"
+                  >
+                    {isUpdating && (
+                      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-brand"></div>
+                    )}
+                  </div>
+                )}
+                
+                {(!listings || listings.length === 0) && !loading && (
                   <div className="text-center py-12">
                     <p className="text-gray-600 mb-4">{t('no_accommodations_found')}</p>
                     <button 
