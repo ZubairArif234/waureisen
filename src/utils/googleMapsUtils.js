@@ -235,6 +235,13 @@ export const addListingMarkers = (map, listings) => {
     return [];
   }
 
+  console.log('Attempting to add markers for', listings.length, 'listings');
+  
+  // Debug the first listing to see its structure
+  if (listings.length > 0) {
+    console.log('First listing structure:', JSON.stringify(listings[0], null, 2));
+  }
+  
   const markers = [];
   let bounds;
   
@@ -257,101 +264,140 @@ export const addListingMarkers = (map, listings) => {
   try {
     // Process each listing
     listings.forEach((listing, index) => {
-      // Skip listings without valid coordinates
-      if (!listing || !listing.location || !listing.location.coordinates || 
-          !Array.isArray(listing.location.coordinates) || 
-          listing.location.coordinates.length < 2 ||
-          isNaN(listing.location.coordinates[0]) || 
-          isNaN(listing.location.coordinates[1])) {
+      // Check for position data in different possible formats
+      let position = null;
+      
+      // Debug the listing structure
+      console.log(`Listing ${index} structure:`, listing);
+      
+      // Check if the listing has a direct position property (as shown in your logs)
+      if (listing.position && typeof listing.position === 'object' && 
+          !isNaN(parseFloat(listing.position.lat)) && !isNaN(parseFloat(listing.position.lng))) {
+        position = {
+          lat: parseFloat(listing.position.lat),
+          lng: parseFloat(listing.position.lng)
+        };
+      } 
+      // Try other possible position formats
+      else if (listing.location?.coordinates && Array.isArray(listing.location.coordinates)) {
+        position = {
+          lat: parseFloat(listing.location.coordinates[1]),
+          lng: parseFloat(listing.location.coordinates[0])
+        };
+      } else if (listing.location?.lat !== undefined && listing.location?.lng !== undefined) {
+        position = {
+          lat: parseFloat(listing.location.lat),
+          lng: parseFloat(listing.location.lng)
+        };
+      } else if (listing.latitude !== undefined && listing.longitude !== undefined) {
+        position = {
+          lat: parseFloat(listing.latitude),
+          lng: parseFloat(listing.longitude)
+        };
+      } else if (listing.lat !== undefined && listing.lng !== undefined) {
+        position = {
+          lat: parseFloat(listing.lat),
+          lng: parseFloat(listing.lng)
+        };
+      }
+      
+      // Skip if we couldn't find valid position
+      if (!position) {
+        console.warn('Skipping listing with missing position:', listing.id || index);
         return;
       }
       
-      try {
-        // Create marker
-        const position = {
-          lat: parseFloat(listing.location.coordinates[1]), // MongoDB stores as [lng, lat]
-          lng: parseFloat(listing.location.coordinates[0])
-        };
-        
-        // Skip if position is invalid
-        if (isNaN(position.lat) || isNaN(position.lng)) {
-          return;
-        }
-        
-        // Get a title string
-        const title = (listing.title && typeof listing.title === 'string')
-          ? listing.title
-          : (typeof listing.location === 'string') 
-            ? listing.location 
-            : 'Accommodation';
-        
-        // Create the marker
-        const marker = new window.google.maps.Marker({
-          position,
-          map,
-          title,
-          animation: window.google.maps.Animation.DROP,
-          // Custom marker for better visibility
-          icon: {
-            path: window.google.maps.SymbolPath.CIRCLE,
-            scale: 8,
-            fillColor: '#B4A481',
-            fillOpacity: 0.9,
-            strokeWeight: 1,
-            strokeColor: '#ffffff'
-          }
-        });
-        
-        // Only extend bounds with valid positions
-        if (position.lat >= -90 && position.lat <= 90 && 
-            position.lng >= -180 && position.lng <= 180) {
-          bounds.extend(position);
-        }
-        
-        // Get price information
-        const price = (listing.pricePerNight && listing.pricePerNight.price) || listing.price || 0;
-        const currency = (listing.pricePerNight && listing.pricePerNight.currency) || 'CHF';
-        
-        // Create info window content
-        const content = `
-          <div style="max-width: 200px; padding: 8px;">
-            <h3 style="margin: 0; font-size: 16px; color: #4D484D;">${title}</h3>
-            <p style="margin: 5px 0; font-size: 14px; color: #B4A481; font-weight: 500;">
-              ${price} ${currency}
-            </p>
-          </div>
-        `;
-
-        // Add click listener to open info window
-        marker.addListener('click', () => {
-          try {
-            // Set content and open the info window
-            sharedInfoWindow.setContent(content);
-            sharedInfoWindow.open({
-              anchor: marker,
-              map,
-            });
-            
-            // Add bounce animation when clicked
-            marker.setAnimation(window.google.maps.Animation.BOUNCE);
-            setTimeout(() => {
-              marker.setAnimation(null);
-            }, 750);
-          } catch (error) {
-            console.error('Error in marker click handler:', error);
-          }
-        });
-
-        markers.push(marker);
-      } catch (error) {
-        console.error('Error creating marker for listing:', error);
-        // Continue with other markers
+      // Skip if position is invalid or out of bounds
+      if (isNaN(position.lat) || isNaN(position.lng) ||
+          position.lat < -90 || position.lat > 90 ||
+          position.lng < -180 || position.lng > 180) {
+        console.warn('Invalid position values for listing:', listing.id || index, position);
+        return;
       }
+      
+      // Log successful position for debugging
+      console.log('Creating marker at position:', position, 'for listing:', listing.id || index);
+      
+      // Get a title string
+      const title = (listing.title && typeof listing.title === 'string')
+        ? listing.title
+        : (listing.name && typeof listing.name === 'string')
+          ? listing.name
+          : 'Accommodation';
+      
+      // Create the marker with a more visible icon
+      const marker = new window.google.maps.Marker({
+        position,
+        map, // Make sure to pass the map instance
+        title,
+        // Use a more visible marker style
+        icon: {
+          path: window.google.maps.SymbolPath.CIRCLE,
+          scale: 12, // Increased size for better visibility
+          fillColor: '#B4A481', // Brand color
+          fillOpacity: 1.0,
+          strokeWeight: 2,
+          strokeColor: '#ffffff'
+        }
+      });
+      
+      // Only extend bounds with valid positions
+      bounds.extend(position);
+      
+      // Get price information
+      const price = listing.price || 
+                    (listing.pricePerNight && listing.pricePerNight.price) || 
+                    0;
+      const currency = listing.currency || 
+                       (listing.pricePerNight && listing.pricePerNight.currency) || 
+                       'CHF';
+      
+      // Create info window content
+      const content = `
+        <div style="max-width: 200px; padding: 8px;">
+          <h3 style="margin: 0; font-size: 16px; color: #4D484D;">${title}</h3>
+          <p style="margin: 5px 0; font-size: 14px; color: #B4A481; font-weight: 500;">
+            ${price} ${currency}
+          </p>
+        </div>
+      `;
+
+      // Add click listener to open info window
+      marker.addListener('click', () => {
+        try {
+          // Set content and open the info window
+          sharedInfoWindow.setContent(content);
+          sharedInfoWindow.open({
+            anchor: marker,
+            map,
+          });
+          
+          // Add bounce animation when clicked
+          marker.setAnimation(window.google.maps.Animation.BOUNCE);
+          setTimeout(() => {
+            marker.setAnimation(null);
+          }, 750);
+        } catch (error) {
+          console.error('Error in marker click handler:', error);
+        }
+      });
+
+      markers.push(marker);
     });
 
-    // Don't adjust map bounds automatically - let the search page control this
-    // This prevents the map from zooming/moving unexpectedly when listings change
+    // Fit the map to the bounds of all markers if there are any
+    if (markers.length > 0 && !bounds.isEmpty()) {
+      map.fitBounds(bounds);
+      
+      // If we only have one marker, zoom out a bit
+      if (markers.length === 1) {
+        const listener = window.google.maps.event.addListenerOnce(map, 'bounds_changed', () => {
+          map.setZoom(Math.min(14, map.getZoom()));
+        });
+      }
+    }
 
+    console.log('Successfully added', markers.length, 'markers to the map');
     return markers;
   } catch (error) {
     console.error('Error adding markers:', error);
