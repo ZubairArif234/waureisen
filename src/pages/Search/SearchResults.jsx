@@ -439,7 +439,8 @@ const SearchResults = () => {
                   }`}
                 >
                   {listings && listings.length > 0 ? listings.map((accommodation) => (
-                    // In the AccommodationCard component usage, update to use the new price structure:
+                    // In the SearchResults.jsx file where you render AccommodationCard components
+                    
                     <AccommodationCard
                       key={accommodation._id || accommodation.id}
                       id={accommodation._id || accommodation.id}
@@ -448,6 +449,7 @@ const SearchResults = () => {
                       currency={accommodation.pricePerNight?.currency || 'CHF'}
                       location={accommodation.location?.address || 'Unknown location'}
                       provider={accommodation.provider || 'Waureisen'}
+                      pricePerNight={accommodation.pricePerNight} // Pass the full pricePerNight object
                     />
                   )) : null}
                 </div>

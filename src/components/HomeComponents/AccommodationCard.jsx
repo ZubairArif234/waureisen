@@ -1,32 +1,60 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 
 const AccommodationCard = ({ 
   id = '1', 
   image, 
   price, 
-  location, 
+  location: propertyLocation, // Renamed from location to propertyLocation
   provider,
-  isFavorited = false
+  isFavorited = false, 
+  pricePerNight 
 }) => {
   const [isFavorite, setIsFavorite] = useState(isFavorited);
   const navigate = useNavigate();
-
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const checkInDate = searchParams.get('dates')?.split(' - ')[0] || '';
+  
+  // Format the date if needed
+  const formatDate = (dateStr) => {
+    if (!dateStr) return null;
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return null;
+    
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}`;
+  };
+  
+  const formattedCheckInDate = formatDate(checkInDate);
+  
+  const handleClick = () => {
+    navigate(`/accommodation/${id}`, { 
+      state: { 
+        pricePerNight: pricePerNight || { price },
+        checkInDate: formattedCheckInDate
+      } 
+    });
+  };
+  
   return (
     <div className="flex flex-col">
       <div 
         className="rounded-xl overflow-hidden mb-3 relative cursor-pointer"
-        onClick={() => navigate(`/accommodation/${id}`)}
+        onClick={handleClick}
       >
         <img 
           src={image} 
-          alt={location}
+          alt={propertyLocation}
           className="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
         />
         <button 
           onClick={(e) => {
-            e.stopPropagation(); // Prevent navigation when clicking the heart
+            e.stopPropagation();
             setIsFavorite(!isFavorite);
           }}
           className="absolute top-3 right-3 p-2 rounded-full bg-white/50 backdrop-blur-sm hover:bg-white/70 transition-colors"
@@ -40,10 +68,10 @@ const AccommodationCard = ({
       </div>
       <div 
         className="space-y-1 cursor-pointer"
-        onClick={() => navigate(`/accommodation/${id}`)}
+        onClick={handleClick}
       >
         <p className="text-brand text-sm">CHF {price.toFixed(2)} per night</p>
-        <h3 className="font-medium text-gray-900">{location}</h3>
+        <h3 className="font-medium text-gray-900">{propertyLocation}</h3>
         <p className="text-gray-500 text-sm">{provider}</p>
       </div>
     </div>

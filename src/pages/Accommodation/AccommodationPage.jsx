@@ -126,20 +126,107 @@ const AccommodationPage = () => {
     const fetchAccommodation = async () => {
       try {
         setLoading(true);
+        
+        // Get search parameters from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const searchDateParam = urlParams.get('checkInDate');
+        
+        // Check if we have price data in the location state (passed from search results)
+        const searchState = window.history.state?.usr || {};
+        const priceFromSearch = searchState.pricePerNight;
+        const dateFromSearch = searchState.checkInDate || searchDateParam;
+        
+        console.log('Search state:', searchState);
+        console.log('Date from search:', dateFromSearch);
+        
         const data = await getListingById(id);
-        setAccommodation(data);
-      } catch (err) {
-        console.error('Error fetching accommodation:', err);
-        setError('Failed to load accommodation details');
-      } finally {
-        setLoading(false);
+        
+        // If we have price data from search results, use it
+        if (priceFromSearch) {
+          console.log('Using price data from search results:', priceFromSearch);
+          data.pricePerNight = priceFromSearch;
+        } 
+        // Otherwise, fetch price data if needed
+        else if (data.provider === 'Interhome' && data.Code && (!data.pricePerNight || !data.pricePerNight.price)) {
+          try {
+            // Use the date from search if available, otherwise use today's date
+            let checkInDate;
+            if (dateFromSearch) {
+              checkInDate = dateFromSearch;
+            } else {
+              const today = new Date();
+              checkInDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            }
+            
+            console.log('Using check-in date for price calculation:', checkInDate);
+            
+            const priceData = await fetchInterhomePrices({
+              accommodationCode: data.Code,
+              checkInDate: checkInDate,
+              los: true
+            });
+            
+            if (priceData && priceData.priceList && priceData.priceList.prices && 
+                priceData.priceList.prices.price && priceData.priceList.prices.price.length > 0) {
+              
+            // Filter for duration 7 options
+            const duration7Options = priceData.priceList.prices.price.filter(option => 
+              option.duration === 7
+            );
+            
+            if (duration7Options.length > 0) {
+              // Sort by paxUpTo (ascending)
+              duration7Options.sort((a, b) => a.paxUpTo - b.paxUpTo);
+              
+              // Use the option with lowest paxUpTo
+              const selectedOption = duration7Options[0];
+              
+              // Calculate price per night
+              const calculatedPricePerNight = Math.round(selectedOption.price / 7);
+              
+              // Update the accommodation data with price information
+              data.pricePerNight = {
+                price: calculatedPricePerNight,
+                currency: priceData.priceList.currency || 'CHF',
+                totalPrice: selectedOption.price,
+                duration: 7,
+                paxUpTo: selectedOption.paxUpTo
+              };
+              
+              console.log('Fetched new price data:', data.pricePerNight);
+            }
+          }
+        } catch (error) {
+          console.warn(`Failed to fetch Interhome prices for ${data.Code}:`, error);
+        }
       }
-    };
-
-    if (id) {
-      fetchAccommodation();
+      
+      setAccommodation(data);
+      
+      // Update date range if we have a date from search
+      if (dateFromSearch) {
+        const startDate = new Date(dateFromSearch);
+        const endDate = new Date(startDate);
+        endDate.setDate(endDate.getDate() + 7); // Default to 7-day stay
+        
+        setDateRange({
+          start: startDate,
+          end: endDate
+        });
+      }
+      
+    } catch (err) {
+      console.error('Error fetching accommodation:', err);
+      setError('Failed to load accommodation details');
+    } finally {
+      setLoading(false);
     }
-  }, [id]);
+  };
+
+  if (id) {
+    fetchAccommodation();
+  }
+}, [id]);
 
   // Default place offers (will be overridden with actual data if available)
   const placeOffers = [
@@ -220,9 +307,14 @@ const AccommodationPage = () => {
       <Navbar />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 mt-20">
-        {/* Title */}
+        {/* Title with Code */}
         <h1 className="text-[#4D484D] md:text-2xl text-xl font-semibold mb-6">
           {accommodation?.title || "Modern and Luxury 1BHK Studio/Self Check-in/Eiffle (default)"}
+          {accommodation?.Code && (
+            <span className="text-gray-500 text-base ml-2">
+              ({accommodation.Code})
+            </span>
+          )}
         </h1>
 
         <ImageGrid images={accommodation?.images || []} />
@@ -376,7 +468,11 @@ const AccommodationPage = () => {
                       {accommodation.pricePerNight.originalPrice} {accommodation.pricePerNight.currency || 'CHF'}
                     </span>
                   )}
-                  {accommodation?.pricePerNight?.price || '240'} {accommodation?.pricePerNight?.currency || 'CHF (default)'}
+                  {accommodation?.pricePerNight?.price ? (
+                    `${accommodation.pricePerNight.price} ${accommodation.pricePerNight.currency || 'CHF'}`
+                  ) : (
+                    '240 CHF (default)'
+                  )}
                 </span>
                 <p className="text-gray-500 text-sm">{t('cost_per_night')}</p>
               </div>
