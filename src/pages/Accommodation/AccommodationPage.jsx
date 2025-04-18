@@ -116,10 +116,61 @@ const AccommodationPage = () => {
     dogs: 1
   });
   
-  // New state for accommodation data
+  // Add isPriceLoading state
+  const [isPriceLoading, setIsPriceLoading] = useState(false);
   const [accommodation, setAccommodation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Add function to fetch price for new dates
+  const fetchPriceForDates = async (startDate) => {
+    if (!accommodation?.Code || !startDate) return;
+
+    try {
+      setIsPriceLoading(true);
+      const formattedDate = startDate.toISOString().split('T')[0];
+      
+      const priceData = await fetchInterhomePrices({
+        accommodationCode: accommodation.Code,
+        checkInDate: formattedDate,
+        los: true
+      });
+
+      if (priceData?.priceList?.prices?.price?.length > 0) {
+        const duration7Options = priceData.priceList.prices.price.filter(option => 
+          option.duration === 7
+        );
+
+        if (duration7Options.length > 0) {
+          duration7Options.sort((a, b) => a.paxUpTo - b.paxUpTo);
+          const selectedOption = duration7Options[0];
+          const calculatedPricePerNight = Math.round(selectedOption.price / 7);
+
+          setAccommodation(prev => ({
+            ...prev,
+            pricePerNight: {
+              price: calculatedPricePerNight,
+              currency: priceData.priceList.currency || 'CHF',
+              totalPrice: selectedOption.price,
+              duration: 7,
+              paxUpTo: selectedOption.paxUpTo
+            }
+          }));
+        }
+      }
+    } catch (error) {
+      console.warn(`Failed to fetch updated prices: ${error.message}`);
+    } finally {
+      setIsPriceLoading(false);
+    }
+  };
+
+  // Add effect to watch date changes
+  useEffect(() => {
+    if (dateRange.start) {
+      fetchPriceForDates(dateRange.start);
+    }
+  }, [dateRange.start]);
 
   // Fetch accommodation data when component mounts
   useEffect(() => {
@@ -462,19 +513,28 @@ const AccommodationPage = () => {
           <div className="md:w-[360px] w-full md:flex-shrink-0 md:ml-auto"> 
             <div className="md:sticky md:top-24 bg-white rounded-lg border p-4">
               <div className="mb-3">
-                <span className="md:text-2xl text-xl font-semibold">
-                  {accommodation?.pricePerNight?.originalPrice && (
-                    <span className="line-through text-gray-400 mr-2">
-                      {accommodation.pricePerNight.originalPrice} {accommodation.pricePerNight.currency || 'CHF'}
+                {isPriceLoading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-gray-500">Updating price...</span>
+                  </div>
+                ) : (
+                  <>
+                    <span className="md:text-2xl text-xl font-semibold">
+                      {accommodation?.pricePerNight?.originalPrice && (
+                        <span className="line-through text-gray-400 mr-2">
+                          {accommodation.pricePerNight.originalPrice} {accommodation.pricePerNight.currency || 'CHF'}
+                        </span>
+                      )}
+                      {accommodation?.pricePerNight?.price ? (
+                        `${accommodation.pricePerNight.price} ${accommodation.pricePerNight.currency || 'CHF'}`
+                      ) : (
+                        '240 CHF (default)'
+                      )}
                     </span>
-                  )}
-                  {accommodation?.pricePerNight?.price ? (
-                    `${accommodation.pricePerNight.price} ${accommodation.pricePerNight.currency || 'CHF'}`
-                  ) : (
-                    '240 CHF (default)'
-                  )}
-                </span>
-                <p className="text-gray-500 text-sm">{t('cost_per_night')}</p>
+                    <p className="text-gray-500 text-sm">{t('cost_per_night')}</p>
+                  </>
+                )}
               </div>
 
               {/* Date Picker */}
