@@ -15,6 +15,7 @@ import Footer from '../../components/Shared/Footer';
 import ImageGalleryModal from '../../components/Shared/ImageGalleryModal';
 import { useLanguage } from '../../utils/LanguageContext';
 import { getListingById } from '../../api/listingAPI';
+import { fetchInterhomePrices } from '../../api/interhomeAPI';
 
 const PlaceOffer = ({ icon: Icon, text, value }) => (
   <div className="flex-1 flex flex-col items-center text-center p-4 border-r border-[#767676] last:border-r-0 md:p-4 p-2">

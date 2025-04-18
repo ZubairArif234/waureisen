@@ -26,7 +26,7 @@ export const loadGoogleMapsScript = (callback) => {
       scriptLoadPromise
         .then(() => callback(true))
         .catch((error) => {
-          console.error('Error waiting for Google Maps script:', error);
+          // console.error('Error waiting for Google Maps script:', error);
           callback(false);
         });
     }
@@ -83,7 +83,7 @@ export const loadGoogleMapsScript = (callback) => {
       googleMapScript.addEventListener('error', (error) => {
         isLoadingScript = false;
         scriptLoadError = error;
-        console.error('Error loading Google Maps script:', error);
+        // console.error('Error loading Google Maps script:', error);
         reject(error);
         callback(false);
       });
@@ -235,11 +235,11 @@ export const addListingMarkers = (map, listings) => {
     return [];
   }
 
-  console.log('Attempting to add markers for', listings.length, 'listings');
+  //console.log('Attempting to add markers for', listings.length, 'listings');
   
   // Debug the first listing to see its structure
   if (listings.length > 0) {
-    console.log('First listing structure:', JSON.stringify(listings[0], null, 2));
+    //console.log('First listing structure:', JSON.stringify(listings[0], null, 2));
   }
   
   const markers = [];
@@ -268,7 +268,7 @@ export const addListingMarkers = (map, listings) => {
       let position = null;
       
       // Debug the listing structure
-      console.log(`Listing ${index} structure:`, listing);
+      //console.log(`Listing ${index} structure:`, listing);
       
       // Check if the listing has a direct position property (as shown in your logs)
       if (listing.position && typeof listing.position === 'object' && 
@@ -316,7 +316,7 @@ export const addListingMarkers = (map, listings) => {
       }
       
       // Log successful position for debugging
-      console.log('Creating marker at position:', position, 'for listing:', listing.id || index);
+      //console.log('Creating marker at position:', position, 'for listing:', listing.id || index);
       
       // Get a title string
       const title = (listing.title && typeof listing.title === 'string')
@@ -397,7 +397,7 @@ export const addListingMarkers = (map, listings) => {
       }
     }
 
-    console.log('Successfully added', markers.length, 'markers to the map');
+    //console.log('Successfully added', markers.length, 'markers to the map');
     return markers;
   } catch (error) {
     console.error('Error adding markers:', error);

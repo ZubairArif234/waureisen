@@ -10,6 +10,7 @@ import { useLanguage } from '../../utils/LanguageContext';
 // Add the missing import for searchListings
 import { searchListings } from '../../api/listingAPI';
 import axios from 'axios';
+import { fetchInterhomePrices } from '../../api/interhomeAPI';
 
 // Import dummy images for now
 import i1 from '../../assets/i1.png';
@@ -24,6 +25,35 @@ const SearchResults = () => {
   // Extract search parameters
   const locationParam = searchParams.get('location') || '';
   const dateRange = searchParams.get('dates') || '';
+  
+  // Fix the date formatting
+  const [startDate] = dateRange.split(' - ');
+  
+  const formatDate = (dateStr) => {
+    if (!dateStr) return null;
+    
+    console.log('Input date string:', dateStr);
+    
+    // Handle date format "May 03 2025"
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) {
+      console.log('Invalid date format');
+      return null;
+    }
+    
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    
+    console.log('Parsed date components:', { year, month, day });
+    
+    return `${year}-${month}-${day}`;
+  };
+  
+  const formattedStartDate = formatDate(startDate);
+  
+  console.log('Original date:', startDate);
+  console.log('Formatted date:', formattedStartDate);
   const people = searchParams.get('people') || 1;
   const dogs = searchParams.get('dogs') || 1;
   
@@ -126,7 +156,6 @@ const SearchResults = () => {
   const fetchListings = useCallback(async (lat, lng, pageNum, append = false) => {
     setIsUpdating(true);
     try {
-      console.log('Fetching listings at coordinates:', lat, lng, 'page:', pageNum);
       const response = await searchListings({
         lat,
         lng,
@@ -134,21 +163,37 @@ const SearchResults = () => {
         pageSize: 10
       });
       
-      console.log('API Response:', response);
-      
-      // Make sure we have a valid response with listings property
-      const newListings = response?.listings || [];
-      const moreAvailable = response?.hasMore || false;
-      
-      console.log('Received listings:', newListings.length, 'hasMore:', moreAvailable);
-      
+      // Process listings and fetch Interhome prices
+      const processedListings = await Promise.all(
+        (response?.listings || []).map(async (listing) => {
+          if (listing.provider === 'Interhome' && listing.Code) {
+            try {
+              console.log(formattedStartDate);
+              const priceData = await fetchInterhomePrices({
+                accommodationCode: listing.Code,
+                checkInDate: formattedStartDate,
+                los: true
+              });
+              return {
+                ...listing,
+                interhomePriceData: priceData
+              };
+            } catch (error) {
+              console.warn(`Failed to fetch Interhome prices for ${listing.Code}:`, error);
+              return listing;
+            }
+          }
+          return listing;
+        })
+      );
+
       if (append) {
-        setListings(prev => [...(prev || []), ...newListings]);
+        setListings(prev => [...prev, ...processedListings]);
       } else {
-        setListings(newListings);
+        setListings(processedListings);
       }
       
-      setHasMore(moreAvailable);
+      setHasMore(response?.hasMore || false);
       
       // Update area name based on coordinates
       const areaDisplayName = await getLocationName(lat, lng);
@@ -156,10 +201,9 @@ const SearchResults = () => {
         setAreaName(areaDisplayName);
       }
       
-      return newListings;
+      return processedListings;
     } catch (error) {
       console.error('Error fetching listings:', error);
-      // Set listings to empty array on error
       if (!append) {
         setListings([]);
       }
@@ -169,7 +213,7 @@ const SearchResults = () => {
       setIsUpdating(false);
       setLoading(false);
     }
-  }, [getLocationName]);
+  }, [getLocationName, formattedStartDate]); // Add formattedStartDate to dependencies
 
   // Transform listings for map display
   const getMapReadyListings = useCallback((listingsData) => {

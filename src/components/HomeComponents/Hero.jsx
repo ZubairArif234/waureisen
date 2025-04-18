@@ -69,22 +69,24 @@ const Hero = () => {
 
   const handleSearch = () => {
     if (!location) {
-      // Show error or notification that location is required
       return;
     }
 
-    // Format dates for URL if they exist
+    // Format dates for URL with year included
     let dateParam = '';
     if (dateRange.start && dateRange.end) {
-      const startDate = dateRange.start.toLocaleDateString('en-US', { day: '2-digit', month: 'short' });
-      const endDate = dateRange.end.toLocaleDateString('en-US', { day: '2-digit', month: 'short' });
-      dateParam = `&dates=${startDate} - ${endDate}`;
+      // Use ISO format for dates to ensure year is included
+      const startDate = `${dateRange.start.toLocaleString('default', { month: 'short' })} ${String(dateRange.start.getDate()).padStart(2, '0')} ${dateRange.start.getFullYear()}`;
+      const endDate = `${dateRange.end.toLocaleString('default', { month: 'short' })} ${String(dateRange.end.getDate()).padStart(2, '0')} ${dateRange.end.getFullYear()}`;
+      dateParam = `&dates=${encodeURIComponent(startDate)} - ${encodeURIComponent(endDate)}`;
+      
+      // Log the formatted dates for debugging
+      console.log('Formatted date range for URL:', startDate, '-', endDate);
     }
 
     // Build the search URL with coordinates if available
     let searchUrl = `/search?location=${encodeURIComponent(location)}${dateParam}&people=${guests.people}&dogs=${guests.dogs}`;
     
-    // Add coordinates if available from placeData
     if (placeData && placeData.location) {
       searchUrl += `&lat=${placeData.location.lat}&lng=${placeData.location.lng}`;
     }
@@ -146,7 +148,7 @@ const Hero = () => {
                   <Calendar className="h-5 w-5 text-gray-400 flex-shrink-0" />
                   <span className="text-sm text-gray-500">
                     {dateRange.start && dateRange.end
-                      ? `${dateRange.start.getDate()} ${dateRange.start.toLocaleString('default', { month: 'short' })} - ${dateRange.end.getDate()} ${dateRange.end.toLocaleString('default', { month: 'short' })}`
+                      ? `${dateRange.start.getDate()} ${dateRange.start.toLocaleString('default', { month: 'short' })} ${dateRange.start.getFullYear()} - ${dateRange.end.getDate()} ${dateRange.end.toLocaleString('default', { month: 'short' })} ${dateRange.end.getFullYear()}`
                       : t('when')}
                   </span>
                 </div>

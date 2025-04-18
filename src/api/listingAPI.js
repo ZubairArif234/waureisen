@@ -27,25 +27,19 @@ export const getListingById = async (id) => {
 // Search listings with parameters (combined function)
 export const searchListings = async (params) => {
   try {
-    // If lat and lng are provided directly as arguments, format them as params
     if (typeof params === 'number' || typeof params === 'string') {
       const [lat, lng, page = 1, pageSize = 10] = arguments;
       
-      console.log('Searching with coordinates:', lat, lng);
-      
-      // Use the geospatial search endpoint
       const response = await API.get('/listings/search', {
         params: {
           lat,
           lng,
           page,
-          pageSize
+          pageSize,
+          select: 'Code title description images location pricePerNight provider' // Added Code to selection
         }
       });
       
-      console.log('API Response:', response.data);
-      
-      // Ensure we return a consistent structure even if the API response is unexpected
       return {
         listings: response?.data?.listings || [],
         hasMore: response?.data?.hasMore || false,
@@ -53,13 +47,14 @@ export const searchListings = async (params) => {
       };
     }
     
-    // Otherwise use the regular search with provided params object
-    console.log('Searching with params object:', params);
-    const response = await API.get('/listings/search', { params });
+    // For regular search, ensure Code is included in the response
+    const response = await API.get('/listings/search', { 
+      params: {
+        ...params,
+        select: 'Code title description images location pricePerNight provider' // Added Code to selection
+      }
+    });
     
-    console.log('API Response:', response.data);
-    
-    // Ensure we return a consistent structure
     return {
       listings: response?.data?.listings || [],
       hasMore: response?.data?.hasMore || false,
@@ -67,8 +62,7 @@ export const searchListings = async (params) => {
     };
   } catch (error) {
     console.error('Error searching listings:', error);
-    // Return a valid empty response on error
-    return { listings: [], hasMore: false };
+    throw error;
   }
 };
 
