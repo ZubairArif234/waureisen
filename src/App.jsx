@@ -26,6 +26,8 @@ import HostRegistration from './components/Footer/HostRegistration'
 import TravelMagazine from './components/Footer/TravelMagazine'
 import ProviderLayout from './pages/Main/Provider'
 import TravelShop from './components/Footer/TravelShop'
+import TravelMagazineDetail from './components/Footer/TravelMagazineDetail'
+import CamperDetail from './pages/Main/CamperDetail'
 
 function App() {
   return (
@@ -38,6 +40,7 @@ function App() {
           <Route path="/search" element={<SearchResults />} />
           <Route path="/accommodation/:id" element={<AccommodationPage />} />
           <Route path="/camper-rental" element={<CamperRental />} />
+          <Route path="/camper/:id" element={<CamperDetail />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           
@@ -62,6 +65,7 @@ function App() {
           <Route path="/host" element={<HostRegistration />} />
           <Route path="/publicmagazine" element={<TravelMagazine />} />
           <Route path="/travelshop" element={<TravelShop />} />
+          <Route path="/magazine/:id" element={<TravelMagazineDetail />} />
 
           {/* Admin Routes */}
           <Route path="/admin/*" element={<AdminLayout />} />
