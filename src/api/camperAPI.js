@@ -30,7 +30,8 @@ export const getAllCampers = async (filters = {}) => {
  */
 export const getCamperById = async (id) => {
   try {
-    const response = await API.get(`/campers/${id}`);
+    // FIXED: Using the public endpoint for accessing individual camper details
+    const response = await API.get(`/campers/public/${id}`);
     return response.data;
   } catch (error) {
     console.error(`Error fetching camper ${id}:`, error);

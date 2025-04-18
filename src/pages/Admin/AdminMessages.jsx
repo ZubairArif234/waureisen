@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Filter, Bell, Send, Phone, Video, Info, ArrowLeft, User, Check, CheckCheck } from 'lucide-react';
+import { Search, Filter, Bell, Send, ArrowLeft, User, Check, CheckCheck } from 'lucide-react';
+import { initSocket, getSocket, sendMessage, addEventListener, removeEventListener, joinChat, markMessagesAsRead } from '../../utils/socketService';
+import { getAdminConversations, getChatHistory, getTotalUnreadCount } from '../../api/chatAPI';
 import avatar from '../../assets/avatar.png';
 
-// Message status component
+// Message status component - keep existing implementation
 const MessageStatus = ({ status }) => {
   if (status === 'sent') {
     return <Check className="w-3 h-3 text-gray-400" />;
@@ -14,7 +16,7 @@ const MessageStatus = ({ status }) => {
   return null;
 };
 
-// Message component
+// Message component - keep existing implementation
 const Message = ({ message, isAdmin }) => {
   return (
     <div className={`flex ${isAdmin ? 'justify-end' : 'justify-start'} mb-4`}>
@@ -53,7 +55,7 @@ const Message = ({ message, isAdmin }) => {
   );
 };
 
-// Conversation list item component
+// Conversation list item component - keep existing implementation
 const ConversationItem = ({ conversation, isActive, onClick, onNotificationClick }) => {
   return (
     <div 
@@ -92,7 +94,7 @@ const ConversationItem = ({ conversation, isActive, onClick, onNotificationClick
   );
 };
 
-// Notification toast component
+// Notification toast component - keep existing implementation
 const NotificationToast = ({ notification, onClose }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -140,229 +142,245 @@ const AdminMessages = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeConversation, setActiveConversation] = useState(null);
-  const [conversations, setConversations] = useState([
-    {
-      id: 1,
-      name: 'John Doe',
-      lastMessage: 'Is the mountain cabin still available for next week?',
-      lastMessageTime: '10:42 AM',
-      online: true,
-      unreadCount: 2,
-      messages: [
-        {
-          id: 1,
-          content: 'Hello, I am interested in booking the Mountain View Chalet for August 15-20.',
-          time: '10:30 AM',
-          isAdmin: false,
-          status: 'read'
-        },
-        {
-          id: 2,
-          content: 'Hi John! Thanks for your interest. The Mountain View Chalet is available for those dates.',
-          time: '10:35 AM',
-          isAdmin: true,
-          status: 'read'
-        },
-        {
-          id: 3,
-          content: 'Great! Is there a discount for a 5-day stay? Also, is it dog-friendly?',
-          time: '10:38 AM',
-          isAdmin: false,
-          status: 'read'
-        },
-        {
-          id: 4,
-          content: 'Yes, we offer a 10% discount for stays of 5 days or more. And absolutely, the chalet is dog-friendly with a fenced yard.',
-          time: '10:40 AM',
-          isAdmin: true,
-          status: 'read'
-        },
-        {
-          id: 5,
-          content: 'Perfect! Is the mountain cabin still available for next week?',
-          time: '10:42 AM',
-          isAdmin: false,
-          status: 'delivered'
-        }
-      ]
-    },
-    {
-      id: 2,
-      name: 'Emma Wilson',
-      lastMessage: 'Thank you for the quick response!',
-      lastMessageTime: '9:15 AM',
-      online: false,
-      unreadCount: 0,
-      messages: [
-        {
-          id: 1,
-          content: 'Hi, I have a question about the Beachfront Villa.',
-          time: '9:05 AM',
-          isAdmin: false,
-          status: 'read'
-        },
-        {
-          id: 2,
-          content: 'Hello Emma, what would you like to know about the villa?',
-          time: '9:10 AM',
-          isAdmin: true,
-          status: 'read'
-        },
-        {
-          id: 3,
-          content: 'Thank you for the quick response!',
-          time: '9:15 AM',
-          isAdmin: false,
-          status: 'read'
-        }
-      ]
-    },
-    {
-      id: 3,
-      name: 'Michael Brown',
-      lastMessage: 'I would like to book this for next month. How do I proceed?',
-      lastMessageTime: 'Yesterday',
-      online: true,
-      unreadCount: 1,
-      messages: [
-        {
-          id: 1,
-          content: 'Hello, I am looking at the City Apartment listing.',
-          time: 'Yesterday',
-          isAdmin: false,
-          status: 'read'
-        },
-        {
-          id: 2,
-          content: 'I would like to book this for next month. How do I proceed?',
-          time: 'Yesterday',
-          isAdmin: false,
-          status: 'delivered'
-        }
-      ]
-    },
-    {
-      id: 4,
-      name: 'Sarah Davis',
-      lastMessage: 'Are there any pet-friendly options in Zürich?',
-      lastMessageTime: '2 days ago',
-      online: false,
-      unreadCount: 0,
-      messages: [
-        {
-          id: 1,
-          content: 'Are there any pet-friendly options in Zürich?',
-          time: '2 days ago',
-          isAdmin: false,
-          status: 'read'
-        },
-        {
-          id: 2,
-          content: 'Hi Sarah! Yes, we have several dog-friendly properties in Zürich. I can send you some recommendations.',
-          time: '2 days ago',
-          isAdmin: true,
-          status: 'read'
-        }
-      ]
-    }
-  ]);
+  const [conversations, setConversations] = useState([]);
+  const [loadingConversations, setLoadingConversations] = useState(true);
+  const [loadingMessages, setLoadingMessages] = useState(false);
+  const [currentMessages, setCurrentMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [notification, setNotification] = useState(null);
   const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
   const messagesEndRef = useRef(null);
   
-  // Handle window resize
+  // Initialize socket and fetch conversations when component mounts
   useEffect(() => {
+    // Initialize socket connection
+    initSocket();
+    
+    // Fetch conversations
+    fetchConversations();
+    
+    // Add socket event listeners
+    addEventListener('new-message', handleNewMessage);
+    addEventListener('messages-read', handleMessagesRead);
+    addEventListener('online-users', handleOnlineUsers);
+    addEventListener('user-offline', handleUserOffline);
+    
+    // Handle window resize
     const handleResize = () => {
       setIsMobileView(window.innerWidth < 768);
     };
     
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    
+    // Clean up
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      
+      // Remove event listeners
+      const socket = getSocket();
+      if (socket) {
+        removeEventListener('new-message', handleNewMessage);
+        removeEventListener('messages-read', handleMessagesRead);
+        removeEventListener('online-users', handleOnlineUsers);
+        removeEventListener('user-offline', handleUserOffline);
+      }
+    };
   }, []);
 
-  // Scroll to bottom of messages when conversation changes or new message is added
+  // Scroll to bottom of messages when conversation changes or messages update
   useEffect(() => {
+    scrollToBottom();
+  }, [currentMessages, activeConversation]);
+
+  // Join chat room when active conversation changes
+  useEffect(() => {
+    if (activeConversation) {
+      joinChat(activeConversation);
+      fetchMessages(activeConversation);
+      markMessagesAsRead(activeConversation);
+      
+      // Update unread count for this conversation
+      setConversations(prev => prev.map(conv => {
+        if (conv.id === activeConversation) {
+          return { ...conv, unreadCount: 0 };
+        }
+        return conv;
+      }));
+    }
+  }, [activeConversation]);
+
+  // Fetch conversations from API
+  const fetchConversations = async () => {
+    try {
+      setLoadingConversations(true);
+      const data = await getAdminConversations();
+      
+      // Format conversations for UI
+      const formattedConversations = data.map(conv => ({
+        id: conv.id,
+        name: conv.name,
+        lastMessage: conv.lastMessage,
+        lastMessageTime: formatTimestamp(conv.lastMessageTime),
+        online: conv.online,
+        unreadCount: conv.unreadCount
+      }));
+      
+      setConversations(formattedConversations);
+      
+      // Set initial active conversation if on desktop
+      if (!isMobileView && formattedConversations.length > 0 && !activeConversation) {
+        setActiveConversation(formattedConversations[0].id);
+      }
+    } catch (error) {
+      console.error('Error fetching conversations:', error);
+    } finally {
+      setLoadingConversations(false);
+    }
+  };
+
+  // Fetch messages for active conversation
+  const fetchMessages = async (userId) => {
+    try {
+      setLoadingMessages(true);
+      const messages = await getChatHistory(userId);
+      
+      // Format messages for UI
+      const formattedMessages = messages.map(msg => ({
+        id: msg.id,
+        content: msg.content,
+        time: formatTimestamp(msg.timestamp),
+        isAdmin: msg.senderType === 'admin',
+        status: msg.isRead ? 'read' : 'delivered'
+      }));
+      
+      setCurrentMessages(formattedMessages);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      setCurrentMessages([]);
+    } finally {
+      setLoadingMessages(false);
+    }
+  };
+
+  // Format timestamp
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return 'Just now';
+    
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.round(diffMs / 60000);
+    const diffHours = Math.round(diffMs / 3600000);
+    const diffDays = Math.round(diffMs / 86400000);
+    
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    
+    return date.toLocaleDateString();
+  };
+
+  // Handle new message from socket
+  const handleNewMessage = (message) => {
+    const { sender, senderType, content, timestamp } = message;
+    
+    // Update conversations list
+    if (senderType === 'user') {
+      // Check if conversation already exists
+      const existingConversation = conversations.find(conv => conv.id === sender);
+      
+      if (existingConversation) {
+        // Update existing conversation
+        setConversations(prev => prev.map(conv => {
+          if (conv.id === sender) {
+            return {
+              ...conv,
+              lastMessage: content,
+              lastMessageTime: formatTimestamp(timestamp),
+              unreadCount: conv.id === activeConversation ? 0 : conv.unreadCount + 1
+            };
+          }
+          return conv;
+        }));
+      } else {
+        // Add new conversation
+        fetchConversations(); // Refresh the entire list to get user details
+      }
+      
+      // Show notification if this is not the active conversation
+      if (sender !== activeConversation) {
+        // Find user name from conversations
+        const user = conversations.find(conv => conv.id === sender);
+        if (user) {
+          setNotification({
+            id: sender,
+            name: user.name,
+            message: content,
+            time: formatTimestamp(timestamp)
+          });
+        }
+      }
+    }
+    
+    // Update current messages if this is the active conversation
+    if ((sender === activeConversation && senderType === 'user') || 
+        (message.receiver === activeConversation && senderType === 'admin')) {
+      
+      const newMsg = {
+        id: message.id,
+        content,
+        time: formatTimestamp(timestamp),
+        isAdmin: senderType === 'admin',
+        status: 'delivered'
+      };
+      
+      setCurrentMessages(prev => [...prev, newMsg]);
+    }
+  };
+
+  // Handle messages being marked as read
+  const handleMessagesRead = ({ conversationId }) => {
+    // Update message statuses for this conversation
+    if (conversationId === activeConversation) {
+      setCurrentMessages(prev => prev.map(msg => {
+        if (msg.isAdmin && msg.status !== 'read') {
+          return { ...msg, status: 'read' };
+        }
+        return msg;
+      }));
+    }
+  };
+
+  // Handle online users update
+  const handleOnlineUsers = (onlineUserIds) => {
+    setConversations(prev => prev.map(conv => ({
+      ...conv,
+      online: onlineUserIds.includes(conv.id)
+    })));
+  };
+
+  // Handle user going offline
+  const handleUserOffline = (userId) => {
+    setConversations(prev => prev.map(conv => {
+      if (conv.id === userId) {
+        return { ...conv, online: false };
+      }
+      return conv;
+    }));
+  };
+
+  // Scroll to bottom of messages
+  const scrollToBottom = () => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [activeConversation, conversations]);
+  };
 
-  // Set initial active conversation
-  useEffect(() => {
-    if (!isMobileView && conversations.length > 0 && !activeConversation) {
-      setActiveConversation(conversations[0].id);
-    }
-  }, [conversations, activeConversation, isMobileView]);
-
-  // Filter conversations based on search query and active tab
-  const filteredConversations = conversations.filter(conversation => {
-    const matchesSearch = conversation.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTab = activeTab === 'all' || 
-                      (activeTab === 'unread' && conversation.unreadCount > 0);
-    return matchesSearch && matchesTab;
-  });
-
-  // Get active conversation data
-  const currentConversation = conversations.find(c => c.id === activeConversation);
-
-  // Handle sending a new message
-  const handleSendMessage = () => {
-    if (newMessage.trim() === '') return;
-    
-    const updatedConversations = conversations.map(conv => {
-      if (conv.id === activeConversation) {
-        const newMsg = {
-          id: conv.messages.length + 1,
-          content: newMessage,
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          isAdmin: true,
-          status: 'sent'
-        };
-        
-        return {
-          ...conv,
-          messages: [...conv.messages, newMsg],
-          lastMessage: newMessage,
-          lastMessageTime: newMsg.time
-        };
-      }
-      return conv;
-    });
-    
-    setConversations(updatedConversations);
-    setNewMessage('');
-    
-    // Simulate message status updates
-    setTimeout(() => {
-      setConversations(prev => prev.map(conv => {
-        if (conv.id === activeConversation) {
-          const updatedMessages = conv.messages.map(msg => {
-            if (msg.id === conv.messages.length) {
-              return { ...msg, status: 'delivered' };
-            }
-            return msg;
-          });
-          return { ...conv, messages: updatedMessages };
-        }
-        return conv;
-      }));
-    }, 1000);
-    
-    setTimeout(() => {
-      setConversations(prev => prev.map(conv => {
-        if (conv.id === activeConversation) {
-          const updatedMessages = conv.messages.map(msg => {
-            if (msg.id === conv.messages.length) {
-              return { ...msg, status: 'read' };
-            }
-            return msg;
-          });
-          return { ...conv, messages: updatedMessages };
-        }
-        return conv;
-      }));
-    }, 2000);
+  // Handle conversation selection
+  const handleSelectConversation = (conversationId) => {
+    setActiveConversation(conversationId);
   };
 
   // Clear notifications for a conversation
@@ -373,69 +391,97 @@ const AdminMessages = () => {
       }
       return conv;
     }));
+    
+    // If there's a notification for this conversation, clear it
+    if (notification && notification.id === conversationId) {
+      setNotification(null);
+    }
+    
+    // Mark messages as read in database
+    markMessagesAsRead(conversationId);
   };
 
-  // Handle conversation selection
-  const handleSelectConversation = (conversationId) => {
-    setActiveConversation(conversationId);
-    clearNotifications(conversationId);
-  };
-
-  // Notification click handler
-  const handleNotificationClick = (conversationId) => {
-    clearNotifications(conversationId);
-  };
-
-  
+  // Handle back button in mobile view
   const handleBackClick = () => {
     setActiveConversation(null);
   };
 
-
-  // Simulate incoming messages periodically
-  useEffect(() => {
-    const simulateIncomingMessage = () => {
-      const randomConvIndex = Math.floor(Math.random() * conversations.length);
-      const randomConv = conversations[randomConvIndex];
+  // Send a message
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !activeConversation) return;
+    
+    // Create message object
+    const messageData = {
+      content: newMessage.trim(),
+      receiverId: activeConversation,
+    };
+    
+    // Optimistically add message to UI
+    const optimisticMessage = {
+      id: `temp-${Date.now()}`,
+      content: newMessage,
+      time: 'Just now',
+      isAdmin: true,
+      status: 'sent'
+    };
+    
+    setCurrentMessages(prev => [...prev, optimisticMessage]);
+    setNewMessage('');
+    
+    try {
+      // Send message via socket
+      await sendMessage(messageData);
       
-      const incomingMsg = {
-        id: randomConv.messages.length + 1,
-        content: `This is a simulated incoming message. #${Math.floor(Math.random() * 1000)}`,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        isAdmin: false,
-        status: 'delivered'
-      };
-      
-      const updatedConversations = conversations.map((conv, index) => {
-        if (index === randomConvIndex) {
+      // Update conversations list
+      setConversations(prev => prev.map(conv => {
+        if (conv.id === activeConversation) {
           return {
             ...conv,
-            messages: [...conv.messages, incomingMsg],
-            lastMessage: incomingMsg.content,
-            lastMessageTime: incomingMsg.time,
-            unreadCount: conv.id !== activeConversation ? conv.unreadCount + 1 : conv.unreadCount
+            lastMessage: newMessage,
+            lastMessageTime: 'Just now'
           };
         }
         return conv;
-      });
+      }));
       
-      setConversations(updatedConversations);
+      // Update message status to delivered after a short delay
+      setTimeout(() => {
+        setCurrentMessages(prev => prev.map(msg => {
+          if (msg.id === optimisticMessage.id) {
+            return { ...msg, status: 'delivered' };
+          }
+          return msg;
+        }));
+      }, 1000);
       
-      // Show notification if the conversation is not active
-      if (randomConv.id !== activeConversation) {
-        setNotification({
-          id: randomConv.id,
-          name: randomConv.name,
-          message: incomingMsg.content,
-          time: incomingMsg.time
-        });
-      }
-    };
-    
-    // Simulate incoming message every 30-60 seconds
-    const timer = setTimeout(simulateIncomingMessage, Math.random() * 30000 + 30000);
-    return () => clearTimeout(timer);
-  }, [conversations, activeConversation]);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      
+      // Show error in UI
+      setCurrentMessages(prev => [
+        ...prev.filter(msg => msg.id !== optimisticMessage.id),
+        {
+          id: `error-${Date.now()}`,
+          content: 'Failed to send message. Please try again.',
+          time: 'Just now',
+          isAdmin: true,
+          status: 'error'
+        }
+      ]);
+    }
+  };
+
+  // Filter conversations based on search query and active tab
+  const filteredConversations = conversations.filter(conversation => {
+    const matchesSearch = conversation.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          conversation.lastMessage.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesTab = activeTab === 'all' || 
+                      (activeTab === 'unread' && conversation.unreadCount > 0);
+    return matchesSearch && matchesTab;
+  });
+
+  // Get current conversation data
+  const currentConversation = conversations.find(c => c.id === activeConversation);
 
   return (
     <div className="h-[calc(100vh-64px)] flex flex-col">
@@ -512,14 +558,18 @@ const AdminMessages = () => {
           
           {/* Conversations List */}
           <div className="flex-1 overflow-y-auto">
-            {filteredConversations.length > 0 ? (
+            {loadingConversations ? (
+              <div className="flex items-center justify-center h-40">
+                <div className="w-8 h-8 border-4 border-gray-200 border-t-brand rounded-full animate-spin"></div>
+              </div>
+            ) : filteredConversations.length > 0 ? (
               filteredConversations.map(conversation => (
                 <ConversationItem
                   key={conversation.id}
                   conversation={conversation}
                   isActive={conversation.id === activeConversation}
                   onClick={() => handleSelectConversation(conversation.id)}
-                  onNotificationClick={handleNotificationClick}
+                  onNotificationClick={clearNotifications}
                 />
               ))
             ) : (
@@ -570,22 +620,29 @@ const AdminMessages = () => {
                     </p>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <button className="p-2 hover:bg-gray-100 rounded-full">
-                    <Info className="w-5 h-5 text-gray-600" />
-                  </button>
-                </div>
               </div>
               
               {/* Chat Messages */}
               <div className="flex-1 overflow-y-auto p-4 bg-white/50">
-                {currentConversation.messages.map(message => (
-                  <Message 
-                    key={message.id} 
-                    message={message} 
-                    isAdmin={message.isAdmin} 
-                  />
-                ))}
+                {loadingMessages ? (
+                  <div className="flex items-center justify-center h-40">
+                    <div className="w-8 h-8 border-4 border-gray-200 border-t-brand rounded-full animate-spin"></div>
+                  </div>
+                ) : currentMessages.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full text-center">
+                    <User className="w-16 h-16 text-gray-300 mb-2" />
+                    <p className="text-gray-500">No messages yet</p>
+                    <p className="text-gray-400 text-sm mt-1">Send a message to start the conversation</p>
+                  </div>
+                ) : (
+                  currentMessages.map(message => (
+                    <Message 
+                      key={message.id} 
+                      message={message} 
+                      isAdmin={message.isAdmin} 
+                    />
+                  ))
+                )}
                 <div ref={messagesEndRef} />
               </div>
               

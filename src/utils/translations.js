@@ -31,6 +31,7 @@ const translations = {
     
     // Auth
     'log_in': 'Log in',
+    'logging_in': 'Logging in...',
     'sign_up': 'Sign up',
     'log_out': 'Log out',
     'email': 'Email',
@@ -42,7 +43,7 @@ const translations = {
     'invalid_credentials': 'Invalid email or password',
     'demo_credentials': 'Demo Credentials:',
     'provider_credentials': 'Provider: provider@mail.com / 1234',
-    'admin_credentials': 'Admin: admin@mail.com / 1234',
+    'admin_credentials': 'Admin: admin@example.com / admin123',
     'user_credentials': 'User: user@mail.com / 1234',
     'user_type': 'User type',
     'choose_user_type': 'Choose a user type',
@@ -828,8 +829,21 @@ const translations = {
     'update_listing': 'Update Listing',
     'night': 'Night',
 
+    'start_conversation': 'Start a conversation with our support team',
+
 
     'invalid_credentials': 'Invalid email or password',
+
+    'magazine_not_found': "Magazine not found",
+    'back_to_magazines': "Back to magazines",
+    
+    // Other related translations that might be useful
+    'dogfriendly_camper_rental': "Dog-friendly Camper Rental",
+    'welcome_camper_rental': "Explore Switzerland with your furry friends in our specially equipped camper vans",
+    'traveling_van_quote': "Life is about the journey, not just the destination. Travel with your dog in comfort and style.",
+    'view_details': "View Details",
+    'coming_soon': "Coming Soon",
+    'no_campers_available': "No campers available at the moment",
 
 
   },
@@ -840,6 +854,25 @@ const translations = {
 
 
   de: {
+
+
+    'camper_not_found': "Wohnmobil nicht gefunden",
+    'back_to_campers': "Zurück zu den Wohnmobilen",
+    
+    // Add missing magazine-related translations
+    'magazine_not_found': "Magazin nicht gefunden",
+    'back_to_magazines': "Zurück zu den Magazinen",
+    
+    // Other related translations that might be useful
+    'dogfriendly_camper_rental': "Hundefreundliche Wohnmobilvermietung",
+    'welcome_camper_rental': "Erkunden Sie die Schweiz mit Ihren pelzigen Freunden in unseren speziell ausgestatteten Wohnmobilen",
+    'traveling_van_quote': "Im Leben geht es um die Reise, nicht nur um das Ziel. Reisen Sie mit Ihrem Hund in Komfort und Stil.",
+    'view_details': "Details ansehen",
+    'coming_soon': "Demnächst verfügbar",
+    'no_campers_available': "Derzeit sind keine Wohnmobile verfügbar",
+
+
+
     // Navbar
     'register_accommodation': 'Unterkunft registrieren',
     'camper_rental': 'Wohnmobilvermietung',
@@ -868,9 +901,12 @@ const translations = {
     'dogs': 'Hunde',
     'search': 'Suchen',
     'done': 'Fertig',
+
+    'start_conversation': 'Beginnen Sie ein Gespräch mit unserem Support-Team.',
     
     // Auth
     'log_in': 'Anmelden',
+    'logging_in': 'Logging in...',
     'sign_up': 'Registrieren',
     'log_out': 'Abmelden',
     'email': 'E-Mail',
@@ -882,7 +918,7 @@ const translations = {
     'invalid_credentials': 'Ungültige E-Mail oder Passwort',
     'demo_credentials': 'Demo-Anmeldedaten:',
     'provider_credentials': 'Anbieter: provider@mail.com / 1234',
-    'admin_credentials': 'Admin: admin@mail.com / 1234',
+    'admin_credentials': 'Admin: admin@example.com / admin123',
     'user_credentials': 'Benutzer: user@mail.com / 1234',
     'user_type': 'Benutzertyp',
     'choose_user_type': 'Wählen Sie einen Benutzertyp',

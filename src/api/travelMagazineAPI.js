@@ -30,7 +30,8 @@ export const getAllBlogs = async (filters = {}) => {
  */
 export const getBlogById = async (id) => {
   try {
-    const response = await API.get(`/travel-magazine/${id}`);
+    // FIXED: Using the public endpoint for accessing individual blog details
+    const response = await API.get(`/travel-magazine/public/${id}`);
     return response.data;
   } catch (error) {
     console.error(`Error fetching blog ${id}:`, error);
