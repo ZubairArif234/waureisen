@@ -32,7 +32,7 @@ const SearchResults = () => {
   const formatDate = (dateStr) => {
     if (!dateStr) return null;
     
-    console.log('Input date string:', dateStr);
+    //console.log('Input date string:', dateStr);
     
     // Handle date format "May 03 2025"
     const date = new Date(dateStr);
@@ -45,14 +45,14 @@ const SearchResults = () => {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     
-    console.log('Parsed date components:', { year, month, day });
+    //console.log('Parsed date components:', { year, month, day });
     
     return `${year}-${month}-${day}`;
   };
   
   const formattedStartDate = formatDate(startDate);
   
-  console.log('Original date:', startDate);
+  //console.log('Original date:', startDate);
   console.log('Formatted date:', formattedStartDate);
   const people = searchParams.get('people') || 1;
   const dogs = searchParams.get('dogs') || 1;
@@ -174,6 +174,50 @@ const SearchResults = () => {
                 checkInDate: formattedStartDate,
                 los: true
               });
+              
+              // Calculate price per night from Interhome data
+              let pricePerNight = listing.pricePerNight?.price || 0;
+              
+              if (priceData && priceData.priceList && priceData.priceList.prices && 
+                  priceData.priceList.prices.price && priceData.priceList.prices.price.length > 0) {
+                
+                // Filter for duration 7 options
+                const duration7Options = priceData.priceList.prices.price.filter(option => 
+                  option.duration === 7
+                );
+                
+                if (duration7Options.length > 0) {
+                  // Sort by paxUpTo (ascending)
+                  duration7Options.sort((a, b) => a.paxUpTo - b.paxUpTo);
+                  
+                  // Use the option with lowest paxUpTo
+                  const selectedOption = duration7Options[0];
+                  
+                  // Calculate price per night
+                  const calculatedPricePerNight = Math.round(selectedOption.price / 7);
+                  
+                  console.log(`Listing ${listing.Code} - Selected option:`, {
+                    totalPrice: selectedOption.price,
+                    duration: 7,
+                    paxUpTo: selectedOption.paxUpTo,
+                    pricePerNight: calculatedPricePerNight
+                  });
+                  
+                  // Update the listing with calculated price per night
+                  return {
+                    ...listing,
+                    interhomePriceData: priceData,
+                    pricePerNight: {
+                      price: calculatedPricePerNight,
+                      currency: priceData.priceList.currency || 'CHF',
+                      totalPrice: selectedOption.price,
+                      duration: 7,
+                      paxUpTo: selectedOption.paxUpTo
+                    }
+                  };
+                }
+              }
+              
               return {
                 ...listing,
                 interhomePriceData: priceData
@@ -186,7 +230,7 @@ const SearchResults = () => {
           return listing;
         })
       );
-
+  
       if (append) {
         setListings(prev => [...prev, ...processedListings]);
       } else {
@@ -213,7 +257,7 @@ const SearchResults = () => {
       setIsUpdating(false);
       setLoading(false);
     }
-  }, [getLocationName, formattedStartDate]); // Add formattedStartDate to dependencies
+  }, [getLocationName, formattedStartDate]);
 
   // Transform listings for map display
   const getMapReadyListings = useCallback((listingsData) => {
@@ -395,11 +439,13 @@ const SearchResults = () => {
                   }`}
                 >
                   {listings && listings.length > 0 ? listings.map((accommodation) => (
+                    // In the AccommodationCard component usage, update to use the new price structure:
                     <AccommodationCard
                       key={accommodation._id || accommodation.id}
                       id={accommodation._id || accommodation.id}
                       image={accommodation.images && accommodation.images.length > 0 ? accommodation.images[0] : null}
                       price={accommodation.pricePerNight?.price || 0}
+                      currency={accommodation.pricePerNight?.currency || 'CHF'}
                       location={accommodation.location?.address || 'Unknown location'}
                       provider={accommodation.provider || 'Waureisen'}
                     />
