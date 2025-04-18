@@ -16,24 +16,25 @@ const AccommodationCard = ({ accommodation, onEdit, onToggleStatus, onDelete }) 
     deleted: 'bg-gray-100 text-gray-800'
   };
 
-  // Calculate menu position when showing
-  useEffect(() => {
-    if (showMenu && buttonRef.current) {
-      const buttonRect = buttonRef.current.getBoundingClientRect();
-      const windowHeight = window.innerHeight;
-      const spaceBelow = windowHeight - buttonRect.bottom;
-      
-      // Lower threshold for mobile (100px) vs desktop (150px)
-      const threshold = window.innerWidth < 768 ? 100 : 150;
-      
-      // If there's not enough space below, position menu above
-      if (spaceBelow < threshold) {
-        setMenuPosition('top');
-      } else {
-        setMenuPosition('bottom');
-      }
+  
+// Calculate menu position when showing
+useEffect(() => {
+  if (showMenu && buttonRef.current) {
+    const buttonRect = buttonRef.current.getBoundingClientRect();
+    const windowHeight = window.innerHeight;
+    const spaceBelow = windowHeight - buttonRect.bottom;
+    
+    // Use a fixed estimate for menu height instead of calculating from menuOptions
+    const estimatedMenuHeight = 120; // Estimate for 3 options (Edit, Activate/Deactivate, Delete)
+    
+    // If there's not enough space below, position the menu above
+    if (spaceBelow < estimatedMenuHeight) {
+      setMenuPosition('top');
+    } else {
+      setMenuPosition('bottom');
     }
-  }, [showMenu]);
+  }
+}, [showMenu]); // Remove menuOptions.length from dependencies
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -146,28 +147,30 @@ const AccommodationCard = ({ accommodation, onEdit, onToggleStatus, onDelete }) 
               </>
             )}
             
-            {/* Desktop Dropdown Menu - Smart positioning */}
-            {showMenu && window.innerWidth >= 768 && (
-              <div 
-                className="absolute right-0 w-32 bg-white rounded-md shadow-lg z-50 border border-gray-200 py-1" 
-                style={{ 
-                  ...(menuPosition === 'top' 
-                    ? { bottom: '100%', marginBottom: '8px' } 
-                    : { top: '100%', marginTop: '8px' }),
-                  overflow: 'visible'
-                }}
-              >
-                {menuOptions.map((option, index) => (
-                  <button
-                    key={index}
-                    onClick={option.onClick}
-                    className={`w-full text-left px-4 py-2 text-sm ${option.className}`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            )}
+           {/* Desktop Dropdown Menu - Smart positioning */}
+{showMenu && window.innerWidth >= 768 && (
+  <div 
+    ref={menuRef}
+    className="fixed right-auto w-32 bg-white rounded-md shadow-lg z-[1000] border border-gray-200 py-1" 
+    style={{ 
+      left: buttonRef.current ? buttonRef.current.getBoundingClientRect().left - 100 : 'auto',
+      ...(menuPosition === 'top' 
+        ? { bottom: window.innerHeight - (buttonRef.current?.getBoundingClientRect().top || 0) } 
+        : { top: (buttonRef.current?.getBoundingClientRect().bottom || 0) }),
+      overflow: 'visible'
+    }}
+  >
+    {menuOptions.map((option, index) => (
+      <button
+        key={index}
+        onClick={option.onClick}
+        className={`w-full text-left px-4 py-2 text-sm ${option.className}`}
+      >
+        {option.label}
+      </button>
+    ))}
+  </div>
+)}
           </div>
         </div>
         <div className="flex items-center justify-between">

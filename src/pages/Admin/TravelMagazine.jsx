@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
-import { Search, Filter, MoreHorizontal, Plus, AlertTriangle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Search, Filter, AlertTriangle, Plus } from 'lucide-react';
 import BlogCard from '../../components/Admin/BlogCard';
-import BlogForm from '../../components/Admin/BlogForm'; // Updated import
-import magazine from '../../assets/magazine.jpg';
+import BlogForm from '../../components/Admin/BlogForm';
+import { getAllBlogs, deleteBlog } from '../../api/travelMagazineAPI';
+import toast from 'react-hot-toast';
 
 const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, blogTitle }) => {
   if (!isOpen) return null;
@@ -44,79 +46,58 @@ const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, blogTitle }) => {
   );
 };
 
-// Helper function to truncate HTML content for previews
-const truncateHtml = (html, maxLength = 150) => {
-  // Create a temporary div to parse the HTML
-  const tempDiv = document.createElement('div');
-  tempDiv.innerHTML = html;
-  
-  // Get the text content
-  let text = tempDiv.textContent || tempDiv.innerText || '';
-  
-  // Truncate the text
-  if (text.length > maxLength) {
-    text = text.substring(0, maxLength) + '...';
-  }
-  
-  return text;
-};
-
 const TravelMagazine = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingBlog, setEditingBlog] = useState(null);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, id: null, title: '' });
+  const [blogs, setBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
-  // Mock data for blog posts
-  const [blogs, setBlogs] = useState([
-    {
-      id: 1,
-      title: '10 Must-Visit Destinations in Switzerland',
-      excerpt: 'Discover the breathtaking beauty of Switzerland\'s most stunning locations...',
-      content: '<h1>10 Must-Visit Destinations in Switzerland</h1><p>Switzerland is known for its breathtaking landscapes, pristine lakes, and charming villages. Here are ten must-visit destinations for any traveler exploring this beautiful country.</p><h2>1. Zurich</h2><p>As the largest city in Switzerland, Zurich offers a perfect blend of urban sophistication and natural beauty. Visit the historic old town, take a boat ride on Lake Zurich, or explore the city\'s world-class museums and galleries.</p><h2>2. Lucerne</h2><p>With its medieval architecture, covered bridges, and stunning lake views, Lucerne is like stepping into a fairy tale. Don\'t miss the iconic Chapel Bridge and the Lion Monument.</p>',
-      category: 'Destinations',
-      featuredImage: magazine,
-      publishDate: 'March 15, 2023'
-    },
-    {
-      id: 2,
-      title: 'Mediterranean Cuisine: A Culinary Journey',
-      excerpt: 'Explore the rich flavors and culinary traditions of the Mediterranean coast...',
-      content: '<h1>Mediterranean Cuisine: A Culinary Journey</h1><p>The Mediterranean diet is not just healthy—it\'s also incredibly delicious and diverse. From Spanish tapas to Italian pasta, Greek meze to Moroccan tagines, the region offers an incredible variety of flavors and cooking techniques.</p><h2>Key Ingredients</h2><ul><li>Olive oil</li><li>Fresh vegetables</li><li>Whole grains</li><li>Fish and seafood</li><li>Herbs and spices</li></ul>',
-      category: 'Food & Cuisine',
-      featuredImage: magazine,
-      publishDate: 'March 10, 2023'
-    },
-    {
-      id: 3,
-      title: 'Essential Packing Tips for Long-Term Travel',
-      excerpt: 'Learn how to pack efficiently for extended trips without overpacking...',
-      content: '<h1>Essential Packing Tips for Long-Term Travel</h1><p>Packing for a long-term journey requires strategy and restraint. Here are some essential tips to help you pack efficiently without weighing yourself down.</p><h2>Pack Versatile Clothing</h2><p>Choose items that can be mixed and matched, and that work for different weather conditions. Neutral colors are your friend!</p><h2>Minimize Electronics</h2><p>Only bring gadgets you\'ll use regularly. Consider a multi-purpose device like a smartphone or tablet instead of carrying multiple electronics.</p>',
-      category: 'Travel Tips',
-      featuredImage: magazine,
-      publishDate: 'March 5, 2023'
-    },
-    {
-      id: 4,
-      title: 'Dog-Friendly Beaches in Europe',
-      excerpt: 'Discover the best beaches across Europe where your furry friend is welcome...',
-      content: '<h1>Dog-Friendly Beaches in Europe</h1><p>Planning a beach vacation with your four-legged friend? Europe offers many beautiful coastlines where dogs are welcome. Here\'s our guide to the best dog-friendly beaches across the continent.</p><h2>Spain: Playa de la Rubina, Costa Brava</h2><p>This wide, sandy beach allows dogs year-round and offers shallow waters perfect for doggy paddles.</p><h2>Italy: Bau Bau Village, Rimini</h2><p>This dedicated dog beach comes complete with umbrellas, dog showers, and even doggy lifeguards!</p>',
-      category: 'Pet Travel',
-      featuredImage: magazine,
-      publishDate: 'February 28, 2023'
+  // Fetch blogs on component mount
+  useEffect(() => {
+    fetchBlogs();
+  }, []);
+
+  // Fetch blogs from API
+  const fetchBlogs = async () => {
+    setLoading(true);
+    try {
+      const filters = {};
+      if (selectedCategory !== 'all') {
+        filters.category = selectedCategory;
+      }
+      
+      const blogsData = await getAllBlogs(filters);
+      setBlogs(blogsData);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching blogs:', err);
+      setError('Failed to load blog posts');
+      toast.error('Error loading blog posts');
+    } finally {
+      setLoading(false);
     }
-  ]);
+  };
+  
+  // Refetch blogs when category changes
+  useEffect(() => {
+    if (!loading) {
+      fetchBlogs();
+    }
+  }, [selectedCategory]);
 
   // Handler for editing a blog
   const handleEdit = (blog) => {
-    setEditingBlog(blog);
-    setIsFormOpen(true);
+    navigate(`/admin/magazine/edit/${blog._id}`);
   };
 
   // Handler for deleting a blog
   const handleDelete = (id) => {
-    const blog = blogs.find(blog => blog.id === id);
+    const blog = blogs.find(blog => blog._id === id);
     setDeleteModal({ 
       isOpen: true, 
       id, 
@@ -125,55 +106,26 @@ const TravelMagazine = () => {
   };
 
   // Handler for confirming deletion
-  const handleConfirmDelete = () => {
-    setBlogs(prevBlogs => 
-      prevBlogs.filter(blog => blog.id !== deleteModal.id)
-    );
-    setDeleteModal({ isOpen: false, id: null, title: '' });
-  };
-
-  // Handler for saving a blog (create or update)
-  const handleSaveBlog = (blogData) => {
-    if (editingBlog) {
-      // Update existing blog
-      setBlogs(prevBlogs => 
-        prevBlogs.map(blog => 
-          blog.id === editingBlog.id 
-            ? { 
-                ...blog, 
-                ...blogData, 
-                id: blog.id,
-                // Generate excerpt from content if not provided
-                excerpt: blogData.excerpt || truncateHtml(blogData.content)
-              } 
-            : blog
-        )
-      );
-    } else {
-      // Create new blog
-      const newBlog = {
-        ...blogData,
-        id: blogs.length > 0 ? Math.max(...blogs.map(b => b.id)) + 1 : 1,
-        publishDate: new Date().toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        }),
-        // Generate excerpt from content if not provided
-        excerpt: blogData.excerpt || truncateHtml(blogData.content)
-      };
-      setBlogs(prevBlogs => [...prevBlogs, newBlog]);
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteBlog(deleteModal.id);
+      
+      // Update local state
+      setBlogs(prevBlogs => prevBlogs.filter(blog => blog._id !== deleteModal.id));
+      
+      toast.success('Blog post deleted successfully');
+    } catch (error) {
+      console.error('Error deleting blog:', error);
+      toast.error('Failed to delete blog post');
+    } finally {
+      setDeleteModal({ isOpen: false, id: null, title: '' });
     }
-
-    // Close form and reset editing state
-    setIsFormOpen(false);
-    setEditingBlog(null);
   };
 
-  // Filter blogs based on search query and category
+  // Filter blogs based on search query
   const filteredBlogs = blogs.filter(blog => 
-    (selectedCategory === 'all' || blog.category === selectedCategory) &&
     (blog.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+     blog.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
      blog.excerpt.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
@@ -191,10 +143,7 @@ const TravelMagazine = () => {
         </div>
         
         <button 
-          onClick={() => {
-            setEditingBlog(null);
-            setIsFormOpen(true);
-          }}
+          onClick={() => navigate('/admin/magazine/create')}
           className="mt-4 md:mt-0 flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-black/80 transition-colors"
         >
           <Plus className="w-5 h-5" />
@@ -235,37 +184,63 @@ const TravelMagazine = () => {
         </div>
       </div>
 
-      {/* Blog Posts Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredBlogs.map(blog => (
-          <BlogCard 
-            key={blog.id} 
-            blog={blog}
-            onEdit={() => handleEdit(blog)}
-            onDelete={() => handleDelete(blog.id)}
-          />
-        ))}
-      </div>
-      
-      {/* No results message */}
-      {filteredBlogs.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-500 text-lg mb-2">No blog posts found</p>
-          <p className="text-gray-400">Try adjusting your search or filters</p>
+      {/* Loading State */}
+      {loading && (
+        <div className="flex justify-center items-center py-12">
+          <div className="w-12 h-12 border-4 border-gray-200 border-t-brand rounded-full animate-spin"></div>
         </div>
       )}
-      
-      {/*  Blog Form Modal */}
-      {isFormOpen && (
-        <BlogForm
-          isOpen={isFormOpen}
-          onClose={() => {
-            setIsFormOpen(false);
-            setEditingBlog(null);
-          }}
-          onSave={handleSaveBlog}
-          blog={editingBlog}
-        />
+
+      {/* Error State */}
+      {error && !loading && (
+        <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-8">
+          <p className="flex items-center">
+            <AlertTriangle className="w-5 h-5 mr-2" />
+            {error}
+          </p>
+          <button 
+            onClick={fetchBlogs}
+            className="mt-2 text-sm underline"
+          >
+            Try again
+          </button>
+        </div>
+      )}
+
+      {/* Blog Posts Grid */}
+      {!loading && !error && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredBlogs.map(blog => (
+              <BlogCard 
+              key={blog._id} 
+              blog={{
+                id: blog._id,
+                title: blog.title,
+                description: blog.description,
+                excerpt: blog.excerpt,
+                category: blog.category,
+                featuredImage: blog.featuredImage,
+                publishDate: new Date(blog.publishDate).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })
+              }}
+              onEdit={() => handleEdit(blog)}
+              onDelete={() => handleDelete(blog._id)}
+            />
+            ))}
+          </div>
+          
+          {/* No results message */}
+          {filteredBlogs.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg mb-2">No blog posts found</p>
+              <p className="text-gray-400">Try adjusting your search or filters</p>
+            </div>
+          )}
+        </>
       )}
       
       {/* Delete Confirmation Modal */}

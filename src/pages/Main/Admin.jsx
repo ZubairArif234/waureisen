@@ -5,6 +5,7 @@ import Accommodations from '../Admin/Accommodations';
 import AddAccommodation from '../Admin/AddAccommodation';
 import Transactions from '../Admin/Transactions';
 import TravelMagazine from '../Admin/TravelMagazine';
+import CreateBlogPost from '../Admin/CreateBlogPost'; // Import the new component
 import Customers from '../Admin/Customers';
 import Providers from '../Admin/Providers';
 import AdminMessages from '../Admin/AdminMessages';
@@ -27,6 +28,8 @@ const AdminLayout = () => {
           <Route path="/accommodations/edit/:id" element={<AddAccommodation />} />
           <Route path="/transactions" element={<Transactions />} />
           <Route path="/magazine" element={<TravelMagazine />} />
+          <Route path="/magazine/create" element={<CreateBlogPost />} />
+          <Route path="/magazine/edit/:id" element={<CreateBlogPost />} /> {/* New edit route */}
           <Route path="/customers" element={<Customers />} />
           <Route path="/providers" element={<Providers />} />
           <Route path="/messages" element={<AdminMessages />} />

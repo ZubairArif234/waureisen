@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, X, ChevronDown, ChevronUp, Trash, AlertTriangle, Calendar, FileImage, ListFilter, Check, Edit } from 'lucide-react';
+import { Plus, X, ChevronDown, ChevronUp, Trash, AlertTriangle, ListFilter, Check, Edit, Lock } from 'lucide-react';
 import { getActiveFilters, createSubsection, updateSubsection, deleteSubsection, createFilter, updateFilter, deleteFilter } from '../../api/adminAPI';
 import { toast } from 'react-hot-toast';
 
@@ -85,8 +85,7 @@ const FilterModal = ({ isOpen, onClose, onSave, editingFilter = null, subsection
     name: editingFilter?.name || '',
     type: editingFilter?.type || 'text',
     options: editingFilter?.options || [],
-    required: editingFilter?.required || false,
-    fileTypes: editingFilter?.fileTypes || 'image/*'
+    required: editingFilter?.required || false
   });
 
   const [newOption, setNewOption] = useState('');
@@ -97,16 +96,14 @@ const FilterModal = ({ isOpen, onClose, onSave, editingFilter = null, subsection
         name: editingFilter.name || '',
         type: editingFilter.type || 'text',
         options: editingFilter.options || [],
-        required: editingFilter.required || false,
-        fileTypes: editingFilter.fileTypes || 'image/*'
+        required: editingFilter.required || false
       });
     } else {
       setFormData({
         name: '',
         type: 'text',
         options: [],
-        required: false,
-        fileTypes: 'image/*'
+        required: false
       });
     }
   }, [editingFilter]);
@@ -141,9 +138,7 @@ const FilterModal = ({ isOpen, onClose, onSave, editingFilter = null, subsection
     number: <ListFilter className="w-4 h-4" />,
     checkbox: <Check className="w-4 h-4" />,
     select: <ListFilter className="w-4 h-4" />,
-    radio: <ListFilter className="w-4 h-4" />,
-    file: <FileImage className="w-4 h-4" />,
-    date: <Calendar className="w-4 h-4" />
+    radio: <ListFilter className="w-4 h-4" />
   };
 
   return (
@@ -189,8 +184,6 @@ const FilterModal = ({ isOpen, onClose, onSave, editingFilter = null, subsection
                   <option value="checkbox">Checkbox</option>
                   <option value="select">Dropdown Select</option>
                   <option value="radio">Radio Buttons</option>
-                  <option value="file">File Upload</option>
-                  <option value="date">Date Picker</option>
                 </select>
                 <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                   {typeIcons[formData.type]}
@@ -198,25 +191,8 @@ const FilterModal = ({ isOpen, onClose, onSave, editingFilter = null, subsection
               </div>
             </div>
 
-            {formData.type === 'file' && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  File Types
-                </label>
-                <input
-                  type="text"
-                  value={formData.fileTypes}
-                  onChange={(e) => setFormData({ ...formData, fileTypes: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand/20 focus:border-brand"
-                  placeholder="e.g., image/*, .pdf, .doc"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Enter allowed file types (e.g., image/*, .pdf, .docx)
-                </p>
-              </div>
-            )}
-
-            {['select', 'radio'].includes(formData.type) && (
+            {/* Options section for select, radio, and checkbox types */}
+            {['select', 'radio', 'checkbox'].includes(formData.type) && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Options
@@ -348,10 +324,6 @@ const FilterTypeIcon = ({ type }) => {
       return <ListFilter className="w-4 h-4 text-gray-500" />;
     case 'radio':
       return <ListFilter className="w-4 h-4 text-gray-500" />;
-    case 'file':
-      return <FileImage className="w-4 h-4 text-gray-500" />;
-    case 'date':
-      return <Calendar className="w-4 h-4 text-gray-500" />;
     default:
       return <ListFilter className="w-4 h-4 text-gray-500" />;
   }
@@ -389,11 +361,11 @@ const FiltersManagement = () => {
       const data = await getActiveFilters();
       setActiveFilter(data);
       
-      // Set Basic Info expanded by default
+      // Set predefined sections expanded by default
       if (data && data.subsections && data.subsections.length) {
         const expanded = {};
         data.subsections.forEach((sub) => {
-          if (sub.name === 'Basic Info') {
+          if (sub.predefined) {
             expanded[sub._id] = true;
           }
         });
@@ -437,7 +409,12 @@ const FiltersManagement = () => {
       fetchFilters();
     } catch (err) {
       console.error('Error saving subsection:', err);
-      toast.error('Failed to save subsection');
+      
+      if (err.response && err.response.data && err.response.data.message) {
+        toast.error(err.response.data.message);
+      } else {
+        toast.error('Failed to save subsection');
+      }
     } finally {
       setSubsectionModal({ isOpen: false, editingSubsection: null });
     }
@@ -467,7 +444,12 @@ const FiltersManagement = () => {
       fetchFilters();
     } catch (err) {
       console.error('Error saving filter:', err);
-      toast.error('Failed to save filter');
+      
+      if (err.response && err.response.data && err.response.data.message) {
+        toast.error(err.response.data.message);
+      } else {
+        toast.error('Failed to save filter');
+      }
     } finally {
       setFilterModal({ isOpen: false, editingFilter: null, subsectionId: null });
     }
@@ -494,7 +476,12 @@ const FiltersManagement = () => {
       fetchFilters();
     } catch (err) {
       console.error('Error deleting item:', err);
-      toast.error('Failed to delete item');
+      
+      if (err.response && err.response.data && err.response.data.message) {
+        toast.error(err.response.data.message);
+      } else {
+        toast.error('Failed to delete item');
+      }
     } finally {
       setDeleteModal({ isOpen: false, item: null, type: null, subsectionId: null });
     }
@@ -557,7 +544,12 @@ const FiltersManagement = () => {
       <div className="space-y-6">
         {activeFilter && activeFilter.subsections && activeFilter.subsections.length > 0 ? (
           activeFilter.subsections.map(subsection => (
-            <div key={subsection._id} className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+            <div 
+              key={subsection._id} 
+              className={`border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow ${
+                subsection.predefined ? 'border-gray-300 bg-gray-50/50' : ''
+              }`}
+            >
               {/* Subsection Header */}
               <div className="bg-gray-50 px-6 py-4 flex items-center justify-between">
                 <div className="flex-1">
@@ -572,27 +564,52 @@ const FiltersManagement = () => {
                         <ChevronDown className="w-5 h-5" />
                       )}
                     </button>
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-900">
-                        {subsection.name}
-                      </h3>
-                      {subsection.description && (
-                        <p className="text-sm text-gray-500">{subsection.description}</p>
+                    <div className="flex items-center gap-2">
+                      {subsection.predefined && (
+                        <Lock className="w-4 h-4 text-brand" />
+                      )}
+                      <div>
+                        <h3 className="text-lg font-medium text-gray-900">
+                          {subsection.name}
+                        </h3>
+                        {subsection.description && (
+                          <p className="text-sm text-gray-500">{subsection.description}</p>
+                        )}
+                      </div>
+                      {subsection.predefined && (
+                        <span className="bg-brand/10 text-brand text-xs px-2 py-1 rounded-full">
+                          Predefined
+                        </span>
                       )}
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setSubsectionModal({ 
-                      isOpen: true, 
-                      editingSubsection: subsection 
-                    })}
-                    className="p-2 text-gray-500 hover:text-gray-700"
-                    title="Edit subsection"
-                  >
-                    <Edit className="w-5 h-5" />
-                  </button>
+                  {!subsection.predefined && (
+                    <>
+                      <button
+                        onClick={() => setSubsectionModal({ 
+                          isOpen: true, 
+                          editingSubsection: subsection 
+                        })}
+                        className="p-2 text-gray-500 hover:text-gray-700"
+                        title="Edit subsection"
+                      >
+                        <Edit className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={() => setDeleteModal({ 
+                          isOpen: true, 
+                          item: subsection,
+                          type: 'subsection'
+                        })}
+                        className="p-2 text-red-500 hover:text-red-700"
+                        title="Delete subsection"
+                      >
+                        <Trash className="w-5 h-5" />
+                      </button>
+                    </>
+                  )}
                   <button
                     onClick={() => setFilterModal({
                       isOpen: true,
@@ -603,17 +620,6 @@ const FiltersManagement = () => {
                     title="Add filter"
                   >
                     <Plus className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={() => setDeleteModal({ 
-                      isOpen: true, 
-                      item: subsection,
-                      type: 'subsection'
-                    })}
-                    className="p-2 text-red-500 hover:text-red-700"
-                    title="Delete subsection"
-                  >
-                    <Trash className="w-5 h-5" />
                   </button>
                 </div>
               </div>
@@ -626,7 +632,9 @@ const FiltersManagement = () => {
                       {subsection.filters.map(filter => (
                         <div
                           key={filter._id}
-                          className="border rounded-lg p-4 hover:bg-gray-50 transition-colors group"
+                          className={`border rounded-lg p-4 ${filter.predefined 
+                            ? 'bg-gray-50 border-gray-300' 
+                            : 'hover:bg-gray-50 transition-colors'} group`}
                         >
                           <div className="flex justify-between items-start">
                             <div className="flex items-start gap-3">
@@ -634,42 +642,49 @@ const FiltersManagement = () => {
                                 <FilterTypeIcon type={filter.type} />
                               </div>
                               <div>
-                                <h4 className="font-medium text-gray-900">{filter.name}</h4>
+                                <h4 className="font-medium text-gray-900 flex items-center gap-2">
+                                  {filter.name}
+                                  {filter.predefined && (
+                                    <Lock className="w-3 h-3 text-brand" />
+                                  )}
+                                </h4>
                                 <p className="text-sm text-gray-500 capitalize">{filter.type}</p>
                                 
-                                {/* Show options count for select/radio types */}
-                                {['select', 'radio'].includes(filter.type) && filter.options && filter.options.length > 0 && (
+                                {/* Show options for select/radio/checkbox types */}
+                                {['select', 'radio', 'checkbox'].includes(filter.type) && filter.options && filter.options.length > 0 && (
                                   <p className="text-xs text-gray-500 mt-1">
                                     {filter.options.length} option{filter.options.length !== 1 ? 's' : ''}
                                   </p>
                                 )}
                               </div>
                             </div>
-                            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button
-                                onClick={() => setFilterModal({
-                                  isOpen: true,
-                                  editingFilter: filter,
-                                  subsectionId: subsection._id
-                                })}
-                                className="text-gray-500 hover:text-gray-700"
-                                title="Edit filter"
-                              >
-                                <Edit className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => setDeleteModal({
-                                  isOpen: true,
-                                  item: filter,
-                                  type: 'filter',
-                                  subsectionId: subsection._id
-                                })}
-                                className="text-red-500 hover:text-red-700"
-                                title="Delete filter"
-                              >
-                                <Trash className="w-4 h-4" />
-                              </button>
-                            </div>
+                            {!filter.predefined && (
+                              <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button
+                                  onClick={() => setFilterModal({
+                                    isOpen: true,
+                                    editingFilter: filter,
+                                    subsectionId: subsection._id
+                                  })}
+                                  className="text-gray-500 hover:text-gray-700"
+                                  title="Edit filter"
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => setDeleteModal({
+                                    isOpen: true,
+                                    item: filter,
+                                    type: 'filter',
+                                    subsectionId: subsection._id
+                                  })}
+                                  className="text-red-500 hover:text-red-700"
+                                  title="Delete filter"
+                                >
+                                  <Trash className="w-4 h-4" />
+                                </button>
+                              </div>
+                            )}
                           </div>
                           {filter.required && (
                             <span className="mt-2 inline-block px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">

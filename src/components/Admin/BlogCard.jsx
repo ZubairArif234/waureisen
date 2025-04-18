@@ -160,9 +160,9 @@ const BlogCard = ({ blog, onEdit, onDelete }) => {
           </div>
         </div>
         
-        {/* Excerpt */}
+        {/* Description */}
         <p className="text-sm text-gray-600 mb-4 line-clamp-3">
-          {blog.excerpt}
+          {blog.description || blog.excerpt}
         </p>
         
         {/* Publish Date */}

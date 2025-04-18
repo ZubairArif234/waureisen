@@ -244,7 +244,6 @@ export const deleteVoucher = async (id) => {
   }
 };
 
-// Filters Management
 export const getActiveFilters = async () => {
   try {
     const response = await API.get('/filters/active');
