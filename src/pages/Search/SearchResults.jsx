@@ -7,10 +7,16 @@ import MockMap from '../../components/SearchComponents/MockMap';
 import MapToggle from '../../components/SearchComponents/MapToggle';
 import Footer from '../../components/Shared/Footer';
 import { useLanguage } from '../../utils/LanguageContext';
-// Add the missing import for searchListings
-import { searchListings } from '../../api/listingAPI';
+import { searchListings, fetchListingsByMapBounds } from '../../api/listingAPI';
 import axios from 'axios';
 import { fetchInterhomePrices } from '../../api/interhomeAPI';
+import { 
+  loadGoogleMapsScript, 
+  createMap, 
+  addListingMarkers, 
+  clearMarkers,
+  addMapMoveListener 
+} from '../../utils/googlemapsutils';
 
 // Import dummy images for now
 import i1 from '../../assets/i1.png';
@@ -32,8 +38,6 @@ const SearchResults = () => {
   const formatDate = (dateStr) => {
     if (!dateStr) return null;
     
-    //console.log('Input date string:', dateStr);
-    
     // Handle date format "May 03 2025"
     const date = new Date(dateStr);
     if (isNaN(date.getTime())) {
@@ -45,14 +49,11 @@ const SearchResults = () => {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     
-    //console.log('Parsed date components:', { year, month, day });
-    
     return `${year}-${month}-${day}`;
   };
   
   const formattedStartDate = formatDate(startDate);
   
-  //console.log('Original date:', startDate);
   console.log('Formatted date:', formattedStartDate);
   const people = searchParams.get('people') || 1;
   const dogs = searchParams.get('dogs') || 1;
@@ -69,6 +70,13 @@ const SearchResults = () => {
   const [areaName, setAreaName] = useState(locationParam || 'this area');
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  
+  // Add new state for map-related data
+  const [mapInstance, setMapInstance] = useState(null);
+  const [mapMarkers, setMapMarkers] = useState([]);
+  const [isMapMoving, setIsMapMoving] = useState(false);
+  const [mapMoveListener, setMapMoveListener] = useState(null);
+  const mapRef = useRef(null);
   
   // State for tracking map viewport
   const [mapViewport, setMapViewport] = useState({
@@ -151,6 +159,60 @@ const SearchResults = () => {
       return locationParam || 'this area';
     }
   }, [locationParam]);
+
+  // Initialize map
+  useEffect(() => {
+    if (showMap && mapRef.current && !mapInstance) {
+      loadGoogleMapsScript((success) => {
+        if (success && window.google && window.google.maps) {
+          // Create map centered on search location
+          const map = createMap(mapRef, { 
+            lat: initialLat, 
+            lng: initialLng 
+          });
+          
+          if (map) {
+            setMapInstance(map);
+            
+            // Add markers for current listings
+            if (listings.length > 0) {
+              const markers = addListingMarkers(map, listings);
+              setMapMarkers(markers);
+            }
+          }
+        }
+      });
+    }
+  }, [showMap, mapRef, listings, initialLat, initialLng, mapInstance]);
+  
+  // Create a function to fetch listings by map bounds
+  const fetchListingsByMapBounds = async (params) => {
+    try {
+      const { lat, lng, radius, bounds, filters = {} } = params;
+      
+      // Build query parameters
+      const queryParams = new URLSearchParams({
+        lat,
+        lng,
+        radius: radius || 10, // Default 10km radius
+        ...filters
+      });
+      
+      // Add bounds if available
+      if (bounds) {
+        queryParams.append('neLat', bounds.ne.lat);
+        queryParams.append('neLng', bounds.ne.lng);
+        queryParams.append('swLat', bounds.sw.lat);
+        queryParams.append('swLng', bounds.sw.lng);
+      }
+      
+      const response = await axios.get(`/api/listings/map?${queryParams.toString()}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching listings by map bounds:', error);
+      throw error;
+    }
+  };
 
   // Fetch listings from API
   const fetchListings = useCallback(async (lat, lng, pageNum, append = false) => {
@@ -259,7 +321,7 @@ const SearchResults = () => {
     }
   }, [getLocationName, formattedStartDate]);
 
-  // Transform listings for map display
+  // Transform listings for map display - FIX THIS FUNCTION
   const getMapReadyListings = useCallback((listingsData) => {
     if (!listingsData || !Array.isArray(listingsData) || listingsData.length === 0) {
       console.log('No listings data available for map');
@@ -269,23 +331,51 @@ const SearchResults = () => {
     console.log('Preparing map data for', listingsData.length, 'listings');
     
     return listingsData.map(listing => {
-      // Make sure location coordinates exist and are in the correct format
-      if (!listing.location || !listing.location.coordinates || 
-          !Array.isArray(listing.location.coordinates) || 
-          listing.location.coordinates.length !== 2) {
-        console.warn('Invalid location data for listing:', listing._id);
+      // Check for position data in different formats
+      let position = null;
+      
+      // Format 1: GeoJSON format with location.coordinates [lng, lat]
+      if (listing.location && listing.location.coordinates && 
+          Array.isArray(listing.location.coordinates) && 
+          listing.location.coordinates.length === 2) {
+        position = {
+          lat: listing.location.coordinates[1],
+          lng: listing.location.coordinates[0]
+        };
+      } 
+      // Format 2: Direct lat/lng properties
+      else if (listing.lat !== undefined && listing.lng !== undefined) {
+        position = {
+          lat: parseFloat(listing.lat),
+          lng: parseFloat(listing.lng)
+        };
+      }
+      // Format 3: Position object
+      else if (listing.position && listing.position.lat !== undefined && listing.position.lng !== undefined) {
+        position = listing.position;
+      }
+      
+      if (!position) {
+        console.warn('Invalid location data for listing:', listing._id || listing.id);
         return null;
       }
       
-      // GeoJSON uses [lng, lat] order, but Google Maps uses {lat, lng}
-      const [lng, lat] = listing.location.coordinates;
+      // Ensure we have valid coordinates
+      if (isNaN(position.lat) || isNaN(position.lng)) {
+        console.warn('Invalid coordinates for listing:', listing._id || listing.id);
+        return null;
+      }
       
+      // Create a properly formatted listing object for the map
       return {
-        id: listing._id,
-        position: { lat, lng },
-        price: listing.pricePerNight?.price || 0,
+        id: listing._id || listing.id,
         title: listing.title || 'Accommodation',
-        image: listing.images && listing.images.length > 0 ? listing.images[0] : null
+        location: {
+          coordinates: [position.lng, position.lat]  // Format expected by MockMap
+        },
+        pricePerNight: listing.pricePerNight || { price: 0, currency: 'CHF' },
+        images: listing.images || [],
+        capacity: listing.capacity || { people: 2, dogs: 1 }
       };
     }).filter(Boolean); // Remove any null entries
   }, []);
@@ -386,6 +476,21 @@ const SearchResults = () => {
 
   // Get the listings ready for the map component
   const mapReadyListings = getMapReadyListings(listings);
+
+  // Create map view with loading indicator
+  const mapView = (
+    <div className="relative h-full">
+      <div ref={mapRef} className="w-full h-full rounded-lg"></div>
+      {isMapMoving && (
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white px-4 py-2 rounded-full shadow-md">
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-sm font-medium">Loading accommodations...</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div className="min-h-screen" style={pageContentStyle}>
@@ -492,12 +597,14 @@ const SearchResults = () => {
             }`}
           >
             <div className="h-full pt-0">
-              <MockMap 
-                center={mapViewport.center}
-                listings={mapReadyListings}
-                locationName={areaName}
-                onMapChange={handleMapChange}
-              />
+              {showMap ? mapView : (
+                <MockMap 
+                  center={mapViewport.center}
+                  listings={mapReadyListings}
+                  locationName={areaName}
+                  onMapChange={handleMapChange}
+                />
+              )}
             </div>
           </aside>
         </div>

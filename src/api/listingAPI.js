@@ -154,3 +154,34 @@ export const getProviderDashboardStats = async (timeFrame = 'month') => {
     throw error;
   }
 };
+
+// Fetch listings by map bounds
+export const fetchListingsByMapBounds = async (params) => {
+  try {
+    const { lat, lng, radius, bounds, page = 1, limit = 10, filters = {} } = params;
+    
+    // Build query parameters
+    const queryParams = new URLSearchParams({
+      lat,
+      lng,
+      radius: radius || 10, // Default 10km radius
+      page,
+      limit,
+      ...filters
+    });
+    
+    // Add bounds if available
+    if (bounds) {
+      queryParams.append('neLat', bounds.ne.lat);
+      queryParams.append('neLng', bounds.ne.lng);
+      queryParams.append('swLat', bounds.sw.lat);
+      queryParams.append('swLng', bounds.sw.lng);
+    }
+    
+    const response = await API.get(`/api/listings/map?${queryParams.toString()}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching listings by map bounds:', error);
+    throw error;
+  }
+};

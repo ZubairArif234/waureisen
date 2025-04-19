@@ -217,190 +217,155 @@ export const createMap = (mapRef, center = { lat: 46.818188, lng: 8.227512 }) =>
   }
 };
 
-// Add markers to the map for listings
+// Add event listener for map movement to dynamically load accommodations
+export const addMapMoveListener = (map, callback, debounceTime = 500) => {
+  if (!map || typeof callback !== 'function') {
+    console.warn('Invalid map or callback for map move listener');
+    return null;
+  }
+
+  let timeoutId = null;
+  
+  // Create the event listener with debounce
+  const listener = map.addListener('idle', () => {
+    // Clear any existing timeout
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+    
+    // Set a new timeout to debounce the callback
+    timeoutId = setTimeout(() => {
+      const center = map.getCenter();
+      const bounds = map.getBounds();
+      
+      if (center && bounds) {
+        const lat = center.lat();
+        const lng = center.lng();
+        const ne = bounds.getNorthEast();
+        const sw = bounds.getSouthWest();
+        
+        // Calculate approximate radius in km (rough estimate)
+        const latDiff = ne.lat() - sw.lat();
+        const lngDiff = ne.lng() - sw.lng();
+        const radius = Math.max(
+          haversineDistance(center.lat(), center.lng(), center.lat() + latDiff/2, center.lng()),
+          haversineDistance(center.lat(), center.lng(), center.lat(), center.lng() + lngDiff/2)
+        );
+        
+        // Pass the map instance to the callback so we can manage markers properly
+        callback({
+          map,
+          lat,
+          lng,
+          radius: Math.min(50, radius), // Cap at 50km
+          bounds: {
+            ne: { lat: ne.lat(), lng: ne.lng() },
+            sw: { lat: sw.lat(), lng: sw.lng() }
+          }
+        });
+      }
+    }, debounceTime);
+  });
+  
+  return listener;
+};
+
+// Helper function to calculate distance between two points using Haversine formula
+const haversineDistance = (lat1, lon1, lat2, lon2) => {
+  const R = 6371; // Radius of the Earth in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c; // Distance in km
+};
+
+// Add markers for listings to the map
 export const addListingMarkers = (map, listings) => {
-  // Safety checks
-  if (!map) {
-    console.warn('Map instance not available for adding markers');
-    return [];
-  }
-  
-  if (!listings || !Array.isArray(listings) || listings.length === 0) {
-    console.warn('No valid listings to add markers for');
-    return [];
-  }
-  
-  if (!window.google || !window.google.maps) {
-    console.warn('Google Maps API not available for creating markers');
+  if (!map || !listings || !Array.isArray(listings) || !window.google) {
+    console.warn('Invalid map, listings, or Google Maps not loaded');
     return [];
   }
 
-  //console.log('Attempting to add markers for', listings.length, 'listings');
-  
-  // Debug the first listing to see its structure
-  if (listings.length > 0) {
-    //console.log('First listing structure:', JSON.stringify(listings[0], null, 2));
-  }
-  
   const markers = [];
-  let bounds;
   
   try {
-    bounds = new window.google.maps.LatLngBounds();
-  } catch (error) {
-    console.error('Error creating bounds:', error);
-    return [];
-  }
-  
-  // Create a single info window to reuse
-  let sharedInfoWindow;
-  try {
-    sharedInfoWindow = new window.google.maps.InfoWindow();
-  } catch (error) {
-    console.error('Error creating info window:', error);
-    return [];
-  }
-
-  try {
-    // Process each listing
-    listings.forEach((listing, index) => {
-      // Check for position data in different possible formats
-      let position = null;
-      
-      // Debug the listing structure
-      //console.log(`Listing ${index} structure:`, listing);
-      
-      // Check if the listing has a direct position property (as shown in your logs)
-      if (listing.position && typeof listing.position === 'object' && 
-          !isNaN(parseFloat(listing.position.lat)) && !isNaN(parseFloat(listing.position.lng))) {
-        position = {
-          lat: parseFloat(listing.position.lat),
-          lng: parseFloat(listing.position.lng)
-        };
-      } 
-      // Try other possible position formats
-      else if (listing.location?.coordinates && Array.isArray(listing.location.coordinates)) {
-        position = {
-          lat: parseFloat(listing.location.coordinates[1]),
-          lng: parseFloat(listing.location.coordinates[0])
-        };
-      } else if (listing.location?.lat !== undefined && listing.location?.lng !== undefined) {
-        position = {
-          lat: parseFloat(listing.location.lat),
-          lng: parseFloat(listing.location.lng)
-        };
-      } else if (listing.latitude !== undefined && listing.longitude !== undefined) {
-        position = {
-          lat: parseFloat(listing.latitude),
-          lng: parseFloat(listing.longitude)
-        };
-      } else if (listing.lat !== undefined && listing.lng !== undefined) {
-        position = {
-          lat: parseFloat(listing.lat),
-          lng: parseFloat(listing.lng)
-        };
-      }
-      
-      // Skip if we couldn't find valid position
-      if (!position) {
-        console.warn('Skipping listing with missing position:', listing.id || index);
+    listings.forEach(listing => {
+      // Skip if no valid coordinates
+      if (!listing.location || 
+          !listing.location.coordinates || 
+          !Array.isArray(listing.location.coordinates) || 
+          listing.location.coordinates.length !== 2) {
+        console.warn('Listing missing valid coordinates:', listing.title || 'Unknown');
         return;
       }
       
-      // Skip if position is invalid or out of bounds
-      if (isNaN(position.lat) || isNaN(position.lng) ||
-          position.lat < -90 || position.lat > 90 ||
-          position.lng < -180 || position.lng > 180) {
-        console.warn('Invalid position values for listing:', listing.id || index, position);
-        return;
-      }
+      // GeoJSON uses [lng, lat] order, so we need to reverse for Google Maps
+      const position = {
+        lat: listing.location.coordinates[1],
+        lng: listing.location.coordinates[0]
+      };
       
-      // Log successful position for debugging
-      //console.log('Creating marker at position:', position, 'for listing:', listing.id || index);
-      
-      // Get a title string
-      const title = (listing.title && typeof listing.title === 'string')
-        ? listing.title
-        : (listing.name && typeof listing.name === 'string')
-          ? listing.name
-          : 'Accommodation';
-      
-      // Create the marker with a more visible icon
+      // Create marker
       const marker = new window.google.maps.Marker({
         position,
-        map, // Make sure to pass the map instance
-        title,
-        // Use a more visible marker style
+        map,
+        title: listing.title || 'Accommodation',
         icon: {
           path: window.google.maps.SymbolPath.CIRCLE,
-          scale: 12, // Increased size for better visibility
-          fillColor: '#B4A481', // Brand color
-          fillOpacity: 1.0,
-          strokeWeight: 2,
+          scale: 8,
+          fillColor: '#B4A481',
+          fillOpacity: 0.7,
+          strokeWeight: 1,
           strokeColor: '#ffffff'
         }
       });
       
-      // Only extend bounds with valid positions
-      bounds.extend(position);
-      
-      // Get price information
-      const price = listing.price || 
-                    (listing.pricePerNight && listing.pricePerNight.price) || 
-                    0;
-      const currency = listing.currency || 
-                       (listing.pricePerNight && listing.pricePerNight.currency) || 
-                       'CHF';
-      
-      // Create info window content
-      const content = `
-        <div style="max-width: 200px; padding: 8px;">
-          <h3 style="margin: 0; font-size: 16px; color: #4D484D;">${title}</h3>
-          <p style="margin: 5px 0; font-size: 14px; color: #B4A481; font-weight: 500;">
-            ${price} ${currency}
-          </p>
-        </div>
-      `;
-
-      // Add click listener to open info window
+      // Add click event to marker
       marker.addListener('click', () => {
-        try {
-          // Set content and open the info window
-          sharedInfoWindow.setContent(content);
-          sharedInfoWindow.open({
-            anchor: marker,
-            map,
-          });
-          
-          // Add bounce animation when clicked
-          marker.setAnimation(window.google.maps.Animation.BOUNCE);
-          setTimeout(() => {
-            marker.setAnimation(null);
-          }, 750);
-        } catch (error) {
-          console.error('Error in marker click handler:', error);
-        }
+        // Create info window content
+        const contentString = `
+          <div style="max-width: 200px; font-family: Arial, sans-serif;">
+            <h3 style="margin: 0 0 5px; font-size: 16px;">${listing.title || 'Accommodation'}</h3>
+            <p style="margin: 0 0 5px; font-size: 14px;">
+              ${listing.pricePerNight ? `${listing.pricePerNight.price} ${listing.pricePerNight.currency}/night` : ''}
+            </p>
+            <p style="margin: 0; font-size: 12px;">
+              ${listing.capacity ? `${listing.capacity.people} guests, ${listing.capacity.dogs} dogs` : ''}
+            </p>
+          </div>
+        `;
+        
+        // Create and open info window
+        const infoWindow = new window.google.maps.InfoWindow({
+          content: contentString
+        });
+        
+        infoWindow.open(map, marker);
       });
-
+      
       markers.push(marker);
     });
-
-    // Fit the map to the bounds of all markers if there are any
-    if (markers.length > 0 && !bounds.isEmpty()) {
-      map.fitBounds(bounds);
-      
-      // If we only have one marker, zoom out a bit
-      if (markers.length === 1) {
-        const listener = window.google.maps.event.addListenerOnce(map, 'bounds_changed', () => {
-          map.setZoom(Math.min(14, map.getZoom()));
-        });
-      }
-    }
-
-    //console.log('Successfully added', markers.length, 'markers to the map');
+    
     return markers;
   } catch (error) {
-    console.error('Error adding markers:', error);
+    console.error('Error adding listing markers:', error);
     return [];
   }
+};
+
+// Clear all markers from the map
+export const clearMarkers = (markers) => {
+  if (!markers || !Array.isArray(markers)) {
+    return;
+  }
+  
+  markers.forEach(marker => {
+    if (marker && typeof marker.setMap === 'function') {
+      marker.setMap(null);
+    }
+  });
 };

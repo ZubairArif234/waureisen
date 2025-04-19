@@ -1,256 +1,291 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { MapPin } from 'lucide-react';
-import { loadGoogleMapsScript, createMap, addListingMarkers } from '../../utils/googleMapsUtils';
+import { useLanguage } from '../../utils/LanguageContext';
 
-const MockMap = ({ 
-  center, 
-  listings = [], 
-  locationName = '',
-  onMapChange // New prop to handle viewport changes
-}) => {
-  const mapRef = useRef(null);
-  const googleMapRef = useRef(null);
-  const markersRef = useRef([]);
+const MockMap = ({ center, listings, locationName, onMapChange }) => {
+  const { t } = useLanguage();
   const [isLoaded, setIsLoaded] = useState(false);
-  const [loadError, setLoadError] = useState(null);
-  
-  // Track if the map is currently being loaded/initialized
-  const isInitializingRef = useRef(true);
+  const mapRef = useRef(null);
+  const mapInstance = useRef(null);
+  const markersRef = useRef([]);
+  // Add this ref to fix the error
+  const mapChangeTimeoutRef = useRef(null);
 
-  // Default center is Switzerland if not provided
-  const mapCenter = center || { lat: 46.818188, lng: 8.227512 };
-
-  // Initialize Google Maps
+  // Initialize map
   useEffect(() => {
-    try {
-      loadGoogleMapsScript((success) => {
-        if (success) {
-          setIsLoaded(true);
-        } else {
-          setLoadError("Failed to load Google Maps.");
-        }
+    // Load Google Maps script
+    const loadGoogleMapsScript = () => {
+      if (window.google && window.google.maps) {
+        initMap();
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&libraries=places`;
+      script.async = true;
+      script.defer = true;
+      script.onload = initMap;
+      document.head.appendChild(script);
+    };
+
+    // Initialize map
+    const initMap = () => {
+      if (!mapRef.current) return;
+
+      const map = new window.google.maps.Map(mapRef.current, {
+        center: center,
+        zoom: 12,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false,
+        zoomControl: true,
+        gestureHandling: 'greedy',
+        disableDefaultUI: false,
+        styles: [
+          {
+            featureType: 'poi',
+            elementType: 'labels',
+            stylers: [{ visibility: 'off' }]
+          },
+          {
+            featureType: 'transit',
+            elementType: 'labels',
+            stylers: [{ visibility: 'off' }]
+          }
+        ]
       });
-    } catch (error) {
-      console.error('Error loading Google Maps:', error);
-      setLoadError(error.message || "Error loading Google Maps.");
-    }
-  }, []);
 
-  // Function to handle map viewport changes
-  const handleMapChange = (map) => {
-    if (!map || isInitializingRef.current) return;
-    
-    try {
-      // Get the current bounds of the map
-      const bounds = map.getBounds();
-      if (!bounds) return;
+      // Add center marker
+      new window.google.maps.Marker({
+        position: center,
+        map: map,
+        icon: {
+          path: window.google.maps.SymbolPath.CIRCLE,
+          scale: 10,
+          fillColor: '#B4A481',
+          fillOpacity: 0.7,
+          strokeWeight: 2,
+          strokeColor: '#ffffff'
+        },
+        title: locationName || 'Selected Location'
+      });
 
-      const ne = bounds.getNorthEast();
-      const sw = bounds.getSouthWest();
+      // Add listing markers
+      if (listings && listings.length > 0) {
+        addListingMarkers(map, listings);
+      }
+
+      // Add map move listener with better control
+      // Only trigger when the map is done being dragged or zoomed
+      map.addListener('dragend', () => {
+        handleMapChange(map);
+      });
       
-      // Get the center position
-      const center = map.getCenter();
-      
-      // Get the current zoom level
-      const zoom = map.getZoom();
-      
-      // Only call the callback if we have a valid viewport
-      if (onMapChange && center && bounds && !isInitializingRef.current) {
-        // Debounce the map change event to prevent too many updates
+      map.addListener('zoom_changed', () => {
+        // Clear existing timeout
         if (mapChangeTimeoutRef.current) {
           clearTimeout(mapChangeTimeoutRef.current);
         }
         
+        // Set a longer timeout for zoom to finish
         mapChangeTimeoutRef.current = setTimeout(() => {
-          onMapChange({
-            center: { 
-              lat: center.lat(), 
-              lng: center.lng() 
-            },
+          handleMapChange(map);
+        }, 1000);
+      });
+
+      mapInstance.current = map;
+      setIsLoaded(true);
+    };
+
+    // Add listing markers - FIX THIS FUNCTION
+    const addListingMarkers = (map, listings) => {
+      console.log('Adding markers for', listings?.length || 0, 'listings');
+      
+      // Clear existing markers
+      if (markersRef.current.length > 0) {
+        markersRef.current.forEach(marker => marker.setMap(null));
+        markersRef.current = [];
+      }
+    
+      // If no listings or invalid data, return early
+      if (!listings || !Array.isArray(listings) || listings.length === 0) {
+        console.warn('No valid listings to add markers for');
+        return;
+      }
+    
+      // Add new markers
+      listings.forEach(listing => {
+        // Debug the listing data
+        console.log('Processing listing for marker:', listing);
+        
+        if (!listing.location || !listing.location.coordinates) {
+          console.warn('Listing missing coordinates:', listing.id || 'unknown');
+          return;
+        }
+    
+        const position = {
+          lat: listing.location.coordinates[1],
+          lng: listing.location.coordinates[0]
+        };
+    
+        // Verify position is valid
+        if (isNaN(position.lat) || isNaN(position.lng)) {
+          console.warn('Invalid coordinates:', position);
+          return;
+        }
+    
+        console.log('Creating marker at position:', position);
+    
+        const marker = new window.google.maps.Marker({
+          position,
+          map,
+          title: listing.title || 'Accommodation',
+          icon: {
+            path: window.google.maps.SymbolPath.CIRCLE,
+            scale: 8,
+            fillColor: '#B4A481',
+            fillOpacity: 0.7,
+            strokeWeight: 1,
+            strokeColor: '#ffffff'
+          }
+        });
+    
+        // Add click event
+        marker.addListener('click', () => {
+          const infoWindow = new window.google.maps.InfoWindow({
+            content: `
+              <div style="max-width: 200px; font-family: Arial, sans-serif;">
+                <h3 style="margin: 0 0 5px; font-size: 16px;">${listing.title || 'Accommodation'}</h3>
+                <p style="margin: 0 0 5px; font-size: 14px;">
+                  ${listing.pricePerNight ? `${listing.pricePerNight.price} ${listing.pricePerNight.currency}/night` : ''}
+                </p>
+                <p style="margin: 0; font-size: 12px;">
+                  ${listing.capacity ? `${listing.capacity.people} guests, ${listing.capacity.dogs} dogs` : ''}
+                </p>
+              </div>
+            `
+          });
+          infoWindow.open(map, marker);
+        });
+    
+        markersRef.current.push(marker);
+      });
+    };
+
+    // Handle map change with improved debugging
+    const handleMapChange = (map) => {
+      if (!map || !onMapChange) return;
+  
+      // Clear existing timeout
+      if (mapChangeTimeoutRef.current) {
+        clearTimeout(mapChangeTimeoutRef.current);
+      }
+  
+      // Set new timeout with moderate debounce time
+      mapChangeTimeoutRef.current = setTimeout(() => {
+        const center = map.getCenter();
+        const bounds = map.getBounds();
+        const zoom = map.getZoom();
+  
+        if (center && bounds) {
+          console.log('Map viewport changed:', {
+            center: { lat: center.lat(), lng: center.lng() },
+            zoom,
             bounds: {
-              ne: { lat: ne.lat(), lng: ne.lng() },
-              sw: { lat: sw.lat(), lng: sw.lng() }
+              ne: { lat: bounds.getNorthEast().lat(), lng: bounds.getNorthEast().lng() },
+              sw: { lat: bounds.getSouthWest().lat(), lng: bounds.getSouthWest().lng() }
+            }
+          });
+          
+          // Always trigger the callback when map movement ends
+          onMapChange({
+            center: { lat: center.lat(), lng: center.lng() },
+            bounds: {
+              ne: { lat: bounds.getNorthEast().lat(), lng: bounds.getNorthEast().lng() },
+              sw: { lat: bounds.getSouthWest().lat(), lng: bounds.getSouthWest().lng() }
             },
             zoom
           });
-        }, 500); // Wait 500ms after the user stops interacting
-      }
-    } catch (error) {
-      console.error('Error getting map viewport:', error);
-    }
-  };
-
-  // Create map when script is loaded or center changes
-  useEffect(() => {
-    if (!isLoaded || loadError) return;
-
-    try {
-      isInitializingRef.current = true;
-      
-      // Check if the map container is available
-      if (!mapRef.current) {
-        console.error('Map container not available');
-        setLoadError('Map container not available');
-        return;
-      }
-      
-      // Create the map
-      const mapInstance = createMap(mapRef, mapCenter);
-      
-      if (!mapInstance) {
-        console.error('Failed to create map instance');
-        setLoadError('Failed to create map. Please try again later.');
-        return;
-      }
-      
-      googleMapRef.current = mapInstance;
-
-      // Add event listeners for map movements
-      const map = googleMapRef.current;
-      if (map) {
-        // Add event listeners for detecting map changes
-        const mapChangeEvents = ['dragend', 'zoom_changed', 'idle'];
-        
-        const eventListeners = mapChangeEvents.map(eventName => {
-          const listener = map.addListener(eventName, () => {
-            // Only send events after initial loading
-            if (eventName === 'idle' && isInitializingRef.current) {
-              isInitializingRef.current = false;
-              return;
-            }
-            
-            handleMapChange(map);
-          });
-          return listener;
-        });
-        
-        // If we have real listings, use those, otherwise use dummy listings
-        if (listings.length > 0) {
-          // Add markers for all listings
-          markersRef.current = addListingMarkers(googleMapRef.current, listings);
-        } else {
-          // Create dummy listings with coordinates near the center for demonstration
-          const dummyListings = Array(8).fill().map((_, i) => ({
-            id: `dummy-${i}`,
-            title: locationName ? `${locationName} Accommodation ${i + 1}` : `Accommodation ${i + 1}`,
-            pricePerNight: { price: 200 + (i * 20), currency: 'CHF' },
-            location: {
-              coordinates: [
-                mapCenter.lng + (Math.random() * 0.1 - 0.05), // lng - longitude is first in GeoJSON
-                mapCenter.lat + (Math.random() * 0.1 - 0.05)  // lat - latitude is second in GeoJSON
-              ]
-            }
-          }));
-          
-          // Add markers for dummy listings
-          markersRef.current = addListingMarkers(googleMapRef.current, dummyListings);
         }
+      }, 600); // Moderate debounce time
+    };
 
-        // Clean up function
-        return () => {
-          // Remove event listeners
-          if (window.google && window.google.maps) {
-            eventListeners.forEach(listener => {
-              try {
-                window.google.maps.event.removeListener(listener);
-              } catch (error) {
-                console.error('Error removing map listener:', error);
-              }
-            });
-          }
-          
-          // Clean up markers
-          if (markersRef.current) {
-            markersRef.current.forEach(marker => {
-              try {
-                marker.setMap(null);
-              } catch (error) {
-                console.error('Error removing marker:', error);
-              }
-            });
-          }
-        };
+    loadGoogleMapsScript();
+
+    // Cleanup
+    return () => {
+      if (mapChangeTimeoutRef.current) {
+        clearTimeout(mapChangeTimeoutRef.current);
       }
-    } catch (error) {
-      console.error('Error setting up map:', error);
-      setLoadError(error.message || 'Error setting up map');
-    }
-  }, [isLoaded, mapCenter]);
+    };
+  }, [center, listings, locationName, onMapChange]);
 
   // Update markers when listings change
   useEffect(() => {
-    if (!isLoaded || loadError || !googleMapRef.current) return;
-    
-    try {
-      const map = googleMapRef.current;
-      if (!map) return;
-
+    if (mapInstance.current && listings && listings.length > 0) {
       // Clear existing markers
-      if (markersRef.current) {
-        markersRef.current.forEach(marker => {
-          try {
-            marker.setMap(null);
-          } catch (error) {
-            console.error('Error removing marker:', error);
+      if (markersRef.current.length > 0) {
+        markersRef.current.forEach(marker => marker.setMap(null));
+        markersRef.current = [];
+      }
+
+      // Add new markers
+      listings.forEach(listing => {
+        if (!listing.location || !listing.location.coordinates) return;
+
+        const position = {
+          lat: listing.location.coordinates[1],
+          lng: listing.location.coordinates[0]
+        };
+
+        const marker = new window.google.maps.Marker({
+          position,
+          map: mapInstance.current,
+          title: listing.title || 'Accommodation',
+          icon: {
+            path: window.google.maps.SymbolPath.CIRCLE,
+            scale: 8,
+            fillColor: '#B4A481',
+            fillOpacity: 0.7,
+            strokeWeight: 1,
+            strokeColor: '#ffffff'
           }
         });
-      }
 
-      // Add new markers if listings exist
-      if (listings && listings.length > 0) {
-        markersRef.current = addListingMarkers(map, listings);
-      }
-    } catch (error) {
-      console.error('Error updating markers:', error);
+        // Add click event
+        marker.addListener('click', () => {
+          const infoWindow = new window.google.maps.InfoWindow({
+            content: `
+              <div style="max-width: 200px; font-family: Arial, sans-serif;">
+                <h3 style="margin: 0 0 5px; font-size: 16px;">${listing.title || 'Accommodation'}</h3>
+                <p style="margin: 0 0 5px; font-size: 14px;">
+                  ${listing.pricePerNight ? `${listing.pricePerNight.price} ${listing.pricePerNight.currency}/night` : ''}
+                </p>
+                <p style="margin: 0; font-size: 12px;">
+                  ${listing.capacity ? `${listing.capacity.people} guests, ${listing.capacity.dogs} dogs` : ''}
+                </p>
+              </div>
+            `
+          });
+          infoWindow.open(mapInstance.current, marker);
+        });
+
+        markersRef.current.push(marker);
+      });
     }
-  }, [listings, isLoaded, loadError]);
-
-  // If there's an error loading the map or API key issues, show fallback
-  if (loadError || !import.meta.env.VITE_GOOGLE_MAPS_API_KEY) {
-    return (
-      <div className="h-[calc(100vh-70px)] w-full rounded-lg mt-0 bg-gray-100 flex flex-col items-center justify-center">
-        <div className="text-center p-6">
-          <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
-              <MapPin className="w-8 h-8 text-gray-400" />
-            </div>
-          </div>
-          <h3 className="text-xl font-medium text-gray-700 mb-2">Map temporarily unavailable</h3>
-          <p className="text-gray-500 mb-4 max-w-md">
-            {loadError || "The map can't be displayed right now. You can still browse accommodations on the left."}
-          </p>
-          
-          {/* List a few sample locations */}
-          <div className="mt-6 text-left max-w-xs mx-auto">
-            <h4 className="font-medium text-gray-700 mb-2">Popular destinations:</h4>
-            <ul className="space-y-2">
-              <li>
-                <a href="/search?location=Zurich" className="text-brand hover:underline">
-                  Zurich, Switzerland
-                </a>
-              </li>
-              <li>
-                <a href="/search?location=Lucerne" className="text-brand hover:underline">
-                  Lucerne, Switzerland
-                </a>
-              </li>
-              <li>
-                <a href="/search?location=Zermatt" className="text-brand hover:underline">
-                  Zermatt, Switzerland
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  }, [listings]);
 
   return (
-    <div 
-      ref={mapRef} 
-      className="h-[calc(100vh-70px)] w-full rounded-lg mt-0"
-    />
+    <div className="h-full relative">
+      <div ref={mapRef} className="w-full h-full rounded-lg"></div>
+      {!isLoaded && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-50 rounded-lg">
+          <div className="text-center">
+            <div className="w-8 h-8 border-4 border-brand border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+            <p className="text-sm font-medium text-gray-600">{t('Loading map...')}</p>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
