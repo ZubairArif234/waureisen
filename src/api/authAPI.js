@@ -117,10 +117,28 @@ export const getProviderProfile = async () => {
 
 // Update user profile
 // Update this function to use the correct endpoint
+// Update this function to properly format the data
 export const updateUserProfile = async (userData) => {
   try {
-    console.log('Sending profile update:', userData);
-    const response = await API.put('/users/profile', userData);
+    // Make a copy of the data to avoid modifying the original
+    const dataToSend = { ...userData };
+    
+    // Handle profile picture separately if it's a File object
+    if (dataToSend.profilePicture instanceof File) {
+      // In a real app, you'd use FormData to upload the image
+      // For now, we'll just remove it to prevent JSON serialization issues
+      delete dataToSend.profilePicture;
+    }
+    
+    console.log('Sending profile update:', dataToSend);
+    
+    // Ensure we're sending proper JSON with the correct Content-Type header
+    const response = await API.put('/users/profile', dataToSend, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
     return response.data;
   } catch (error) {
     console.error('Error updating profile:', error);

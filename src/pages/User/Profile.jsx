@@ -36,13 +36,17 @@ const Profile = () => {
     const fetchUserProfile = async () => {
       try {
         setIsLoading(true);
+        // Get user ID from localStorage or context
         const token = localStorage.getItem('token');
         if (!token) {
           throw new Error('No authentication token found');
         }
         
-        // No need to extract user ID, just call the API
-        const userData = await getUserProfile();
+        // Decode token to get user ID
+        const tokenData = JSON.parse(atob(token.split('.')[1]));
+        const userId = tokenData.id;
+        
+        const userData = await getUserProfile(userId);
         
         // Map backend data to component state
         setProfileData({
@@ -161,18 +165,14 @@ const Profile = () => {
     }
   };
 
+  // In the handleSubmit function
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     try {
       setIsLoading(true);
       
-      // Get user ID from token
-      const token = localStorage.getItem('token');
-      const tokenData = JSON.parse(atob(token.split('.')[1]));
-      const userId = tokenData.id;
-      
-      // Prepare data for API - include ALL fields from the form
+      // Create a clean copy of the data to send
       const updateData = {
         firstName: profileData.firstName,
         lastName: profileData.lastName,
@@ -194,24 +194,28 @@ const Profile = () => {
           country: 'N/A',
           expiryDate: 'N/A'
         },
-        // Format dogs array for backend
+        // Format dogs array for backend - remove frontend-specific IDs
         dogs: profileData.dogs.map(dog => ({
           name: dog.name,
           gender: dog.gender
+        })),
+        // Format travellers array for backend - remove frontend-specific IDs
+        travellers: profileData.travellers.map(traveller => ({
+          name: traveller.name,
+          gender: traveller.gender,
+          relationship: traveller.relationship
         }))
       };
       
-      // If profile picture was updated
-      if (profileData.profilePicture && typeof profileData.profilePicture !== 'string') {
-        // In a real app, you'd upload the image to a server/cloud storage
-        // and get back a URL to store in the database
+      // If profile picture was updated and is a string (URL), include it
+      if (previewImage && typeof previewImage === 'string') {
         updateData.profilePicture = previewImage;
       }
       
-      console.log('Sending update data:', updateData); // Add logging to debug
+      console.log('Sending update data:', updateData);
       
-      const result = await updateUserProfile(userId, updateData);
-      console.log('Update result:', result); // Add logging to debug
+      const result = await updateUserProfile(updateData);
+      console.log('Update result:', result);
       
       setIsEditing(false);
       // Show success message or notification
