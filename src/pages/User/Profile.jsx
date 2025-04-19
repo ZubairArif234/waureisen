@@ -36,17 +36,13 @@ const Profile = () => {
     const fetchUserProfile = async () => {
       try {
         setIsLoading(true);
-        // Get user ID from localStorage or context
         const token = localStorage.getItem('token');
         if (!token) {
           throw new Error('No authentication token found');
         }
         
-        // Decode token to get user ID
-        const tokenData = JSON.parse(atob(token.split('.')[1]));
-        const userId = tokenData.id;
-        
-        const userData = await getUserProfile(userId);
+        // No need to extract user ID, just call the API
+        const userData = await getUserProfile();
         
         // Map backend data to component state
         setProfileData({

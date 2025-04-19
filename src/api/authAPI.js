@@ -93,6 +93,7 @@ export const adminSignup = async (adminData) => {
 };
 
 // Get user profile
+// Update this function to use the new endpoint
 export const getUserProfile = async () => {
   try {
     const response = await API.get('/users/profile');
@@ -115,12 +116,14 @@ export const getProviderProfile = async () => {
 };
 
 // Update user profile
-export const updateUserProfile = async (profileData) => {
+// Update this function to use the correct endpoint
+export const updateUserProfile = async (userData) => {
   try {
-    const response = await API.put('/users/profile', profileData);
+    console.log('Sending profile update:', userData);
+    const response = await API.put('/users/profile', userData);
     return response.data;
   } catch (error) {
-    console.error('Error updating user profile:', error);
+    console.error('Error updating profile:', error);
     throw error;
   }
 };
