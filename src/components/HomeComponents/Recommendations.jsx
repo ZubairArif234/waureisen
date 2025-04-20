@@ -3,6 +3,7 @@ import AccommodationCard from './AccommodationCard';
 import { useLanguage } from '../../utils/LanguageContext';
 import API from '../../api/config';
 import { getAllListings } from '../../api/listingAPI';
+import { fetchInterhomePrices } from '../../api/interhomeAPI'; // Import the price fetching function
 
 const RecommendationsSection = ({ title, listings }) => {
   return (
@@ -15,9 +16,10 @@ const RecommendationsSection = ({ title, listings }) => {
               key={listing._id}
               id={listing._id}
               image={listing.images && listing.images.length > 0 ? listing.images[0] : 'https://via.placeholder.com/300x200?text=No+Image'}
-              price={listing.pricePerNight?.price || 0}
+              price={listing.dynamicPrice || listing.pricePerNight?.price || 0}
               location={`${listing.listingType} in ${listing.location?.address || 'Unknown Location'}`}
               provider={listing.provider || 'Waureisen'}
+              pricePerNight={listing.dynamicPrice ? { price: listing.dynamicPrice, currency: 'CHF' } : listing.pricePerNight}
             />
           ))
         ) : (
@@ -39,11 +41,46 @@ const Recommendations = () => {
       try {
         setLoading(true);
         const data = await getAllListings();
-        setAllListings(data);
+        
+        // Fetch prices for Interhome listings
+        const listingsWithPrices = await Promise.all(
+          data.map(async (listing) => {
+            // Only fetch prices for Interhome listings
+            if (listing.source?.name === 'interhome' && listing.Code) {
+              try {
+                // Get today's date in YYYY-MM-DD format
+                const today = new Date();
+                const formattedDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+                
+                // Fetch price for a 7-day stay starting today with 2 guests
+                const priceData = await fetchInterhomePrices({
+                  accommodationCode: listing.Code,
+                  checkInDate: formattedDate,
+                  pax: 2,
+                  duration: 7,
+                  los: true
+                });
+                
+                // Add dynamic price to the listing if available
+                if (priceData && priceData.price) {
+                  return {
+                    ...listing,
+                    dynamicPrice: priceData.price
+                  };
+                }
+              } catch (priceError) {
+                console.warn(`Could not fetch price for ${listing.Code}: ${priceError.message}`);
+              }
+            }
+            return listing;
+          })
+        );
+        
+        setAllListings(listingsWithPrices);
+        setLoading(false);
       } catch (err) {
         console.error('Error fetching listings:', err);
-        setError('Failed to load recommendations');
-      } finally {
+        setError(err.message);
         setLoading(false);
       }
     };
@@ -51,63 +88,20 @@ const Recommendations = () => {
     fetchListings();
   }, []);
 
-  // Create different sections with filtered listings
-  const getTopRecommendations = () => {
-    // You could implement logic to filter top recommendations
-    // For now, just return the first 3 listings
-    return allListings.slice(0, 3);
-  };
+  // Filter listings for different sections
+  const featuredListings = allListings.slice(0, 6);
+  const newListings = allListings.slice(6, 12);
+  const popularListings = allListings.slice(12, 18);
 
-  const getPopularAccommodations = () => {
-    // You could implement logic to filter popular accommodations
-    // For now, just return listings 3-6
-    return allListings.slice(3, 6);
-  };
-
-  const getExclusiveFinds = () => {
-    // You could implement logic to filter exclusive finds
-    // For now, just return listings 6-9
-    return allListings.slice(6, 9);
-  };
-
-  if (loading) {
-    return (
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="flex justify-center items-center h-64">
-          <div className="w-8 h-8 border-4 border-gray-200 border-t-brand rounded-full animate-spin"></div>
-        </div>
-      </section>
-    );
-  }
-
-  if (error) {
-    return (
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center text-red-500">{error}</div>
-      </section>
-    );
-  }
-
-  const sections = [
-    { title: t('our_top_recommendations'), listings: getTopRecommendations() },
-    { title: t('popular_accommodations'), listings: getPopularAccommodations() },
-    { title: t('exclusive_finds'), listings: getExclusiveFinds() }
-  ];
+  if (loading) return <div className="text-center py-10">Loading recommendations...</div>;
+  if (error) return <div className="text-center py-10 text-red-500">Error: {error}</div>;
 
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-      {sections.map((section, index) => (
-        section.listings && section.listings.length > 0 ? (
-          <RecommendationsSection key={index} title={section.title} listings={section.listings} />
-        ) : null
-      ))}
-      
-      {allListings.length === 0 && (
-        <div className="text-center py-10">
-          <p className="text-gray-500">{t('no_accommodations_available')}</p>
-        </div>
-      )}
-    </section>
+    <div className="container mx-auto px-4 py-12">
+      <RecommendationsSection title={t('featured_accommodations')} listings={featuredListings} />
+      <RecommendationsSection title={t('new_accommodations')} listings={newListings} />
+      <RecommendationsSection title={t('popular_accommodations')} listings={popularListings} />
+    </div>
   );
 };
 
