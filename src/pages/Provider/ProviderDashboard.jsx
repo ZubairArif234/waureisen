@@ -1,5 +1,3 @@
-
- 
  import React, { useState, useEffect } from 'react';
  import { useNavigate, Link } from 'react-router-dom';
  import { ArrowLeft, BarChart2, TrendingUp, Users, Calendar, Briefcase, DollarSign, Award, Eye, CreditCard, MessageSquare } from 'lucide-react';
@@ -11,14 +9,16 @@
  import s2 from '../../assets/s2.png';
  import i3 from '../../assets/magazine.jpg';
  import { useLanguage } from '../../utils/LanguageContext';
- import { 
-   getProviderDashboardStats, 
-   getProviderBookings,
-   getProviderListings 
- } from '../../utils/apiClient';
  import { isAuthenticated, getCurrentProvider, setAuthHeader } from '../../utils/authService';
  import BookingChart from '../../components/Shared/BookingChart';
  import RevenueChart from '../../components/Shared/RevenueChart';
+ import { 
+  getProviderDashboardStats, 
+  getProviderBookings,
+  getProviderListings 
+} from '../../api/providerAPI';
+
+
  
  // StatCard Component
  const StatCard = ({ icon: Icon, title, value, change, changeType }) => {
@@ -139,116 +139,117 @@
      bookings: []
    });
    
-   useEffect(() => {
-     // Check if authenticated
-     if (!isAuthenticated()) {
-       console.log('Not authenticated, redirecting to login');
-       navigate('/login');
-       return;
-     }
- 
-     // Get provider details to verify further
-     const provider = getCurrentProvider();
-     if (!provider) {
-       console.log('Provider data not found, redirecting to login');
-       navigate('/login');
-       return;
-     }
- 
-     console.log('Provider authenticated:', provider.email || provider.username);
-     
-     // Force set the authorization header before making any requests
-     setAuthHeader();
- 
-     // Fetch dashboard data
-     const fetchDashboardData = async () => {
-       setIsLoading(true);
-       setError(null);
-       
-       try {
-         console.log('Fetching dashboard data with timeRange:', timeRange);
-         
-         // Make sure auth header is set again right before the request
-         setAuthHeader();
-         
-         // Fetch dashboard stats
-         const stats = await getProviderDashboardStats(timeRange);
-         console.log('Dashboard stats received:', stats);
-         setDashboardStats(stats);
-         
-         // Process chart data if available
-         if (stats && stats.charts) {
-           // Create data for revenue chart
-           const revenueData = Array.isArray(stats.charts.revenue) 
-             ? stats.charts.revenue.map((value, index) => ({
-                 date: `Day ${index + 1}`,
-                 revenue: value
-               }))
-             : [];
-             
-           // Create data for bookings chart
-           const bookingData = Array.isArray(stats.charts.bookings)
-             ? stats.charts.bookings.map((value, index) => ({
-                 date: `Day ${index + 1}`,
-                 bookings: value
-               }))
-             : [];
-             
-           setChartData({
-             revenue: revenueData,
-             bookings: bookingData
-           });
-         }
-         
-         // Fetch recent bookings
-         console.log('Fetching bookings data...');
-         setAuthHeader();  // Set auth header again
-         const bookingsData = await getProviderBookings('all', 5);
-         console.log('Bookings data received:', bookingsData);
-         
-         // Transform booking data
-         if (Array.isArray(bookingsData)) {
-           const formattedBookings = bookingsData.map(booking => ({
-             id: booking.id || booking._id || `booking-${Math.random().toString(36).substring(2, 9)}`,
-             date: booking.createdAt ? new Date(booking.createdAt).toLocaleDateString('en-US', { 
-               month: 'short', day: 'numeric', year: 'numeric' 
-             }) : 'N/A',
-             guest: booking.user?.username || booking.user?.firstName + ' ' + booking.user?.lastName || 'Guest',
-             property: booking.listing?.title || 'Property',
-             duration: booking.checkInDate && booking.checkOutDate 
-               ? Math.ceil((new Date(booking.checkOutDate) - new Date(booking.checkInDate)) / (1000 * 60 * 60 * 24)) 
-               : 1,
-             amount: booking.totalPrice || 0
-           }));
-           
-           setRecentBookings(formattedBookings);
-         }
-         
-         // Fetch listings
-         console.log('Fetching provider listings...');
-         setAuthHeader();  // Set auth header again
-         const listingsData = await getProviderListings();
-         console.log('Listings data received:', listingsData);
-         setListings(Array.isArray(listingsData) ? listingsData : []);
-         
-       } catch (err) {
-         console.error('Error fetching dashboard data:', err);
-         if (err.response) {
-           console.error('Error response data:', err.response.data);
-           console.error('Error response status:', err.response.status);
-           console.error('Error response headers:', err.response.headers);
-         } else if (err.request) {
-           console.error('Request was made but no response received', err.request);
-         } else {
- console.error('Error setting up request', err.message);
-}
-setError('Failed to load dashboard data. Please try again later.');
-} finally {
-setIsLoading(false);
-}
-};
+   // Replace the useEffect in ProviderDashboard.jsx
+useEffect(() => {
+  // Check if authenticated
+  if (!isAuthenticated()) {
+    console.log('Not authenticated, redirecting to login');
+    navigate('/login');
+    return;
+  }
 
-fetchDashboardData();
+  // Get provider details to verify further
+  const provider = getCurrentProvider();
+  if (!provider) {
+    console.log('Provider data not found, redirecting to login');
+    navigate('/login');
+    return;
+  }
+
+  console.log('Provider authenticated:', provider.email || provider.username);
+  
+  // Force set the authorization header before making any requests
+  setAuthHeader();
+
+  // Fetch dashboard data
+  const fetchDashboardData = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      console.log('Fetching dashboard data with timeRange:', timeRange);
+      
+      // Make sure auth header is set again right before the request
+      setAuthHeader();
+      
+      // Fetch dashboard stats from providerAPI instead of using getProviderDashboardStats
+      const stats = await getProviderDashboardStats(timeRange);
+      console.log('Dashboard stats received:', stats);
+      setDashboardStats(stats);
+      
+      // Process chart data if available
+      if (stats && stats.charts) {
+        // Create data for revenue chart
+        const revenueData = Array.isArray(stats.charts.revenue) 
+          ? stats.charts.revenue.map((value, index) => ({
+              date: `Day ${index + 1}`,
+              revenue: value
+            }))
+          : [];
+          
+        // Create data for bookings chart
+        const bookingData = Array.isArray(stats.charts.bookings)
+          ? stats.charts.bookings.map((value, index) => ({
+              date: `Day ${index + 1}`,
+              bookings: value
+            }))
+          : [];
+          
+        setChartData({
+          revenue: revenueData,
+          bookings: bookingData
+        });
+      }
+      
+      // Fetch recent bookings using providerAPI
+      console.log('Fetching bookings data...');
+      setAuthHeader();  // Set auth header again
+      const bookingsData = await getProviderBookings('all', 5);
+      console.log('Bookings data received:', bookingsData);
+      
+      // Transform booking data
+      if (Array.isArray(bookingsData)) {
+        const formattedBookings = bookingsData.map(booking => ({
+          id: booking.id || booking._id || `booking-${Math.random().toString(36).substring(2, 9)}`,
+          date: booking.createdAt ? new Date(booking.createdAt).toLocaleDateString('en-US', { 
+            month: 'short', day: 'numeric', year: 'numeric' 
+          }) : 'N/A',
+          guest: booking.user?.username || booking.user?.firstName + ' ' + booking.user?.lastName || 'Guest',
+          property: booking.listing?.title || 'Property',
+          duration: booking.checkInDate && booking.checkOutDate 
+            ? Math.ceil((new Date(booking.checkOutDate) - new Date(booking.checkInDate)) / (1000 * 60 * 60 * 24)) 
+            : 1,
+          amount: booking.totalPrice || 0
+        }));
+        
+        setRecentBookings(formattedBookings);
+      }
+      
+      // Fetch listings
+      console.log('Fetching provider listings...');
+      setAuthHeader();  // Set auth header again
+      const listingsData = await getProviderListings();
+      console.log('Listings data received:', listingsData);
+      setListings(Array.isArray(listingsData) ? listingsData : []);
+      
+    } catch (err) {
+      console.error('Error fetching dashboard data:', err);
+      if (err.response) {
+        console.error('Error response data:', err.response.data);
+        console.error('Error response status:', err.response.status);
+        console.error('Error response headers:', err.response.headers);
+      } else if (err.request) {
+        console.error('Request was made but no response received', err.request);
+      } else {
+        console.error('Error setting up request', err.message);
+      }
+      setError('Failed to load dashboard data. Please try again later.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  fetchDashboardData();
 }, [timeRange, navigate]);
 
 // Mock data for listings grid (still using mock images until file upload integration)

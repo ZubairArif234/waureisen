@@ -196,7 +196,7 @@ export const updateProviderProfile = (updatedData) => {
   return null;
 };
 
-// Set authorization header for all requests
+
 export const setAuthHeader = () => {
   const token = getToken();
   if (token) {

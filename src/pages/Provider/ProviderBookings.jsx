@@ -5,8 +5,8 @@ import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
 import avatar from '../../assets/avatar.png';
 import { useLanguage } from '../../utils/LanguageContext';
-import { getProviderBookings } from '../../utils/apiClient';
 import API from '../../api/config';
+import { getProviderBookings, acceptBooking, cancelBooking } from '../../api/providerAPI';
 
 // Status Badge Component
 const StatusBadge = ({ status }) => {
@@ -190,28 +190,29 @@ const ProviderBookings = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Fetch bookings when tab changes or on initial load
-  useEffect(() => {
-    const fetchBookings = async () => {
-      setIsLoading(true);
-      setError(null);
+
       
-      try {
-        // Map UI tab status to API status parameter
-        const statusParam = activeTab === 'all' ? '' : activeTab;
-        const response = await getProviderBookings(statusParam);
+    useEffect(() => {
+      const fetchBookings = async () => {
+        setIsLoading(true);
+        setError(null);
         
-        setBookings(response);
-      } catch (err) {
-        console.error("Error fetching bookings:", err);
-        setError("Failed to load bookings. Please try again.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchBookings();
-  }, [activeTab]);
+        try {
+          // Map UI tab status to API status parameter
+          const statusParam = activeTab === 'all' ? '' : activeTab;
+          const response = await getProviderBookings(statusParam);
+          
+          setBookings(response);
+        } catch (err) {
+          console.error("Error fetching bookings:", err);
+          setError("Failed to load bookings. Please try again.");
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      
+      fetchBookings();
+    }, [activeTab]);
 
   const handleMessage = (bookingId) => {
     navigate(`/provider/messages?booking=${bookingId}`);
@@ -222,7 +223,7 @@ const ProviderBookings = () => {
       setIsLoading(true);
       
       // API call to accept booking
-      const response = await API.put(`/providers/bookings/${bookingId}/accept`);
+      const response = await acceptBooking(bookingId);
       
       // Update local state with the updated booking
       setBookings(prevBookings => 
@@ -247,7 +248,7 @@ const ProviderBookings = () => {
       setIsLoading(true);
       
       // API call to cancel booking
-      const response = await API.put(`/providers/bookings/${bookingId}/cancel`);
+      const response = await cancelBooking(bookingId);
       
       // Update local state with the canceled booking
       setBookings(prevBookings => 

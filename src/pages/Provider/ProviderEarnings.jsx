@@ -4,6 +4,7 @@ import { ArrowLeft, Download, Filter, Calendar, CreditCard, DollarSign, Building
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
 import { useLanguage } from '../../utils/LanguageContext';
+import { getProviderEarnings, getProviderTransactions } from '../../api/providerAPI';
 
 // EarningsSummaryCard Component
 const EarningsSummaryCard = ({ title, amount, subtitle, icon: Icon, color }) => {
@@ -311,6 +312,25 @@ const ProviderEarnings = () => {
       isDefault: false
     }
   ]);
+
+  
+  useEffect(() => {
+    const fetchEarningsData = async () => {
+      try {
+        const earningsData = await getProviderEarnings(timeRange);
+        setEarningsSummary(earningsData);
+        
+        const transactionsData = await getProviderTransactions({ 
+          type: transactionType !== 'all' ? transactionType : undefined
+        });
+        setTransactions(transactionsData);
+      } catch (error) {
+        console.error('Error fetching earnings data:', error);
+      }
+    };
+    
+    fetchEarningsData();
+  }, [timeRange, transactionType]);
   
   // Filter transactions based on time range and type
   const filteredTransactions = transactions.filter(transaction => {
