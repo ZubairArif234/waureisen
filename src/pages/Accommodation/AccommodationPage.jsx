@@ -116,7 +116,9 @@ const AccommodationPage = () => {
     dogs: 1
   });
   
-  // Add isPriceLoading state
+  // Add maxGuests state to track the maximum allowed guests
+  const [maxGuests, setMaxGuests] = useState(6); // Default to 6 if not specified
+  
   const [isPriceLoading, setIsPriceLoading] = useState(false);
   const [accommodation, setAccommodation] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -510,65 +512,69 @@ const AccommodationPage = () => {
           </div>
 
           {/* Right Column - Booking Card */}
-          <div className="md:w-[360px] w-full md:flex-shrink-0 md:ml-auto"> 
-            <div className="md:sticky md:top-24 bg-white rounded-lg border p-4">
-              <div className="mb-3">
-                {isPriceLoading ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin"></div>
-                    <span className="text-gray-500">Updating price...</span>
-                  </div>
-                ) : (
-                  <>
-                    <span className="md:text-2xl text-xl font-semibold">
-                      {accommodation?.pricePerNight?.originalPrice && (
-                        <span className="line-through text-gray-400 mr-2">
-                          {accommodation.pricePerNight.originalPrice} {accommodation.pricePerNight.currency || 'CHF'}
-                        </span>
-                      )}
-                      {accommodation?.pricePerNight?.price ? (
-                        `${accommodation.pricePerNight.price} ${accommodation.pricePerNight.currency || 'CHF'}`
-                      ) : (
-                        '240 CHF (default)'
-                      )}
-                    </span>
-                    <p className="text-gray-500 text-sm">{t('cost_per_night')}</p>
-                  </>
-                )}
+          <div className="md:w-[360px] w-full md:flex-shrink-0 md:ml-auto">
+            <div className="sticky top-24 bg-white border border-gray-200 rounded-xl shadow-md p-6">
+              {/* Price Display */}
+              <div className="flex items-baseline mb-6">
+                <span className="text-2xl font-semibold">
+                  {isPriceLoading ? (
+                    <div className="w-16 h-8 bg-gray-200 animate-pulse rounded"></div>
+                  ) : (
+                    `${accommodation?.pricePerNight?.price || 0} ${accommodation?.pricePerNight?.currency || 'CHF'}`
+                  )}
+                </span>
+                <span className="text-gray-600 ml-1">/ night</span>
               </div>
 
               {/* Date Picker */}
-              <div 
-                className="border rounded-lg p-3 mb-4 cursor-pointer"
-                onClick={() => setIsDatePickerOpen(true)}
-              >
-                <div className="grid grid-cols-2">
-                  <div>
-                    <p className="text-sm text-gray-500">{t('check_in')}</p>
-                    <p className="text-sm">{dateRange.start ? dateRange.start.toLocaleDateString() : '13/03/2024'}</p>
+              <div className="mb-4 relative">
+                <button
+                  onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
+                  className="w-full flex items-center justify-between border border-gray-300 rounded-lg p-3 text-left"
+                >
+                  <span className="text-sm">
+                    {dateRange.start && dateRange.end
+                      ? `${dateRange.start.toLocaleDateString()} - ${dateRange.end.toLocaleDateString()}`
+                      : t('select_dates')}
+                  </span>
+                  <ChevronDown className="h-5 w-5 text-gray-500" />
+                </button>
+                {isDatePickerOpen && (
+                  <div className="absolute z-10 mt-2 w-full">
+                    <DateRangePicker
+                      selectedRange={dateRange}
+                      onRangeChange={setDateRange}
+                      onClose={() => setIsDatePickerOpen(false)}
+                    />
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-500">{t('check_out')}</p>
-                    <p className="text-sm">{dateRange.end ? dateRange.end.toLocaleDateString() : '14/03/2024'}</p>
-                  </div>
-                </div>
+                )}
               </div>
 
               {/* Guest Selector */}
-              <div 
-                className="border rounded-lg p-3 mb-4 cursor-pointer flex justify-between items-center"
-                onClick={() => setIsGuestSelectorOpen(true)}
-              >
-                <div>
-                  <p className="text-sm text-gray-500">{t('guests')}</p>
-                  <p className="text-sm">{`${guests.people} people, ${guests.dogs} dog`}</p>
-                </div>
-                <ChevronDown className="w-5 h-5 text-gray-400" />
+              <div className="mb-6 relative">
+                <button
+                  onClick={() => setIsGuestSelectorOpen(!isGuestSelectorOpen)}
+                  className="w-full flex items-center justify-between border border-gray-300 rounded-lg p-3 text-left"
+                >
+                  <span className="text-sm">
+                    {guests.people} {guests.people === 1 ? t('guest') : t('guests')}, {guests.dogs} {guests.dogs === 1 ? t('dog') : t('dogs')}
+                  </span>
+                  <ChevronDown className="h-5 w-5 text-gray-500" />
+                </button>
+                {isGuestSelectorOpen && (
+                  <div className="absolute z-10 mt-2 w-full">
+                    <GuestSelector
+                      guests={guests}
+                      onChange={setGuests}
+                      onClose={() => setIsGuestSelectorOpen(false)}
+                      maxGuests={accommodation?.maxGuests || maxGuests} // Use the maxGuests state
+                      maxDogs={accommodation?.maxDogs || 2}
+                    />
+                  </div>
+                )}
               </div>
 
-              <button className="w-full bg-brand text-white py-3 rounded-lg hover:bg-brand/90 transition-colors">
-                {t('reserve')}
-              </button>
+              {/* ... rest of the booking card ... */}
             </div>
           </div>
         </div>
