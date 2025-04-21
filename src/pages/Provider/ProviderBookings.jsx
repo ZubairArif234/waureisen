@@ -192,27 +192,29 @@ const ProviderBookings = () => {
 
 
       
-    useEffect(() => {
-      const fetchBookings = async () => {
-        setIsLoading(true);
-        setError(null);
-        
-        try {
-          // Map UI tab status to API status parameter
-          const statusParam = activeTab === 'all' ? '' : activeTab;
-          const response = await getProviderBookings(statusParam);
-          
-          setBookings(response);
-        } catch (err) {
-          console.error("Error fetching bookings:", err);
-          setError("Failed to load bookings. Please try again.");
-        } finally {
-          setIsLoading(false);
-        }
-      };
+    // Update the useEffect in ProviderBookings.jsx to call getProviderBookings correctly
+useEffect(() => {
+  const fetchBookings = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Map UI tab status to API status parameter
+      const statusParam = activeTab === 'all' ? undefined : activeTab;
+      const response = await getProviderBookings({ status: statusParam });
       
-      fetchBookings();
-    }, [activeTab]);
+      console.log('Bookings fetched:', response); // Add this to debug
+      setBookings(response);
+    } catch (err) {
+      console.error("Error fetching bookings:", err);
+      setError("Failed to load bookings. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  fetchBookings();
+}, [activeTab]);
 
   const handleMessage = (bookingId) => {
     navigate(`/provider/messages?booking=${bookingId}`);

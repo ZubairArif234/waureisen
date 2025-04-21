@@ -4,61 +4,15 @@ import { ArrowLeft, Calendar as CalendarIcon, Filter, ChevronLeft, ChevronRight 
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
 import { useLanguage } from '../../utils/LanguageContext';
+import { 
+  getProviderListings, 
+  getProviderBookings,
+  getUnavailableDates,
+  blockDates
+} from '../../api/providerAPI';
 
 
-// Mock data for bookings and availability
-const MOCK_BOOKINGS = [
-  {
-    id: 'B1001',
-    listingId: '1',
-    listingTitle: 'Modern Studio in City Center',
-    guestName: 'John Doe',
-    checkIn: '2025-04-12',
-    checkOut: '2025-04-16',
-    status: 'confirmed',
-    guestCount: 2,
-    dogCount: 1
-  },
-  {
-    id: 'B1002',
-    listingId: '2',
-    listingTitle: 'Mountain View Chalet',
-    guestName: 'Alice Johnson',
-    checkIn: '2025-04-20',
-    checkOut: '2025-04-23',
-    status: 'pending',
-    guestCount: 4,
-    dogCount: 2
-  },
-  {
-    id: 'B1003',
-    listingId: '3',
-    listingTitle: 'Lakeside Apartment',
-    guestName: 'Robert Smith',
-    checkIn: '2025-05-05',
-    checkOut: '2025-05-10',
-    status: 'confirmed',
-    guestCount: 3,
-    dogCount: 1
-  }
-];
 
-// Mock listing data
-const MOCK_LISTINGS = [
-  { id: '1', title: 'Modern Studio in City Center' },
-  { id: '2', title: 'Mountain View Chalet' },
-  { id: '3', title: 'Lakeside Apartment' },
-  { id: '4', title: 'Cozy Cottage in the Woods' }
-];
-
-// Custom unavailable dates (e.g., for maintenance)
-const MOCK_UNAVAILABLE_DATES = [
-  { listingId: '1', date: '2025-04-10', reason: 'Maintenance' },
-  { listingId: '1', date: '2025-04-11', reason: 'Maintenance' },
-  { listingId: '2', date: '2025-05-01', reason: 'Personal Use' },
-  { listingId: '2', date: '2025-05-02', reason: 'Personal Use' },
-  { listingId: '2', date: '2025-05-03', reason: 'Personal Use' }
-];
 
 // Helper function to generate days for the calendar
 const generateCalendarDays = (year, month) => {
@@ -183,19 +137,38 @@ const Calendar = ({ currentDate, bookings, listings, unavailableDates, selectedL
   
   const renderCellContent = (day) => {
     const dateString = formatDate(day.date);
-    const bookingsForDay = getBookingsForDate(day.date);
-    const isUnavailable = isDateUnavailable(day.date);
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
     const isToday = formatDate(today) === dateString;
+    const isPastDate = day.date < today;
+    const bookingsForDay = getBookingsForDate(day.date);
+    const isBooked = bookingsForDay.length > 0;
+    const isUnavailable = isDateUnavailable(day.date);
+    
+    // Determine cell color class
+    let cellClass = '';
+    if (isPastDate) {
+      cellClass = 'bg-red-50';
+    } else if (isBooked) {
+      cellClass = 'bg-green-50';
+    } else if (isUnavailable) {
+      cellClass = 'bg-red-100';
+    } else if (isToday) {
+      cellClass = 'bg-blue-50 border border-blue-200';
+    }
     
     return (
-      <div className={`h-full w-full rounded-lg p-1 ${
-        isToday ? 'bg-blue-50 border border-blue-200' : ''
-      }`}>
+      <div 
+        className={`h-full w-full rounded-lg p-1 ${cellClass}`}
+        onClick={() => day.isCurrentMonth && !isPastDate && !isBooked && onDateClick(dateString)}
+      >
         <div className="text-right p-1">
           <span className={`text-sm ${
             day.isCurrentMonth 
-              ? isToday ? 'font-bold text-blue-600' : 'text-gray-900' 
+              ? isToday ? 'font-bold text-blue-600' 
+              : isPastDate ? 'text-red-400'
+              : 'text-gray-900' 
               : 'text-gray-400'
           }`}>
             {day.date.getDate()}
@@ -204,7 +177,7 @@ const Calendar = ({ currentDate, bookings, listings, unavailableDates, selectedL
         
         <div className="mt-1 space-y-1">
           {isUnavailable && (
-            <div className="h-5 rounded bg-gray-200 text-xs flex items-center justify-center text-gray-600 font-medium">
+            <div className="h-5 rounded bg-red-200 text-xs flex items-center justify-center text-red-600 font-medium">
               {t('unavailable')}
             </div>
           )}
@@ -212,7 +185,10 @@ const Calendar = ({ currentDate, bookings, listings, unavailableDates, selectedL
           {bookingsForDay.map((booking, index) => (
             <div 
               key={booking.id}
-              onClick={() => onBookingClick(booking)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onBookingClick(booking);
+              }}
               className={`text-xs p-1 rounded-sm truncate cursor-pointer ${
                 booking.status === 'confirmed' 
                   ? 'bg-green-100 text-green-800' 
@@ -413,22 +389,83 @@ const BookingDetailsModal = ({ booking, onClose }) => {
   );
 };
 
-// Block date modal
-const BlockDateModal = ({ isOpen, onClose, listings, selectedDate, onSave }) => {
+const BlockDateModal = ({ isOpen, onClose, listings, selectedDate, onSave, bookings }) => {
+  const { t } = useLanguage();
   const [selectedListing, setSelectedListing] = useState('');
   const [reason, setReason] = useState('maintenance');
   const [customReason, setCustomReason] = useState('');
-  const [startDate, setStartDate] = useState(selectedDate || '');
-  const [endDate, setEndDate] = useState(selectedDate || '');
+  
+  // Calculate minimum start date (today)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const minDate = today.toISOString().split('T')[0];
+  
+  const [startDate, setStartDate] = useState(selectedDate && new Date(selectedDate) >= today ? selectedDate : minDate);
+  const [endDate, setEndDate] = useState(selectedDate && new Date(selectedDate) >= today ? selectedDate : minDate);
+  
+  // Determine which dates are already booked for the selected listing
+  const [bookedDates, setBookedDates] = useState([]);
+  
+  useEffect(() => {
+    if (selectedListing && bookings) {
+      // Find all bookings for the selected listing
+      const listingBookings = bookings.filter(booking => 
+        booking.listingId === selectedListing
+      );
+      
+      // Extract all dates between check-in and check-out for each booking
+      const bookedDatesList = [];
+      listingBookings.forEach(booking => {
+        const checkIn = new Date(booking.checkIn);
+        const checkOut = new Date(booking.checkOut);
+        
+        for (let date = new Date(checkIn); date <= checkOut; date.setDate(date.getDate() + 1)) {
+          bookedDatesList.push(date.toISOString().split('T')[0]);
+        }
+      });
+      
+      setBookedDates(bookedDatesList);
+    } else {
+      setBookedDates([]);
+    }
+  }, [selectedListing, bookings]);
   
   useEffect(() => {
     if (selectedDate) {
-      setStartDate(selectedDate);
-      setEndDate(selectedDate);
+      const selectedDateObj = new Date(selectedDate);
+      if (selectedDateObj >= today) {
+        setStartDate(selectedDate);
+        setEndDate(selectedDate);
+      }
     }
   }, [selectedDate]);
   
+  // Validate selected dates against booked dates
+  const isDateRangeValid = () => {
+    if (!startDate || !endDate || !selectedListing) return false;
+    
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    // Check each date in the range
+    for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
+      const dateString = date.toISOString().split('T')[0];
+      
+      // Check if the date is already booked
+      if (bookedDates.includes(dateString)) {
+        return false;
+      }
+    }
+    
+    return true;
+  };
+  
   const handleSave = () => {
+    if (!isDateRangeValid()) {
+      alert(t('cannot_block_booked_dates'));
+      return;
+    }
+    
     const reasonText = reason === 'custom' ? customReason : reason;
     onSave({
       listingId: selectedListing,
@@ -470,7 +507,7 @@ const BlockDateModal = ({ isOpen, onClose, listings, selectedDate, onSave }) => 
               >
                 <option value="" disabled>{t('select_property')}</option>
                 {listings.map(listing => (
-                  <option key={listing.id} value={listing.id}>{listing.title}</option>
+                  <option key={listing.id || listing._id} value={listing.id || listing._id}>{listing.title}</option>
                 ))}
               </select>
             </div>
@@ -484,6 +521,7 @@ const BlockDateModal = ({ isOpen, onClose, listings, selectedDate, onSave }) => 
                   type="date"
                   id="startDate"
                   value={startDate}
+                  min={minDate}
                   onChange={(e) => setStartDate(e.target.value)}
                   className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                   required
@@ -538,6 +576,12 @@ const BlockDateModal = ({ isOpen, onClose, listings, selectedDate, onSave }) => 
                 />
               </div>
             )}
+            
+            {!isDateRangeValid() && selectedListing && startDate && endDate && (
+              <div className="text-red-600 text-sm">
+                {t('warning_dates_already_booked')}
+              </div>
+            )}
           </div>
           
           <div className="mt-6 flex justify-end gap-3">
@@ -549,9 +593,9 @@ const BlockDateModal = ({ isOpen, onClose, listings, selectedDate, onSave }) => 
             </button>
             <button
               onClick={handleSave}
-              disabled={!selectedListing || !startDate || !endDate || (reason === 'custom' && !customReason)}
+              disabled={!selectedListing || !startDate || !endDate || !isDateRangeValid() || (reason === 'custom' && !customReason)}
               className={`px-4 py-2 bg-brand text-white rounded-md text-sm font-medium ${
-                !selectedListing || !startDate || !endDate || (reason === 'custom' && !customReason)
+                !selectedListing || !startDate || !endDate || !isDateRangeValid() || (reason === 'custom' && !customReason)
                   ? 'opacity-50 cursor-not-allowed'
                   : 'hover:bg-brand/90'
               }`}
@@ -570,21 +614,94 @@ const ProviderCalendar = () => {
   const navigate = useNavigate();
   const [selectedListing, setSelectedListing] = useState('all');
   const [currentDate] = useState(new Date());
-  const [bookings, setBookings] = useState(MOCK_BOOKINGS);
-  const [unavailableDates, setUnavailableDates] = useState(MOCK_UNAVAILABLE_DATES);
+  const [bookings, setBookings] = useState([]);
+  const [activeTab, setActiveTab] = useState('all');
+  const [listings, setListings] = useState([]);
+  const [unavailableDates, setUnavailableDates] = useState([]);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
   const [selectedDateForBlock, setSelectedDateForBlock] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+
+  
+
+  useEffect(() => {
+    const fetchCalendarData = async () => {
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        // Get basic listings data
+        const listingsData = await getProviderListings();
+        setListings(listingsData);
+        
+        // Get basic bookings data
+        const bookingsData = await getProviderBookings({
+          status: activeTab !== 'all' ? activeTab : undefined,
+          listingId: selectedListing !== 'all' ? selectedListing : undefined
+        });
+        
+        // Transform bookings for calendar display
+        const formattedBookings = bookingsData.map(booking => ({
+          id: booking._id || booking.id,
+          checkIn: new Date(booking.checkInDate).toISOString().split('T')[0],
+          checkOut: new Date(booking.checkOutDate).toISOString().split('T')[0],
+          guestName: booking.user?.username || booking.user?.firstName + ' ' + booking.user?.lastName || 'Guest',
+          status: booking.status,
+          listingId: booking.listing?._id || booking.listing,
+          listingTitle: booking.listing?.title || 'Property',
+          guestCount: booking.capacity?.people || 1,
+          dogCount: booking.capacity?.dogs || 0
+        }));
+        
+        setBookings(formattedBookings);
+        
+        // Get unavailable dates
+        const unavailableDatesData = await getUnavailableDates({
+          listingId: selectedListing !== 'all' ? selectedListing : undefined
+        });
+        
+        // Transform unavailable dates for calendar display
+        const formattedUnavailableDates = unavailableDatesData.map(date => ({
+          date: typeof date.date === 'string' ? date.date : new Date(date.date).toISOString().split('T')[0],
+          listingId: date.listing?._id || date.listing,
+          reason: date.reason
+        }));
+        
+        setUnavailableDates(formattedUnavailableDates);
+        
+      } catch (err) {
+        console.error('Error fetching calendar data:', err);
+        setError('Failed to load calendar data. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchCalendarData();
+  }, [selectedListing, activeTab]);
   
   const handleOpenBlockModal = (date) => {
     setSelectedDateForBlock(date);
     setIsBlockModalOpen(true);
   };
   
-  const handleBlockDates = (blockData) => {
-    // In a real app, you would call an API to block these dates
-    console.log('Blocking dates:', blockData);
+  // Update the handleBlockDates function around line 345
+const handleBlockDates = async (blockData) => {
+  try {
+    setIsLoading(true);
     
+    // Call the API to block dates
+    await blockDates({
+      listingId: blockData.listingId,
+      startDate: blockData.startDate,
+      endDate: blockData.endDate,
+      reason: blockData.reason
+    });
+    
+    // Create entries for each day in the range to update local state
     const startDate = new Date(blockData.startDate);
     const endDate = new Date(blockData.endDate);
     const newUnavailableDates = [];
@@ -598,9 +715,78 @@ const ProviderCalendar = () => {
       });
     }
     
-    setUnavailableDates([...unavailableDates, ...newUnavailableDates]);
-    alert('Dates have been blocked successfully!');
-  };
+    // Update state with new unavailable dates
+    setUnavailableDates(prev => [...prev, ...newUnavailableDates]);
+    
+    alert(t('dates_blocked_successfully'));
+  } catch (error) {
+    console.error('Error blocking dates:', error);
+    alert(t('error_blocking_dates'));
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
+  // Add this before the main return statement
+if (isLoading && !bookings.length && !listings.length) {
+  return (
+    <div className="min-h-screen bg-white">
+      <Navbar />
+      
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 mt-20">
+        <div className="flex items-center gap-4 mb-8">
+          <button
+            onClick={() => navigate('/provider/dashboard')}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <ArrowLeft className="w-6 h-6 text-gray-600" />
+          </button>
+          <h1 className="text-3xl font-semibold text-gray-900">{t('calendar')}</h1>
+        </div>
+        
+        <div className="flex justify-center py-12">
+          <div className="w-12 h-12 border-4 border-gray-200 border-t-brand rounded-full animate-spin mb-4"></div>
+          <p className="text-gray-600 ml-3">{t('loading_calendar')}</p>
+        </div>
+      </main>
+      
+      <Footer />
+    </div>
+  );
+}
+
+if (error) {
+  return (
+    <div className="min-h-screen bg-white">
+      <Navbar />
+      
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 mt-20">
+        <div className="flex items-center gap-4 mb-8">
+          <button
+            onClick={() => navigate('/provider/dashboard')}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <ArrowLeft className="w-6 h-6 text-gray-600" />
+          </button>
+          <h1 className="text-3xl font-semibold text-gray-900">{t('calendar')}</h1>
+        </div>
+        
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+          <p>{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            {t('retry')}
+          </button>
+        </div>
+      </main>
+      
+      <Footer />
+    </div>
+  );
+}
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -621,16 +807,19 @@ const ProviderCalendar = () => {
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <CalendarIcon className="w-5 h-5 text-gray-400" />
-              <select
-                value={selectedListing}
-                onChange={(e) => setSelectedListing(e.target.value)}
-                className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand bg-white"
-              >
-                  <option value="all">{t('all_properties')}</option>
-                {MOCK_LISTINGS.map(listing => (
-                  <option key={listing.id} value={listing.id}>{listing.title}</option>
-                ))}
-              </select>
+              
+            <select
+              value={selectedListing}
+              onChange={(e) => setSelectedListing(e.target.value)}
+              className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand bg-white"
+            >
+              <option value="all">{t('all_properties')}</option>
+              {listings.map(listing => (
+                <option key={listing.id || listing._id} value={listing.id || listing._id}>
+                  {listing.title}
+                </option>
+              ))}
+            </select>
             </div>
             
             <button
@@ -643,15 +832,15 @@ const ProviderCalendar = () => {
         </div>
         
         <div className="mb-6">
-          <Calendar 
-            currentDate={currentDate}
-            bookings={bookings}
-            listings={MOCK_LISTINGS}
-            unavailableDates={unavailableDates}
-            selectedListing={selectedListing}
-            onBookingClick={(booking) => setSelectedBooking(booking)}
-            onDateClick={handleOpenBlockModal}
-          />
+        <Calendar 
+          currentDate={currentDate}
+          bookings={bookings}
+          listings={listings}
+          unavailableDates={unavailableDates}
+          selectedListing={selectedListing}
+          onBookingClick={(booking) => setSelectedBooking(booking)}
+          onDateClick={handleOpenBlockModal}
+        />
         </div>
         
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
@@ -753,7 +942,8 @@ const ProviderCalendar = () => {
       <BlockDateModal 
         isOpen={isBlockModalOpen}
         onClose={() => setIsBlockModalOpen(false)}
-        listings={MOCK_LISTINGS}
+        listings={listings}
+        bookings={bookings}
         selectedDate={selectedDateForBlock ? formatDate(selectedDateForBlock) : null}
         onSave={handleBlockDates}
       />

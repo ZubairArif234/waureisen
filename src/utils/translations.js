@@ -845,6 +845,15 @@ const translations = {
     'coming_soon': "Coming Soon",
     'no_campers_available': "No campers available at the moment",
 
+    'listing_deleted_successfully': "Listing deleted successfully",
+
+    'error_deleting_listing': "Error deleting listing",
+
+    'loading_dashboard': "Loading dashboard...",
+
+    'warning_dates_already_booked': 'Some selected dates are already booked and cannot be blocked.',
+    'cannot_block_booked_dates': 'Cannot block dates that are already booked.',
+    'unavailable': 'Unavailable',
 
   },
 
@@ -854,6 +863,16 @@ const translations = {
 
 
   de: {
+
+    'warning_dates_already_booked': 'Einige ausgewählte Daten sind bereits gebucht und können nicht blockiert werden.',
+    'cannot_block_booked_dates': 'Bereits gebuchte Daten können nicht blockiert werden.',
+    'unavailable': 'Nicht verfügbar',
+
+    'loading_dashboard': "Lade Dashboard...",
+
+    'error_deleting_listing': "Fehler beim Löschen des Inserats",
+
+    'listing_deleted_successfully': "Inserat erfolgreich gelöscht",
 
 
     'camper_not_found': "Wohnmobil nicht gefunden",

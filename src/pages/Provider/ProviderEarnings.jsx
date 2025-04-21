@@ -463,7 +463,7 @@ const ProviderEarnings = () => {
               </div>
             </div>
             
-            {/* Transactions Table */}
+            
             <TransactionsTable 
               transactions={filteredTransactions} 
               onDownloadInvoice={handleDownloadInvoice}
