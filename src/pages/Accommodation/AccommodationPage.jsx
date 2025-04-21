@@ -574,6 +574,7 @@ const AccommodationPage = () => {
                 )}
               </div>
 
+
               {/* Price Calculation */}
               <div className="mb-6">
                 <div className="flex justify-between mb-2">
@@ -581,17 +582,21 @@ const AccommodationPage = () => {
                     {accommodation?.pricePerNight?.price || 0} {accommodation?.pricePerNight?.currency || 'CHF'} x 7 nights
                   </span>
                   <span className="text-sm text-gray-700">
-                    {accommodation?.pricePerNight?.totalPrice || 0} {accommodation?.pricePerNight?.currency || 'CHF'}
+                    {(accommodation?.pricePerNight?.price * 7 || 0).toFixed(2)} {accommodation?.pricePerNight?.currency || 'CHF'}
                   </span>
                 </div>
                 <div className="flex justify-between mb-2">
-                  <span className="text-sm text-gray-700">{t('service_fee')}</span>
-                  <span className="text-sm text-gray-700">0 CHF</span>
+                  <span className="text-sm text-gray-700">{t('service_fee')} (2.9%)</span>
+                  <span className="text-sm text-gray-700">
+                    {(accommodation?.pricePerNight?.totalPrice * 0.029 || 0).toFixed(2)} {accommodation?.pricePerNight?.currency || 'CHF'}
+                  </span>
                 </div>
                 <div className="border-t border-gray-200 my-4"></div>
                 <div className="flex justify-between font-semibold">
                   <span>{t('total')}</span>
-                  <span>{accommodation?.pricePerNight?.totalPrice || 0} {accommodation?.pricePerNight?.currency || 'CHF'}</span>
+                  <span>
+                    {(accommodation?.pricePerNight?.totalPrice * 1.029 || 0).toFixed(2)} {accommodation?.pricePerNight?.currency || 'CHF'}
+                  </span>
                 </div>
               </div>
 
