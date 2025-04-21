@@ -19,7 +19,11 @@ const RecommendationsSection = ({ title, listings }) => {
               price={listing.dynamicPrice || listing.pricePerNight?.price || 0}
               location={`${listing.listingType} in ${listing.location?.address || 'Unknown Location'}`}
               provider={listing.provider || 'Waureisen'}
-              pricePerNight={listing.dynamicPrice ? { price: listing.dynamicPrice, currency: 'CHF' } : listing.pricePerNight}
+              pricePerNight={listing.dynamicPrice ? 
+                { price: listing.dynamicPrice, currency: 'CHF' } : 
+                listing.pricePerNight
+              }
+              weeklyPrice={listing.weeklyPrice}
             />
           ))
         ) : (
@@ -62,11 +66,25 @@ const Recommendations = () => {
                 });
                 
                 // Add dynamic price to the listing if available
-                if (priceData && priceData.price) {
-                  return {
-                    ...listing,
-                    dynamicPrice: priceData.price
-                  };
+                if (priceData && priceData.priceList && priceData.priceList.prices && priceData.priceList.prices.price) {
+                  const priceItems = priceData.priceList.prices.price;
+                  
+                  if (priceItems.length > 0) {
+                    // Get the first price item (should be for 7 days)
+                    const priceItem = priceItems[0];
+                    
+                    // Calculate the price per night by dividing the weekly price by 7
+                    const weeklyPrice = priceItem.price;
+                    const pricePerNight = Math.round(weeklyPrice / 7);
+                    
+                    console.log(`Listing ${listing.Code}: Weekly price ${weeklyPrice} CHF, nightly price ${pricePerNight} CHF`);
+                    
+                    return {
+                      ...listing,
+                      dynamicPrice: pricePerNight,
+                      weeklyPrice: weeklyPrice
+                    };
+                  }
                 }
               } catch (priceError) {
                 console.warn(`Could not fetch price for ${listing.Code}: ${priceError.message}`);
