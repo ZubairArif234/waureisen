@@ -574,7 +574,37 @@ const AccommodationPage = () => {
                 )}
               </div>
 
-              {/* ... rest of the booking card ... */}
+              {/* Price Calculation */}
+              <div className="mb-6">
+                <div className="flex justify-between mb-2">
+                  <span className="text-sm text-gray-700">
+                    {accommodation?.pricePerNight?.price || 0} {accommodation?.pricePerNight?.currency || 'CHF'} x 7 nights
+                  </span>
+                  <span className="text-sm text-gray-700">
+                    {accommodation?.pricePerNight?.totalPrice || 0} {accommodation?.pricePerNight?.currency || 'CHF'}
+                  </span>
+                </div>
+                <div className="flex justify-between mb-2">
+                  <span className="text-sm text-gray-700">{t('service_fee')}</span>
+                  <span className="text-sm text-gray-700">0 CHF</span>
+                </div>
+                <div className="border-t border-gray-200 my-4"></div>
+                <div className="flex justify-between font-semibold">
+                  <span>{t('total')}</span>
+                  <span>{accommodation?.pricePerNight?.totalPrice || 0} {accommodation?.pricePerNight?.currency || 'CHF'}</span>
+                </div>
+              </div>
+
+              {/* Reserve Button */}
+              <button 
+                className="w-full bg-brand text-white py-3 rounded-lg font-medium hover:bg-brand-dark transition-colors"
+                onClick={() => {
+                  // Handle reservation logic here
+                  alert('Booking functionality will be implemented soon!');
+                }}
+              >
+                {t('reserve')}
+              </button>
             </div>
           </div>
         </div>
