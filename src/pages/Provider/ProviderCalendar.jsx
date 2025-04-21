@@ -130,6 +130,8 @@ const Calendar = ({ currentDate, bookings, listings, unavailableDates, selectedL
   
   const isDateUnavailable = (date) => {
     const dateString = formatDate(date);
+    console.log('Checking if date is unavailable:', dateString, filteredUnavailableDates); // Debug log
+    
     return filteredUnavailableDates.some(unavailableDate => 
       unavailableDate.date === dateString
     );
@@ -663,12 +665,16 @@ const ProviderCalendar = () => {
           listingId: selectedListing !== 'all' ? selectedListing : undefined
         });
         
+        console.log('Unavailable dates from API:', unavailableDatesData); // Add this line for debugging
+        
         // Transform unavailable dates for calendar display
         const formattedUnavailableDates = unavailableDatesData.map(date => ({
           date: typeof date.date === 'string' ? date.date : new Date(date.date).toISOString().split('T')[0],
-          listingId: date.listing?._id || date.listing,
-          reason: date.reason
+          listingId: date.listing?._id || date.listing || date.listingId,
+          reason: date.reason || 'unavailable'
         }));
+        
+        console.log('Formatted unavailable dates:', formattedUnavailableDates); // Add this line for debugging
         
         setUnavailableDates(formattedUnavailableDates);
         
