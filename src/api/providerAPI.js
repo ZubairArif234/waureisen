@@ -135,17 +135,31 @@ export const getBookingUserDetails = async (bookingId) => {
   }
 };
 
-// Dashboard/Analytics functions
-export const getProviderStats = async (timeFrame = 'month') => {
+
+export const getProviderStats = async (timeRange = 'month') => {
   try {
     setAuthHeader();
     const response = await API.get('/providers/analytics', { 
-      params: { timeRange: timeFrame } 
+      params: { timeRange } 
     });
     return response.data;
   } catch (error) {
-    console.error('Error fetching provider stats:', error);
-    return null;
+    console.error('Error fetching provider analytics:', error);
+    
+    return {
+      timeRange,
+      performance: {
+        totalBookings: { current: 0, previous: 0 },
+        totalRevenue: { current: 0, previous: 0 },
+        occupancyRate: { current: 0, previous: 0 },
+        averageNightlyRate: { current: 0, previous: 0 }
+      },
+      charts: {
+        labels: [],
+        revenue: [],
+        bookings: []
+      }
+    };
   }
 };
 
