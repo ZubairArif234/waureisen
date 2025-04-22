@@ -28,7 +28,7 @@ import Footer from "../../components/Shared/Footer";
 import ImageGalleryModal from "../../components/Shared/ImageGalleryModal";
 import { useLanguage } from "../../utils/LanguageContext";
 import { getListingById } from "../../api/listingAPI";
-import { fetchInterhomePrices } from "../../api/interhomeAPI";
+import { fetchInterhomePrices, fetchInterhomeAvailability } from "../../api/interhomeAPI"; // Import fetchInterhomeAvailability
 import moment from "moment";
 
 const PlaceOffer = ({ icon: Icon, text, value }) => (
@@ -139,6 +139,7 @@ const AccommodationPage = () => {
   const [accommodation, setAccommodation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [availableDates, setAvailableDates] = useState([]); // Add state for available dates
 
   // Add function to fetch price for new dates
   const fetchPriceForDates = async (startDate) => {
@@ -209,6 +210,19 @@ const AccommodationPage = () => {
         console.log("Date from search:", dateFromSearch);
 
         const data = await getListingById(id);
+
+        // Fetch availability data if it's an Interhome listing
+        if (data.provider === "Interhome" && data.Code) {
+          try {
+            const availabilityData = await fetchInterhomeAvailability(data.Code);
+            if (availabilityData && availabilityData.availableDates) {
+              setAvailableDates(availabilityData.availableDates.map(d => d.checkInDate)); // Store only the dates
+            }
+          } catch (availabilityError) {
+            console.warn(`Failed to fetch Interhome availability for ${data.Code}:`, availabilityError);
+            // Optionally set an error state or handle this case
+          }
+        }
 
         // If we have price data from search results, use it
         if (priceFromSearch) {
@@ -650,6 +664,7 @@ const AccommodationPage = () => {
                       selectedRange={dateRange}
                       onRangeChange={setDateRange}
                       onClose={() => setIsDatePickerOpen(false)}
+                      availableDates={availableDates} // Pass available dates
                     />
                   </div>
                 )}
@@ -768,6 +783,7 @@ const AccommodationPage = () => {
             setIsDatePickerOpen(false);
           }
         }}
+        availableDates={availableDates} // Pass available dates
       />
 
       

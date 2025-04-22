@@ -1,10 +1,14 @@
 import React from 'react';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import moment from 'moment'; // Import moment for date comparison
 
-const Calendar = ({ month, year, selectedRange, onDateSelect }) => {
+const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates }) => { // Add availableDates prop
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDayOfMonth = new Date(year, month, 1).getDay();
   
+  // Parse availableDates strings into moment objects for comparison
+  const availableMoments = availableDates?.map(dateStr => moment(dateStr, 'YYYY-MM-DD'));
+
   const days = Array(daysInMonth).fill().map((_, i) => i + 1);
   const weeks = [];
   let week = Array(7).fill(null);
@@ -47,6 +51,18 @@ const Calendar = ({ month, year, selectedRange, onDateSelect }) => {
     return date.getTime() === selectedRange.end.getTime();
   };
 
+  const isDateAvailable = (day) => {
+    if (!availableMoments || availableMoments.length === 0) return true; // If no availability data, all dates are considered available
+    const currentDate = moment({ year, month, day });
+    
+    // Check if the current date falls within 7 days (inclusive) of any available start date
+    return availableMoments.some(availableMoment => {
+      const startDate = availableMoment;
+      const endDate = availableMoment.clone().add(7, 'days'); // 7 days inclusive means adding 6 days
+      return currentDate.isBetween(startDate, endDate, 'day', '[]'); // '[]' includes start and end dates
+    });
+  };
+
   return (
     <div className="bg-white rounded-lg shadow p-4">
       <div className="flex justify-between items-center mb-4">
@@ -62,14 +78,15 @@ const Calendar = ({ month, year, selectedRange, onDateSelect }) => {
           week.map((day, dayIndex) => (
             <button
               key={`${weekIndex}-${dayIndex}`}
-              disabled={!day}
-              onClick={() => day && onDateSelect(new Date(year, month, day))}
+              disabled={!day || !isDateAvailable(day)} // Disable if day is null OR not available
+              onClick={() => day && isDateAvailable(day) && onDateSelect(new Date(year, month, day))} // Only allow selection if available
               className={`
                 p-2 text-center text-sm rounded-full
-                ${!day ? 'invisible' : 'hover:bg-gray-100'}
-                ${isDateInRange(day) ? 'bg-brand/20' : ''}
-                ${isStartDate(day) ? 'bg-brand text-white hover:bg-brand' : ''}
-                ${isEndDate(day) ? 'bg-brand text-white hover:bg-brand' : ''}
+                ${!day ? 'invisible' : ''}
+                ${!isDateAvailable(day) ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-gray-100'} // Style disabled dates
+                ${isDateInRange(day) && isDateAvailable(day) ? 'bg-brand/20' : ''}
+                ${isStartDate(day) && isDateAvailable(day) ? 'bg-brand text-white hover:bg-brand' : ''}
+                ${isEndDate(day) && isDateAvailable(day) ? 'bg-brand text-white hover:bg-brand' : ''}
               `}
             >
               {day}
@@ -81,7 +98,7 @@ const Calendar = ({ month, year, selectedRange, onDateSelect }) => {
   );
 };
 
-const DateRangePicker = ({ isOpen, onClose, selectedRange, onRangeSelect }) => {
+const DateRangePicker = ({ isOpen, onClose, selectedRange, onRangeSelect, availableDates }) => { // Add availableDates prop
   if (!isOpen) return null;
 
   const today = new Date();
@@ -116,12 +133,14 @@ const DateRangePicker = ({ isOpen, onClose, selectedRange, onRangeSelect }) => {
             year={leftYear}
             selectedRange={selectedRange}
             onDateSelect={handleDateSelect}
+            availableDates={availableDates} // Pass availableDates down
           />
           <Calendar
             month={(leftMonth + 1) % 12}
             year={leftMonth === 11 ? leftYear + 1 : leftYear}
             selectedRange={selectedRange}
             onDateSelect={handleDateSelect}
+            availableDates={availableDates} // Pass availableDates down
           />
         </div>
 
