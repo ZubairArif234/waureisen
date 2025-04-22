@@ -17,8 +17,14 @@ const Payment = () => {
     paymentIntentId: "",
   });
   const getPaymentIntent = async () => {
+    if (!data?.pricePerNight?.price) return;
+  
+    const noOfDays = details?.noOfDays > 0 ? details.noOfDays : 1;
+    const pricePerNight = data.pricePerNight.price;
+  
+    const amount = (pricePerNight * noOfDays * 1.029);
     setLoading(true);
-    const res = await createPaymentIntent({ amount: 100 });
+    const res = await createPaymentIntent({ amount: Math.round(amount) , currency:details?.pricePerNight?.currency });
     console.log(res.data.clientSecret);
     setPaymentIntent({
       clientSecret: res.data.clientSecret,
@@ -28,9 +34,11 @@ const Payment = () => {
   };
 
   useEffect(() => {
+  
+    
     getPaymentIntent();
-  }, []);
-
+  }, [data, details]);
+  
   console.log(location);
 
   const options = {

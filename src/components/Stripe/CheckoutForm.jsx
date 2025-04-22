@@ -5,6 +5,7 @@ import {
   useStripe,
 } from "@stripe/react-stripe-js";
 import React from "react";
+import toast from "react-hot-toast";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const CheckoutForm = () => {
@@ -13,13 +14,9 @@ const CheckoutForm = () => {
   const { state } = useLocation();
   const elements = useElements();
   const handleSubmit = async (event) => {
-    // We don't want to let default form submission happen here,
-    // which would refresh the page.
     event.preventDefault();
 
     if (!stripe || !elements) {
-      // Stripe.js hasn't yet loaded.
-      // Make sure to disable form submission until Stripe.js has loaded.
       return;
     }
     const result = await stripe.confirmPayment({
@@ -34,6 +31,8 @@ const CheckoutForm = () => {
 
     if (result.error) {
       console.error("Payment Failed:", result.error.message);
+      toast.success("Payment failed")
+      navigate(-1)
       // navigate("/payment-success", {
       //   state: { status: "failed", plan: state?.data },
       // });
@@ -41,6 +40,8 @@ const CheckoutForm = () => {
       result.paymentIntent &&
       result.paymentIntent.status === "succeeded"
     ) {
+      toast.success("Payment done successfully")
+      navigate(-1)
       // navigate("/payment-success", {
       //   state: {
       //     status: "success",
