@@ -21,33 +21,20 @@ import AnalyticsChart from '../../components/Provider/AnalyticsChart';
 
 
  
- // StatCard Component
- const StatCard = ({ icon: Icon, title, value, change, changeType }) => {
-   return (
-     <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
-       <div className="flex items-start justify-between">
-         <div className="p-2 rounded-lg bg-brand/10">
-           <Icon className="w-6 h-6 text-brand" />
-         </div>
-         {change !== undefined && (
-           <div className={`flex items-center text-xs font-medium ${
-             changeType === 'positive' ? 'text-green-600' : 
-             changeType === 'negative' ? 'text-red-600' : 'text-gray-600'
-           }`}>
-             {changeType === 'positive' ? (
-               <TrendingUp className="w-3 h-3 mr-1" />
-             ) : changeType === 'negative' ? (
-               <TrendingUp className="w-3 h-3 mr-1 transform rotate-180" />
-             ) : null}
-             <span>{change}%</span>
-           </div>
-         )}
-       </div>
-       <h3 className="mt-4 text-lg font-medium text-gray-900">{value}</h3>
-       <p className="mt-1 text-sm text-gray-500">{title}</p>
-     </div>
-   );
- };
+
+const StatCard = ({ icon: Icon, title, value }) => {
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex items-start justify-between">
+        <div className="p-2 rounded-lg bg-brand/10">
+          <Icon className="w-6 h-6 text-brand" />
+        </div>
+      </div>
+      <h3 className="mt-4 text-lg font-medium text-gray-900">{value}</h3>
+      <p className="mt-1 text-sm text-gray-500">{title}</p>
+    </div>
+  );
+};
  
  // ImageGrid Component from listings page
  const ImageGrid = ({ images, title, subtitle, link }) => (
@@ -202,28 +189,39 @@ useEffect(() => {
         });
       }
       
-      // Fetch recent bookings using providerAPI
       console.log('Fetching bookings data...');
-      setAuthHeader();  // Set auth header again
-      const bookingsData = await getProviderBookings('all', 5);
-      console.log('Bookings data received:', bookingsData);
+      setAuthHeader();
+      const bookingsResponse = await getProviderBookings({ 
+        status: 'all', 
+        page: 1, 
+        limit: 5,
+        sortOrder: 'desc' // Most recent bookings first
+      }); 
+      console.log('Bookings data received:', bookingsResponse);
+      
+      // Extract bookings array from the response
+      const bookingsData = bookingsResponse?.bookings || [];
       
       // Transform booking data
-      if (Array.isArray(bookingsData)) {
-        const formattedBookings = bookingsData.map(booking => ({
-          id: booking.id || booking._id || `booking-${Math.random().toString(36).substring(2, 9)}`,
-          date: booking.createdAt ? new Date(booking.createdAt).toLocaleDateString('en-US', { 
-            month: 'short', day: 'numeric', year: 'numeric' 
-          }) : 'N/A',
-          guest: booking.user?.username || booking.user?.firstName + ' ' + booking.user?.lastName || 'Guest',
-          property: booking.listing?.title || 'Property',
-          duration: booking.checkInDate && booking.checkOutDate 
-            ? Math.ceil((new Date(booking.checkOutDate) - new Date(booking.checkInDate)) / (1000 * 60 * 60 * 24)) 
-            : 1,
-          amount: booking.totalPrice || 0
-        }));
-        
+      if (Array.isArray(bookingsData) && bookingsData.length > 0) {
+        const formattedBookings = bookingsData
+          .map(booking => ({
+            id: booking.id || booking._id || `booking-${Math.random().toString(36).substring(2, 9)}`,
+            date: booking.createdAt ? new Date(booking.createdAt).toLocaleDateString('en-US', { 
+              month: 'short', day: 'numeric', year: 'numeric' 
+            }) : 'N/A',
+            guest: booking.user?.username || booking.user?.firstName + ' ' + booking.user?.lastName || 'Guest',
+            property: booking.listing?.title || 'Property',
+            duration: booking.checkInDate && booking.checkOutDate 
+              ? Math.ceil((new Date(booking.checkOutDate) - new Date(booking.checkInDate)) / (1000 * 60 * 60 * 24)) 
+              : 1,
+            amount: booking.totalPrice || 0
+          }));
+          
         setRecentBookings(formattedBookings);
+      } else {
+        console.log('No bookings found or empty bookings array');
+        setRecentBookings([]);
       }
       
       // Fetch listings
@@ -358,14 +356,7 @@ navigate(`/provider/bookings?id=${bookingId}`);
     ? (dashboardStats.performance.occupancyRate.current - dashboardStats.performance.occupancyRate.previous)
     : 0;
   
-  const avgNights = dashboardStats?.performance?.averageNightlyRate?.current 
-    ? `${dashboardStats.performance.averageNightlyRate.current} CHF` 
-    : '0 CHF';
     
-  const nightsChange = dashboardStats?.performance?.averageNightlyRate?.current && dashboardStats?.performance?.averageNightlyRate?.previous
-    ? Math.round(((dashboardStats.performance.averageNightlyRate.current - dashboardStats.performance.averageNightlyRate.previous) / 
-        Math.max(1, dashboardStats.performance.averageNightlyRate.previous)) * 100)
-    : 0;
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -425,13 +416,6 @@ navigate(`/provider/bookings?id=${bookingId}`);
             value={occupancyRate}
             change={occupancyChange}
             changeType={occupancyChange >= 0 ? "positive" : "negative"}
-          />
-          <StatCard
-            icon={Calendar}
-            title={t('avg_length_stay')}
-            value={avgNights}
-            change={nightsChange}
-            changeType={nightsChange >= 0 ? "positive" : "negative"}
           />
         </div>
         

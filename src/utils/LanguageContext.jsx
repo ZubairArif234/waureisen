@@ -1,3 +1,4 @@
+// src/utils/LanguageContext.jsx
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import translations from './translations';
 
@@ -8,32 +9,36 @@ const LanguageContext = createContext();
 export const LanguageProvider = ({ children }) => {
   // Get saved language from localStorage or default to 'en'
   const [language, setLanguage] = useState(() => {
-    const savedLanguage = localStorage.getItem('language');
-    return savedLanguage || 'en';
+    const saved = localStorage.getItem('language');
+    return saved || 'en';
   });
 
-  // Save language to localStorage whenever it changes
+  // Persist language changes
   useEffect(() => {
     localStorage.setItem('language', language);
   }, [language]);
 
-  // Translate function
-  const t = (key) => {
-    if (!translations[language]) {
+  // Translate function with simple {param} interpolation
+  const t = (key, params = {}) => {
+    const dict = translations[language];
+    if (!dict) {
       console.warn(`No translations found for language: ${language}`);
       return key;
     }
 
-    const translation = translations[language][key];
-    if (!translation) {
+    let str = dict[key];
+    if (typeof str !== 'string') {
       console.warn(`No translation found for key: ${key} in language: ${language}`);
       return key;
     }
 
-    return translation;
+    // Replace all occurrences of {foo} with params.foo
+    return str.replace(/\{(\w+)\}/g, (_, name) =>
+      params[name] != null ? params[name] : `{${name}}`
+    );
   };
 
-  // Switch language function
+  // Language switcher
   const switchLanguage = (lang) => {
     if (lang !== 'en' && lang !== 'de') {
       console.warn(`Unsupported language: ${lang}`);
@@ -42,7 +47,6 @@ export const LanguageProvider = ({ children }) => {
     setLanguage(lang);
   };
 
-  // Provide the language context to all children
   return (
     <LanguageContext.Provider value={{ language, switchLanguage, t }}>
       {children}
@@ -50,7 +54,7 @@ export const LanguageProvider = ({ children }) => {
   );
 };
 
-// Custom hook to use the language context
+// Custom hook for consuming the context
 export const useLanguage = () => {
   const context = useContext(LanguageContext);
   if (!context) {
