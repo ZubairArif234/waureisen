@@ -855,6 +855,11 @@ const translations = {
     'cannot_block_booked_dates': 'Cannot block dates that are already booked.',
     'unavailable': 'Unavailable',
 
+    'showing_page': 'Showing page {page} of {total}',
+    'try_adjusting_filters': 'Try adjusting your filters to see more results',
+    'no_bookings_match_filters': 'No bookings match your current filters',
+
+
   },
 
 
@@ -863,6 +868,10 @@ const translations = {
 
 
   de: {
+
+    'showing_page': 'Seite {page} von {total}',
+    'try_adjusting_filters': 'Versuchen Sie, Ihre Filter anzupassen, um mehr Ergebnisse zu sehen',
+    'no_bookings_match_filters': 'Keine Buchungen entsprechen Ihren aktuellen Filtern',
 
     'warning_dates_already_booked': 'Einige ausgewählte Daten sind bereits gebucht und können nicht blockiert werden.',
     'cannot_block_booked_dates': 'Bereits gebuchte Daten können nicht blockiert werden.',

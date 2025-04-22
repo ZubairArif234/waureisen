@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Send, Search, Filter, Calendar as CalendarIcon, ChevronDown, ChevronUp, Check, X, Users } from 'lucide-react';
 import Navbar from '../../components/Shared/Navbar';
@@ -7,6 +7,7 @@ import avatar from '../../assets/avatar.png';
 import { useLanguage } from '../../utils/LanguageContext';
 import API from '../../api/config';
 import { getProviderBookings, acceptBooking, cancelBooking } from '../../api/providerAPI';
+import Pagination from '../../components/Shared/Pagination';
 
 // Status Badge Component
 const StatusBadge = ({ status }) => {
@@ -175,15 +176,22 @@ const ProviderBookings = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalBookings, setTotalBookings] = useState(0);
   
-  // Parse query params to get booking ID if it exists
+  
+  const prevActiveTab = useRef(activeTab);
+  
+  
   const queryParams = new URLSearchParams(location.search);
   const bookingIdParam = queryParams.get('id');
   
-  // State for bookings data
+  
   const [bookings, setBookings] = useState([]);
   
-  // Update isMobile on window resize
+  
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
@@ -192,29 +200,54 @@ const ProviderBookings = () => {
 
 
       
-    // Update the useEffect in ProviderBookings.jsx to call getProviderBookings correctly
-useEffect(() => {
-  const fetchBookings = async () => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // Map UI tab status to API status parameter
-      const statusParam = activeTab === 'all' ? undefined : activeTab;
-      const response = await getProviderBookings({ status: statusParam });
+  useEffect(() => {
+    const fetchBookings = async () => {
+      setIsLoading(true);
+      setError(null);
       
-      console.log('Bookings fetched:', response); // Add this to debug
-      setBookings(response);
-    } catch (err) {
-      console.error("Error fetching bookings:", err);
-      setError("Failed to load bookings. Please try again.");
-    } finally {
-      setIsLoading(false);
+      try {
+        // Reset to page 1 when changing filters
+        const pageToFetch = activeTab !== prevActiveTab.current ? 1 : currentPage;
+        if (activeTab !== prevActiveTab.current) {
+          setCurrentPage(1);
+        }
+        prevActiveTab.current = activeTab;
+  
+        // Map UI tab status to API status parameter
+        const statusParam = activeTab === 'all' ? undefined : activeTab;
+        
+        const response = await getProviderBookings({ 
+          status: statusParam,
+          page: pageToFetch,
+          limit: 10,
+          sortOrder: sortBy === 'checkInDate' ? 'asc' : 'desc'
+        });
+        
+        console.log('Bookings fetched:', response);
+        
+        // Update state with the paginated data
+        setBookings(response.bookings || []);
+        setTotalPages(response.pagination?.totalPages || 1);
+        setTotalBookings(response.pagination?.totalCount || 0);
+      } catch (err) {
+        console.error("Error fetching bookings:", err);
+        setError("Failed to load bookings. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchBookings();
+  }, [activeTab, currentPage, sortBy]);
+
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+      
+      window.scrollTo(0, 0);
     }
   };
-  
-  fetchBookings();
-}, [activeTab]);
 
   const handleMessage = (bookingId) => {
     navigate(`/provider/messages?booking=${bookingId}`);
@@ -372,207 +405,213 @@ useEffect(() => {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-white">
-      <Navbar />
-      
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 mt-20">
-        {/* Header with Back Button */}
-        <div className="flex items-center gap-4 mb-8">
-          <button
-            onClick={() => navigate('/provider/dashboard')}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <ArrowLeft className="w-6 h-6 text-gray-600" />
-          </button>
-          <h1 className="text-3xl font-semibold text-gray-900">{t('bookings')}</h1>
-        </div>
+ // Complete return section of ProviderBookings.jsx
+return (
+  <div className="min-h-screen bg-white">
+    <Navbar />
+    
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 mt-20">
+      {/* Header with Back Button */}
+      <div className="flex items-center gap-4 mb-8">
+        <button
+          onClick={() => navigate('/provider/dashboard')}
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+        >
+          <ArrowLeft className="w-6 h-6 text-gray-600" />
+        </button>
+        <h1 className="text-3xl font-semibold text-gray-900">{t('bookings')}</h1>
+      </div>
 
-        {/* Filters and Search */}
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder={t('search_bookings_placeholder')}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
-            />
+      {/* Filters and Search */}
+      <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <div className="flex-1 relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <input
+            type="text"
+            placeholder={t('search_bookings_placeholder')}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+          />
+        </div>
+        
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex items-center gap-2">
+            <Filter className="w-5 h-5 text-gray-400" />
+            <select
+              value={activeTab}
+              onChange={(e) => setActiveTab(e.target.value)}
+              className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+            >
+              <option value="all">{t('all_bookings')}</option>
+              <option value="confirmed">{t('confirmed')}</option>
+              <option value="pending">{t('pending')}</option>
+              <option value="canceled">{t('canceled')}</option>
+            </select>
           </div>
           
-          <div className="flex flex-col sm:flex-row gap-2">
-            <div className="flex items-center gap-2">
-              <Filter className="w-5 h-5 text-gray-400" />
-              <select
-                value={activeTab}
-                onChange={(e) => setActiveTab(e.target.value)}
-                className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
-              >
-                <option value="all">{t('all_bookings')}</option>
-                <option value="confirmed">{t('confirmed')}</option>
-                <option value="pending">{t('pending')}</option>
-                <option value="canceled">{t('canceled')}</option>
-              </select>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <CalendarIcon className="w-5 h-5 text-gray-400" />
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
-              >
-                <option value="checkInDate">{t('sort_by_checkin')}</option>
-                <option value="bookingDate">{t('sort_by_booking_date')}</option>
-                <option value="price">{t('sort_by_price')}</option>
-              </select>
-            </div>
+          <div className="flex items-center gap-2">
+            <CalendarIcon className="w-5 h-5 text-gray-400" />
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+            >
+              <option value="checkInDate">{t('sort_by_checkin')}</option>
+              <option value="bookingDate">{t('sort_by_booking_date')}</option>
+              <option value="price">{t('sort_by_price')}</option>
+            </select>
           </div>
         </div>
+      </div>
 
-        {/* Mobile View */}
-        {isMobile && (
-          <div className="space-y-4">
-            {isLoading && (
-              <div className="flex justify-center py-4">
-                <div className="w-8 h-8 border-4 border-gray-200 border-t-brand rounded-full animate-spin"></div>
-              </div>
-            )}
-            
-            {filteredBookings.map(booking => (
-              <BookingCardMobile 
-                key={booking.id || booking._id} 
-                booking={booking} 
-                onMessage={handleMessage}
-                onAcceptBooking={handleAcceptBooking}
-                onCancelBooking={handleCancelBooking}
-              />
-            ))}
-            
-            {filteredBookings.length === 0 && !isLoading && (
-              <div className="text-center py-10">
-                <p className="text-gray-500 text-lg mb-2">{t('no_bookings_found')}</p>
-                <p className="text-gray-400 text-sm">
-                  {activeTab === 'all'
-                    ? t('no_bookings_yet')
-                    : `${t('no_bookings_with_status', { status: t(activeTab) })}`}
-                </p>
-              </div>
-            )}
-          </div>
-        )}
+      {/* Loading Indicator */}
+      {isLoading && bookings.length === 0 && (
+        <div className="flex justify-center py-4">
+          <div className="w-8 h-8 border-4 border-gray-200 border-t-brand rounded-full animate-spin"></div>
+        </div>
+      )}
 
-        {/* Desktop View - Table */}
-        {!isMobile && (
-          <div className="overflow-x-auto bg-white border rounded-lg">
-            {isLoading && (
-              <div className="flex justify-center py-4 border-b">
-                <div className="w-8 h-8 border-4 border-gray-200 border-t-brand rounded-full animate-spin"></div>
-              </div>
-            )}
-            
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('booking_details')}
-                  </th>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('guest')}
-                  </th>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('dates')}
-                  </th>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('total')}
-                  </th>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('status')}
-                  </th>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('actions')}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredBookings.map((booking) => (
-                  <tr key={booking.id || booking._id} className="hover:bg-gray-50">
-                    <td className="px-4 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-3">
-                        <img 
-                          src={booking.listing?.photos?.[0] || avatar} 
-                          alt={booking.listing?.title || 'Property'} 
-                          className="w-12 h-12 rounded-md object-cover"
-                        />
-                        <div>
-                          <div className="font-medium text-gray-900">{booking.listing?.title || 'Property'}</div>
-                          <div className="text-sm text-gray-500">{booking.listing?.location?.address || 'Unknown location'}</div>
-                          <div className="text-xs text-gray-400">#{booking.id || booking._id}</div>
+      {/* Mobile View */}
+      {isMobile && (
+        <div className="space-y-4">
+          {bookings.map(booking => (
+            <BookingCardMobile 
+              key={booking.id || booking._id} 
+              booking={booking} 
+              onMessage={handleMessage}
+              onAcceptBooking={handleAcceptBooking}
+              onCancelBooking={handleCancelBooking}
+            />
+          ))}
+          
+          {/* Pagination for Mobile View */}
+          {bookings.length > 0 && !isLoading && (
+            <Pagination 
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          )}
+          
+          {bookings.length === 0 && !isLoading && (
+            <div className="text-center py-10">
+              <p className="text-gray-500 text-lg mb-2">
+                {totalBookings === 0 
+                  ? t('no_bookings_found') 
+                  : t('no_bookings_match_filters')}
+              </p>
+              <p className="text-gray-400 text-sm">
+                {totalBookings === 0
+                  ? (activeTab === 'all'
+                      ? t('no_bookings_yet')
+                      : `${t('no_bookings_with_status', { status: t(activeTab) })}`)
+                  : t('try_adjusting_filters')}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Desktop View - Table */}
+      {!isMobile && (
+        <div className="overflow-x-auto bg-white border rounded-lg">
+          {isLoading && bookings.length === 0 && (
+            <div className="flex justify-center py-4 border-b">
+              <div className="w-8 h-8 border-4 border-gray-200 border-t-brand rounded-full animate-spin"></div>
+            </div>
+          )}
+          
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t('booking_details')}
+                </th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t('guest')}
+                </th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t('dates')}
+                </th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t('total')}
+                </th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t('status')}
+                </th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {t('actions')}
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {bookings.map((booking) => (
+                <tr key={booking.id || booking._id} className="hover:bg-gray-50">
+                  <td className="px-4 py-4 whitespace-nowrap">
+                    <div className="flex items-center gap-3">
+                      <img 
+                        src={booking.listing?.photos?.[0] || avatar} 
+                        alt={booking.listing?.title || 'Property'} 
+                        className="w-12 h-12 rounded-md object-cover"
+                      />
+                      <div>
+                        <div className="font-medium text-gray-900">{booking.listing?.title || 'Property'}</div>
+                        <div className="text-sm text-gray-500">{booking.listing?.location?.address || 'Unknown location'}</div>
+                        <div className="text-xs text-gray-400">#{booking.id || booking._id}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      <img src={avatar} alt="Guest" className="w-8 h-8 rounded-full" />
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {booking.user?.username || booking.user?.firstName + ' ' + booking.user?.lastName || 'Guest'}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {booking.capacity?.people || 1} {booking.capacity?.people !== 1 ? t('people') : t('person')}, 
+                          {' '}{booking.capacity?.dogs || 0} {booking.capacity?.dogs !== 1 ? t('dogs') : t('dog')}
                         </div>
                       </div>
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <img src={avatar} alt="Guest" className="w-8 h-8 rounded-full" />
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">
-                            {booking.user?.username || booking.user?.firstName + ' ' + booking.user?.lastName || 'Guest'}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {booking.capacity?.people || 1} {booking.capacity?.people !== 1 ? t('people') : t('person')}, 
-                            {' '}{booking.capacity?.dogs || 0} {booking.capacity?.dogs !== 1 ? t('dogs') : t('dog')}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {formatDate(booking.checkInDate)} - {formatDate(booking.checkOutDate)}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {t('booked_on')} {formatDate(booking.createdAt)}
-                      </div>
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-brand">
-                        {booking.totalPrice} {booking.currency || 'CHF'}
-                      </div>
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap">
-                      <StatusBadge status={booking.status} />
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm">
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleMessage(booking.id || booking._id)}
-                          className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
-                        >
-                          <Send className="w-4 h-4" />
-                          <span>{t('message')}</span>
-                        </button>
-                        
-                        {booking.status === 'pending' && (
-                          <>
-                            <button
-                              onClick={() => handleAcceptBooking(booking.id || booking._id)}
-                              className="flex items-center gap-1 px-3 py-1.5 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg transition-colors"
-                            >
-                              <Check className="w-4 h-4" />
-                              <span>{t('accept')}</span>
-                            </button>
-                            
-                            <button
-                              onClick={() => handleCancelBooking(booking.id || booking._id)}
-                              className="flex items-center gap-1 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors"
-                            >
-                              <X className="w-4 h-4" />
-                              <span>{t('cancel')}</span>
-                            </button>
-                          </>
-                        )}
-                        
-                        {booking.status === 'confirmed' && (
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">
+                      {formatDate(booking.checkInDate)} - {formatDate(booking.checkOutDate)}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {t('booked_on')} {formatDate(booking.createdAt)}
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-brand">
+                      {booking.totalPrice} {booking.currency || 'CHF'}
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap">
+                    <StatusBadge status={booking.status} />
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm">
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleMessage(booking.id || booking._id)}
+                        className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+                      >
+                        <Send className="w-4 h-4" />
+                        <span>{t('message')}</span>
+                      </button>
+                      
+                      {booking.status === 'pending' && (
+                        <>
+                          <button
+                            onClick={() => handleAcceptBooking(booking.id || booking._id)}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg transition-colors"
+                          >
+                            <Check className="w-4 h-4" />
+                            <span>{t('accept')}</span>
+                          </button>
+                          
                           <button
                             onClick={() => handleCancelBooking(booking.id || booking._id)}
                             className="flex items-center gap-1 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors"
@@ -580,33 +619,59 @@ useEffect(() => {
                             <X className="w-4 h-4" />
                             <span>{t('cancel')}</span>
                           </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                
-                {filteredBookings.length === 0 && !isLoading && (
-                  <tr>
-                    <td colSpan="6" className="px-4 py-12 text-center">
-                      <p className="text-gray-500 text-lg mb-2">{t('no_bookings_found')}</p>
-                      <p className="text-gray-400 text-sm">
-                        {activeTab === 'all'
-                          ? t('no_bookings_yet')
-                          : `${t('no_bookings_with_status', { status: t(activeTab) })}`}
-                      </p>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </main>
+                        </>
+                      )}
+                      
+                      {booking.status === 'confirmed' && (
+                        <button
+                          onClick={() => handleCancelBooking(booking.id || booking._id)}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                          <span>{t('cancel')}</span>
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              
+              {bookings.length === 0 && !isLoading && (
+                <tr>
+                  <td colSpan="6" className="px-4 py-12 text-center">
+                    <p className="text-gray-500 text-lg mb-2">
+                      {totalBookings === 0 
+                        ? t('no_bookings_found') 
+                        : t('no_bookings_match_filters')}
+                    </p>
+                    <p className="text-gray-400 text-sm">
+                      {totalBookings === 0
+                        ? (activeTab === 'all'
+                            ? t('no_bookings_yet')
+                            : `${t('no_bookings_with_status', { status: t(activeTab) })}`)
+                        : t('try_adjusting_filters')}
+                    </p>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+          
+          {/* Pagination for Desktop View */}
+          {bookings.length > 0 && !isLoading && (
+            <Pagination 
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          )}
+        </div>
+      )}
+    </main>
 
-      <Footer />
-    </div>
-  );
+    <Footer />
+  </div>
+);
 };
 
 export default ProviderBookings;

@@ -79,17 +79,53 @@ export const deleteListing = async (id) => {
   }
 };
 
-export const getProviderBookings = async (filters = {}) => {
+export const getProviderBookings = async (params = {}) => {
   try {
+    const { 
+      status = 'all', 
+      page = 1, 
+      limit = 10,
+      sortOrder = 'asc'
+    } = params;
+    
     const queryParams = new URLSearchParams();
-    if (filters.status) queryParams.append('status', filters.status);
-    if (filters.listingId) queryParams.append('listingId', filters.listingId);
-
+    
+    if (status !== 'all') {
+      queryParams.append('status', status);
+    }
+    
+    queryParams.append('page', page.toString());
+    queryParams.append('limit', limit.toString());
+    queryParams.append('sortOrder', sortOrder);
+    
     const response = await API.get(`/providers/bookings?${queryParams}`);
-    return response.data;
+    
+    
+    if (response.data.bookings && response.data.pagination) {
+      return response.data;
+    } else {
+      
+      return {
+        bookings: Array.isArray(response.data) ? response.data : [],
+        pagination: {
+          totalCount: Array.isArray(response.data) ? response.data.length : 0,
+          page: 1,
+          limit: 10,
+          totalPages: 1
+        }
+      };
+    }
   } catch (error) {
     console.error('Error fetching provider bookings:', error);
-    throw error;
+    return {
+      bookings: [],
+      pagination: {
+        totalCount: 0,
+        page: 1,
+        limit: 10,
+        totalPages: 1
+      }
+    };
   }
 };
 
@@ -142,17 +178,39 @@ export const getProviderStats = async (timeRange = 'month') => {
     const response = await API.get('/providers/analytics', { 
       params: { timeRange } 
     });
-    return response.data;
+    
+    
+    const performanceDefaults = {
+      totalBookings: { current: 0, previous: 0 },
+      totalRevenue: { current: 0, previous: 0 },
+      occupancyRate: { current: 0, previous: 0 }
+    };
+    
+    
+    const data = {
+      ...response.data,
+      performance: {
+        ...performanceDefaults,
+        ...response.data?.performance
+      },
+      charts: response.data?.charts || {
+        labels: [],
+        revenue: [],
+        bookings: []
+      }
+    };
+    
+    return data;
   } catch (error) {
     console.error('Error fetching provider analytics:', error);
     
+    // Return default structure on error to prevent UI crashes
     return {
       timeRange,
       performance: {
         totalBookings: { current: 0, previous: 0 },
         totalRevenue: { current: 0, previous: 0 },
-        occupancyRate: { current: 0, previous: 0 },
-        averageNightlyRate: { current: 0, previous: 0 }
+        occupancyRate: { current: 0, previous: 0 }
       },
       charts: {
         labels: [],
@@ -205,8 +263,8 @@ export const getProviderTransactions = async (filters = {}) => {
 };
 
 export const getProviderDashboardStats = async (timeFrame = 'month') => {
-    return getProviderStats(timeFrame);
-  };
+  return getProviderStats(timeFrame);
+};
   
   export const cancelBooking = async (id) => {
     return rejectBooking(id);

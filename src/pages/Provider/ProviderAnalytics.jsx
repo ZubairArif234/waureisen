@@ -76,8 +76,7 @@ const ChartMock = ({ type, title, description, data }) => {
 // Performance Card Component
 const PerformanceCard = ({ title, current, previous, isPercentage, isCurrency }) => {
   const { t } = useLanguage();
-  const changePercent = ((current - previous) / previous) * 100;
-  const isPositive = current >= previous;
+
   
   const formatValue = (value) => {
     if (isPercentage) return `${value}%`;
@@ -87,24 +86,10 @@ const PerformanceCard = ({ title, current, previous, isPercentage, isCurrency })
   
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
-      <div className="flex items-center justify-between">
-        <h3 className="text-base font-medium text-gray-500">{title}</h3>
-        <div className={`flex items-center text-sm ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-          {isPositive ? (
-            <TrendingUp className="w-4 h-4 mr-1" />
-          ) : (
-            <TrendingDown className="w-4 h-4 mr-1" />
-          )}
-          <span>{changePercent.toFixed(1)}%</span>
-        </div>
-      </div>
-      
+      <h3 className="text-base font-medium text-gray-500">{title}</h3>
       <div className="mt-2">
         <div className="text-2xl font-semibold text-gray-900">
           {formatValue(current)}
-        </div>
-        <div className="text-sm text-gray-500 mt-1">
-          {t('previous')}: {formatValue(previous)}
         </div>
       </div>
     </div>
@@ -261,7 +246,7 @@ const ProviderAnalytics = () => {
               </select>
             </div>
             
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <Filter className="w-5 h-5 text-gray-400" />
               <select
                 value={selectedCompareMode}
@@ -271,15 +256,15 @@ const ProviderAnalytics = () => {
           <option value="previous">{t('vs_previous_period')}</option>
           <option value="year">{t('vs_last_year')}</option>
               </select>
-            </div>
+            </div> */}
             
-            <button
+            {/* <button
               onClick={handleExportData}
               className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <Download className="w-5 h-5 text-gray-500" />
               <span>{t('export')}</span>
-            </button>
+            </button> */}
           </div>
         </div>
         
@@ -295,12 +280,6 @@ const ProviderAnalytics = () => {
             current={analyticsData.performance.occupancyRate.current}
             previous={analyticsData.performance.occupancyRate.previous}
             isPercentage={true}
-          />
-          <PerformanceCard
-            title={t('average_nightly_rate')}
-            current={analyticsData.performance.averageNightlyRate.current}
-            previous={analyticsData.performance.averageNightlyRate.previous}
-            isCurrency={true}
           />
           <PerformanceCard
             title={t('total_revenue')}
@@ -330,7 +309,7 @@ const ProviderAnalytics = () => {
           />
         </div>
         
-        {/* Insights */}
+        {/* Insights
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm mb-8">
           <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
           <h2 className="text-lg font-medium text-gray-900">{t('insights_recommendations')}</h2>
@@ -381,9 +360,9 @@ const ProviderAnalytics = () => {
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
         
-        {/* Listing Performance */}
+        {/* Listing Performance
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
           <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
           <h2 className="text-lg font-medium text-gray-900">{t('listing_performance')}</h2>
@@ -431,7 +410,7 @@ const ProviderAnalytics = () => {
               </tbody>
             </table>
           </div>
-        </div>
+        </div> */}
       </main>
       
       <Footer />
