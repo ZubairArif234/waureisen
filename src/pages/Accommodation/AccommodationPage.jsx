@@ -316,31 +316,31 @@ const AccommodationPage = () => {
 
   // Default place offers (will be overridden with actual data if available)
   const placeOffers = [
-    {
-      icon: Users,
-      text: t("people"),
-      value: accommodation?.maxGuests?.toString() || "6 (default)",
+    { 
+      icon: Users, 
+      text: t('people'), 
+      value: accommodation?.pricePerNight?.paxUpTo || accommodation?.maxGuests?.toString() || '6 ' // Default 
     },
-    {
-      icon: Dog,
-      text: t("dog"),
-      value: accommodation?.maxDogs?.toString() || "1 (default)",
+    { 
+      icon: Dog, 
+      text: t('dog'), 
+      value: accommodation?.maxDogs?.toString() || '1' 
     },
-    {
-      icon: Home,
-      text: t("bedrooms"),
-      value: accommodation?.bedrooms?.toString() || "2 (default)",
+    { 
+      icon: Home, 
+      text: t('bedrooms'), 
+      value: accommodation?.bedRooms?.toString() || '2 (default)' 
     },
-    {
-      icon: DoorOpen,
-      text: t("rooms"),
-      value: accommodation?.rooms?.toString() || "2 (default)",
+    { 
+      icon: DoorOpen, 
+      text: t('rooms'), 
+      value: accommodation?.rooms?.number?.toString() || '2 (default)' 
     },
-    {
-      icon: Bath,
-      text: t("washroom"),
-      value: accommodation?.bathrooms?.toString() || "1 (default)",
-    },
+    { 
+      icon: Bath, 
+      text: t('washroom'), 
+      value: accommodation?.washrooms?.toString() || '1 (default)' 
+    }
   ];
 
   // Map amenities from backend to frontend icons
@@ -355,15 +355,15 @@ const AccommodationPage = () => {
       swimming_pool: Waves,
       tv: Tv,
     };
-
-    return iconMap[amenityName] || Sparkles; // Default to Sparkles if no match
+    
+    return iconMap[amenityName?.toLowerCase()] || Sparkles; // Default to Sparkles if no match
   };
 
-  // Generate details from amenities in backend data
-  const details = accommodation?.amenities
-    ? accommodation.amenities.map((amenity) => ({
-        icon: getAmenityIcon(amenity.type),
-        text: amenity.name || amenity.type || "Amenity",
+  // Generate details from attributes in backend data
+  const details = accommodation?.attributes && accommodation.attributes.length > 0
+    ? accommodation.attributes.map(attr => ({
+        icon: getAmenityIcon(attr.name?.toLowerCase()),
+        text: attr.name || 'Amenity'
       }))
     : [
         { icon: Utensils, text: t("kitchen") + " (default)" },
@@ -473,30 +473,29 @@ const AccommodationPage = () => {
               </div>
             </section>
 
-            {/* Dog Filters */}
-            <section className="mb-10">
-              <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
-                {t("dog_filters")}
-              </h2>
-              <div className="flex md:flex-row flex-col gap-4">
-                <div className="flex items-center gap-2">
-                  <Check className="text-brand" />
-                  <span className="text-sm">
-                    {accommodation?.dogFilters?.includes("firework_free")
-                      ? "Firework Free Zone"
-                      : "Firework Free Zone (default)"}
-                  </span>
+            {/* Dog Filters Hidden if nothing recevied */}
+            {(accommodation?.dogFilters && accommodation.dogFilters.length > 0) && (
+              <section className="mb-10">
+                <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
+                  {t('dog_filters')}
+                </h2>
+                <div className="flex md:flex-row flex-col gap-4">
+                  {accommodation.dogFilters.includes('firework_free') && (
+                    <div className="flex items-center gap-2">
+                      <Check className="text-brand" />
+                      <span className="text-sm">Firework Free Zone</span>
+                    </div>
+                  )}
+                  {accommodation.dogFilters.includes('restaurants_nearby') && (
+                    <div className="flex items-center gap-2">
+                      <Check className="text-brand" />
+                      <span className="text-sm">Dog-friendly restaurants nearby</span>
+                    </div>
+                  )}
+                  {/* Add more dog filters here as needed */}
                 </div>
-                <div className="flex items-center gap-2">
-                  <Check className="text-brand" />
-                  <span className="text-sm">
-                    {accommodation?.dogFilters?.includes("restaurants_nearby")
-                      ? "Dog-friendly restaurants nearby"
-                      : "Dog-friendly restaurants nearby (default)"}
-                  </span>
-                </div>
-              </div>
-            </section>
+              </section>
+            )}
 
             {/* Description */}
             <section className="mb-10">
@@ -504,8 +503,10 @@ const AccommodationPage = () => {
                 {t("description")}
               </h2>
               <p className="text-gray-600 whitespace-pre-line text-sm">
-                {accommodation?.description ||
-                  "Innenbereich20 m2. Weitere Angaben des Anbieters: Wir bieten grosszügige Rabatte schon ab 3 Tagen. Langzeitaufenthalte möglich. Perfekte Lage: Unsere Unterkunft bietet eine unschlagbare zentrale Lage. Lebensmittelgeschäfte, Bushaltestellen, erstklassige Restaurants, Bars und Shoppingmöglichkeiten – alles ist nur einen kurzen Spaziergang entfernt. (default)"}
+                {accommodation?.description?.general || 
+                 (accommodation?.description?.inside || accommodation?.description?.outside) ? 
+                   `${accommodation?.description?.outside || ''} ${accommodation?.description?.inside ? '\n\n' + accommodation?.description?.inside : ''}` :
+                   "Innenbereich20 m2. Weitere Angaben des Anbieters: Wir bieten grosszügige Rabatte schon ab 3 Tagen. Langzeitaufenthalte möglich. Perfekte Lage: Unsere Unterkunft bietet eine unschlagbare zentrale Lage. Lebensmittelgeschäfte, Bushaltestellen, erstklassige Restaurants, Bars und Shoppingmöglichkeiten – alles ist nur einen kurzen Spaziergang entfernt. (default)"}
               </p>
             </section>
 
@@ -552,9 +553,19 @@ const AccommodationPage = () => {
                 {t("cancellation_policy")}
               </h2>
               <p className="text-gray-600 text-sm">
-                {accommodation?.cancellationPolicy ||
-                  "Je nach Reisezeitraum 90% Rückerstattung bis 0% Rückerstattung. (default)"}
+                {accommodation?.legal?.cancellationPolicy || "Je nach Reisezeitraum 90% Rückerstattung bis 0% Rückerstattung. (default)"}
               </p>
+              
+              {accommodation?.legal?.termsAndConditions && (
+                <div className="mt-4">
+                  <h3 className="text-[#4D484D] text-base font-medium mb-2">
+                    {t('terms_and_conditions')}
+                  </h3>
+                  <p className="text-gray-600 text-sm whitespace-pre-line">
+                    {accommodation.legal.termsAndConditions}
+                  </p>
+                </div>
+              )}
             </section>
 
             {/* Reviews */}
@@ -759,13 +770,8 @@ const AccommodationPage = () => {
         }}
       />
 
-      {/* Guest Selector Modal */}
-      <GuestSelector
-        isOpen={isGuestSelectorOpen}
-        onClose={() => setIsGuestSelectorOpen(false)}
-        guests={guests}
-        onGuestsChange={setGuests}
-      />
+      
+      {/* Remove the redundant date picker and guest selector modals */}
       <Footer />
     </div>
   );

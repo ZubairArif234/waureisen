@@ -17,6 +17,7 @@
   getProviderBookings,
   getProviderListings 
 } from '../../api/providerAPI';
+import AnalyticsChart from '../../components/Provider/AnalyticsChart';
 
 
  
@@ -169,10 +170,10 @@ useEffect(() => {
     try {
       console.log('Fetching dashboard data with timeRange:', timeRange);
       
-      // Make sure auth header is set again right before the request
+      
       setAuthHeader();
       
-      // Fetch dashboard stats from providerAPI instead of using getProviderDashboardStats
+      
       const stats = await getProviderDashboardStats(timeRange);
       console.log('Dashboard stats received:', stats);
       setDashboardStats(stats);
@@ -436,17 +437,22 @@ navigate(`/provider/bookings?id=${bookingId}`);
         
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <RevenueChart 
-            data={chartData.revenue}
-            loading={isLoading}
+          <AnalyticsChart 
+            data={dashboardStats?.charts}
             title={t('revenue_overview')}
             description={t('revenue_analysis')}
-          />
-          <BookingChart 
-            data={chartData.bookings}
+            dataKey="revenue"
             loading={isLoading}
+            color="#10B981"
+            tooltipFormatter={(value) => [`${Math.round(value)} CHF`, t('revenue')]}
+          />
+          <AnalyticsChart 
+            data={dashboardStats?.charts}
             title={t('booking_trends')}
             description={t('booking_analysis')}
+            dataKey="bookings"
+            loading={isLoading}
+            color="#3B82F6"
           />
         </div>
         

@@ -3,10 +3,28 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, Filter, Download, Eye, TrendingUp, TrendingDown, AlertTriangle } from 'lucide-react';
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
-import { getProviderDashboardStats } from '../../api/listingAPI';
+import { getProviderDashboardStats, getProviderStats } from '../../api/providerAPI';
 import { useLanguage } from '../../utils/LanguageContext';
+import AnalyticsChart from '../../components/Provider/AnalyticsChart';
 
-// Mock Chart Component - In a real app, you'd use a library like Chart.js or Recharts
+
+const emptyAnalyticsData = {
+  performance: {
+    totalBookings: { current: 0, previous: 0 },
+    totalRevenue: { current: 0, previous: 0 },
+    occupancyRate: { current: 0, previous: 0 },
+    averageNightlyRate: { current: 0, previous: 0 }
+  },
+  charts: {
+    labels: [],
+    revenue: [],
+    bookings: []
+  },
+  insights: [], 
+  listings: []  
+};
+
+
 const ChartMock = ({ type, title, description, data }) => {
   // Sample data visualization (just a mockup)
   const maxValue = Math.max(...data);
@@ -150,115 +168,29 @@ const ProviderAnalytics = () => {
   const navigate = useNavigate();
   const [timeRange, setTimeRange] = useState('month');
   const [isLoading, setIsLoading] = useState(true);
-  const [analyticsData, setAnalyticsData] = useState(null);
+  const [analyticsData, setAnalyticsData] = useState(emptyAnalyticsData);
   const [selectedCompareMode, setSelectedCompareMode] = useState('previous');
+  const [error, setError] = useState(null);
   
-  // Fetch analytics data based on timeRange
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        // In a real app, we would call the API
-        // const data = await getProviderDashboardStats(timeRange);
+  
+    useEffect(() => {
+      const fetchAnalyticsData = async () => {
+        setIsLoading(true);
+        setError(null);
         
-        // For demo, we'll use mock data
-        setTimeout(() => {
-          const mockData = {
-            performance: {
-              totalBookings: {
-                current: 47,
-                previous: 41
-              },
-              occupancyRate: {
-                current: 78,
-                previous: 81
-              },
-              averageNightlyRate: {
-                current: 185,
-                previous: 175
-              },
-              totalRevenue: {
-                current: 9230,
-                previous: 8500
-              }
-            },
-            charts: {
-              revenue: [5200, 6800, 7400, 9230],
-              bookings: [18, 25, 30, 47]
-            },
-            listings: [
-              {
-                id: '1',
-                title: 'Modern Studio in City Center',
-                location: 'Zurich, Switzerland',
-                image: '/src/assets/i1.png',
-                occupancyRate: 85,
-                pricing: 120,
-                bookings: 12,
-                bookingChange: 15,
-                revenue: 3450
-              },
-              {
-                id: '2',
-                title: 'Mountain View Chalet',
-                location: 'Swiss Alps, Switzerland',
-                image: '/src/assets/i2.png',
-                occupancyRate: 70,
-                pricing: 230,
-                bookings: 9,
-                bookingChange: -5,
-                revenue: 4140
-              },
-              {
-                id: '3',
-                title: 'Lakeside Apartment',
-                location: 'Lucerne, Switzerland',
-                image: '/src/assets/s1.png',
-                occupancyRate: 65,
-                pricing: 190,
-                bookings: 6,
-                bookingChange: 10,
-                revenue: 1140
-              },
-              {
-                id: '4',
-                title: 'Cozy Cottage in the Woods',
-                location: 'Black Forest, Germany',
-                image: '/src/assets/s2.png',
-                occupancyRate: 50,
-                pricing: 150,
-                bookings: 4,
-                bookingChange: 0,
-                revenue: 900
-              }
-            ],
-            insights: [
-              {
-                type: 'opportunity',
-                message: 'Increasing your price by 10-15% during weekends could improve revenue based on demand patterns.'
-              },
-              {
-                type: 'warning',
-                message: 'Your Mountain View Chalet has 5% fewer bookings compared to last month.'
-              },
-              {
-                type: 'tip',
-                message: 'Adding more high-quality photos could increase booking conversion rates.'
-              }
-            ]
-          };
-          
-          setAnalyticsData(mockData);
+        try {
+          const data = await getProviderStats(timeRange);
+          setAnalyticsData(data);
+        } catch (err) {
+          console.error('Error fetching analytics data:', err);
+          setError('Failed to load analytics data. Please try again.');
+        } finally {
           setIsLoading(false);
-        }, 800);
-      } catch (error) {
-        console.error('Error fetching analytics data:', error);
-        setIsLoading(false);
-      }
-    };
-    
-    fetchData();
-  }, [timeRange]);
+        }
+      };
+      
+      fetchAnalyticsData();
+    }, [timeRange]);
   
   const handleViewListingDetails = (listingId) => {
     navigate(`/provider/analytics/listing/${listingId}`);
@@ -380,18 +312,22 @@ const ProviderAnalytics = () => {
         
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <ChartMock 
-        type="revenue"
-        title={t('revenue_trends')}
-        description={`${t('revenue_analysis')} ${timeRange === 'week' ? t('past_week') : timeRange === 'month' ? t('past_month') : timeRange === 'quarter' ? t('past_quarter') : t('past_year')}`}
-        data={analyticsData.charts.revenue}
-      />
-      <ChartMock 
-        type="bookings"
-        title={t('booking_trends')}
-        description={`${t('booking_analysis')} ${timeRange === 'week' ? t('past_week') : timeRange === 'month' ? t('past_month') : timeRange === 'quarter' ? t('past_quarter') : t('past_year')}`}
-        data={analyticsData.charts.bookings}
-      />
+        <AnalyticsChart 
+          data={analyticsData?.charts || { labels: [], revenue: [] }}
+          title={t('revenue_trends')}
+          dataKey="revenue"
+          loading={isLoading}
+            color="#10B981" /* Green color for revenue */
+            tooltipFormatter={(value) => [`${Math.round(value)} CHF`, t('revenue')]}
+          />
+          <AnalyticsChart 
+            data={analyticsData?.charts}
+            title={t('booking_trends')}
+            description={t('booking_analysis')}
+            dataKey="bookings"
+            loading={isLoading}
+            color="#3B82F6" /* Blue color for bookings */
+          />
         </div>
         
         {/* Insights */}
@@ -400,16 +336,16 @@ const ProviderAnalytics = () => {
           <h2 className="text-lg font-medium text-gray-900">{t('insights_recommendations')}</h2>
           </div>
           <div className="p-6 space-y-4">
-            {analyticsData.insights.map((insight, index) => (
-              <div 
-                key={index}
-                className={`p-4 rounded-lg flex items-start gap-3 ${
-                  insight.type === 'opportunity' 
-                    ? 'bg-green-50 border border-green-100' 
-                    : insight.type === 'warning'
-                    ? 'bg-yellow-50 border border-yellow-100'
-                    : 'bg-blue-50 border border-blue-100'
-                }`}
+          {analyticsData?.insights?.map((insight, index) => (
+            <div 
+              key={index}
+              className={`p-4 rounded-lg flex items-start gap-3 ${
+                insight.type === 'opportunity' 
+                  ? 'bg-green-50 border border-green-100' 
+                  : insight.type === 'warning'
+                  ? 'bg-yellow-50 border border-yellow-100'
+                  : 'bg-blue-50 border border-blue-100'
+              }`}
               >
                 <div className={`p-1.5 rounded-full ${
                   insight.type === 'opportunity' 
@@ -477,13 +413,21 @@ const ProviderAnalytics = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {analyticsData.listings.map((listing) => (
-                  <ListingPerformanceRow 
-                    key={listing.id} 
-                    listing={listing} 
-                    onViewDetails={handleViewListingDetails}
-                  />
-                ))}
+                {analyticsData?.listings?.length > 0 ? (
+                  analyticsData.listings.map((listing) => (
+                    <ListingPerformanceRow 
+                      key={listing.id} 
+                      listing={listing} 
+                      onViewDetails={handleViewListingDetails}
+                    />
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="px-4 py-8 text-center text-gray-500">
+                      {isLoading ? t('loading_data') : t('no_listings_found')}
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
