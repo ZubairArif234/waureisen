@@ -28,6 +28,7 @@ import ProviderLayout from './pages/Main/Provider'
 import TravelShop from './components/Footer/TravelShop'
 import TravelMagazineDetail from './components/Footer/TravelMagazineDetail'
 import CamperDetail from './pages/Main/CamperDetail'
+import Payment from './pages/Stripe/Payment'
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
           <Route path="/camper/:id" element={<CamperDetail />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/payment" element={<Payment />} />
           
           {/* User Routes */}
           <Route path="/messages" element={<Messages />} />
