@@ -144,6 +144,12 @@ useEffect(() => {
     return;
   }
 
+  if (provider.registrationStatus === 'incomplete') {
+    console.log('Provider registration incomplete, redirecting to registration');
+    navigate('/provider/registration');
+    return;
+  }
+
   console.log('Provider authenticated:', provider.email || provider.username);
   
   // Force set the authorization header before making any requests

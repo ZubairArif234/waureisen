@@ -85,13 +85,28 @@ export const getProviderBookings = async (params = {}) => {
       status = 'all', 
       page = 1, 
       limit = 10,
-      sortOrder = 'asc'
+      sortOrder = 'asc',
+      dateRange,
+      listingId
     } = params;
+    
+    // Log received parameters for debugging
+    console.log('Getting provider bookings with params:', { 
+      status, page, limit, sortOrder, dateRange, listingId 
+    });
     
     const queryParams = new URLSearchParams();
     
     if (status !== 'all') {
       queryParams.append('status', status);
+    }
+    
+    if (listingId) {
+      queryParams.append('listingId', listingId);
+    }
+    
+    if (dateRange) {
+      queryParams.append('dateRange', dateRange);
     }
     
     queryParams.append('page', page.toString());
@@ -100,17 +115,19 @@ export const getProviderBookings = async (params = {}) => {
     
     const response = await API.get(`/providers/bookings?${queryParams}`);
     
+    // Log response for debugging
+    console.log('Bookings API response:', response.data);
     
     if (response.data.bookings && response.data.pagination) {
       return response.data;
     } else {
-      
+      // Handle legacy response format
       return {
         bookings: Array.isArray(response.data) ? response.data : [],
         pagination: {
           totalCount: Array.isArray(response.data) ? response.data.length : 0,
           page: 1,
-          limit: 10,
+          limit: limit,
           totalPages: 1
         }
       };
