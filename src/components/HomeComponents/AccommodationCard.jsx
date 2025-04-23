@@ -78,7 +78,7 @@ const AccommodationCard = ({
         </div>
       </div>
       <div className="space-y-1 cursor-pointer" onClick={handleClick}>
-        <p className="text-brand text-sm">CHF {price.toFixed(2)} {t("per_night")}</p>
+       {/* Maaz removed 2 prices from here as price per night was displayed 2 times */}
         <p className="text-brand text-sm">{pricePerNight?.currency || "CHF"} {(pricePerNight?.price || price).toFixed(2)} per night</p>
         <h3 className="font-medium text-gray-900">{propertyLocation}</h3>
       </div>
