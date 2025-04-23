@@ -91,8 +91,23 @@ const Recommendations = () => {
           try {
             const listing = await getListingById(id);
 
+            // Check if it's an Interhome listing by checking both source.name and provider attributes
+            const isInterhomeListing = 
+              (listing.source?.name?.toLowerCase() === "interhome" || 
+               listing.provider?.toLowerCase() === "interhome" || 
+               listing.listingSource?.toLowerCase() === "interhome") && 
+              listing.Code;
+              
+            // Log the source information for debugging
+            console.log(`Listing ${listing._id} source info:`, {
+              sourceName: listing.source?.name,
+              provider: listing.provider,
+              listingSource: listing.listingSource,
+              isInterhome: isInterhomeListing
+            });
+              
             // If it's an Interhome listing, fetch dynamic pricing
-            if (listing.source?.name === "interhome" && listing.Code) {
+            if (isInterhomeListing) {
               try {
                 // Get today's date in YYYY-MM-DD format
                 const today = new Date();
@@ -108,16 +123,38 @@ const Recommendations = () => {
                   accommodationCode: listing.Code,
                   checkInDate: formattedDate,
                   pax: 2,
-                  duration: 7,
                   los: true,
                 });
 
-                // Add dynamic price to the listing if available
-                if (priceData && priceData.price) {
-                  return {
-                    ...listing,
-                    dynamicPrice: priceData.price,
-                  };
+                // Process Interhome price data
+                if (priceData?.priceList?.prices?.price?.length > 0) {
+                  // Filter for 7-day duration options
+                  const duration7Options = priceData.priceList.prices.price.filter(
+                    option => option.duration === 7
+                  );
+
+                  if (duration7Options.length > 0) {
+                    // Sort by paxUpTo (ascending)
+                    duration7Options.sort((a, b) => a.paxUpTo - b.paxUpTo);
+                    
+                    // Use the option with lowest paxUpTo
+                    const selectedOption = duration7Options[0];
+                    
+                    // Calculate price per night
+                    const calculatedPricePerNight = Math.round(selectedOption.price / 7);
+                    
+                    return {
+                      ...listing,
+                      dynamicPrice: calculatedPricePerNight,
+                      pricePerNight: {
+                        price: calculatedPricePerNight,
+                        currency: priceData.priceList.currency || 'CHF',
+                        totalPrice: selectedOption.price,
+                        duration: 7,
+                        paxUpTo: selectedOption.paxUpTo
+                      }
+                    };
+                  }
                 }
               } catch (priceError) {
                 console.warn(

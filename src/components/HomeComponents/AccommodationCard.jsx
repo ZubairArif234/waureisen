@@ -36,7 +36,7 @@ const AccommodationCard = ({
   const handleClick = () => {
     navigate(`/accommodation/${id}`, {
       state: {
-        pricePerNight: pricePerNight || { price },
+        pricePerNight: pricePerNight || { price, currency: "CHF" },
         checkInDate: formattedCheckInDate,
       },
     });
@@ -76,7 +76,7 @@ const AccommodationCard = ({
         </div>
       </div>
       <div className="space-y-1 cursor-pointer" onClick={handleClick}>
-        <p className="text-brand text-sm">CHF {price.toFixed(2)} per night</p>
+        <p className="text-brand text-sm">{pricePerNight?.currency || "CHF"} {(pricePerNight?.price || price).toFixed(2)} per night</p>
         <h3 className="font-medium text-gray-900">{propertyLocation}</h3>
         <p className="text-gray-500 text-sm">Source: {displaySource}</p>
       </div>
