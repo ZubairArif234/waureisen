@@ -64,6 +64,25 @@ export const addToFeaturedSection = async (id, section) => {
           },
         };
       }
+
+      // Check if listing is not active
+      if (listingCheck.data.status !== "active") {
+        throw {
+          response: {
+            status: 400,
+            data: {
+              message: `Listing with ID ${id} is ${listingCheck.data.status}. Only active listings can be added to recommendations.`,
+              skippedListings: [
+                {
+                  id,
+                  title: listingCheck.data.title || "Unnamed Listing",
+                  reason: `${listingCheck.data.status}. Only active listings can be added to recommendations.`,
+                },
+              ],
+            },
+          },
+        };
+      }
     } catch (listingErr) {
       if (listingErr.response?.status === 404) {
         throw {
@@ -249,15 +268,9 @@ export const getUserById = async (id) => {
 
 export const updateUserStatus = async (id, status) => {
   try {
-    const response = await API.put(
-      `/admins/ban-user/${id}`,
-      {},
-      {
-        headers: {
-          "profile-status": status,
-        },
-      }
-    );
+    const response = await API.put(`/admins/update-user-status/${id}`, {
+      profileStatus: status,
+    });
     return response.data;
   } catch (error) {
     console.error(`Error updating user status:`, error);

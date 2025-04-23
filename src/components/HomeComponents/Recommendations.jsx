@@ -6,6 +6,8 @@ import { getListingById } from "../../api/listingAPI";
 import { fetchInterhomePrices } from "../../api/interhomeAPI";
 
 const RecommendationsSection = ({ title, listings }) => {
+  const { t } = useLanguage();
+
   return (
     <div className="mb-16">
       <h2 className="text-2xl font-semibold text-gray-900 mb-6">{title}</h2>
@@ -21,9 +23,7 @@ const RecommendationsSection = ({ title, listings }) => {
                   : "https://via.placeholder.com/300x200?text=No+Image"
               }
               price={listing.dynamicPrice || listing.pricePerNight?.price || 0}
-              location={`${listing.listingType} in ${
-                listing.location?.address || "Unknown Location"
-              }`}
+              location={listing.title || "Unnamed Accommodation"}
               provider={listing.provider || "Unknown"}
               listingSource={
                 listing.listingSource ||
@@ -38,7 +38,7 @@ const RecommendationsSection = ({ title, listings }) => {
             />
           ))
         ) : (
-          <p>No listings available</p>
+          <p>{t("no_listings_available")}</p>
         )}
       </div>
     </div>
@@ -139,15 +139,13 @@ const Recommendations = () => {
             ids.map((id) => fetchListingWithPrice(id))
           );
 
-          // Filter out null values (failed fetches)
-          const validListings = fetchedListings.filter(Boolean);
+          // Filter out null values (failed fetches) and only include active listings
+          const validListings = fetchedListings.filter(
+            (listing) => Boolean(listing) && listing.status === "active"
+          );
 
-          // Sort listings: first by availability (active status), then by price (low to high)
+          // Sort listings by price (low to high)
           return validListings.sort((a, b) => {
-            // First prioritize active listings
-            if (a.status === "active" && b.status !== "active") return -1;
-            if (a.status !== "active" && b.status === "active") return 1;
-
             // Then sort by price (use dynamicPrice if available, otherwise use pricePerNight)
             const priceA = a.dynamicPrice || a.pricePerNight?.price || 0;
             const priceB = b.dynamicPrice || b.pricePerNight?.price || 0;
@@ -179,7 +177,9 @@ const Recommendations = () => {
   }, []);
 
   if (loading)
-    return <div className="text-center py-10">Loading recommendations...</div>;
+    return (
+      <div className="text-center py-10">{t("loading_recommendations")}</div>
+    );
   if (error)
     return <div className="text-center py-10 text-red-500">Error: {error}</div>;
 

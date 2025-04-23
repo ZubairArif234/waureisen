@@ -442,7 +442,28 @@ const Accommodations = () => {
   const handleConfirmAddToFeatured = async (section) => {
     try {
       setLoading(true);
-      await addToFeaturedSection(featuredModal.id, section);
+      const response = await addToFeaturedSection(featuredModal.id, section);
+
+      // Check if there were any skipped listings
+      if (
+        response.data?.skippedListings &&
+        response.data.skippedListings.length > 0
+      ) {
+        // Get the first skipped listing
+        const skipped = response.data.skippedListings[0];
+        setError(
+          `Cannot add to recommendations: ${skipped.title || "Listing"} is ${
+            skipped.reason
+          }`
+        );
+        setTimeout(() => {
+          setError(null);
+        }, 5000);
+
+        setLoading(false);
+        setFeaturedModal({ isOpen: false, id: null, title: "" });
+        return;
+      }
 
       // Show success message
       setSuccessMessage(

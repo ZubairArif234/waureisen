@@ -33,6 +33,14 @@ const Signup = () => {
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const redirect = queryParams.get("redirect");
+    // Check for userType in URL params (from login redirect)
+    const userTypeParam = queryParams.get("userType");
+
+    if (userTypeParam) {
+      // Map "user" to "customer" as that's what this component uses
+      setUserType(userTypeParam === "user" ? "customer" : userTypeParam);
+    }
+
     if (redirect) {
       setRedirectAfterSignup(redirect);
 

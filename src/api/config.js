@@ -1,17 +1,18 @@
 // src/api/config.js
-import axios from 'axios';
+import axios from "axios";
+import { isAccountNotFoundError, redirectToSignup } from "../utils/authService";
 
 // Create an axios instance with default configs
 const API = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/api",
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
   timeout: 15000, // 15 seconds timeout
 });
 
 // Set constant token key
-const TOKEN_KEY = 'token';
+const TOKEN_KEY = "token";
 
 // Add request interceptor to include auth token for protected routes
 API.interceptors.request.use(
@@ -19,23 +20,23 @@ API.interceptors.request.use(
     const token = localStorage.getItem(TOKEN_KEY);
     if (token) {
       // Ensure we're using the correct Bearer format
-      config.headers['Authorization'] = `Bearer ${token}`;
+      config.headers["Authorization"] = `Bearer ${token}`;
       console.log(`Setting Authorization header for ${config.url}`);
     }
-    
+
     // Log the request for debugging
     console.log(`API Request to ${config.url}:`, {
       method: config.method,
       headers: config.headers,
       params: config.params,
       // Don't log password or sensitive data
-      data: config.data ? sanitizeRequestData(config.data) : undefined
+      data: config.data ? sanitizeRequestData(config.data) : undefined,
     });
-    
+
     return config;
   },
   (error) => {
-    console.error('Request interceptor error:', error);
+    console.error("Request interceptor error:", error);
     return Promise.reject(error);
   }
 );
@@ -46,45 +47,61 @@ API.interceptors.response.use(
     // Log successful responses for debugging
     console.log(`API Response from ${response.config.url}:`, {
       status: response.status,
-      data: response.data
+      data: response.data,
     });
     return response;
   },
   (error) => {
     // Handle network errors
     if (!error.response) {
-      console.error('Network error - no response from server');
+      console.error("Network error - no response from server");
       return Promise.reject(
-        new Error('Network error - please check your connection')
+        new Error("Network error - please check your connection")
       );
     }
 
     // Log specific errors for debugging
     if (error.response) {
-      console.error(`API Error ${error.response.status} (${error.response.config.url}):`, 
-        error.response.data);
-      
+      console.error(
+        `API Error ${error.response.status} (${error.response.config.url}):`,
+        error.response.data
+      );
+
       // Handle token expiration/invalid token
       if (error.response.status === 401) {
-        console.error('401 Unauthorized - Token invalid or expired');
-        
+        console.error("401 Unauthorized - Token invalid or expired");
+
+        // Get the current user type before clearing localStorage
+        const userType = localStorage.getItem("userType");
+
         // Clear auth data from localStorage
         localStorage.removeItem(TOKEN_KEY);
-        localStorage.removeItem('userType');
-        localStorage.removeItem('user_data');
-        localStorage.removeItem('provider_user');
-        localStorage.removeItem('admin_data');
-        
-        // Redirect to login page if not already there
+        localStorage.removeItem("userType");
+        localStorage.removeItem("user_data");
+        localStorage.removeItem("provider_user");
+        localStorage.removeItem("admin_data");
+
+        // Redirect to appropriate page if not already there
         const currentPath = window.location.pathname;
-        if (!currentPath.includes('/login')) {
-          window.location.href = '/login?session_expired=true';
+
+        if (
+          !currentPath.includes("/login") &&
+          !currentPath.includes("/signup")
+        ) {
+          // Check if error indicates account doesn't exist
+          if (isAccountNotFoundError(error)) {
+            // Use utility function to redirect to signup with user type
+            redirectToSignup(userType || "user");
+          } else {
+            // Otherwise just redirect to login with session expired parameter
+            window.location.href = "/login?session_expired=true";
+          }
         }
       } else if (error.response.status === 403) {
-        console.error('403 Forbidden - Permission denied');
+        console.error("403 Forbidden - Permission denied");
       }
     }
-    
+
     return Promise.reject(error);
   }
 );
@@ -92,15 +109,15 @@ API.interceptors.response.use(
 // Helper function to sanitize request data for logging (removes passwords)
 function sanitizeRequestData(data) {
   if (!data) return data;
-  
+
   // Create a copy to avoid modifying the original data
   const sanitized = { ...data };
-  
+
   // Remove sensitive fields
-  if (sanitized.password) sanitized.password = '[REDACTED]';
-  if (sanitized.newPassword) sanitized.newPassword = '[REDACTED]';
-  if (sanitized.currentPassword) sanitized.currentPassword = '[REDACTED]';
-  
+  if (sanitized.password) sanitized.password = "[REDACTED]";
+  if (sanitized.newPassword) sanitized.newPassword = "[REDACTED]";
+  if (sanitized.currentPassword) sanitized.currentPassword = "[REDACTED]";
+
   return sanitized;
 }
 
@@ -108,8 +125,8 @@ function sanitizeRequestData(data) {
 export const initializeAuthHeaders = () => {
   const token = localStorage.getItem(TOKEN_KEY);
   if (token) {
-    API.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    console.log('Auth headers initialized from localStorage');
+    API.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    console.log("Auth headers initialized from localStorage");
     return true;
   }
   return false;

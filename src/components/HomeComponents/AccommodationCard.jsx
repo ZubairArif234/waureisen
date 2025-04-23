@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Heart } from "lucide-react";
+import { useLanguage } from "../../utils/LanguageContext";
 
 const AccommodationCard = ({
   id = "1",
@@ -12,6 +13,7 @@ const AccommodationCard = ({
   isFavorited = false,
   pricePerNight,
 }) => {
+  const { t } = useLanguage();
   const [isFavorite, setIsFavorite] = useState(isFavorited);
   const navigate = useNavigate();
   const location = useLocation();
@@ -76,9 +78,8 @@ const AccommodationCard = ({
         </div>
       </div>
       <div className="space-y-1 cursor-pointer" onClick={handleClick}>
-        <p className="text-brand text-sm">CHF {price.toFixed(2)} per night</p>
+        <p className="text-brand text-sm">CHF {price.toFixed(2)} {t("per_night")}</p>
         <h3 className="font-medium text-gray-900">{propertyLocation}</h3>
-        <p className="text-gray-500 text-sm">Source: {displaySource}</p>
       </div>
     </div>
   );
