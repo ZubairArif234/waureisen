@@ -859,6 +859,8 @@ const translations = {
     'try_adjusting_filters': 'Try adjusting your filters to see more results',
     'no_bookings_match_filters': 'No bookings match your current filters',
 
+    'dates_blocked_successfully': 'Dates blocked successfully',
+
 
   },
 
@@ -868,6 +870,8 @@ const translations = {
 
 
   de: {
+
+    'dates_blocked_successfully': 'Daten erfolgreich blockiert',
 
     'showing_page': 'Seite {page} von {total}',
     'try_adjusting_filters': 'Versuchen Sie, Ihre Filter anzupassen, um mehr Ergebnisse zu sehen',

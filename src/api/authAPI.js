@@ -63,6 +63,26 @@ export const providerSignup = async (providerData) => {
   }
 };
 
+export const completeProviderRegistration = async (registrationData) => {
+  try {
+    console.log('Completing provider registration with:', registrationData);
+    const response = await API.post('/providers/complete-registration', registrationData);
+    console.log('Registration completion response:', response.data);
+    
+    // Update the stored provider data with the completed registration
+    if (response.data.provider) {
+      const currentData = JSON.parse(localStorage.getItem('provider_user') || '{}');
+      const updatedData = { ...currentData, ...response.data.provider };
+      localStorage.setItem('provider_user', JSON.stringify(updatedData));
+    }
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error completing provider registration:', error);
+    throw error;
+  }
+};
+
 // Admin authentication
 export const adminLogin = async (credentials) => {
   try {
