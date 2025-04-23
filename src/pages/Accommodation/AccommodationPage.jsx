@@ -597,19 +597,17 @@ const AccommodationPage = () => {
               </h2>
               <div className="bg-gray-50 p-4 md:p-6 rounded-lg">
                 <div className="flex items-center gap-4 mb-4">
-                  <img
-                    src={accommodation?.provider?.profilePicture || logo}
-                    alt={accommodation?.provider?.name || "Waureisen"}
-                    className="w-12 md:w-16 h-12 md:h-16 rounded-full object-cover"
+                  <img 
+                    src={accommodation?.provider?.profilePicture || logo} 
+                    alt={accommodation?.provider?.name || (accommodation?.listingSource || accommodation?.source?.name || "Provider")} 
+                    className="w-12 md:w-16 h-12 md:h-16 rounded-full object-cover" 
                   />
                   <div>
                     <h3 className="font-semibold md:text-base text-sm">
-                      Hello, I'm{" "}
-                      {accommodation?.provider?.name || "Waureisen (default)"}.
+                      Hello, I'm {accommodation?.provider?.name || (accommodation?.listingSource || accommodation?.source?.name || "Provider")}.
                     </h3>
                     <p className="text-gray-600 text-sm">
-                      {accommodation?.provider?.description ||
-                        "Dies ist eine Unterkunft eines unserer geschätzten Kooperationspartner. (default)"}
+                      {accommodation?.provider?.description || "This is an accommodation from one of our valued partners."}
                     </p>
                   </div>
                 </div>

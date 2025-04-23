@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import AccommodationCard from './AccommodationCard';
-import { useLanguage } from '../../utils/LanguageContext';
-import API from '../../api/config';
-import { getAllListings } from '../../api/listingAPI';
-import { fetchInterhomePrices } from '../../api/interhomeAPI'; // Import the price fetching function
+import React, { useState, useEffect } from "react";
+import AccommodationCard from "./AccommodationCard";
+import { useLanguage } from "../../utils/LanguageContext";
+import API from "../../api/config";
+import { getListingById } from "../../api/listingAPI";
+import { fetchInterhomePrices } from "../../api/interhomeAPI";
 
 const RecommendationsSection = ({ title, listings }) => {
   return (
@@ -15,15 +15,26 @@ const RecommendationsSection = ({ title, listings }) => {
             <AccommodationCard
               key={listing._id}
               id={listing._id}
-              image={listing.images && listing.images.length > 0 ? listing.images[0] : 'https://via.placeholder.com/300x200?text=No+Image'}
-              price={listing.dynamicPrice || listing.pricePerNight?.price || 0}
-              location={`${listing.listingType} in ${listing.location?.address || 'Unknown Location'}`}
-              provider={listing.provider || 'Waureisen'}
-              pricePerNight={listing.dynamicPrice ? 
-                { price: listing.dynamicPrice, currency: 'CHF' } : 
-                listing.pricePerNight
+              image={
+                listing.images && listing.images.length > 0
+                  ? listing.images[0]
+                  : "https://via.placeholder.com/300x200?text=No+Image"
               }
-              weeklyPrice={listing.weeklyPrice}
+              price={listing.dynamicPrice || listing.pricePerNight?.price || 0}
+              location={`${listing.listingType} in ${
+                listing.location?.address || "Unknown Location"
+              }`}
+              provider={listing.provider || "Unknown"}
+              listingSource={
+                listing.listingSource ||
+                (listing.source && listing.source.name) ||
+                "Provider"
+              }
+              pricePerNight={
+                listing.dynamicPrice
+                  ? { price: listing.dynamicPrice, currency: "CHF" }
+                  : listing.pricePerNight
+              }
             />
           ))
         ) : (
@@ -36,89 +47,156 @@ const RecommendationsSection = ({ title, listings }) => {
 
 const Recommendations = () => {
   const { t } = useLanguage();
-  const [allListings, setAllListings] = useState([]);
+  const [featuredListings, setFeaturedListings] = useState([]);
+  const [newListings, setNewListings] = useState([]);
+  const [popularListings, setPopularListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
+  // Fetch recommendations and corresponding listings
   useEffect(() => {
-    const fetchListings = async () => {
+    const fetchRecommendedListings = async () => {
       try {
-        setLoading(true);
-        const data = await getAllListings();
-        
-        // Fetch prices for Interhome listings
-        const listingsWithPrices = await Promise.all(
-          data.map(async (listing) => {
-            // Only fetch prices for Interhome listings
-            if (listing.source?.name === 'interhome' && listing.Code) {
+        // Get recommendations from the API
+        let recommendationsData = {
+          topRecommendations: [],
+          popularAccommodations: [],
+          exclusiveFinds: [],
+        };
+
+        try {
+          const response = await API.get("/admins/recommendations");
+          recommendationsData = response.data;
+        } catch (recError) {
+          console.warn("Could not fetch recommendations:", recError.message);
+        }
+
+        // Extract listing IDs from each section
+        const getIds = (items) => {
+          return items.map((item) =>
+            typeof item === "string" ? item : item._id
+          );
+        };
+
+        const featuredIds = getIds(
+          recommendationsData.topRecommendations || []
+        );
+        const newIds = getIds(recommendationsData.exclusiveFinds || []);
+        const popularIds = getIds(
+          recommendationsData.popularAccommodations || []
+        );
+
+        // Function to fetch a listing by ID with price data
+        const fetchListingWithPrice = async (id) => {
+          try {
+            const listing = await getListingById(id);
+
+            // If it's an Interhome listing, fetch dynamic pricing
+            if (listing.source?.name === "interhome" && listing.Code) {
               try {
                 // Get today's date in YYYY-MM-DD format
                 const today = new Date();
-                const formattedDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-                
+                const formattedDate = `${today.getFullYear()}-${String(
+                  today.getMonth() + 1
+                ).padStart(2, "0")}-${String(today.getDate()).padStart(
+                  2,
+                  "0"
+                )}`;
+
                 // Fetch price for a 7-day stay starting today with 2 guests
                 const priceData = await fetchInterhomePrices({
                   accommodationCode: listing.Code,
                   checkInDate: formattedDate,
                   pax: 2,
                   duration: 7,
-                  los: true
+                  los: true,
                 });
-                
+
                 // Add dynamic price to the listing if available
-                if (priceData && priceData.priceList && priceData.priceList.prices && priceData.priceList.prices.price) {
-                  const priceItems = priceData.priceList.prices.price;
-                  
-                  if (priceItems.length > 0) {
-                    // Get the first price item (should be for 7 days)
-                    const priceItem = priceItems[0];
-                    
-                    // Calculate the price per night by dividing the weekly price by 7
-                    const weeklyPrice = priceItem.price;
-                    const pricePerNight = Math.round(weeklyPrice / 7);
-                    
-                    console.log(`Listing ${listing.Code}: Weekly price ${weeklyPrice} CHF, nightly price ${pricePerNight} CHF`);
-                    
-                    return {
-                      ...listing,
-                      dynamicPrice: pricePerNight,
-                      weeklyPrice: weeklyPrice
-                    };
-                  }
+                if (priceData && priceData.price) {
+                  return {
+                    ...listing,
+                    dynamicPrice: priceData.price,
+                  };
                 }
               } catch (priceError) {
-                console.warn(`Could not fetch price for ${listing.Code}: ${priceError.message}`);
+                console.warn(
+                  `Could not fetch price for ${listing.Code}: ${priceError.message}`
+                );
               }
             }
             return listing;
-          })
-        );
-        
-        setAllListings(listingsWithPrices);
+          } catch (error) {
+            console.warn(`Could not fetch listing ${id}:`, error.message);
+            return null;
+          }
+        };
+
+        // Function to fetch listings by array of IDs and sort by availability and price
+        const fetchAndSortListings = async (ids) => {
+          // Fetch all listings in parallel
+          const fetchedListings = await Promise.all(
+            ids.map((id) => fetchListingWithPrice(id))
+          );
+
+          // Filter out null values (failed fetches)
+          const validListings = fetchedListings.filter(Boolean);
+
+          // Sort listings: first by availability (active status), then by price (low to high)
+          return validListings.sort((a, b) => {
+            // First prioritize active listings
+            if (a.status === "active" && b.status !== "active") return -1;
+            if (a.status !== "active" && b.status === "active") return 1;
+
+            // Then sort by price (use dynamicPrice if available, otherwise use pricePerNight)
+            const priceA = a.dynamicPrice || a.pricePerNight?.price || 0;
+            const priceB = b.dynamicPrice || b.pricePerNight?.price || 0;
+            return priceA - priceB;
+          });
+        };
+
+        // Fetch and process all three recommendation sections in parallel
+        const [featured, newItems, popular] = await Promise.all([
+          fetchAndSortListings(featuredIds),
+          fetchAndSortListings(newIds),
+          fetchAndSortListings(popularIds),
+        ]);
+
+        // Limit to 6 items per section
+        setFeaturedListings(featured.slice(0, 6));
+        setNewListings(newItems.slice(0, 6));
+        setPopularListings(popular.slice(0, 6));
+
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching listings:', err);
+        console.error("Error fetching recommendations:", err);
         setError(err.message);
         setLoading(false);
       }
     };
 
-    fetchListings();
+    fetchRecommendedListings();
   }, []);
 
-  // Filter listings for different sections
-  const featuredListings = allListings.slice(0, 6);
-  const newListings = allListings.slice(6, 12);
-  const popularListings = allListings.slice(12, 18);
-
-  if (loading) return <div className="text-center py-10">Loading recommendations...</div>;
-  if (error) return <div className="text-center py-10 text-red-500">Error: {error}</div>;
+  if (loading)
+    return <div className="text-center py-10">Loading recommendations...</div>;
+  if (error)
+    return <div className="text-center py-10 text-red-500">Error: {error}</div>;
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <RecommendationsSection title={t('featured_accommodations')} listings={featuredListings} />
-      <RecommendationsSection title={t('new_accommodations')} listings={newListings} />
-      <RecommendationsSection title={t('popular_accommodations')} listings={popularListings} />
+      <RecommendationsSection
+        title={t("featured_accommodations")}
+        listings={featuredListings}
+      />
+      <RecommendationsSection
+        title={t("new_accommodations")}
+        listings={newListings}
+      />
+      <RecommendationsSection
+        title={t("popular_accommodations")}
+        listings={popularListings}
+      />
     </div>
   );
 };

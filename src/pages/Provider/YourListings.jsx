@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, Search, Filter, MoreHorizontal, AlertTriangle } from 'lucide-react';
@@ -11,40 +12,71 @@ import s1 from '../../assets/s1.png';
 import s2 from '../../assets/s2.png';
 import { useLanguage } from '../../utils/LanguageContext';
 import { getProviderListings, deleteListing } from '../../api/providerAPI';
+=======
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  ArrowLeft,
+  Plus,
+  Search,
+  Filter,
+  MoreHorizontal,
+  AlertTriangle,
+} from "lucide-react";
+import Navbar from "../../components/Shared/Navbar";
+import Footer from "../../components/Shared/Footer";
+import MockMap from "../../components/SearchComponents/MockMap";
+import MapToggle from "../../components/SearchComponents/MapToggle";
+import i1 from "../../assets/i1.png";
+import i2 from "../../assets/i2.png";
+import s1 from "../../assets/s1.png";
+import s2 from "../../assets/s2.png";
+import { useLanguage } from "../../utils/LanguageContext";
+>>>>>>> 548bb14 (Dropdown issues resolved All sources resolved Add to recommendations added)
 
 // DeleteConfirmationModal component
-const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, listingTitle }) => {
+const DeleteConfirmationModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  listingTitle,
+}) => {
   if (!isOpen) return null;
 
   return (
     <>
       {/* Overlay */}
-      <div className="fixed inset-0 bg-black bg-opacity-50 z-50" onClick={onClose} />
-      
+      <div
+        className="fixed inset-0 bg-black bg-opacity-50 z-50"
+        onClick={onClose}
+      />
+
       {/* Modal */}
       <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl z-50 w-96 max-w-[90%]">
         <div className="p-6">
           <div className="flex items-center text-red-600 mb-4">
             <AlertTriangle className="w-6 h-6 mr-2" />
-            <h3 className="text-lg font-medium">{t('delete_listing')}</h3>
+            <h3 className="text-lg font-medium">{t("delete_listing")}</h3>
           </div>
-          
+
           <p className="text-gray-600 mb-6">
-          {t('delete_confirmation', { title: <span className="font-medium">{listingTitle}</span> })}
+            {t("delete_confirmation", {
+              title: <span className="font-medium">{listingTitle}</span>,
+            })}
           </p>
-          
+
           <div className="flex justify-end gap-3">
             <button
               onClick={onClose}
               className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
             >
-              {t('cancel')}
+              {t("cancel")}
             </button>
             <button
               onClick={onConfirm}
               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
             >
-               {t('delete')}
+              {t("delete")}
             </button>
           </div>
         </div>
@@ -56,28 +88,35 @@ const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, listingTitle }) =
 const ListingCard = ({ listing, onEdit, onDelete, onView }) => {
   const { t } = useLanguage();
   const [showMenu, setShowMenu] = useState(false);
-  
+
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
       <div className="relative">
-        <img 
-          src={listing.image} 
+        <img
+          src={listing.image}
           alt={listing.title}
           className="w-full h-48 object-cover"
           onClick={() => onView(listing.id)}
         />
-        <div className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-medium ${
-          listing.status === 'active' 
-            ? 'bg-green-100 text-green-800' 
-            : listing.status === 'pending approval'
-            ? 'bg-yellow-100 text-yellow-800'
-            : 'bg-gray-100 text-gray-800'
-        }`}>
-          {listing.status === 'active' 
-            ? t('active_status') 
-            : listing.status === 'pending approval'
-            ? t('pending_status') 
-            : t('draft_status')}
+        <div
+          className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-medium ${
+            listing.status === "active"
+              ? "bg-green-100 text-green-800"
+              : listing.status === "pending approval"
+              ? "bg-yellow-100 text-yellow-800"
+              : "bg-gray-100 text-gray-800"
+          }`}
+        >
+          {listing.status === "active"
+            ? t("active_status")
+            : listing.status === "pending approval"
+            ? t("pending_status")
+            : t("draft_status")}
+        </div>
+
+        {/* Add source badge */}
+        <div className="absolute bottom-3 right-3 px-2 py-1 bg-black/60 text-white text-xs rounded-md">
+          {listing.listingSource || "Provider"}
         </div>
       </div>
       <div className="p-4">
@@ -87,18 +126,18 @@ const ListingCard = ({ listing, onEdit, onDelete, onView }) => {
             <p className="text-sm text-gray-500">{listing.location}</p>
           </div>
           <div className="relative">
-            <button 
+            <button
               className="p-1 hover:bg-gray-100 rounded-full"
               onClick={() => setShowMenu(!showMenu)}
               aria-label="Open options menu"
             >
               <MoreHorizontal className="w-5 h-5 text-gray-500" />
             </button>
-            
+
             {showMenu && (
               <>
-                <div 
-                  className="fixed inset-0 z-40" 
+                <div
+                  className="fixed inset-0 z-40"
                   onClick={() => setShowMenu(false)}
                 />
                 <div className="absolute right-0 mt-1 bg-white rounded-md shadow-lg z-50 w-32 py-1 border border-gray-200">
@@ -109,7 +148,7 @@ const ListingCard = ({ listing, onEdit, onDelete, onView }) => {
                     }}
                     className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
-                    {t('view')}
+                    {t("view")}
                   </button>
                   <button
                     onClick={() => {
@@ -118,7 +157,7 @@ const ListingCard = ({ listing, onEdit, onDelete, onView }) => {
                     }}
                     className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
-                    {t('edit')}
+                    {t("edit")}
                   </button>
                   <button
                     onClick={() => {
@@ -127,17 +166,21 @@ const ListingCard = ({ listing, onEdit, onDelete, onView }) => {
                     }}
                     className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                   >
-                    {t('delete')}
+                    {t("delete")}
                   </button>
                 </div>
               </>
             )}
           </div>
         </div>
-        
+
         <div className="flex items-center justify-between">
-          <span className="text-brand font-medium">{listing.price} CHF/night</span>
-          <span className="text-gray-500 text-sm">{listing.bookings} bookings</span>
+          <span className="text-brand font-medium">
+            {listing.price} CHF/night
+          </span>
+          <span className="text-gray-500 text-sm">
+            {listing.bookings} bookings
+          </span>
         </div>
       </div>
     </div>
@@ -147,9 +190,9 @@ const ListingCard = ({ listing, onEdit, onDelete, onView }) => {
 const YourListings = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedPropertyType, setSelectedPropertyType] = useState('all');
+  const [activeTab, setActiveTab] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedPropertyType, setSelectedPropertyType] = useState("all");
   const [showMap, setShowMap] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
   const [listings, setListings] = useState([]);
@@ -159,7 +202,7 @@ const YourListings = () => {
     isOpen: false, 
     listing: null 
   });
-  
+
   // Handle window resize for responsive design
   useEffect(() => {
     const handleResize = () => {
@@ -170,9 +213,9 @@ const YourListings = () => {
         setShowMap(false);
       }
     };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, [showMap]);
 
 
@@ -220,7 +263,7 @@ const YourListings = () => {
   const handleDelete = (listing) => {
     setDeleteModal({
       isOpen: true,
-      listing
+      listing,
     });
   };
 
@@ -253,28 +296,32 @@ const confirmDelete = async () => {
   };
 
   const handleCreateListing = () => {
-    navigate('/provider/create-listing');
+    navigate("/provider/create-listing");
   };
 
   // Apply filters to listings
-  const filteredListings = listings.filter(listing => {
+  const filteredListings = listings.filter((listing) => {
     // Filter by tab (status)
-    const statusMatch = 
-      activeTab === 'all' ? true : 
-      activeTab === 'active' ? listing.status === 'active' :
-      activeTab === 'pending' ? listing.status === 'pending approval' :
-      listing.status === 'draft';
-    
+    const statusMatch =
+      activeTab === "all"
+        ? true
+        : activeTab === "active"
+        ? listing.status === "active"
+        : activeTab === "pending"
+        ? listing.status === "pending approval"
+        : listing.status === "draft";
+
     // Filter by search query
-    const searchMatch = 
+    const searchMatch =
       listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       listing.location.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     // Filter by property type
-    const typeMatch = 
-      selectedPropertyType === 'all' ? true : 
-      listing.propertyType === selectedPropertyType;
-    
+    const typeMatch =
+      selectedPropertyType === "all"
+        ? true
+        : listing.propertyType === selectedPropertyType;
+
     return statusMatch && searchMatch && typeMatch;
   });
 
@@ -349,39 +396,38 @@ const confirmDelete = async () => {
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
-      
+
       <div className="relative pt-20">
         {/* Mobile Map Toggle */}
-        <MapToggle 
-          showMap={showMap} 
-          onToggle={(show) => setShowMap(show)} 
-        />
+        <MapToggle showMap={showMap} onToggle={(show) => setShowMap(show)} />
 
         <div className="flex">
           {/* Main Content */}
-          <main 
+          <main
             className={`w-full px-4 sm:px-6 lg:px-8 py-12 ${
-              isDesktop ? 'lg:w-2/3' : 'w-full'
-            } ${showMap && !isDesktop ? 'hidden' : ''}`}
+              isDesktop ? "lg:w-2/3" : "w-full"
+            } ${showMap && !isDesktop ? "hidden" : ""}`}
           >
             {/* Header with Back Button */}
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
               <div className="flex items-center gap-4">
                 <button
-                  onClick={() => navigate('/provider/dashboard')}
+                  onClick={() => navigate("/provider/dashboard")}
                   className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                 >
                   <ArrowLeft className="w-6 h-6 text-gray-600" />
                 </button>
-                <h1 className="text-3xl font-semibold text-gray-900">{t('your_listings')}</h1>
+                <h1 className="text-3xl font-semibold text-gray-900">
+                  {t("your_listings")}
+                </h1>
               </div>
-              
+
               <button
                 onClick={handleCreateListing}
                 className="flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand/90 transition-colors"
               >
                 <Plus className="w-5 h-5" />
-                <span>{t('create_new_listing')}</span>
+                <span>{t("create_new_listing")}</span>
               </button>
             </div>
 
@@ -391,13 +437,13 @@ const confirmDelete = async () => {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
-                  placeholder={t('search_listings_placeholder')}
+                  placeholder={t("search_listings_placeholder")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                 />
               </div>
-              
+
               <div className="flex items-center gap-2">
                 <Filter className="w-5 h-5 text-gray-400" />
                 <select
@@ -407,7 +453,7 @@ const confirmDelete = async () => {
                 >
                   {propertyTypes.map((type, index) => (
                     <option key={index} value={type}>
-                       {type === 'all' ? t('all_property_types') : type}
+                      {type === "all" ? t("all_property_types") : type}
                     </option>
                   ))}
                 </select>
@@ -417,50 +463,54 @@ const confirmDelete = async () => {
             {/* Tabs */}
             <div className="flex border-b mb-6 overflow-x-auto">
               <button
-                onClick={() => setActiveTab('all')}
+                onClick={() => setActiveTab("all")}
                 className={`px-4 py-2 font-medium ${
-                  activeTab === 'all'
-                    ? 'text-brand border-b-2 border-brand'
-                    : 'text-gray-500 hover:text-gray-700'
+                  activeTab === "all"
+                    ? "text-brand border-b-2 border-brand"
+                    : "text-gray-500 hover:text-gray-700"
                 }`}
               >
-                  {t('all_listings')} ({listings.length})
+                {t("all_listings")} ({listings.length})
               </button>
               <button
-                onClick={() => setActiveTab('active')}
+                onClick={() => setActiveTab("active")}
                 className={`px-4 py-2 font-medium ${
-                  activeTab === 'active'
-                    ? 'text-brand border-b-2 border-brand'
-                    : 'text-gray-500 hover:text-gray-700'
+                  activeTab === "active"
+                    ? "text-brand border-b-2 border-brand"
+                    : "text-gray-500 hover:text-gray-700"
                 }`}
               >
-                 {t('active')} ({listings.filter(l => l.status === 'active').length})
+                {t("active")} (
+                {listings.filter((l) => l.status === "active").length})
               </button>
               <button
-                onClick={() => setActiveTab('pending')}
+                onClick={() => setActiveTab("pending")}
                 className={`px-4 py-2 font-medium ${
-                  activeTab === 'pending'
-                    ? 'text-brand border-b-2 border-brand'
-                    : 'text-gray-500 hover:text-gray-700'
+                  activeTab === "pending"
+                    ? "text-brand border-b-2 border-brand"
+                    : "text-gray-500 hover:text-gray-700"
                 }`}
               >
-                {t('pending')}({listings.filter(l => l.status === 'pending approval').length})
+                {t("pending")}(
+                {listings.filter((l) => l.status === "pending approval").length}
+                )
               </button>
               <button
-                onClick={() => setActiveTab('draft')}
+                onClick={() => setActiveTab("draft")}
                 className={`px-4 py-2 font-medium ${
-                  activeTab === 'draft'
-                    ? 'text-brand border-b-2 border-brand'
-                    : 'text-gray-500 hover:text-gray-700'
+                  activeTab === "draft"
+                    ? "text-brand border-b-2 border-brand"
+                    : "text-gray-500 hover:text-gray-700"
                 }`}
               >
-                {t('drafts')} ({listings.filter(l => l.status === 'draft').length})
+                {t("drafts")} (
+                {listings.filter((l) => l.status === "draft").length})
               </button>
             </div>
 
             {/* Listings Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {filteredListings.map(listing => (
+              {filteredListings.map((listing) => (
                 <ListingCard
                   key={listing.id}
                   listing={listing}
@@ -474,34 +524,36 @@ const confirmDelete = async () => {
             {/* No listings state */}
             {filteredListings.length === 0 && (
               <div className="text-center py-12">
-                <p className="text-gray-500 text-lg mb-2">{t('no_listings_found')}</p>
+                <p className="text-gray-500 text-lg mb-2">
+                  {t("no_listings_found")}
+                </p>
                 <p className="text-gray-400 mb-6">
-                  {activeTab === 'all'
-                    ? t('no_listings_created_yet')
-                    : activeTab === 'active'
-                    ? t('no_active_listings')
-                    : activeTab === 'pending'
-                    ? t('no_pending_listings')
-                    : t('no_draft_listings')}
+                  {activeTab === "all"
+                    ? t("no_listings_created_yet")
+                    : activeTab === "active"
+                    ? t("no_active_listings")
+                    : activeTab === "pending"
+                    ? t("no_pending_listings")
+                    : t("no_draft_listings")}
                 </p>
                 <button
                   onClick={handleCreateListing}
                   className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand/90 transition-colors"
                 >
-                  {t('create_your_first_listing')}
+                  {t("create_your_first_listing")}
                 </button>
               </div>
             )}
           </main>
 
           {/* Map View */}
-          <aside 
+          <aside
             className={`${
-              showMap && !isDesktop 
-                ? 'fixed inset-0 z-40' 
-                : isDesktop 
-                  ? 'hidden lg:block lg:w-1/3 sticky top-20 h-[calc(100vh-80px)]' 
-                  : 'hidden'
+              showMap && !isDesktop
+                ? "fixed inset-0 z-40"
+                : isDesktop
+                ? "hidden lg:block lg:w-1/3 sticky top-20 h-[calc(100vh-80px)]"
+                : "hidden"
             }`}
           >
             <MockMap listings={filteredListings} />
@@ -514,7 +566,7 @@ const confirmDelete = async () => {
         isOpen={deleteModal.isOpen}
         onClose={() => setDeleteModal({ isOpen: false, listing: null })}
         onConfirm={confirmDelete}
-        listingTitle={deleteModal.listing?.title || ''}
+        listingTitle={deleteModal.listing?.title || ""}
       />
 
       <Footer />

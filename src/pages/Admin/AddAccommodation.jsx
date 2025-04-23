@@ -1,112 +1,55 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save } from 'lucide-react';
-import BasicInfoForm from '../../components/Admin/BasicInfoForm';
-import PhotosForm from '../../components/Admin/PhotosForm';
-import AmenitiesForm from '../../components/Admin/AmenitiesForm';
-import DescriptionForm from '../../components/Admin/DescriptionForm';
-import PoliciesLocationForm from '../../components/Admin/PoliciesLocationForm';
-
-// Mock data for edit mode
-const mockAccommodationData = {
-  title: 'Modern and Luxury 1BHK Studio/Self Check-in/Eiffle',
-  propertyType: 'Studio',
-  listingSource: 'Admin',
-  capacity: {
-    people: 6,
-    dogs: 1,
-    bedrooms: 2,
-    rooms: 2,
-    washrooms: 1
-  },
-  pricing: {
-    currency: 'CHF',
-    regularPrice: 360,
-    discountedPrice: 240
-  },
-  availability: {
-    checkInDates: '',
-    checkInDate: null,
-    checkOutDate: null,
-    checkInTime: { hour: '', period: '' },
-    checkOutTime: { hour: '', period: '' },
-    allowInstantBooking: false,
-    active: false
-  },
-  mainImage: null,
-  galleryImages: [],
-  generalAmenities: {
-    kitchen: true,
-    airConditioning: true,
-    parking: true,
-    wifi: true,
-    dedicatedWorkspace: true,
-    fireworkFreeZone: true,
-    tv: true,
-    swimmingPool: false,
-    dogsAllowed: true
-  },
-  dogFilters: {
-    fireworkFreeZone: true,
-    dogParksNearby: false,
-    dogFriendlyRestaurants: true,
-    petSupplies: false
-  },
-  shortDescription: 'Modern and Luxury 1BHK Studio with self check-in in a prime location',
-  fullDescription: 'Innenbereich:20 m². Weitere Angaben des Anbieters: Wir bieten grosszügige Rabatte schon ab 3 Tagen. Langzeitaufenthalte möglich. Perfekte Lage: Unsere Unterkunft bietet eine unschlagbare zentrale Lage. Lebensmittelgeschäfte, Bushaltestellen, erstklassige Restaurants, Bars und Shoppingmöglichkeiten – alles ist nur einen kurzen Spaziergang entfernt. Stilvolle Einrichtung: Erleben Sie stillen Luxus und höchste Funktionalität. Unsere Einrichtung umfasst ein Top-Bett, hochwertigste Bettwäsche und Seifen, schnellen WLAN-Zugang, einen Flachbild-TV und eine Musikanlage. Top-Qualität und Sauberkeit: Wir garantieren Ihnen Top-Qualität und makellose Sauberkeit. Sie finden alles in perfektem Zustand vor, sodass Sie sich sofort wohlfühlen können. Eigener Garagenplatz: Für zusätzlichen Komfort steht Ihnen ein eigener Garagenplatz zur Verfügung. So haben Sie jederzeit einen sicheren Stellplatz für Ihr Fahrzeug. Ruhige Umgebung: Trotz der zentralen Lage ist die Umgebung unserer Unterkunft sehr ruhig, sodass Sie jederzeit entspannen und zur Ruhe kommen können. Unser Studio zeichnet sich durch qualitativ hochstehende, stilvolle',
-  location: {
-    city: 'Vaz',
-    fullAddress: '7082 Vaz/Obervaz, Switzerland',
-    mapLocation: null
-  },
-  policies: {
-    cancellationPolicy: 'flexible',
-    customPolicyDetails: 'Je nach Reisezeitraum 90% Rückerstattung bis 0% Rückerstattung.',
-    houseRules: {
-      noSmoking: true,
-      noParties: true,
-      quietHours: true
-    }
-  }
-};
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, Save } from "lucide-react";
+import BasicInfoForm from "../../components/Admin/BasicInfoForm";
+import PhotosForm from "../../components/Admin/PhotosForm";
+import AmenitiesForm from "../../components/Admin/AmenitiesForm";
+import DescriptionForm from "../../components/Admin/DescriptionForm";
+import PoliciesLocationForm from "../../components/Admin/PoliciesLocationForm";
+import {
+  createListing,
+  updateListing,
+  getListingById,
+} from "../../api/adminAPI";
+import { generateUniqueListingCode } from "../../utils/uniqueCodeGenerator";
 
 const AddAccommodation = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEditMode = !!id;
   const [isLoading, setIsLoading] = useState(isEditMode); // Start with loading if in edit mode
-  const [activeTab, setActiveTab] = useState('basicInfo');
+  const [activeTab, setActiveTab] = useState("basicInfo");
   const [formData, setFormData] = useState({
     // Basic Info
-    title: '',
-    propertyType: 'Studio',
-    listingSource: 'Admin',
+    title: "",
+    propertyType: "Studio",
+    listingSource: "Admin",
     capacity: {
       people: 6,
       dogs: 1,
       bedrooms: 2,
       rooms: 2,
-      washrooms: 1
+      washrooms: 1,
     },
     pricing: {
-      currency: 'CHF',
+      currency: "CHF",
       regularPrice: 360,
-      discountedPrice: 240
+      discountedPrice: 240,
     },
     availability: {
-      checkInDates: '',
+      checkInDates: "",
       checkInDate: null,
       checkOutDate: null,
-      checkInTime: { hour: '', period: '' },
-      checkOutTime: { hour: '', period: '' },
+      checkInTime: { hour: "", period: "" },
+      checkOutTime: { hour: "", period: "" },
       allowInstantBooking: false,
-      active: false
+      active: false,
     },
-    
+
     // Photos
     mainImage: null,
     galleryImages: [],
-    
+
     // Amenities
     generalAmenities: {
       kitchen: false,
@@ -117,67 +60,63 @@ const AddAccommodation = () => {
       fireworkFreeZone: false,
       tv: false,
       swimmingPool: false,
-      dogsAllowed: false
+      dogsAllowed: false,
     },
     dogFilters: {
       fireworkFreeZone: false,
       dogParksNearby: false,
       dogFriendlyRestaurants: false,
-      petSupplies: false
+      petSupplies: false,
     },
-    
+
     // Description
-    shortDescription: '',
-    fullDescription: '',
-    
+    shortDescription: "",
+    fullDescription: "",
+
     // Policies & Location
     location: {
-      city: '',
-      fullAddress: '',
-      mapLocation: null
+      city: "",
+      fullAddress: "",
+      mapLocation: null,
     },
     policies: {
-      cancellationPolicy: 'flexible',
-      customPolicyDetails: '',
+      cancellationPolicy: "flexible",
+      customPolicyDetails: "",
       houseRules: {
         noSmoking: false,
         noParties: false,
-        quietHours: false
-      }
+        quietHours: false,
+      },
     },
   });
 
   // Load data if in edit mode
   useEffect(() => {
     if (isEditMode) {
-      // In a real app, you would fetch the data from an API based on the ID
-      console.log(`Fetching data for listing with ID: ${id}`);
-      setIsLoading(true);
-      
-      // Simulate API call delay
-      const fetchData = async () => {
+      const fetchListing = async () => {
         try {
-          // Simulate network delay
-          await new Promise(resolve => setTimeout(resolve, 800));
-          
-          // Set form data to mock data
-          setFormData(mockAccommodationData);
+          setIsLoading(true);
+          // Fetch actual listing data using the API
+          const listingData = await getListingById(id);
+          setFormData(listingData);
           setIsLoading(false);
         } catch (error) {
           console.error("Error fetching accommodation data:", error);
-          // Handle error here - show error message to user
+          alert("Failed to load listing data. Please try again.");
           setIsLoading(false);
+          // Navigate back to listings on error
+          navigate("/admin/accommodations");
         }
       };
-      
-      fetchData();
+
+      fetchListing();
     }
-  }, [isEditMode, id]);
+  }, [isEditMode, id, navigate]);
 
   const handleInputChange = (field, value) => {
     setFormData({
       ...formData,
-      [field]: value
+      [field]: value,
     });
   };
 
@@ -187,71 +126,168 @@ const AddAccommodation = () => {
       ...formData,
       [section]: {
         ...formData[section],
-        [field]: value
-      }
+        [field]: value,
+      },
     });
   };
 
-  const handleSubmit = () => {
-    // Here you would typically send the data to your backend
-    if (isEditMode) {
-      console.log(`Updating listing ${id} with data:`, formData);
-      // In a real app, you would make a PUT or PATCH request to update the listing
-    } else {
-      console.log('Creating new listing with data:', formData);
-      // In a real app, you would make a POST request to create the listing
+  const handleSubmit = async () => {
+    try {
+      setIsLoading(true);
+
+      // Generate a unique code for the listing
+      const uniqueCode = generateUniqueListingCode();
+
+      // Process the images array
+      const photos = [];
+
+      // Add main image if available
+      if (formData.mainImage) {
+        photos.push(formData.mainImage);
+      }
+
+      // Add gallery images if available
+      if (formData.galleryImages && formData.galleryImages.length > 0) {
+        // Filter to make sure we only include string URLs (not File objects)
+        const galleryUrls = formData.galleryImages.filter(
+          (img) => typeof img === "string"
+        );
+        photos.push(...galleryUrls);
+      }
+
+      // Create a completely new data structure to ensure all required fields
+      const listingSubmitData = {
+        title: formData.title || "New Listing",
+        description:
+          formData.fullDescription || formData.shortDescription || "",
+        shortDescription: formData.shortDescription || "",
+        listingType: formData.propertyType || "Studio",
+        status: "active",
+        provider: "Waureisen",
+        // Add unique code to prevent duplicate key error
+        Code: uniqueCode,
+
+        // Format pricing data correctly
+        pricePerNight: {
+          price: formData.pricing?.regularPrice || 0,
+          currency: formData.pricing?.currency || "CHF",
+        },
+
+        // Format location with required address
+        location: {
+          city: formData.location?.city || "",
+          address: formData.location?.fullAddress || "Default Address",
+          coordinates: formData.location?.mapLocation || [0, 0],
+        },
+
+        // Copy capacity information
+        capacity: formData.capacity || {
+          people: 2,
+          dogs: 1,
+          bedrooms: 1,
+          rooms: 1,
+          washrooms: 1,
+        },
+
+        // Add processed photos array
+        photos: photos,
+
+        // Source information
+        source: {
+          name: "waureisen",
+          redirectLink: null,
+        },
+
+        // Format selected filters
+        selectedFilters: {
+          generalFilters: Object.entries(formData.generalAmenities || {})
+            .filter(([, value]) => value === true)
+            .map(([key]) => key),
+          dogFilters: Object.entries(formData.dogFilters || {})
+            .filter(([, value]) => value === true)
+            .map(([key]) => key),
+        },
+      };
+
+      // Log the exact data being sent for debugging
+      console.log(
+        "Sending data to server:",
+        JSON.stringify(listingSubmitData, null, 2)
+      );
+
+      let result;
+      if (isEditMode) {
+        result = await updateListing(id, listingSubmitData);
+        console.log(`Updated listing ${id}:`, result);
+      } else {
+        result = await createListing(listingSubmitData);
+        console.log("Created new listing:", result);
+      }
+
+      // Show success message
+      alert(
+        isEditMode
+          ? "Listing updated successfully!"
+          : "Listing created successfully!"
+      );
+
+      // Redirect back to accommodations list
+      navigate("/admin/accommodations");
+    } catch (error) {
+      console.error("Error saving listing:", error);
+      alert(
+        `Failed to ${
+          isEditMode ? "update" : "create"
+        } listing. Please try again. Error: ${error.message}`
+      );
+    } finally {
+      setIsLoading(false);
     }
-    
-    // Show success message (in a real app)
-    alert(isEditMode ? 'Listing updated successfully!' : 'Listing created successfully!');
-    
-    // Redirect back to accommodations list
-    navigate('/admin/accommodations');
   };
 
   const tabs = [
-    { id: 'basicInfo', label: 'Basic Info' },
-    { id: 'photos', label: 'Photos' },
-    { id: 'amenities', label: 'Amenities' },
-    { id: 'description', label: 'Description' },
-    { id: 'policiesLocation', label: 'Policies & Location' }
+    { id: "basicInfo", label: "Basic Info" },
+    { id: "photos", label: "Photos" },
+    { id: "amenities", label: "Amenities" },
+    { id: "description", label: "Description" },
+    { id: "policiesLocation", label: "Policies & Location" },
   ];
 
   const renderForm = () => {
     switch (activeTab) {
-      case 'basicInfo':
+      case "basicInfo":
         return (
-          <BasicInfoForm 
-            formData={formData} 
+          <BasicInfoForm
+            formData={formData}
             handleInputChange={handleInputChange}
             handleNestedInputChange={handleNestedInputChange}
           />
         );
-      case 'photos':
+      case "photos":
         return (
-          <PhotosForm 
-            formData={formData} 
+          <PhotosForm
+            formData={formData}
             handleInputChange={handleInputChange}
           />
         );
-      case 'amenities':
+      case "amenities":
         return (
-          <AmenitiesForm 
-            formData={formData} 
+          <AmenitiesForm
+            formData={formData}
             handleNestedInputChange={handleNestedInputChange}
           />
         );
-      case 'description':
+      case "description":
         return (
-          <DescriptionForm 
-            formData={formData} 
+          <DescriptionForm
+            formData={formData}
             handleInputChange={handleInputChange}
           />
         );
-      case 'policiesLocation':
+      case "policiesLocation":
         return (
-          <PoliciesLocationForm 
-            formData={formData} 
+          <PoliciesLocationForm
+            formData={formData}
             handleInputChange={handleInputChange}
             handleNestedInputChange={handleNestedInputChange}
           />
@@ -266,13 +302,13 @@ const AddAccommodation = () => {
       {/* Header */}
       <div className="mb-6 flex items-center gap-4">
         <button
-          onClick={() => navigate('/admin/accommodations')}
+          onClick={() => navigate("/admin/accommodations")}
           className="p-2 hover:bg-gray-100 rounded-full transition-colors"
         >
           <ArrowLeft className="w-5 h-5 text-gray-600" />
         </button>
         <h1 className="text-2xl font-semibold text-gray-900">
-          {isEditMode ? 'Edit Listing' : 'Add New Listing'}
+          {isEditMode ? "Edit Listing" : "Add New Listing"}
         </h1>
       </div>
 
@@ -286,8 +322,8 @@ const AddAccommodation = () => {
               onClick={() => setActiveTab(tab.id)}
               className={`px-6 py-4 text-sm font-medium whitespace-nowrap ${
                 activeTab === tab.id
-                  ? 'text-gray-900 border-b-2 border-gray-900'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? "text-gray-900 border-b-2 border-gray-900"
+                  : "text-gray-500 hover:text-gray-700"
               }`}
             >
               {tab.label}
@@ -303,9 +339,7 @@ const AddAccommodation = () => {
               <p className="text-gray-600">Loading listing data...</p>
             </div>
           ) : (
-            <form onSubmit={(e) => e.preventDefault()}>
-              {renderForm()}
-            </form>
+            <form onSubmit={(e) => e.preventDefault()}>{renderForm()}</form>
           )}
         </div>
 
@@ -313,7 +347,7 @@ const AddAccommodation = () => {
         <div className="p-4 border-t bg-gray-50 flex justify-end gap-4">
           <button
             type="button"
-            onClick={() => navigate('/admin/accommodations')}
+            onClick={() => navigate("/admin/accommodations")}
             className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
             Cancel

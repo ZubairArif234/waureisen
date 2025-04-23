@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { MoreHorizontal, Image } from 'lucide-react';
+import React, { useState, useRef, useEffect } from "react";
+import { MoreHorizontal, Image } from "lucide-react";
 
 const BlogCard = ({ blog, onEdit, onDelete }) => {
   const [showMenu, setShowMenu] = useState(false);
-  const [menuPosition, setMenuPosition] = useState('bottom');
+  const [menuPosition, setMenuPosition] = useState("bottom");
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
 
@@ -13,12 +13,15 @@ const BlogCard = ({ blog, onEdit, onDelete }) => {
       const buttonRect = buttonRef.current.getBoundingClientRect();
       const windowHeight = window.innerHeight;
       const spaceBelow = windowHeight - buttonRect.bottom;
-      
+
+      // Use a fixed estimate for menu height
+      const estimatedMenuHeight = 100;
+
       // Position menu above if there's not enough space below
-      if (spaceBelow < 100) {
-        setMenuPosition('top');
+      if (spaceBelow < estimatedMenuHeight) {
+        setMenuPosition("top");
       } else {
-        setMenuPosition('bottom');
+        setMenuPosition("bottom");
       }
     }
   }, [showMenu]);
@@ -36,16 +39,30 @@ const BlogCard = ({ blog, onEdit, onDelete }) => {
     };
   }, [menuRef]);
 
+  // Close menu when scrolling
+  useEffect(() => {
+    const handleScroll = () => {
+      if (showMenu) {
+        setShowMenu(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [showMenu]);
+
   // Get category style
   const getCategoryStyle = (category) => {
     const styles = {
-      'Destinations': 'bg-blue-100 text-blue-800',
-      'Food & Cuisine': 'bg-yellow-100 text-yellow-800',
-      'Travel Tips': 'bg-green-100 text-green-800',
-      'Pet Travel': 'bg-purple-100 text-purple-800'
+      Destinations: "bg-blue-100 text-blue-800",
+      "Food & Cuisine": "bg-yellow-100 text-yellow-800",
+      "Travel Tips": "bg-green-100 text-green-800",
+      "Pet Travel": "bg-purple-100 text-purple-800",
     };
-    
-    return styles[category] || 'bg-gray-100 text-gray-800';
+
+    return styles[category] || "bg-gray-100 text-gray-800";
   };
 
   return (
@@ -53,8 +70,8 @@ const BlogCard = ({ blog, onEdit, onDelete }) => {
       {/* Image Section */}
       <div className="h-48 bg-gray-100 flex items-center justify-center">
         {blog.featuredImage ? (
-          <img 
-            src={blog.featuredImage} 
+          <img
+            src={blog.featuredImage}
             alt={blog.title}
             className="w-full h-full object-cover"
           />
@@ -65,36 +82,55 @@ const BlogCard = ({ blog, onEdit, onDelete }) => {
           </div>
         )}
       </div>
-      
+
       {/* Content Section */}
       <div className="p-4">
         {/* Category Tag */}
         <div className="mb-3">
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryStyle(blog.category)}`}>
+          <span
+            className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryStyle(
+              blog.category
+            )}`}
+          >
             {blog.category}
           </span>
         </div>
-        
+
         {/* Title and Menu */}
         <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="font-medium text-gray-900 line-clamp-2">{blog.title}</h3>
+          <h3 className="font-medium text-gray-900 line-clamp-2">
+            {blog.title}
+          </h3>
           <div className="relative" ref={menuRef}>
-            <button 
+            <button
               ref={buttonRef}
               className="p-1 hover:bg-gray-100 rounded-full flex-shrink-0"
               onClick={() => setShowMenu(!showMenu)}
+              aria-label="Open options menu"
             >
               <MoreHorizontal className="w-5 h-5 text-gray-500" />
             </button>
-            
+
             {/* Desktop Dropdown Menu */}
             {showMenu && window.innerWidth >= 768 && (
-              <div 
-                className="absolute right-0 w-32 bg-white rounded-md shadow-lg z-10 border border-gray-200 py-1" 
-                style={{ 
-                  ...(menuPosition === 'top' 
-                    ? { bottom: '100%', marginBottom: '8px' } 
-                    : { top: '100%', marginTop: '8px' })
+              <div
+                className="fixed right-auto w-32 bg-white rounded-md shadow-lg z-[1000] border border-gray-200 py-1"
+                style={{
+                  left: buttonRef.current
+                    ? buttonRef.current.getBoundingClientRect().left - 100
+                    : "auto",
+                  ...(menuPosition === "top"
+                    ? {
+                        bottom:
+                          window.innerHeight -
+                          (buttonRef.current?.getBoundingClientRect().top || 0),
+                      }
+                    : {
+                        top:
+                          buttonRef.current?.getBoundingClientRect().bottom ||
+                          0,
+                      }),
+                  overflow: "visible",
                 }}
               >
                 <button
@@ -117,17 +153,20 @@ const BlogCard = ({ blog, onEdit, onDelete }) => {
                 </button>
               </div>
             )}
-            
+
             {/* Mobile Dropdown Menu - Opens at bottom of screen */}
             {showMenu && window.innerWidth < 768 && (
               <>
                 {/* Backdrop for mobile */}
-                <div className="fixed inset-0 bg-black/20 z-40" onClick={() => setShowMenu(false)} />
-                
+                <div
+                  className="fixed inset-0 bg-black/20 z-40"
+                  onClick={() => setShowMenu(false)}
+                />
+
                 {/* Menu fixed to bottom of screen */}
                 <div className="fixed inset-x-0 bottom-0 bg-white rounded-t-lg shadow-lg z-50 p-2">
                   <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-3"></div>
-                  
+
                   <button
                     onClick={() => {
                       onEdit();
@@ -137,7 +176,7 @@ const BlogCard = ({ blog, onEdit, onDelete }) => {
                   >
                     Edit
                   </button>
-                  
+
                   <button
                     onClick={() => {
                       onDelete();
@@ -147,7 +186,7 @@ const BlogCard = ({ blog, onEdit, onDelete }) => {
                   >
                     Delete
                   </button>
-                  
+
                   <button
                     onClick={() => setShowMenu(false)}
                     className="w-full py-3 mt-2 text-sm font-medium text-gray-500 border-t border-gray-100"
@@ -159,12 +198,12 @@ const BlogCard = ({ blog, onEdit, onDelete }) => {
             )}
           </div>
         </div>
-        
+
         {/* Description */}
         <p className="text-sm text-gray-600 mb-4 line-clamp-3">
           {blog.description || blog.excerpt}
         </p>
-        
+
         {/* Publish Date */}
         <div className="text-xs text-gray-500">
           Published: {blog.publishDate}

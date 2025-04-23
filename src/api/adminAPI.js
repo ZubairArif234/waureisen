@@ -1,13 +1,177 @@
 // src/api/adminAPI.js
-import API from './config';
+import API from "./config";
+
+// Featured, Popular, and New Accommodations
+export const getFeaturedAccommodations = async () => {
+  try {
+    // Create empty default structure for recommendations
+    const defaultData = {
+      featured_accommodations: [],
+      new_accommodations: [],
+      popular_accommodations: [],
+    };
+
+    const response = await API.get("/admins/recommendations");
+
+    // Return data from API if available
+    if (response.data) {
+      return {
+        featured_accommodations:
+          response.data.topRecommendations?.map((item) =>
+            typeof item === "string" ? item : item._id
+          ) || [],
+        new_accommodations:
+          response.data.exclusiveFinds?.map((item) =>
+            typeof item === "string" ? item : item._id
+          ) || [],
+        popular_accommodations:
+          response.data.popularAccommodations?.map((item) =>
+            typeof item === "string" ? item : item._id
+          ) || [],
+      };
+    }
+
+    return defaultData;
+  } catch (error) {
+    console.error("Error fetching featured accommodations:", error);
+
+    // Return empty arrays as fallback
+    return {
+      featured_accommodations: [],
+      new_accommodations: [],
+      popular_accommodations: [],
+    };
+  }
+};
+
+export const addToFeaturedSection = async (id, section) => {
+  try {
+    // Map the frontend section names to the backend endpoint names
+    const sectionEndpointMap = {
+      featured_accommodations: "top",
+      new_accommodations: "exclusive",
+      popular_accommodations: "popular",
+    };
+
+    // First verify this listing ID exists
+    try {
+      const listingCheck = await API.get(`/listings/${id}`);
+      if (!listingCheck.data || !listingCheck.data._id) {
+        throw {
+          response: {
+            status: 404,
+            data: { message: `Listing with ID ${id} not found` },
+          },
+        };
+      }
+    } catch (listingErr) {
+      if (listingErr.response?.status === 404) {
+        throw {
+          response: {
+            status: 404,
+            data: {
+              message: `Listing with ID ${id} not found or not available`,
+            },
+          },
+        };
+      }
+      // Pass through other errors
+      throw listingErr;
+    }
+
+    // Get current items to check count - just to display a warning if we're over limit
+    const currentFeatures = await getFeaturedAccommodations();
+    const currentItems = currentFeatures[section] || [];
+
+    // Check if we already have 6 items - this is just for UI warning
+    // The backend will enforce the limit anyway
+    if (currentItems.length >= 6) {
+      console.warn(
+        `Already have ${currentItems.length} items in ${section}, backend will trim to 6 items`
+      );
+    }
+
+    // Always try to add the item - the backend will handle validation and limits
+    // Get the endpoint to call
+    const endpoint = sectionEndpointMap[section];
+    if (!endpoint) {
+      throw new Error(`Invalid section: ${section}`);
+    }
+
+    // Add the new ID to the list
+    const updatedListingIds = currentItems.includes(id)
+      ? currentItems // Don't add if already present
+      : [...currentItems, id]; // Add if not already in list
+
+    // Call the API endpoint - backend will enforce the 6 item limit
+    const response = await API.put(`/admins/recommendations/${endpoint}`, {
+      listingIds: updatedListingIds,
+    });
+
+    return {
+      success: true,
+      message: `Added to ${section} successfully`,
+      data: response.data,
+    };
+  } catch (error) {
+    console.error(`Error adding to ${section} section:`, error);
+
+    // Check if it's the specific "Listing not found" error
+    if (error.response?.data?.message?.includes("Listing with ID")) {
+      throw {
+        response: {
+          status: 404,
+          data: { message: error.response.data.message },
+        },
+      };
+    }
+
+    throw error;
+  }
+};
+
+export const removeFromFeaturedSection = async (id, section) => {
+  try {
+    // Map the frontend section names to the backend endpoint names
+    const sectionEndpointMap = {
+      featured_accommodations: "top",
+      new_accommodations: "exclusive",
+      popular_accommodations: "popular",
+    };
+
+    // Get current items
+    const currentFeatures = await getFeaturedAccommodations();
+    const currentItems = currentFeatures[section] || [];
+
+    // Remove the ID
+    const updatedItems = currentItems.filter((itemId) => itemId !== id);
+
+    // Get the endpoint to call
+    const endpoint = sectionEndpointMap[section];
+    if (!endpoint) {
+      throw new Error(`Invalid section: ${section}`);
+    }
+
+    // Call the API endpoint
+    await API.put(`/admins/recommendations/${endpoint}`, {
+      listingIds: updatedItems,
+    });
+
+    return { success: true, message: `Removed from ${section} successfully` };
+  } catch (error) {
+    console.error(`Error removing from ${section} section:`, error);
+    throw error;
+  }
+};
 
 // Accommodations/Listings
 export const getAllListings = async () => {
   try {
-    const response = await API.get('/admins/view-all-listings');
+    const response = await API.get("/admins/view-all-listings");
+    console.log(response.data);
     return response.data;
   } catch (error) {
-    console.error('Error fetching all listings:', error);
+    console.error("Error fetching all listings:", error);
     throw error;
   }
 };
@@ -24,10 +188,10 @@ export const getListingById = async (id) => {
 
 export const createListing = async (listingData) => {
   try {
-    const response = await API.post('/admins/add-listing', listingData);
+    const response = await API.post("/admins/add-listing", listingData);
     return response.data;
   } catch (error) {
-    console.error('Error creating listing:', error);
+    console.error("Error creating listing:", error);
     throw error;
   }
 };
@@ -37,7 +201,7 @@ export const updateListing = async (id, listingData) => {
     const response = await API.put(`/listings/${id}`, listingData);
     return response.data;
   } catch (error) {
-    console.error('Error updating listing:', error);
+    console.error("Error updating listing:", error);
     throw error;
   }
 };
@@ -47,7 +211,7 @@ export const deleteListing = async (id) => {
     const response = await API.delete(`/admins/delete-listing/${id}`);
     return response.data;
   } catch (error) {
-    console.error('Error deleting listing:', error);
+    console.error("Error deleting listing:", error);
     throw error;
   }
 };
@@ -57,7 +221,7 @@ export const closeListing = async (id) => {
     const response = await API.put(`/admins/close-listing/${id}`);
     return response.data;
   } catch (error) {
-    console.error('Error closing listing:', error);
+    console.error("Error closing listing:", error);
     throw error;
   }
 };
@@ -65,10 +229,10 @@ export const closeListing = async (id) => {
 // Users
 export const getAllUsers = async () => {
   try {
-    const response = await API.get('/admins/view-all-customers');
+    const response = await API.get("/admins/view-all-customers");
     return response.data;
   } catch (error) {
-    console.error('Error fetching all users:', error);
+    console.error("Error fetching all users:", error);
     throw error;
   }
 };
@@ -85,11 +249,15 @@ export const getUserById = async (id) => {
 
 export const updateUserStatus = async (id, status) => {
   try {
-    const response = await API.put(`/admins/ban-user/${id}`, {}, {
-      headers: {
-        'profile-status': status
+    const response = await API.put(
+      `/admins/ban-user/${id}`,
+      {},
+      {
+        headers: {
+          "profile-status": status,
+        },
       }
-    });
+    );
     return response.data;
   } catch (error) {
     console.error(`Error updating user status:`, error);
@@ -102,7 +270,7 @@ export const deleteUser = async (id) => {
     const response = await API.delete(`/users/${id}`);
     return response.data;
   } catch (error) {
-    console.error('Error deleting user:', error);
+    console.error("Error deleting user:", error);
     throw error;
   }
 };
@@ -110,10 +278,10 @@ export const deleteUser = async (id) => {
 // Providers
 export const getAllProviders = async () => {
   try {
-    const response = await API.get('/admins/view-all-providers');
+    const response = await API.get("/admins/view-all-providers");
     return response.data;
   } catch (error) {
-    console.error('Error fetching all providers:', error);
+    console.error("Error fetching all providers:", error);
     throw error;
   }
 };
@@ -130,11 +298,15 @@ export const getProviderById = async (id) => {
 
 export const updateProviderStatus = async (id, status) => {
   try {
-    const response = await API.put(`/admins/ban-provider/${id}`, {}, {
-      headers: {
-        'profile-status': status
+    const response = await API.put(
+      `/admins/ban-provider/${id}`,
+      {},
+      {
+        headers: {
+          "profile-status": status,
+        },
       }
-    });
+    );
     return response.data;
   } catch (error) {
     console.error(`Error updating provider status:`, error);
@@ -147,7 +319,7 @@ export const deleteProvider = async (id) => {
     const response = await API.delete(`/providers/${id}`);
     return response.data;
   } catch (error) {
-    console.error('Error deleting provider:', error);
+    console.error("Error deleting provider:", error);
     throw error;
   }
 };
@@ -155,10 +327,10 @@ export const deleteProvider = async (id) => {
 // Transactions
 export const getAllTransactions = async () => {
   try {
-    const response = await API.get('/admins/view-all-transactions');
+    const response = await API.get("/admins/view-all-transactions");
     return response.data;
   } catch (error) {
-    console.error('Error fetching all transactions:', error);
+    console.error("Error fetching all transactions:", error);
     throw error;
   }
 };
@@ -178,17 +350,19 @@ export const updateTransaction = async (id, data) => {
     const response = await API.put(`/transactions/${id}`, data);
     return response.data;
   } catch (error) {
-    console.error('Error updating transaction:', error);
+    console.error("Error updating transaction:", error);
     throw error;
   }
 };
 
 export const cancelBookingTransaction = async (id) => {
   try {
-    const response = await API.put(`/transactions/${id}`, { status: 'cancelled' });
+    const response = await API.put(`/transactions/${id}`, {
+      status: "cancelled",
+    });
     return response.data;
   } catch (error) {
-    console.error('Error cancelling booking transaction:', error);
+    console.error("Error cancelling booking transaction:", error);
     throw error;
   }
 };
@@ -196,10 +370,10 @@ export const cancelBookingTransaction = async (id) => {
 // Vouchers
 export const getAllVouchers = async () => {
   try {
-    const response = await API.get('/admins/view-all-vouchers');
+    const response = await API.get("/admins/view-all-vouchers");
     return response.data;
   } catch (error) {
-    console.error('Error fetching all vouchers:', error);
+    console.error("Error fetching all vouchers:", error);
     throw error;
   }
 };
@@ -216,10 +390,10 @@ export const getVoucherById = async (id) => {
 
 export const createVoucher = async (voucherData) => {
   try {
-    const response = await API.post('/admins/add-voucher', voucherData);
+    const response = await API.post("/admins/add-voucher", voucherData);
     return response.data;
   } catch (error) {
-    console.error('Error creating voucher:', error);
+    console.error("Error creating voucher:", error);
     throw error;
   }
 };
@@ -229,7 +403,7 @@ export const updateVoucher = async (id, voucherData) => {
     const response = await API.put(`/admins/update-voucher/${id}`, voucherData);
     return response.data;
   } catch (error) {
-    console.error('Error updating voucher:', error);
+    console.error("Error updating voucher:", error);
     throw error;
   }
 };
@@ -239,77 +413,102 @@ export const deleteVoucher = async (id) => {
     const response = await API.delete(`/admins/del-voucher/${id}`);
     return response.data;
   } catch (error) {
-    console.error('Error deleting voucher:', error);
+    console.error("Error deleting voucher:", error);
     throw error;
   }
 };
 
 export const getActiveFilters = async () => {
   try {
-    const response = await API.get('/filters/active');
+    const response = await API.get("/filters/active");
     return response.data;
   } catch (error) {
-    console.error('Error fetching active filters:', error);
+    console.error("Error fetching active filters:", error);
     throw error;
   }
 };
 
 export const createSubsection = async (filterId, subsectionData) => {
   try {
-    const response = await API.post(`/filters/${filterId}/subsections`, subsectionData);
+    const response = await API.post(
+      `/filters/${filterId}/subsections`,
+      subsectionData
+    );
     return response.data;
   } catch (error) {
-    console.error('Error creating filter subsection:', error);
+    console.error("Error creating filter subsection:", error);
     throw error;
   }
 };
 
-export const updateSubsection = async (filterId, subsectionId, subsectionData) => {
+export const updateSubsection = async (
+  filterId,
+  subsectionId,
+  subsectionData
+) => {
   try {
-    const response = await API.put(`/filters/${filterId}/subsections/${subsectionId}`, subsectionData);
+    const response = await API.put(
+      `/filters/${filterId}/subsections/${subsectionId}`,
+      subsectionData
+    );
     return response.data;
   } catch (error) {
-    console.error('Error updating filter subsection:', error);
+    console.error("Error updating filter subsection:", error);
     throw error;
   }
 };
 
 export const deleteSubsection = async (filterId, subsectionId) => {
   try {
-    const response = await API.delete(`/filters/${filterId}/subsections/${subsectionId}`);
+    const response = await API.delete(
+      `/filters/${filterId}/subsections/${subsectionId}`
+    );
     return response.data;
   } catch (error) {
-    console.error('Error deleting filter subsection:', error);
+    console.error("Error deleting filter subsection:", error);
     throw error;
   }
 };
 
 export const createFilter = async (filterId, subsectionId, filterData) => {
   try {
-    const response = await API.post(`/filters/${filterId}/subsections/${subsectionId}/filters`, filterData);
+    const response = await API.post(
+      `/filters/${filterId}/subsections/${subsectionId}/filters`,
+      filterData
+    );
     return response.data;
   } catch (error) {
-    console.error('Error creating filter:', error);
+    console.error("Error creating filter:", error);
     throw error;
   }
 };
 
-export const updateFilter = async (filterId, subsectionId, subFilterId, filterData) => {
+export const updateFilter = async (
+  filterId,
+  subsectionId,
+  subFilterId,
+  filterData
+) => {
   try {
-    const response = await API.put(`/filters/${filterId}/subsections/${subsectionId}/filters/${subFilterId}`, filterData);
+    const response = await API.put(
+      `/filters/${filterId}/subsections/${subsectionId}/filters/${subFilterId}`,
+      filterData
+    );
     return response.data;
   } catch (error) {
-    console.error('Error updating filter:', error);
+    console.error("Error updating filter:", error);
     throw error;
   }
 };
 
 export const deleteFilter = async (filterId, subsectionId, subFilterId) => {
   try {
-    const response = await API.delete(`/filters/${filterId}/subsections/${subsectionId}/filters/${subFilterId}`);
+    const response = await API.delete(
+      `/filters/${filterId}/subsections/${subsectionId}/filters/${subFilterId}`
+    );
     return response.data;
   } catch (error) {
-    console.error('Error deleting filter:', error);
+    console.error("Error deleting filter:", error);
     throw error;
   }
 };
