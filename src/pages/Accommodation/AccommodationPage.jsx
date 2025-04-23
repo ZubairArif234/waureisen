@@ -464,9 +464,25 @@ const AccommodationPage = () => {
     return differenceInDays >= 0 ? differenceInDays : 0;
   };
 
-  const handleReserved = (type) => {
-    if (type == "interhome") {
-      alert("Booking functionality will be implemented soon!");
+  const handleReserved = () => {
+    console.log("Reserved button clicked : ", accommodation?.provider);
+    if (!dateRange?.start) {
+      alert("Please select a check-in date before reserving.");
+      return;
+    }
+    if (!dateRange?.start) {
+      alert("Please select a check-in date before reserving.");
+      return;
+    }
+    if (accommodation?.provider === "Interhome") {
+      const checkInDate = moment(dateRange.start).format('YYYY-MM-DD');
+      const duration = moment(dateRange.end).diff(moment(dateRange.start), 'days');
+      // console.log("Check-in Date:", checkInDate);
+      // console.log("Duration:", duration);
+      
+      const partnerId = import.meta.env.VITE_INTERHOME_PARTNER_ID;
+      const iframeUrl = `https://www.interhome.com/Forward.aspx?navigationid=12&aCode=${accommodation.Code}&dtCheckin=${checkInDate}&duration=${duration}&partnerid=${partnerId}&adrAdults=${guests.people}&iniframe=1`;
+      window.location.href = iframeUrl;
     } else {
       navigate("/payment", {
         state: {
