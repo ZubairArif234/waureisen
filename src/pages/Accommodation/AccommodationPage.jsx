@@ -184,13 +184,13 @@ const AccommodationPage = () => {
             selectedOption = duration7Options[0];
           }
           
-          const calculatedPricePerNight = Math.round(selectedOption.price / 7);
+          const calculatedPricePerNight = (selectedOption.price / 7).toFixed(2);
 
           setAccommodation((prev) => ({
             ...prev,
             pricePerNight: {
               price: calculatedPricePerNight,
-              currency: priceData.priceList.currency || "CHF",
+              currency: priceData.priceList.currency || "", 
               totalPrice: selectedOption.price,
               duration: 7,
               paxUpTo: selectedOption.paxUpTo,
@@ -317,7 +317,7 @@ const AccommodationPage = () => {
                 // Update the accommodation data with price information
                 data.pricePerNight = {
                   price: calculatedPricePerNight,
-                  currency: priceData.priceList.currency || "CHF",
+                  currency: priceData.priceList.currency || "", 
                   totalPrice: selectedOption.price,
                   duration: 7,
                   paxUpTo: selectedOption.paxUpTo,
@@ -464,9 +464,25 @@ const AccommodationPage = () => {
     return differenceInDays >= 0 ? differenceInDays : 0;
   };
 
-  const handleReserved = (type) => {
-    if (type == "interhome") {
-      alert("Booking functionality will be implemented soon!");
+  const handleReserved = () => {
+    console.log("Reserved button clicked : ", accommodation?.provider);
+    if (!dateRange?.start) {
+      alert("Please select a check-in date before reserving.");
+      return;
+    }
+    if (!dateRange?.start) {
+      alert("Please select a check-in date before reserving.");
+      return;
+    }
+    if (accommodation?.provider === "Interhome") {
+      const checkInDate = moment(dateRange.start).format('YYYY-MM-DD');
+      const duration = moment(dateRange.end).diff(moment(dateRange.start), 'days');
+      // console.log("Check-in Date:", checkInDate);
+      // console.log("Duration:", duration);
+      
+      const partnerId = import.meta.env.VITE_INTERHOME_PARTNER_ID;
+      const iframeUrl = `https://www.interhome.com/Forward.aspx?navigationid=12&aCode=${accommodation.Code}&dtCheckin=${checkInDate}&duration=${duration}&partnerid=${partnerId}&adrAdults=${guests.people}&iniframe=1`;
+      window.location.href = iframeUrl;
     } else {
       navigate("/payment", {
         state: {
@@ -660,19 +676,24 @@ const AccommodationPage = () => {
           <div className="md:w-[360px] w-full md:flex-shrink-0 md:ml-auto">
             <div className="sticky top-24 bg-white border border-gray-200 rounded-xl shadow-md p-6">
               {/* Price Display */}
-              <div className="flex items-baseline mb-6">
-                <span className="text-2xl font-semibold">
-                  {isPriceLoading ? (
-                    <div className="w-16 h-8 bg-gray-200 animate-pulse rounded"></div>
-                  ) : (
-                    `${accommodation?.pricePerNight?.price || 0} ${
-                      accommodation?.pricePerNight?.currency || "CHF"
-                    }`
-                  )}
-                </span>
-                {accommodation?.provider != "Interhome" && (
-                  <span className="text-gray-600 ml-1">/ night</span>
-                )}
+              <div className="flex flex-col mb-6">
+                <div className="flex items-baseline">
+                  <span className="text-gray-600 mr-2 font-bold">Total Price:</span>
+                  <span className="text-xl font-semibold">
+                    {isPriceLoading ? (
+                      <div className="w-16 h-8 bg-gray-200 animate-pulse rounded"></div>
+                    ) : (
+                      `${accommodation?.pricePerNight?.price || 0} X ${getNoOfDays(dateRange?.start, dateRange?.end) || 1} = ${(accommodation?.pricePerNight?.price || 0) * (getNoOfDays(dateRange?.start, dateRange?.end) || 1)} ${
+                        accommodation?.pricePerNight?.currency || "CHF"
+                      }`
+                    )}
+                  </span>
+                </div>
+                <div className="text-sm text-gray-600 mt-2">
+                  Price per person per night: {(accommodation?.pricePerNight?.price || 0) / (guests?.people || 1)} ${
+                    accommodation?.pricePerNight?.currency || "CHF"
+                  }
+                </div>
               </div>
 
               {/* Date Picker */}
@@ -736,7 +757,7 @@ const AccommodationPage = () => {
 
               {/* Price Calculation */}
 
-              {accommodation?.provider != "Interhome" && (
+              {accommodation?.provider == "Interhome" && (
                 <div className="mb-4">
                   <div className="flex justify-between items-center">
                     <p className="text-sm text-gray-700">
