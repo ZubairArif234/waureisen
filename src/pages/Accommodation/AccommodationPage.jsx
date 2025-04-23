@@ -141,8 +141,8 @@ const AccommodationPage = () => {
   const [error, setError] = useState(null);
   const [availableDates, setAvailableDates] = useState([]); // Add state for available dates
 
-  // Add function to fetch price for new dates
-  const fetchPriceForDates = async (startDate) => {
+  // Add function to fetch price for new dates with optional pax parameter
+  const fetchPriceForDates = async (startDate, paxValue = null) => {
     if (!accommodation?.Code || !startDate) return;
 
     try {
@@ -152,6 +152,7 @@ const AccommodationPage = () => {
       const priceData = await fetchInterhomePrices({
         accommodationCode: accommodation.Code,
         checkInDate: formattedDate,
+        pax: paxValue, // Pass the pax parameter if provided
         los: true,
       });
 
@@ -161,8 +162,28 @@ const AccommodationPage = () => {
         );
 
         if (duration7Options.length > 0) {
-          duration7Options.sort((a, b) => a.paxUpTo - b.paxUpTo);
-          const selectedOption = duration7Options[0];
+          // If pax is specified, find the option that matches or is closest to the pax value
+          let selectedOption;
+          
+          if (paxValue) {
+            // Find options that can accommodate the requested number of guests
+            const suitableOptions = duration7Options.filter(option => option.paxUpTo >= paxValue);
+            
+            if (suitableOptions.length > 0) {
+              // Sort by paxUpTo to get the most appropriate option
+              suitableOptions.sort((a, b) => a.paxUpTo - b.paxUpTo);
+              selectedOption = suitableOptions[0]; // Get the option with the lowest suitable paxUpTo
+            } else {
+              // If no suitable options, sort by paxUpTo (ascending) and take the highest capacity
+              duration7Options.sort((a, b) => b.paxUpTo - a.paxUpTo);
+              selectedOption = duration7Options[0];
+            }
+          } else {
+            // Default behavior when no pax specified - sort by paxUpTo (ascending)
+            duration7Options.sort((a, b) => a.paxUpTo - b.paxUpTo);
+            selectedOption = duration7Options[0];
+          }
+          
           const calculatedPricePerNight = Math.round(selectedOption.price / 7);
 
           setAccommodation((prev) => ({
@@ -217,6 +238,17 @@ const AccommodationPage = () => {
             const availabilityData = await fetchInterhomeAvailability(data.Code);
             if (availabilityData && availabilityData.availableDates) {
               setAvailableDates(availabilityData.availableDates.map(d => d.checkInDate)); // Store only the dates
+              
+              // Find the maximum paxUpTo value from all available dates
+              if (availabilityData.availableDates.length > 0) {
+                const maxPaxUpTo = Math.max(...availabilityData.availableDates.map(date => date.paxUpTo || 0));
+                if (maxPaxUpTo > 0) {
+                  //console.log(`Setting maximum guests to ${maxPaxUpTo} based on availability data`);
+                  setMaxGuests(maxPaxUpTo);
+                  // Also set it on the accommodation object for reference
+                  data.maxGuests = maxPaxUpTo;
+                }
+              }
             }
           } catch (availabilityError) {
             console.warn(`Failed to fetch Interhome availability for ${data.Code}:`, availabilityError);
@@ -678,6 +710,7 @@ const AccommodationPage = () => {
                     {guests.people}{" "}
                     {guests.people === 1 ? t("guest") : t("guests")},{" "}
                     {guests.dogs} {guests.dogs === 1 ? t("dog") : t("dogs")}
+                    {accommodation?.maxGuests ? ` (${t("max")} ${accommodation.maxGuests} ${t("guests")})` : ""}
                   </span>
                   <ChevronDown className="h-5 w-5 text-gray-500" />
                 </button>
@@ -686,7 +719,14 @@ const AccommodationPage = () => {
                     <GuestSelector
                       guests={guests}
                       onChange={setGuests}
-                      onClose={() => setIsGuestSelectorOpen(false)}
+                      onClose={() => {
+                        setIsGuestSelectorOpen(false);
+                        // When Apply is clicked, update the price based on the selected number of guests
+                        if (dateRange.start && accommodation?.Code) {
+                          // Pass the total number of guests (people) as the pax parameter
+                          fetchPriceForDates(dateRange.start, guests.people);
+                        }
+                      }}
                       maxGuests={accommodation?.maxGuests || maxGuests} // Use the maxGuests state
                       maxDogs={accommodation?.maxDogs || 2}
                     />
