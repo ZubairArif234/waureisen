@@ -696,7 +696,7 @@ const AccommodationPage = () => {
 
               {/* Price Calculation */}
 
-              {accommodation?.provider != "Interhome" && (
+              {accommodation?.provider == "Interhome" && (
                 <div className="mb-4">
                   <div className="flex justify-between items-center">
                     <p className="text-sm text-gray-700">

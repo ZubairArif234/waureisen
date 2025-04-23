@@ -31,8 +31,8 @@ const CheckoutForm = () => {
 
     if (result.error) {
       console.error("Payment Failed:", result.error.message);
-      toast.success("Payment failed")
-      navigate(-1)
+      toast.error("Payment failed")
+      // navigate(-1)
       // navigate("/payment-success", {
       //   state: { status: "failed", plan: state?.data },
       // });
@@ -41,7 +41,7 @@ const CheckoutForm = () => {
       result.paymentIntent.status === "succeeded"
     ) {
       toast.success("Payment done successfully")
-      navigate(-1)
+      navigate("/trips")
       // navigate("/payment-success", {
       //   state: {
       //     status: "success",
