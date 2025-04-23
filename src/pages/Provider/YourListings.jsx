@@ -1,18 +1,3 @@
-<<<<<<< HEAD
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Search, Filter, MoreHorizontal, AlertTriangle } from 'lucide-react';
-import Navbar from '../../components/Shared/Navbar';
-import Footer from '../../components/Shared/Footer';
-import MockMap from '../../components/SearchComponents/MockMap';
-import MapToggle from '../../components/SearchComponents/MapToggle';
-import i1 from '../../assets/i1.png';
-import i2 from '../../assets/i2.png';
-import s1 from '../../assets/s1.png';
-import s2 from '../../assets/s2.png';
-import { useLanguage } from '../../utils/LanguageContext';
-import { getProviderListings, deleteListing } from '../../api/providerAPI';
-=======
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -32,7 +17,7 @@ import i2 from "../../assets/i2.png";
 import s1 from "../../assets/s1.png";
 import s2 from "../../assets/s2.png";
 import { useLanguage } from "../../utils/LanguageContext";
->>>>>>> 548bb14 (Dropdown issues resolved All sources resolved Add to recommendations added)
+import { getProviderListings, deleteListing } from "../../api/providerAPI";
 
 // DeleteConfirmationModal component
 const DeleteConfirmationModal = ({
@@ -198,9 +183,9 @@ const YourListings = () => {
   const [listings, setListings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [deleteModal, setDeleteModal] = useState({ 
-    isOpen: false, 
-    listing: null 
+  const [deleteModal, setDeleteModal] = useState({
+    isOpen: false,
+    listing: null,
   });
 
   // Handle window resize for responsive design
@@ -218,43 +203,41 @@ const YourListings = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, [showMap]);
 
-
   useEffect(() => {
     const fetchListings = async () => {
       setIsLoading(true);
       setError(null);
       try {
         const data = await getProviderListings();
-        
+
         // Transform the data to match the expected format
-        const formattedListings = data.map(listing => ({
+        const formattedListings = data.map((listing) => ({
           id: listing._id,
-          title: listing.title || 'Unnamed Listing',
-          location: listing.location?.address || 'Unknown location',
+          title: listing.title || "Unnamed Listing",
+          location: listing.location?.address || "Unknown location",
           price: listing.pricePerNight?.price || 0,
-          status: listing.status || 'draft',
+          status: listing.status || "draft",
           image: listing.images?.[0] || i1, // Fallback to placeholder image
           bookings: listing.totalBookings || 0,
-          propertyType: listing.listingType || 'Other'
+          propertyType: listing.listingType || "Other",
         }));
-        
+
         setListings(formattedListings);
       } catch (err) {
-        console.error('Error fetching listings:', err);
-        setError('Failed to load listings. Please try again.');
+        console.error("Error fetching listings:", err);
+        setError("Failed to load listings. Please try again.");
       } finally {
         setIsLoading(false);
       }
     };
-    
+
     fetchListings();
   }, []);
-  
-  
-  
 
-
-  const propertyTypes = ['all', ...Array.from(new Set(listings.map(l => l.propertyType)))];
+  const propertyTypes = [
+    "all",
+    ...Array.from(new Set(listings.map((l) => l.propertyType))),
+  ];
 
   const handleEdit = (id) => {
     navigate(`/provider/edit-listing/${id}`);
@@ -267,29 +250,27 @@ const YourListings = () => {
     });
   };
 
+  const confirmDelete = async () => {
+    if (deleteModal.listing) {
+      setIsLoading(true);
+      try {
+        await deleteListing(deleteModal.listing.id);
 
-const confirmDelete = async () => {
-  if (deleteModal.listing) {
-    setIsLoading(true);
-    try {
-      await deleteListing(deleteModal.listing.id);
-      
-      // Remove from local state
-      setListings(prevListings => 
-        prevListings.filter(l => l.id !== deleteModal.listing.id)
-      );
-      
-      
-      alert(t('listing_deleted_successfully'));
-    } catch (err) {
-      console.error('Error deleting listing:', err);
-      alert(t('error_deleting_listing'));
-    } finally {
-      setIsLoading(false);
-      setDeleteModal({ isOpen: false, listing: null });
+        // Remove from local state
+        setListings((prevListings) =>
+          prevListings.filter((l) => l.id !== deleteModal.listing.id)
+        );
+
+        alert(t("listing_deleted_successfully"));
+      } catch (err) {
+        console.error("Error deleting listing:", err);
+        alert(t("error_deleting_listing"));
+      } finally {
+        setIsLoading(false);
+        setDeleteModal({ isOpen: false, listing: null });
+      }
     }
-  }
-};
+  };
 
   const handleView = (id) => {
     navigate(`/accommodation/${id}`);
@@ -325,74 +306,73 @@ const confirmDelete = async () => {
     return statusMatch && searchMatch && typeMatch;
   });
 
- 
-
- 
   if (isLoading && listings.length === 0) {
     return (
       <div className="min-h-screen bg-white">
         <Navbar />
-        
+
         <div className="relative pt-20">
           <main className="w-full px-4 sm:px-6 lg:px-8 py-12">
             <div className="flex items-center gap-4 mb-8">
               <button
-                onClick={() => navigate('/provider/dashboard')}
+                onClick={() => navigate("/provider/dashboard")}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"
               >
                 <ArrowLeft className="w-6 h-6 text-gray-600" />
               </button>
-              <h1 className="text-3xl font-semibold text-gray-900">{t('your_listings')}</h1>
+              <h1 className="text-3xl font-semibold text-gray-900">
+                {t("your_listings")}
+              </h1>
             </div>
-            
+
             <div className="flex justify-center py-12">
               <div className="w-12 h-12 border-4 border-gray-200 border-t-brand rounded-full animate-spin mb-4"></div>
-              <p className="text-gray-600 ml-3">{t('loading_listings')}</p>
+              <p className="text-gray-600 ml-3">{t("loading_listings")}</p>
             </div>
           </main>
         </div>
-        
+
         <Footer />
       </div>
     );
   }
 
-  
   if (error) {
     return (
       <div className="min-h-screen bg-white">
         <Navbar />
-        
+
         <div className="relative pt-20">
           <main className="w-full px-4 sm:px-6 lg:px-8 py-12">
             <div className="flex items-center gap-4 mb-8">
               <button
-                onClick={() => navigate('/provider/dashboard')}
+                onClick={() => navigate("/provider/dashboard")}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"
               >
                 <ArrowLeft className="w-6 h-6 text-gray-600" />
               </button>
-              <h1 className="text-3xl font-semibold text-gray-900">{t('your_listings')}</h1>
+              <h1 className="text-3xl font-semibold text-gray-900">
+                {t("your_listings")}
+              </h1>
             </div>
-            
+
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
               <p>{error}</p>
-              <button 
+              <button
                 onClick={() => window.location.reload()}
                 className="mt-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
               >
-                {t('retry')}
+                {t("retry")}
               </button>
             </div>
           </main>
         </div>
-        
+
         <Footer />
       </div>
     );
   }
 
-  
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
