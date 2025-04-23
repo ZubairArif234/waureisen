@@ -53,17 +53,17 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (!acceptTerms) {
       setError(
         t("please_accept_terms") || "Please accept the terms and conditions"
       );
       return;
     }
-
+  
     setError("");
     setIsLoading(true);
-
+  
     try {
       // Create common user data object
       const userData = {
@@ -75,66 +75,58 @@ const Signup = () => {
         username:
           formData.displayName || `${formData.firstName} ${formData.lastName}`,
       };
-
+  
       let response;
-
+  
       // Different API call based on user type
       if (userType === "customer") {
         console.log("Attempting customer signup with:", userData);
         response = await userSignup(userData);
         console.log("Customer signup response:", response);
-
+  
         if (response && response.token) {
           localStorage.setItem("token", response.token);
           localStorage.setItem("userType", "user");
-
+  
           if (response.user) {
             localStorage.setItem("user_data", JSON.stringify(response.user));
           }
-
+  
           navigate("/login");
         } else {
           throw new Error("Invalid response from server - no token received");
         }
       } else if (userType === "provider") {
-        // Add any provider-specific fields
-        const providerData = {
-          ...userData,
-          displayName:
-            formData.displayName ||
-            `${formData.firstName} ${formData.lastName}`,
-        };
-
-        // If the redirect is for provider registration, just navigate there
-        if (redirectAfterSignup === "provider-registration") {
-          // Store data temporarily to be used in the registration form
+        console.log("Attempting provider signup with:", userData);
+        response = await providerSignup(userData);
+        console.log("Provider signup response:", response);
+  
+        // Store the token and provider data
+        if (response && response.token) {
+          localStorage.setItem("token", response.token);
+          localStorage.setItem("userType", "provider");
+  
+          if (response.provider) {
+            localStorage.setItem(
+              "provider_user",
+              JSON.stringify(response.provider)
+            );
+          }
+  
+          // Store form data in sessionStorage to pre-fill provider registration form
           sessionStorage.setItem(
             "providerSignupData",
-            JSON.stringify(providerData)
+            JSON.stringify({
+              ...userData,
+              // Don't include password in the session storage for security reasons
+              password: undefined,
+            })
           );
+  
+          // Redirect to provider registration instead of dashboard
           navigate("/provider/registration");
         } else {
-          // Otherwise, make the actual API call
-          console.log("Attempting provider signup with:", providerData);
-          response = await providerSignup(providerData);
-          console.log("Provider signup response:", response);
-
-          // Store the token and provider data
-          if (response && response.token) {
-            localStorage.setItem("token", response.token);
-            localStorage.setItem("userType", "provider");
-
-            if (response.provider) {
-              localStorage.setItem(
-                "provider_user",
-                JSON.stringify(response.provider)
-              );
-            }
-
-            navigate("/provider/dashboard");
-          } else {
-            throw new Error("Invalid response from server - no token received");
-          }
+          throw new Error("Invalid response from server - no token received");
         }
       } else {
         throw new Error("Please select a user type");

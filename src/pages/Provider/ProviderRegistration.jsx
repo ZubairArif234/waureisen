@@ -1,51 +1,65 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Check, HelpCircle } from 'lucide-react';
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
-import { providerSignup } from '../../api/authAPI';
+import { completeProviderRegistration } from '../../api/authAPI';
 import { useLanguage } from '../../utils/LanguageContext';
-
 
 const ProviderRegistration = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    // Personal Information
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    phone: '',
-    address: {
-      street: '',
-      city: '',
-      postalCode: '',
-      country: 'Switzerland'
-    },
-    dateOfBirth: '',
+  const [formData, setFormData] = useState(() => {
+    // Try to get data from sessionStorage first (from signup flow)
+    const savedData = sessionStorage.getItem('providerSignupData');
+    const parsedData = savedData ? JSON.parse(savedData) : null;
     
-    // Business Information
-    businessName: '',
-    businessType: 'individual',
-    vatNumber: '',
-    website: '',
-    
-    // Banking Details
-    bankName: '',
-    accountHolder: '',
-    iban: '',
-    swift: '',
-    
-    // Additional Information
-    hostingExperience: 'none',
-    propertyCount: '1',
-    heardAboutUs: '',
-    terms: false,
-    newsletter: false
+    return {
+      // Default form structure
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      phone: '',
+      address: {
+        street: '',
+        city: '',
+        postalCode: '',
+        country: 'Switzerland'
+      },
+      dateOfBirth: '',
+      
+      // Business Information
+      businessName: '',
+      businessType: 'individual',
+      vatNumber: '',
+      website: '',
+      
+      // Banking Details
+      bankName: '',
+      accountHolder: '',
+      iban: '',
+      swift: '',
+      
+      // Additional Information
+      hostingExperience: 'none',
+      propertyCount: '1',
+      heardAboutUs: '',
+      terms: false,
+      newsletter: false,
+      
+      // Override with data from signup if available
+      ...(parsedData && {
+        firstName: parsedData.firstName || '',
+        lastName: parsedData.lastName || '',
+        email: parsedData.email || '',
+        phone: parsedData.phoneNumber || '',
+        // Don't pre-fill passwords for security
+      }),
+    };
   });
   
   const [errors, setErrors] = useState({});
@@ -87,14 +101,6 @@ const ProviderRegistration = () => {
         newErrors.email = 'Email is required';
       } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
         newErrors.email = 'Email is invalid';
-      }
-      if (!formData.password) {
-        newErrors.password = 'Password is required';
-      } else if (formData.password.length < 8) {
-        newErrors.password = 'Password must be at least 8 characters';
-      }
-      if (formData.password !== formData.confirmPassword) {
-        newErrors.confirmPassword = 'Passwords do not match';
       }
       if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
       if (!formData.address.street.trim()) newErrors.street = 'Street address is required';
@@ -154,15 +160,55 @@ const ProviderRegistration = () => {
     setIsSubmitting(true);
     
     try {
-      // In a real app, you would call your API here
-      await providerSignup(formData);
+      // Prepare the data for the API call
+      const registrationData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phoneNumber: formData.phone,
+        
+        // Address
+        address: formData.address,
+        
+        // Business information
+        businessName: formData.businessName,
+        businessType: formData.businessType,
+        vatNumber: formData.vatNumber,
+        website: formData.website,
+        
+        // Banking details
+        bankName: formData.bankName,
+        accountHolder: formData.accountHolder,
+        iban: formData.iban,
+        swift: formData.swift,
+        
+        // Additional information
+        hostingExperience: formData.hostingExperience,
+        propertyCount: formData.propertyCount,
+        heardAboutUs: formData.heardAboutUs,
+        
+        // Preferences
+        newsletter: formData.newsletter,
+        
+        // Update registration status
+        registrationStatus: 'complete'
+      };
       
-      // Success! Navigate to success page or provider dashboard
+      // Call the API to complete registration
+      const response = await completeProviderRegistration(registrationData);
+      
+      // Clear the sessionStorage data now that we're done with it
+      sessionStorage.removeItem('providerSignupData');
+      
+      // Success! Navigate to success page
       navigate('/provider/registration-success');
     } catch (error) {
+      console.error('Registration error:', error);
+      
       if (error.response && error.response.data) {
         // Handle API validation errors
-        setErrors(error.response.data.errors || {});
+        setErrors(error.response.data.errors || {
+          form: error.response.data.message || 'Registration failed'
+        });
       } else {
         // Handle generic error
         setErrors({
@@ -238,51 +284,6 @@ const ProviderRegistration = () => {
               {errors.email && (
                 <p className="mt-1 text-sm text-red-600">{errors.email}</p>
               )}
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('password')} *
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand ${
-                    errors.password ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  autoComplete="new-password"
-                />
-                {errors.password && (
-                  <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-                )}
-                <p className="mt-1 text-sm text-gray-500">
-                {t('password_min_length')}
-                </p>
-              </div>
-              
-              <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('confirm_password')} *
-                </label>
-                <input
-                  type="password"
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand ${
-                    errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  autoComplete="new-password"
-                />
-                {errors.confirmPassword && (
-                  <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
-                )}
-              </div>
             </div>
             
             <div>
@@ -898,7 +899,7 @@ const ProviderRegistration = () => {
                     <span>{t('complete_registration')}</span>
                   </div>
                 ) : (
-                  'Complete Registration'
+                  t('complete_registration')
                 )}
               </button>
             )}

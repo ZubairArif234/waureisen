@@ -8,7 +8,7 @@ import ProviderDashboard from '../Provider/ProviderDashboard';
 import ProviderEarnings from '../Provider/ProviderEarnings';
 import ProviderMessages from '../Provider/ProviderMessages';
 import ProviderAnalytics from '../Provider/ProviderAnalytics';
-// import ProviderCalendar from '../Provider/ProviderCalendar';
+import ProviderCalendar from '../Provider/ProviderCalendar';
 import ProviderRegistration from '../Provider/ProviderRegistration';
 import RegistrationSuccess from '../Provider/RegistrationSuccess';
 
@@ -25,7 +25,7 @@ const ProviderLayout = () => {
         <Route path="/earnings" element={<ProviderEarnings />} />
         <Route path="/messages" element={<ProviderMessages />} />
         <Route path="/analytics" element={<ProviderAnalytics />} />
-        {/* <Route path="/calendar" element={<ProviderCalendar />} /> */}
+        <Route path="/calendar" element={<ProviderCalendar />} />
         <Route path="/registration" element={<ProviderRegistration />} />
         <Route path="/registration-success" element={<RegistrationSuccess />} />
         <Route path="/analytics/listing/:id" element={<ProviderAnalytics />} />

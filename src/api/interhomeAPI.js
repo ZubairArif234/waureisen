@@ -16,6 +16,8 @@ export const fetchInterhomePrices = async ({
         los
       }
     });
+
+    console.log('Fetched Interhome prices:', response.data);
     
     return response.data;
   } catch (error) {
