@@ -1,18 +1,30 @@
-import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Building2, Menu, X, CreditCard, Users, UserCog, Newspaper, MessageCircle, ReceiptText, LogOut, Sliders, CaravanIcon } from 'lucide-react';
-import logo from '../../assets/logo.png';
+import React, { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  Building2,
+  Menu,
+  X,
+  CreditCard,
+  Users,
+  UserCog,
+  Newspaper,
+  MessageCircle,
+  ReceiptText,
+  LogOut,
+  Sliders,
+  CaravanIcon,
+} from "lucide-react";
+import logo from "../../assets/logo.png";
+import { logout } from "../../utils/authService";
 
 const SidebarLink = ({ icon: Icon, label, to, isActive, onClick }) => {
-  const Component = to ? Link : 'button';
+  const Component = to ? Link : "button";
   return (
     <Component
       to={to}
       onClick={onClick}
       className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors w-full ${
-        isActive 
-          ? 'bg-brand text-white' 
-          : 'text-gray-600 hover:bg-gray-100'
+        isActive ? "bg-brand text-white" : "text-gray-600 hover:bg-gray-100"
       }`}
     >
       <Icon className="w-5 h-5" />
@@ -26,52 +38,59 @@ const AdminSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const handleLogout = () => {
+    // Use the logout function from authService
+    logout();
+    // Navigate to login page
+    navigate("/login");
+  };
+
   const menuItems = [
     {
       icon: Building2,
-      label: 'Accommodations',
-      path: '/admin/accommodations'
+      label: "Accommodations",
+      path: "/admin/accommodations",
     },
     {
       icon: Users,
-      label: 'Customers',
-      path: '/admin/customers'
+      label: "Customers",
+      path: "/admin/customers",
     },
     {
       icon: UserCog,
-      label: 'Providers',
-      path: '/admin/providers'
+      label: "Providers",
+      path: "/admin/providers",
     },
     {
       icon: CreditCard,
-      label: 'Transactions',
-      path: '/admin/transactions'
+      label: "Transactions",
+      path: "/admin/transactions",
     },
     {
       icon: Newspaper,
-      label: 'Travel Magazine',
-      path: '/admin/magazine'
+      label: "Travel Magazine",
+      path: "/admin/magazine",
     },
     {
       icon: MessageCircle,
-      label: 'Messages',
-      path: '/admin/messages'
+      label: "Messages",
+      path: "/admin/messages",
     },
     {
       icon: CaravanIcon,
-      label: 'Campers',
-      path: '/admin/campers'
+      label: "Campers",
+      path: "/admin/campers",
     },
     {
       icon: ReceiptText,
-      label: 'Discount Vouchers',
-      path: '/admin/vouchers'
+      label: "Discount Vouchers",
+      path: "/admin/vouchers",
     },
     {
       icon: Sliders,
-      label: 'Filters',
-      path: '/admin/filters'
-    }
+      label: "Filters",
+      path: "/admin/filters",
+    },
   ];
 
   const sidebarContent = (
@@ -80,9 +99,11 @@ const AdminSidebar = () => {
       <div className="px-4 py-6 border-b flex-shrink-0">
         <img src={logo} alt="Waureisen Logo" className="h-8" />
       </div>
-      
+
       {/* Scrollable Menu Section with Fixed Height */}
-      <div className="flex-1 flex flex-col min-h-0"> {/* min-h-0 is crucial for nested flex scroll */}
+      <div className="flex-1 flex flex-col min-h-0">
+        {" "}
+        {/* min-h-0 is crucial for nested flex scroll */}
         <div className="flex-1 p-4 overflow-y-auto scrollbar-hide">
           <div className="space-y-2">
             {menuItems.map((item, index) => (
@@ -91,20 +112,18 @@ const AdminSidebar = () => {
                 icon={item.icon}
                 label={item.label}
                 to={item.path}
-                isActive={location.pathname === item.path || 
-                  (item.path !== '/admin' && location.pathname.startsWith(item.path))}
+                isActive={
+                  location.pathname === item.path ||
+                  (item.path !== "/admin" &&
+                    location.pathname.startsWith(item.path))
+                }
               />
             ))}
           </div>
         </div>
-
         {/* Fixed Logout Section */}
         <div className="p-4 border-t mt-auto">
-          <SidebarLink
-            icon={LogOut}
-            label="Logout"
-            onClick={() => navigate('/login')}
-          />
+          <SidebarLink icon={LogOut} label="Logout" onClick={handleLogout} />
         </div>
       </div>
     </div>
