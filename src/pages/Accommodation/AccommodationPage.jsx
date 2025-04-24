@@ -33,6 +33,7 @@ import {
   fetchInterhomeAvailability,
 } from "../../api/interhomeAPI"; // Import fetchInterhomeAvailability
 import moment from "moment";
+import AccommodationDetails from '../../components/AccommodationDetails';
 
 const PlaceOffer = ({ icon: Icon, text, value }) => (
   <div className="flex-1 flex flex-col items-center text-center p-4 border-r border-[#767676] last:border-r-0 md:p-4 p-2">
@@ -589,6 +590,7 @@ const AccommodationPage = () => {
                 </section>
               )}
 
+<<<<<<< HEAD
             {/* Description */}
             <section className="mb-10">
               <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
@@ -618,6 +620,10 @@ const AccommodationPage = () => {
                 ))}
               </div>
             </section>
+=======
+             {/* Accommodation Details */}
+        <AccommodationDetails accommodation={accommodation} />
+>>>>>>> 139f96a (Accomodation Page Details Updated)
 
             {/* Location */}
             <section className="mb-10">
@@ -909,3 +915,8 @@ const AccommodationPage = () => {
 };
 
 export default AccommodationPage;
+<<<<<<< HEAD
+=======
+
+       
+>>>>>>> 139f96a (Accomodation Page Details Updated)
