@@ -490,6 +490,8 @@ const AccommodationPage = () => {
           data: accommodation,
           details: {
             noOfDays: getNoOfDays(dateRange?.start, dateRange?.endDate),
+            startDate: dateRange?.start,
+            endDate: dateRange?.end,
           },
         },
       });

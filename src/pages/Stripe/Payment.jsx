@@ -27,7 +27,7 @@ const Payment = () => {
 
     // payment delay days
     const today = moment().startOf("day");
-    const checkInDate = moment(data?.checkInTime).startOf("day");
+    const checkInDate = moment(details?.startDate).startOf("day");
 
     const diffDays = checkInDate.diff(today, "days");
     setLoading(true);
@@ -35,8 +35,8 @@ const Payment = () => {
       amount: Math.round(amount),
       currency: data?.pricePerNight?.currency,
       listingId: data?._id,
-      checkInDate: new Date(data?.checkInTime),
-      checkOutDate: new Date(data?.checkOutTime),
+      checkInDate: new Date(details?.startDate),
+      checkOutDate: new Date(details?.endDate),
       providerAccountId: "809jujj9ehfhjf99g",
       paymentDelayDays: diffDays,
     });
@@ -59,7 +59,7 @@ const Payment = () => {
     clientSecret: paymentIntent.clientSecret,
   };
   return (
-    <div className="grid grid-cols-2  items-start h-screen py-10 px-20">
+    <div className="grid grid-cols-2 gap-4  items-start h-screen py-10 px-20">
       <div>
         <p className="text-xl font-medium  mb-2 ">
           {data?.title}{" "}
