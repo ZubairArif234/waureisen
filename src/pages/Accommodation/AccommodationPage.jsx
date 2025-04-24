@@ -590,40 +590,8 @@ const AccommodationPage = () => {
                 </section>
               )}
 
-<<<<<<< HEAD
-            {/* Description */}
-            <section className="mb-10">
-              <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
-                {t("description")}
-              </h2>
-              <p className="text-gray-600 whitespace-pre-line text-sm">
-                {accommodation?.description?.general ||
-                accommodation?.description?.inside ||
-                accommodation?.description?.outside
-                  ? `${accommodation?.description?.outside || ""} ${
-                      accommodation?.description?.inside
-                        ? "\n\n" + accommodation?.description?.inside
-                        : ""
-                    }`
-                  : "Innenbereich20 m2. Weitere Angaben des Anbieters: Wir bieten grosszügige Rabatte schon ab 3 Tagen. Langzeitaufenthalte möglich. Perfekte Lage: Unsere Unterkunft bietet eine unschlagbare zentrale Lage. Lebensmittelgeschäfte, Bushaltestellen, erstklassige Restaurants, Bars und Shoppingmöglichkeiten – alles ist nur einen kurzen Spaziergang entfernt. (default)"}
-              </p>
-            </section>
-
-            {/* Details */}
-            <section className="mb-10">
-              <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-6">
-                {t("details")}
-              </h2>
-              <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
-                {details.map((detail, index) => (
-                  <Detail key={index} icon={detail.icon} text={detail.text} />
-                ))}
-              </div>
-            </section>
-=======
              {/* Accommodation Details */}
         <AccommodationDetails accommodation={accommodation} />
->>>>>>> 139f96a (Accomodation Page Details Updated)
 
             {/* Location */}
             <section className="mb-10">
@@ -915,8 +883,5 @@ const AccommodationPage = () => {
 };
 
 export default AccommodationPage;
-<<<<<<< HEAD
-=======
 
        
->>>>>>> 139f96a (Accomodation Page Details Updated)
