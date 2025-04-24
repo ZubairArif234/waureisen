@@ -1,18 +1,16 @@
- import React, { useState, useEffect } from 'react';
- import { useNavigate, Link } from 'react-router-dom';
- import { ArrowLeft, BarChart2, TrendingUp, Users, Calendar, Briefcase, DollarSign, Award, Eye, CreditCard, MessageSquare } from 'lucide-react';
- import Navbar from '../../components/Shared/Navbar';
- import Footer from '../../components/Shared/Footer';
- import i1 from '../../assets/i1.png';
- import i2 from '../../assets/i2.png';
- import s1 from '../../assets/s1.png';
- import s2 from '../../assets/s2.png';
- import i3 from '../../assets/magazine.jpg';
- import { useLanguage } from '../../utils/LanguageContext';
- import { isAuthenticated, getCurrentProvider, setAuthHeader } from '../../utils/authService';
- import BookingChart from '../../components/Shared/BookingChart';
- import RevenueChart from '../../components/Shared/RevenueChart';
- import { 
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft, BarChart2, TrendingUp, Users, Calendar, Briefcase, DollarSign, Award, Eye, CreditCard, MessageSquare, User, Banknote } from 'lucide-react';
+import Navbar from '../../components/Shared/Navbar';
+import Footer from '../../components/Shared/Footer';
+import i1 from '../../assets/i1.png';
+import i2 from '../../assets/i2.png';
+import s1 from '../../assets/s1.png';
+import s2 from '../../assets/s2.png';
+import i3 from '../../assets/magazine.jpg';
+import { useLanguage } from '../../utils/LanguageContext';
+import { isAuthenticated, getCurrentProvider, setAuthHeader } from '../../utils/authService';
+import { 
   getProviderDashboardStats, 
   getProviderBookings,
   getProviderListings 
@@ -501,63 +499,72 @@ navigate(`/provider/bookings?id=${bookingId}`);
           </div>
         </div>
         
-        {/* Quick Links */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-medium text-gray-900">{t('quick_actions')}</h2>
-          </div>
-          <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <button
-              onClick={() => navigate('/provider/create-listing')}
-              className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
-            >
-              <Briefcase className="w-5 h-5 text-brand" />
-              <span className="text-gray-700">{t('create_listing')}</span>
-            </button>
-            <button
-              onClick={() => navigate('/provider/your-listings')}
-              className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
-            >
-              <Eye className="w-5 h-5 text-brand" />
-              <span className="text-gray-700">{t('view_listings')}</span>
-            </button>
-            <button
-              onClick={() => navigate('/provider/bookings')}
-              className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
-            >
-              <Calendar className="w-5 h-5 text-brand" />
-              <span className="text-gray-700">{t('manage_bookings')}</span>
-            </button>
-            <button
-              onClick={() => navigate('/provider/earnings')}
-              className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
-            >
-              <CreditCard className="w-5 h-5 text-brand" />
-              <span className="text-gray-700">{t('view_earnings')}</span>
-            </button>
-            <button
-              onClick={() => navigate('/provider/analytics')}
-              className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
-            >
-              <BarChart2 className="w-5 h-5 text-brand" />
-              <span className="text-gray-700">{t('analytics')}</span>
-            </button>
-            <button
-              onClick={() => navigate('/provider/calendar')}
-              className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
-            >
-              <Calendar className="w-5 h-5 text-brand" />
-              <span className="text-gray-700">{t('calendar')}</span>
-            </button>
-            <button
-              onClick={() => navigate('/provider/messages')}
-              className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
-            >
-              <MessageSquare className="w-5 h-5 text-brand" />
-              <span className="text-gray-700">{t('messages')}</span>
-            </button>
-          </div>
-        </div>
+        
+
+            {/* Quick Links */}
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-lg font-medium text-gray-900">{t('quick_actions')}</h2>
+              </div>
+              <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <button
+                  onClick={() => navigate('/provider/create-listing')}
+                  className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                >
+                  <Briefcase className="w-5 h-5 text-brand" />
+                  <span className="text-gray-700">{t('create_listing')}</span>
+                </button>
+                <button
+                  onClick={() => navigate('/provider/your-listings')}
+                  className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                >
+                  <Eye className="w-5 h-5 text-brand" />
+                  <span className="text-gray-700">{t('view_listings')}</span>
+                </button>
+                <button
+                  onClick={() => navigate('/provider/bookings')}
+                  className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                >
+                  <Calendar className="w-5 h-5 text-brand" />
+                  <span className="text-gray-700">{t('manage_bookings')}</span>
+                </button>
+                <button
+                  onClick={() => navigate('/provider/earnings')}
+                  className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                >
+                  <CreditCard className="w-5 h-5 text-brand" />
+                  <span className="text-gray-700">{t('view_earnings')}</span>
+                </button>
+                <button
+                  onClick={() => navigate('/provider/analytics')}
+                  className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                >
+                  <BarChart2 className="w-5 h-5 text-brand" />
+                  <span className="text-gray-700">{t('analytics')}</span>
+                </button>
+                <button
+                  onClick={() => navigate('/provider/calendar')}
+                  className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                >
+                  <Calendar className="w-5 h-5 text-brand" />
+                  <span className="text-gray-700">{t('calendar')}</span>
+                </button>
+                <button
+                  onClick={() => navigate('/provider/messages')}
+                  className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                >
+                  <MessageSquare className="w-5 h-5 text-brand" />
+                  <span className="text-gray-700">{t('messages')}</span>
+                </button>
+                <button
+                  onClick={() => navigate('/provider/account')}
+                  className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                >
+                  <User className="w-5 h-5 text-brand" />
+                  <span className="text-gray-700">{t('account')}</span>
+                </button>
+              </div>
+            </div>
       </main>
       
       <Footer />

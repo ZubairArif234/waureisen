@@ -11,6 +11,10 @@ import ProviderAnalytics from '../Provider/ProviderAnalytics';
 import ProviderCalendar from '../Provider/ProviderCalendar';
 import ProviderRegistration from '../Provider/ProviderRegistration';
 import RegistrationSuccess from '../Provider/RegistrationSuccess';
+import ProviderAccountPage from '../Provider/ProviderAccountPage';
+import ProviderProfilePage from '../Provider/ProviderProfilePage';
+import ProviderBankingPage from '../Provider/ProviderBankingPage';
+import ProviderSecurityPage from '../Provider/ProviderSecurityPage';
 
 const ProviderLayout = () => {
   return (
@@ -29,6 +33,10 @@ const ProviderLayout = () => {
         <Route path="/registration" element={<ProviderRegistration />} />
         <Route path="/registration-success" element={<RegistrationSuccess />} />
         <Route path="/analytics/listing/:id" element={<ProviderAnalytics />} />
+        <Route path="/account" element={<ProviderAccountPage />} />
+        <Route path="/account/profile" element={<ProviderProfilePage />} />
+        <Route path="/account/banking" element={<ProviderBankingPage />} />
+        <Route path="/account/security" element={<ProviderSecurityPage />} />
         {/* Redirect old listings path to dashboard */}
         <Route path="/listings" element={<Navigate to="/provider/dashboard" replace />} />
       </Routes>

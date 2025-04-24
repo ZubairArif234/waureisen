@@ -2,7 +2,6 @@
 import API from './config';
 import { setAuthHeader } from '../utils/authService';
 
-// Provider profile functions
 export const getProviderProfile = async () => {
   try {
     setAuthHeader();
@@ -17,7 +16,15 @@ export const getProviderProfile = async () => {
 export const updateProviderProfile = async (profileData) => {
   try {
     setAuthHeader();
+    console.log('Updating provider profile with data:', profileData);
     const response = await API.put('/providers/profile', profileData);
+    
+    if (response.data) {
+      const currentData = JSON.parse(localStorage.getItem('provider_user') || '{}');
+      const updatedData = { ...currentData, ...profileData };
+      localStorage.setItem('provider_user', JSON.stringify(updatedData));
+    }
+    
     return response.data;
   } catch (error) {
     console.error('Error updating provider profile:', error);
@@ -25,7 +32,56 @@ export const updateProviderProfile = async (profileData) => {
   }
 };
 
-// Listing management functions
+export const updateProviderBanking = async (bankingData) => {
+  try {
+    setAuthHeader();
+    console.log('Updating provider banking details:', bankingData);
+    const response = await API.put('/providers/profile/banking', bankingData);
+    
+    if (response.data) {
+      const currentData = JSON.parse(localStorage.getItem('provider_user') || '{}');
+      const updatedData = { ...currentData, ...bankingData };
+      localStorage.setItem('provider_user', JSON.stringify(updatedData));
+    }
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error updating provider banking details:', error);
+    throw error;
+  }
+};
+
+export const updateProviderSecurity = async (securityData) => {
+  try {
+    setAuthHeader();
+    const response = await API.put('/providers/profile/security', securityData);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating provider security settings:', error);
+    throw error;
+  }
+};
+
+export const updateProviderSettings = async (settingsData) => {
+  try {
+    setAuthHeader();
+    const response = await API.put('/providers/profile/settings', settingsData);
+    
+    // Update local storage if needed
+    if (response.data) {
+      const currentData = JSON.parse(localStorage.getItem('provider_user') || '{}');
+      const updatedData = { ...currentData, settings: settingsData };
+      localStorage.setItem('provider_user', JSON.stringify(updatedData));
+    }
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error updating provider settings:', error);
+    throw error;
+  }
+};
+
+
 export const getProviderListings = async () => {
   try {
     const response = await API.get('/providers/listings');
@@ -90,7 +146,7 @@ export const getProviderBookings = async (params = {}) => {
       listingId
     } = params;
     
-    // Log received parameters for debugging
+    
     console.log('Getting provider bookings with params:', { 
       status, page, limit, sortOrder, dateRange, listingId 
     });
@@ -115,13 +171,13 @@ export const getProviderBookings = async (params = {}) => {
     
     const response = await API.get(`/providers/bookings?${queryParams}`);
     
-    // Log response for debugging
+    
     console.log('Bookings API response:', response.data);
     
     if (response.data.bookings && response.data.pagination) {
       return response.data;
     } else {
-      // Handle legacy response format
+      
       return {
         bookings: Array.isArray(response.data) ? response.data : [],
         pagination: {
@@ -221,7 +277,7 @@ export const getProviderStats = async (timeRange = 'month') => {
   } catch (error) {
     console.error('Error fetching provider analytics:', error);
     
-    // Return default structure on error to prevent UI crashes
+    
     return {
       timeRange,
       performance: {
@@ -238,7 +294,7 @@ export const getProviderStats = async (timeRange = 'month') => {
   }
 };
 
-// Calendar management functions
+
 export const blockCalendarDates = async (blockData) => {
   try {
     setAuthHeader();
@@ -250,7 +306,7 @@ export const blockCalendarDates = async (blockData) => {
   }
 };
 
-// Earnings functions
+
 export const getProviderEarnings = async (timeFrame = 'all') => {
   try {
     setAuthHeader();
@@ -289,12 +345,6 @@ export const getProviderDashboardStats = async (timeFrame = 'month') => {
 
 
 
-  /**
- * Get provider's unavailable dates
- * @param {string} startDate - Optional start date (YYYY-MM-DD)
- * @param {string} endDate - Optional end date (YYYY-MM-DD)
- * @returns {Promise<Array>} Array of unavailable dates
- */
   export const getUnavailableDates = async (filters = {}) => {
     try {
       const queryParams = new URLSearchParams();
@@ -302,19 +352,17 @@ export const getProviderDashboardStats = async (timeFrame = 'month') => {
       if (filters.startDate) queryParams.append('startDate', filters.startDate);
       if (filters.endDate) queryParams.append('endDate', filters.endDate);
   
+      console.log('Fetching unavailable dates with params:', queryParams.toString());
       const response = await API.get(`/providers/calendar/unavailable-dates?${queryParams}`);
+      console.log('Unavailable dates response:', response.data);
       return response.data;
     } catch (error) {
       console.error('Error fetching unavailable dates:', error);
-      throw error;
+      return []; 
     }
   };
   
-  /**
-   * Block dates for a listing
-   * @param {Object} blockData - Date blocking data
-   * @returns {Promise} API response
-   */
+
   export const blockDates = async (blockData) => {
     try {
       const response = await API.post('/providers/calendar/block-dates', blockData);
@@ -325,11 +373,6 @@ export const getProviderDashboardStats = async (timeFrame = 'month') => {
     }
   };
   
-  /**
-   * Unblock dates for a listing
-   * @param {Object} unblockData - Date unblocking data
-   * @returns {Promise} API response
-   */
   export const unblockDates = async (unblockData) => {
     try {
       setAuthHeader();
@@ -340,3 +383,44 @@ export const getProviderDashboardStats = async (timeFrame = 'month') => {
       throw error;
     }
   };
+
+ export const getProviderCalendarBookings = async (params = {}) => {
+   try {
+     const { 
+       status = 'all', 
+       dateRange,
+       listingId
+     } = params;
+     
+     console.log('Getting calendar bookings with params:', { 
+       status, dateRange, listingId 
+     });
+     
+     const queryParams = new URLSearchParams();
+     
+     if (status !== 'all') {
+       queryParams.append('status', status);
+     }
+     
+     if (listingId) {
+       queryParams.append('listingId', listingId);
+     }
+     
+     if (dateRange) {
+       queryParams.append('dateRange', dateRange);
+     }
+     
+
+     queryParams.append('calendarView', 'true');
+     
+     const response = await API.get(`/providers/calendar-bookings?${queryParams}`);
+     
+     console.log('Calendar bookings API response:', response.data);
+     
+
+     return Array.isArray(response.data) ? response.data : [];
+   } catch (error) {
+     console.error('Error fetching calendar bookings:', error);
+     return [];
+   }
+ };
