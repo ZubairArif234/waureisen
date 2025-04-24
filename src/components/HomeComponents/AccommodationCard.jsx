@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Heart } from "lucide-react";
 import { useLanguage } from "../../utils/LanguageContext";
@@ -78,12 +78,26 @@ const AccommodationCard = ({
         </div>
       </div>
       <div className="space-y-1 cursor-pointer" onClick={handleClick}>
-       {/* Maaz removed 2 prices from here as price per night was displayed 2 times */}
-        <p className="text-brand text-sm">{pricePerNight?.currency || "CHF"} {(pricePerNight?.price || price).toFixed(2)} per night</p>
+        {/* Maaz removed 2 prices from here as price per night was displayed 2 times */}
+        <p className="text-brand text-sm">
+          {pricePerNight?.currency || "CHF"}{" "}
+          {(pricePerNight?.price || price).toFixed(2)} per night
+        </p>
         <h3 className="font-medium text-gray-900">{propertyLocation}</h3>
       </div>
     </div>
   );
 };
 
-export default AccommodationCard;
+// Use memo to prevent unnecessary re-renders
+export default memo(AccommodationCard, (prevProps, nextProps) => {
+  // Only re-render if these props change
+  return (
+    prevProps.id === nextProps.id &&
+    prevProps.image === nextProps.image &&
+    prevProps.price === nextProps.price &&
+    prevProps.location === nextProps.location &&
+    prevProps.pricePerNight?.price === nextProps.pricePerNight?.price &&
+    prevProps.isFavorited === nextProps.isFavorited
+  );
+});

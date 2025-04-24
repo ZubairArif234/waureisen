@@ -195,6 +195,26 @@ export const getAllListings = async () => {
   }
 };
 
+export const getPaginatedListings = async (
+  page = 1,
+  limit = 9,
+  search = ""
+) => {
+  try {
+    const queryParams = new URLSearchParams({
+      page,
+      limit,
+      ...(search && { search }),
+    });
+
+    const response = await API.get(`/admins/paginated-listings?${queryParams}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching paginated listings:", error);
+    throw error;
+  }
+};
+
 export const getListingById = async (id) => {
   try {
     const response = await API.get(`/listings/${id}`);
@@ -311,18 +331,38 @@ export const getProviderById = async (id) => {
 
 export const updateProviderStatus = async (id, status) => {
   try {
+    console.log(`Attempting to update provider ${id} status to ${status}`);
+
+    // Ensure proper authentication headers are set
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("Authentication token not found");
+    }
+
+    // Set up proper headers
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      "profile-status": status,
+    };
+
+    // Make request with headers
     const response = await API.put(
       `/admins/ban-provider/${id}`,
-      {},
-      {
-        headers: {
-          "profile-status": status,
-        },
-      }
+      {}, // Empty request body
+      { headers }
+    );
+
+    console.log(
+      `Successfully updated provider ${id} status to ${status}:`,
+      response.data
     );
     return response.data;
   } catch (error) {
-    console.error(`Error updating provider status:`, error);
+    console.error(
+      `Error updating provider status:`,
+      error.response?.data || error.message
+    );
     throw error;
   }
 };

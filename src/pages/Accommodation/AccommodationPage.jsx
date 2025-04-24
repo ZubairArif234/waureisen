@@ -28,7 +28,10 @@ import Footer from "../../components/Shared/Footer";
 import ImageGalleryModal from "../../components/Shared/ImageGalleryModal";
 import { useLanguage } from "../../utils/LanguageContext";
 import { getListingById } from "../../api/listingAPI";
-import { fetchInterhomePrices, fetchInterhomeAvailability } from "../../api/interhomeAPI"; // Import fetchInterhomeAvailability
+import {
+  fetchInterhomePrices,
+  fetchInterhomeAvailability,
+} from "../../api/interhomeAPI"; // Import fetchInterhomeAvailability
 import moment from "moment";
 
 const PlaceOffer = ({ icon: Icon, text, value }) => (
@@ -164,11 +167,13 @@ const AccommodationPage = () => {
         if (duration7Options.length > 0) {
           // If pax is specified, find the option that matches or is closest to the pax value
           let selectedOption;
-          
+
           if (paxValue) {
             // Find options that can accommodate the requested number of guests
-            const suitableOptions = duration7Options.filter(option => option.paxUpTo >= paxValue);
-            
+            const suitableOptions = duration7Options.filter(
+              (option) => option.paxUpTo >= paxValue
+            );
+
             if (suitableOptions.length > 0) {
               // Sort by paxUpTo to get the most appropriate option
               suitableOptions.sort((a, b) => a.paxUpTo - b.paxUpTo);
@@ -183,14 +188,14 @@ const AccommodationPage = () => {
             duration7Options.sort((a, b) => a.paxUpTo - b.paxUpTo);
             selectedOption = duration7Options[0];
           }
-          
+
           const calculatedPricePerNight = (selectedOption.price / 7).toFixed(2);
 
           setAccommodation((prev) => ({
             ...prev,
             pricePerNight: {
               price: calculatedPricePerNight,
-              currency: priceData.priceList.currency || "", 
+              currency: priceData.priceList.currency || "",
               totalPrice: selectedOption.price,
               duration: 7,
               paxUpTo: selectedOption.paxUpTo,
@@ -235,13 +240,21 @@ const AccommodationPage = () => {
         // Fetch availability data if it's an Interhome listing
         if (data.provider === "Interhome" && data.Code) {
           try {
-            const availabilityData = await fetchInterhomeAvailability(data.Code);
+            const availabilityData = await fetchInterhomeAvailability(
+              data.Code
+            );
             if (availabilityData && availabilityData.availableDates) {
-              setAvailableDates(availabilityData.availableDates.map(d => d.checkInDate)); // Store only the dates
-              
+              setAvailableDates(
+                availabilityData.availableDates.map((d) => d.checkInDate)
+              ); // Store only the dates
+
               // Find the maximum paxUpTo value from all available dates
               if (availabilityData.availableDates.length > 0) {
-                const maxPaxUpTo = Math.max(...availabilityData.availableDates.map(date => date.paxUpTo || 0));
+                const maxPaxUpTo = Math.max(
+                  ...availabilityData.availableDates.map(
+                    (date) => date.paxUpTo || 0
+                  )
+                );
                 if (maxPaxUpTo > 0) {
                   //console.log(`Setting maximum guests to ${maxPaxUpTo} based on availability data`);
                   setMaxGuests(maxPaxUpTo);
@@ -251,7 +264,10 @@ const AccommodationPage = () => {
               }
             }
           } catch (availabilityError) {
-            console.warn(`Failed to fetch Interhome availability for ${data.Code}:`, availabilityError);
+            console.warn(
+              `Failed to fetch Interhome availability for ${data.Code}:`,
+              availabilityError
+            );
             // Optionally set an error state or handle this case
           }
         }
@@ -317,7 +333,7 @@ const AccommodationPage = () => {
                 // Update the accommodation data with price information
                 data.pricePerNight = {
                   price: calculatedPricePerNight,
-                  currency: priceData.priceList.currency || "", 
+                  currency: priceData.priceList.currency || "",
                   totalPrice: selectedOption.price,
                   duration: 7,
                   paxUpTo: selectedOption.paxUpTo,
@@ -362,31 +378,34 @@ const AccommodationPage = () => {
 
   // Default place offers (will be overridden with actual data if available)
   const placeOffers = [
-    { 
-      icon: Users, 
-      text: t('people'), 
-      value: accommodation?.pricePerNight?.paxUpTo || accommodation?.maxGuests?.toString() || '6 ' // Default 
+    {
+      icon: Users,
+      text: t("people"),
+      value:
+        accommodation?.pricePerNight?.paxUpTo ||
+        accommodation?.maxGuests?.toString() ||
+        "6 ", // Default
     },
-    { 
-      icon: Dog, 
-      text: t('dog'), 
-      value: accommodation?.maxDogs?.toString() || '1' 
+    {
+      icon: Dog,
+      text: t("dog"),
+      value: accommodation?.maxDogs?.toString() || "1",
     },
-    { 
-      icon: Home, 
-      text: t('bedrooms'), 
-      value: accommodation?.bedRooms?.toString() || '2 (default)' 
+    {
+      icon: Home,
+      text: t("bedrooms"),
+      value: accommodation?.bedRooms?.toString() || "2 (default)",
     },
-    { 
-      icon: DoorOpen, 
-      text: t('rooms'), 
-      value: accommodation?.rooms?.number?.toString() || '2 (default)' 
+    {
+      icon: DoorOpen,
+      text: t("rooms"),
+      value: accommodation?.rooms?.number?.toString() || "2 (default)",
     },
-    { 
-      icon: Bath, 
-      text: t('washroom'), 
-      value: accommodation?.washrooms?.toString() || '1 (default)' 
-    }
+    {
+      icon: Bath,
+      text: t("washroom"),
+      value: accommodation?.washrooms?.toString() || "1 (default)",
+    },
   ];
 
   // Map amenities from backend to frontend icons
@@ -401,26 +420,27 @@ const AccommodationPage = () => {
       swimming_pool: Waves,
       tv: Tv,
     };
-    
+
     return iconMap[amenityName?.toLowerCase()] || Sparkles; // Default to Sparkles if no match
   };
 
   // Generate details from attributes in backend data
-  const details = accommodation?.attributes && accommodation.attributes.length > 0
-    ? accommodation.attributes.map(attr => ({
-        icon: getAmenityIcon(attr.name?.toLowerCase()),
-        text: attr.name || 'Amenity'
-      }))
-    : [
-        { icon: Utensils, text: t("kitchen") + " (default)" },
-        { icon: Dog, text: t("dogs_allowed") + " (default)" },
-        { icon: Briefcase, text: t("dedicated_workspace") + " (default)" },
-        { icon: Wind, text: t("air_conditioning") + " (default)" },
-        { icon: Sparkles, text: t("firework_free_zone") + " (default)" },
-        { icon: Wifi, text: t("wifi") + " (default)" },
-        { icon: Waves, text: t("swimming_pool") + " (default)" },
-        { icon: Tv, text: t("tv") + " (default)" },
-      ];
+  const details =
+    accommodation?.attributes && accommodation.attributes.length > 0
+      ? accommodation.attributes.map((attr) => ({
+          icon: getAmenityIcon(attr.name?.toLowerCase()),
+          text: attr.name || "Amenity",
+        }))
+      : [
+          { icon: Utensils, text: t("kitchen") + " (default)" },
+          { icon: Dog, text: t("dogs_allowed") + " (default)" },
+          { icon: Briefcase, text: t("dedicated_workspace") + " (default)" },
+          { icon: Wind, text: t("air_conditioning") + " (default)" },
+          { icon: Sparkles, text: t("firework_free_zone") + " (default)" },
+          { icon: Wifi, text: t("wifi") + " (default)" },
+          { icon: Waves, text: t("swimming_pool") + " (default)" },
+          { icon: Tv, text: t("tv") + " (default)" },
+        ];
 
   // Show loading state
   if (loading) {
@@ -475,11 +495,14 @@ const AccommodationPage = () => {
       return;
     }
     if (accommodation?.provider === "Interhome") {
-      const checkInDate = moment(dateRange.start).format('YYYY-MM-DD');
-      const duration = moment(dateRange.end).diff(moment(dateRange.start), 'days');
+      const checkInDate = moment(dateRange.start).format("YYYY-MM-DD");
+      const duration = moment(dateRange.end).diff(
+        moment(dateRange.start),
+        "days"
+      );
       // console.log("Check-in Date:", checkInDate);
       // console.log("Duration:", duration);
-      
+
       const partnerId = import.meta.env.VITE_INTERHOME_PARTNER_ID;
       const iframeUrl = `https://www.interhome.com/Forward.aspx?navigationid=12&aCode=${accommodation.Code}&dtCheckin=${checkInDate}&duration=${duration}&partnerid=${partnerId}&adrAdults=${guests.people}&iniframe=1`;
       window.location.href = iframeUrl;
@@ -538,28 +561,33 @@ const AccommodationPage = () => {
             </section>
 
             {/* Dog Filters Hidden if nothing recevied */}
-            {(accommodation?.dogFilters && accommodation.dogFilters.length > 0) && (
-              <section className="mb-10">
-                <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
-                  {t('dog_filters')}
-                </h2>
-                <div className="flex md:flex-row flex-col gap-4">
-                  {accommodation.dogFilters.includes('firework_free') && (
-                    <div className="flex items-center gap-2">
-                      <Check className="text-brand" />
-                      <span className="text-sm">Firework Free Zone</span>
-                    </div>
-                  )}
-                  {accommodation.dogFilters.includes('restaurants_nearby') && (
-                    <div className="flex items-center gap-2">
-                      <Check className="text-brand" />
-                      <span className="text-sm">Dog-friendly restaurants nearby</span>
-                    </div>
-                  )}
-                  {/* Add more dog filters here as needed */}
-                </div>
-              </section>
-            )}
+            {accommodation?.dogFilters &&
+              accommodation.dogFilters.length > 0 && (
+                <section className="mb-10">
+                  <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
+                    {t("dog_filters")}
+                  </h2>
+                  <div className="flex md:flex-row flex-col gap-4">
+                    {accommodation.dogFilters.includes("firework_free") && (
+                      <div className="flex items-center gap-2">
+                        <Check className="text-brand" />
+                        <span className="text-sm">Firework Free Zone</span>
+                      </div>
+                    )}
+                    {accommodation.dogFilters.includes(
+                      "restaurants_nearby"
+                    ) && (
+                      <div className="flex items-center gap-2">
+                        <Check className="text-brand" />
+                        <span className="text-sm">
+                          Dog-friendly restaurants nearby
+                        </span>
+                      </div>
+                    )}
+                    {/* Add more dog filters here as needed */}
+                  </div>
+                </section>
+              )}
 
             {/* Description */}
             <section className="mb-10">
@@ -567,10 +595,15 @@ const AccommodationPage = () => {
                 {t("description")}
               </h2>
               <p className="text-gray-600 whitespace-pre-line text-sm">
-                {accommodation?.description?.general || 
-                 (accommodation?.description?.inside || accommodation?.description?.outside) ? 
-                   `${accommodation?.description?.outside || ''} ${accommodation?.description?.inside ? '\n\n' + accommodation?.description?.inside : ''}` :
-                   "Innenbereich20 m2. Weitere Angaben des Anbieters: Wir bieten grosszügige Rabatte schon ab 3 Tagen. Langzeitaufenthalte möglich. Perfekte Lage: Unsere Unterkunft bietet eine unschlagbare zentrale Lage. Lebensmittelgeschäfte, Bushaltestellen, erstklassige Restaurants, Bars und Shoppingmöglichkeiten – alles ist nur einen kurzen Spaziergang entfernt. (default)"}
+                {accommodation?.description?.general ||
+                accommodation?.description?.inside ||
+                accommodation?.description?.outside
+                  ? `${accommodation?.description?.outside || ""} ${
+                      accommodation?.description?.inside
+                        ? "\n\n" + accommodation?.description?.inside
+                        : ""
+                    }`
+                  : "Innenbereich20 m2. Weitere Angaben des Anbieters: Wir bieten grosszügige Rabatte schon ab 3 Tagen. Langzeitaufenthalte möglich. Perfekte Lage: Unsere Unterkunft bietet eine unschlagbare zentrale Lage. Lebensmittelgeschäfte, Bushaltestellen, erstklassige Restaurants, Bars und Shoppingmöglichkeiten – alles ist nur einen kurzen Spaziergang entfernt. (default)"}
               </p>
             </section>
 
@@ -617,13 +650,14 @@ const AccommodationPage = () => {
                 {t("cancellation_policy")}
               </h2>
               <p className="text-gray-600 text-sm">
-                {accommodation?.legal?.cancellationPolicy || "Je nach Reisezeitraum 90% Rückerstattung bis 0% Rückerstattung. (default)"}
+                {accommodation?.legal?.cancellationPolicy ||
+                  "Je nach Reisezeitraum 90% Rückerstattung bis 0% Rückerstattung. (default)"}
               </p>
-              
+
               {accommodation?.legal?.termsAndConditions && (
                 <div className="mt-4">
                   <h3 className="text-[#4D484D] text-base font-medium mb-2">
-                    {t('terms_and_conditions')}
+                    {t("terms_and_conditions")}
                   </h3>
                   <p className="text-gray-600 text-sm whitespace-pre-line">
                     {accommodation.legal.termsAndConditions}
@@ -647,17 +681,28 @@ const AccommodationPage = () => {
               </h2>
               <div className="bg-gray-50 p-4 md:p-6 rounded-lg">
                 <div className="flex items-center gap-4 mb-4">
-                  <img 
-                    src={accommodation?.provider?.profilePicture || logo} 
-                    alt={accommodation?.provider?.name || (accommodation?.listingSource || accommodation?.source?.name || "Provider")} 
-                    className="w-12 md:w-16 h-12 md:h-16 rounded-full object-cover" 
+                  <img
+                    src={accommodation?.provider?.profilePicture || logo}
+                    alt={
+                      accommodation?.provider?.name ||
+                      accommodation?.listingSource ||
+                      accommodation?.source?.name ||
+                      "Provider"
+                    }
+                    className="w-12 md:w-16 h-12 md:h-16 rounded-full object-cover"
                   />
                   <div>
                     <h3 className="font-semibold md:text-base text-sm">
-                      Hello, I'm {accommodation?.provider?.name || (accommodation?.listingSource || accommodation?.source?.name || "Provider")}.
+                      Hello, I'm{" "}
+                      {accommodation?.provider?.name ||
+                        accommodation?.listingSource ||
+                        accommodation?.source?.name ||
+                        "Provider"}
+                      .
                     </h3>
                     <p className="text-gray-600 text-sm">
-                      {accommodation?.provider?.description || "This is an accommodation from one of our valued partners."}
+                      {accommodation?.provider?.description ||
+                        "This is an accommodation from one of our valued partners."}
                     </p>
                   </div>
                 </div>
@@ -680,21 +725,27 @@ const AccommodationPage = () => {
               {/* Price Display */}
               <div className="flex flex-col mb-6">
                 <div className="flex items-baseline">
-                  <span className="text-gray-600 mr-2 font-bold">Total Price:</span>
+                  <span className="text-gray-600 mr-2 font-bold">
+                    Total Price:
+                  </span>
                   <span className="text-xl font-semibold">
                     {isPriceLoading ? (
                       <div className="w-16 h-8 bg-gray-200 animate-pulse rounded"></div>
                     ) : (
-                      `${accommodation?.pricePerNight?.price || 0} X ${getNoOfDays(dateRange?.start, dateRange?.end) || 1} = ${(accommodation?.pricePerNight?.price || 0) * (getNoOfDays(dateRange?.start, dateRange?.end) || 1)} ${
-                        accommodation?.pricePerNight?.currency || "CHF"
-                      }`
+                      `${accommodation?.pricePerNight?.price || 0} X ${
+                        getNoOfDays(dateRange?.start, dateRange?.end) || 1
+                      } = ${
+                        (accommodation?.pricePerNight?.price || 0) *
+                        (getNoOfDays(dateRange?.start, dateRange?.end) || 1)
+                      } ${accommodation?.pricePerNight?.currency || "CHF"}`
                     )}
                   </span>
                 </div>
                 <div className="text-sm text-gray-600 mt-2">
-                  Price per person per night: {(accommodation?.pricePerNight?.price || 0) / (guests?.people || 1)} ${
-                    accommodation?.pricePerNight?.currency || "CHF"
-                  }
+                  Price per person per night:{" "}
+                  {(accommodation?.pricePerNight?.price || 0) /
+                    (guests?.people || 1)}{" "}
+                  ${accommodation?.pricePerNight?.currency || "CHF"}
                 </div>
               </div>
 
@@ -733,7 +784,11 @@ const AccommodationPage = () => {
                     {guests.people}{" "}
                     {guests.people === 1 ? t("guest") : t("guests")},{" "}
                     {guests.dogs} {guests.dogs === 1 ? t("dog") : t("dogs")}
-                    {accommodation?.maxGuests ? ` (${t("max")} ${accommodation.maxGuests} ${t("guests")})` : ""}
+                    {accommodation?.maxGuests
+                      ? ` (${t("max")} ${accommodation.maxGuests} ${t(
+                          "guests"
+                        )})`
+                      : ""}
                   </span>
                   <ChevronDown className="h-5 w-5 text-gray-500" />
                 </button>
@@ -847,7 +902,6 @@ const AccommodationPage = () => {
         availableDates={availableDates} // Pass available dates
       />
 
-      
       {/* Remove the redundant date picker and guest selector modals */}
       <Footer />
     </div>

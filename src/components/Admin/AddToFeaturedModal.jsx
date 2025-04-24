@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AlertTriangle } from "lucide-react";
 
 const AddToFeaturedModal = ({
@@ -9,12 +9,36 @@ const AddToFeaturedModal = ({
   currentCounts = {},
   listingTitle,
   listingId,
+  sections: predefinedSections,
+  isRemoveMode,
 }) => {
   const [selectedSection, setSelectedSection] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
+  // Reset selected section when modal opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedSection(
+        predefinedSections && predefinedSections.length === 1
+          ? getSectionId(predefinedSections[0])
+          : ""
+      );
+    } else {
+      setSelectedSection("");
+    }
+    setErrorMessage("");
+  }, [isOpen, predefinedSections]);
+
+  // Helper function to convert section name to section ID
+  const getSectionId = (sectionName) => {
+    if (sectionName === "Featured") return "featured_accommodations";
+    if (sectionName === "New") return "new_accommodations";
+    if (sectionName === "Popular") return "popular_accommodations";
+    return "";
+  };
+
   // Modified sections array with more friendly display names
-  const sections = [
+  const defaultSections = [
     {
       id: "featured_accommodations",
       name: "Featured Accommodations",
@@ -32,20 +56,39 @@ const AddToFeaturedModal = ({
     },
   ];
 
+  // Filter sections if in remove mode to only show sections the item is in
+  const availableSections =
+    isRemoveMode && predefinedSections
+      ? defaultSections.filter((section) =>
+          predefinedSections.includes(
+            section.name === "Featured Accommodations"
+              ? "Featured"
+              : section.name === "New Accommodations"
+              ? "New"
+              : section.name === "Popular Accommodations"
+              ? "Popular"
+              : ""
+          )
+        )
+      : defaultSections;
+
   const handleConfirm = () => {
     if (!selectedSection) {
       setErrorMessage("Please select a section");
       return;
     }
 
-    const currentCount = currentCounts[selectedSection] || 0;
-    if (currentCount >= maxAllowed) {
-      setErrorMessage(
-        `Cannot add more than ${maxAllowed} accommodations to ${
-          sections.find((s) => s.id === selectedSection).name
-        }`
-      );
-      return;
+    // Only check the max limit when adding, not when removing
+    if (!isRemoveMode) {
+      const currentCount = currentCounts[selectedSection] || 0;
+      if (currentCount >= maxAllowed) {
+        setErrorMessage(
+          `Cannot add more than ${maxAllowed} accommodations to ${
+            defaultSections.find((s) => s.id === selectedSection).name
+          }`
+        );
+        return;
+      }
     }
 
     onConfirm(selectedSection);
@@ -67,12 +110,17 @@ const AddToFeaturedModal = ({
       <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl z-50 w-96 max-w-[90%]">
         <div className="p-6">
           <div className="flex items-center text-gray-800 mb-4">
-            <h3 className="text-lg font-medium">Add to Featured Section</h3>
+            <h3 className="text-lg font-medium">
+              {isRemoveMode
+                ? "Remove from Featured Section"
+                : "Add to Featured Section"}
+            </h3>
           </div>
 
           <p className="text-gray-600 mb-4">
-            Select a featured section to add "
-            <span className="font-medium">{listingTitle}</span>" to.
+            Select a featured section to {isRemoveMode ? "remove" : "add"} "
+            <span className="font-medium">{listingTitle}</span>"
+            {isRemoveMode ? "from" : "to"}.
           </p>
 
           <div className="mb-4">
@@ -89,14 +137,18 @@ const AddToFeaturedModal = ({
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481] appearance-none bg-white"
               >
                 <option value="">Select a section</option>
-                {sections.map((section) => (
+                {availableSections.map((section) => (
                   <option
                     key={section.id}
                     value={section.id}
-                    disabled={(currentCounts[section.id] || 0) >= maxAllowed}
+                    disabled={
+                      !isRemoveMode &&
+                      (currentCounts[section.id] || 0) >= maxAllowed
+                    }
                   >
-                    {section.name} ({currentCounts[section.id] || 0}/
-                    {maxAllowed})
+                    {section.name}{" "}
+                    {!isRemoveMode &&
+                      `(${currentCounts[section.id] || 0}/${maxAllowed})`}
                   </option>
                 ))}
               </select>
@@ -134,9 +186,13 @@ const AddToFeaturedModal = ({
             </button>
             <button
               onClick={handleConfirm}
-              className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              className={`px-4 py-2 ${
+                isRemoveMode
+                  ? "bg-amber-600 hover:bg-amber-700"
+                  : "bg-gray-800 hover:bg-gray-700"
+              } text-white rounded-lg transition-colors`}
             >
-              Add
+              {isRemoveMode ? "Remove" : "Add"}
             </button>
           </div>
         </div>

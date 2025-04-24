@@ -1,19 +1,56 @@
 // src/pages/Admin/Campers.jsx
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Search, Plus, Filter, AlertTriangle } from 'lucide-react';
-import CamperCard from '../../components/Admin/CamperCard';
-import { getAllCampers, deleteCamper } from '../../api/camperAPI';
-import toast from 'react-hot-toast';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Search, Plus, Filter, AlertTriangle } from "lucide-react";
+import CamperCard from "../../components/Admin/CamperCard";
+import { getAllCampers, deleteCamper } from "../../api/camperAPI";
+import toast from "react-hot-toast";
 
-const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, camperTitle }) => {
+// Skeleton cards for loading state
+const SkeletonCards = () => {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {[...Array(6)].map((_, index) => (
+        <div
+          key={index}
+          className="bg-white rounded-lg overflow-hidden shadow border border-gray-200 animate-pulse"
+        >
+          <div className="h-48 bg-gray-200"></div>
+          <div className="p-4">
+            <div className="mb-3 flex gap-2">
+              <div className="h-5 bg-gray-200 rounded-full w-16"></div>
+              <div className="h-5 bg-gray-200 rounded-full w-24"></div>
+            </div>
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <div className="w-3/4">
+                <div className="h-5 bg-gray-200 rounded w-full mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+              </div>
+              <div className="w-6 h-6 rounded-full bg-gray-200"></div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const DeleteConfirmationModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  camperTitle,
+}) => {
   if (!isOpen) return null;
 
   return (
     <>
       {/* Overlay */}
-      <div className="fixed inset-0 bg-black bg-opacity-50 z-50" onClick={onClose} />
-      
+      <div
+        className="fixed inset-0 bg-black bg-opacity-50 z-50"
+        onClick={onClose}
+      />
+
       {/* Modal */}
       <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl z-50 w-96 max-w-[90%]">
         <div className="p-6">
@@ -21,11 +58,13 @@ const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, camperTitle }) =>
             <AlertTriangle className="w-6 h-6 mr-2" />
             <h3 className="text-lg font-medium">Delete Camper</h3>
           </div>
-          
+
           <p className="text-gray-600 mb-6">
-            Are you sure you want to delete "<span className="font-medium">{camperTitle}</span>"? This action cannot be undone.
+            Are you sure you want to delete "
+            <span className="font-medium">{camperTitle}</span>"? This action
+            cannot be undone.
           </p>
-          
+
           <div className="flex justify-end gap-3">
             <button
               onClick={onClose}
@@ -48,13 +87,17 @@ const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, camperTitle }) =>
 
 const Campers = () => {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [deleteModal, setDeleteModal] = useState({ isOpen: false, id: null, title: '' });
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [deleteModal, setDeleteModal] = useState({
+    isOpen: false,
+    id: null,
+    title: "",
+  });
   const [campers, setCampers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   // Fetch campers on component mount
   useEffect(() => {
     fetchCampers();
@@ -65,22 +108,22 @@ const Campers = () => {
     setLoading(true);
     try {
       const filters = {};
-      if (selectedCategory !== 'all') {
+      if (selectedCategory !== "all") {
         filters.category = selectedCategory;
       }
-      
+
       const campersData = await getAllCampers(filters);
       setCampers(campersData);
       setError(null);
     } catch (err) {
-      console.error('Error fetching campers:', err);
-      setError('Failed to load campers');
-      toast.error('Error loading campers');
+      console.error("Error fetching campers:", err);
+      setError("Failed to load campers");
+      toast.error("Error loading campers");
     } finally {
       setLoading(false);
     }
   };
-  
+
   // Refetch campers when category changes
   useEffect(() => {
     if (!loading) {
@@ -95,41 +138,44 @@ const Campers = () => {
 
   // Handler for deleting a camper
   const handleDelete = (id) => {
-    const camper = campers.find(camper => camper._id === id);
-    setDeleteModal({ 
-      isOpen: true, 
-      id, 
-      title: camper?.title || 'this camper' 
+    const camper = campers.find((camper) => camper._id === id);
+    setDeleteModal({
+      isOpen: true,
+      id,
+      title: camper?.title || "this camper",
     });
   };
 
   // Handler for adding a new camper
   const handleAdd = () => {
-    navigate('/admin/campers/new');
+    navigate("/admin/campers/new");
   };
 
   // Handler for confirming deletion
   const handleConfirmDelete = async () => {
     try {
       await deleteCamper(deleteModal.id);
-      
+
       // Update local state
-      setCampers(prevCampers => prevCampers.filter(camper => camper._id !== deleteModal.id));
-      
-      toast.success('Camper deleted successfully');
+      setCampers((prevCampers) =>
+        prevCampers.filter((camper) => camper._id !== deleteModal.id)
+      );
+
+      toast.success("Camper deleted successfully");
     } catch (error) {
-      console.error('Error deleting camper:', error);
-      toast.error('Failed to delete camper');
+      console.error("Error deleting camper:", error);
+      toast.error("Failed to delete camper");
     } finally {
-      setDeleteModal({ isOpen: false, id: null, title: '' });
+      setDeleteModal({ isOpen: false, id: null, title: "" });
     }
   };
 
   // Filter campers based on search query
-  const filteredCampers = campers.filter(camper => 
-    (camper.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-     camper.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-     camper.location.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredCampers = campers.filter(
+    (camper) =>
+      camper.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      camper.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      camper.location.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -140,12 +186,10 @@ const Campers = () => {
           <h1 className="text-2xl font-semibold text-gray-900 mb-2">
             Camper Management
           </h1>
-          <p className="text-gray-600">
-            Manage your dog-friendly camper fleet
-          </p>
+          <p className="text-gray-600">Manage your dog-friendly camper fleet</p>
         </div>
-        
-        <button 
+
+        <button
           onClick={handleAdd}
           className="mt-4 md:mt-0 flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-black/80 transition-colors"
         >
@@ -192,11 +236,7 @@ const Campers = () => {
       </div>
 
       {/* Loading State */}
-      {loading && (
-        <div className="flex justify-center items-center py-12">
-          <div className="w-12 h-12 border-4 border-gray-200 border-t-brand rounded-full animate-spin"></div>
-        </div>
-      )}
+      {loading && <SkeletonCards />}
 
       {/* Error State */}
       {error && !loading && (
@@ -205,10 +245,7 @@ const Campers = () => {
             <AlertTriangle className="w-5 h-5 mr-2" />
             {error}
           </p>
-          <button 
-            onClick={fetchCampers}
-            className="mt-2 text-sm underline"
-          >
+          <button onClick={fetchCampers} className="mt-2 text-sm underline">
             Try again
           </button>
         </div>
@@ -218,9 +255,9 @@ const Campers = () => {
       {!loading && !error && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCampers.map(camper => (
-              <CamperCard 
-                key={camper._id} 
+            {filteredCampers.map((camper) => (
+              <CamperCard
+                key={camper._id}
                 camper={{
                   id: camper._id,
                   title: camper.title,
@@ -231,28 +268,30 @@ const Campers = () => {
                   status: camper.status,
                   price: camper.price,
                   currency: camper.currency,
-                  location: camper.location
+                  location: camper.location,
                 }}
                 onEdit={() => handleEdit(camper)}
                 onDelete={() => handleDelete(camper._id)}
               />
             ))}
           </div>
-          
+
           {/* No results message */}
           {filteredCampers.length === 0 && (
             <div className="text-center py-12">
               <p className="text-gray-500 text-lg mb-2">No campers found</p>
-              <p className="text-gray-400">Try adjusting your search or filters</p>
+              <p className="text-gray-400">
+                Try adjusting your search or filters
+              </p>
             </div>
           )}
         </>
       )}
-      
+
       {/* Delete Confirmation Modal */}
-      <DeleteConfirmationModal 
+      <DeleteConfirmationModal
         isOpen={deleteModal.isOpen}
-        onClose={() => setDeleteModal({ isOpen: false, id: null, title: '' })}
+        onClose={() => setDeleteModal({ isOpen: false, id: null, title: "" })}
         onConfirm={handleConfirmDelete}
         camperTitle={deleteModal.title}
       />

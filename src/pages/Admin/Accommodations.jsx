@@ -10,11 +10,12 @@ import {
   Star,
 } from "lucide-react";
 import {
-  getAllListings,
+  getPaginatedListings,
   deleteListing,
   closeListing,
   getFeaturedAccommodations,
   addToFeaturedSection,
+  removeFromFeaturedSection,
 } from "../../api/adminAPI";
 import {
   getCloudinaryUrl,
@@ -30,12 +31,34 @@ const DEFAULT_SOURCES = [
   { id: "admin", name: "Admin" },
 ];
 
+// Skeleton card for loading state
+const SkeletonCard = () => {
+  return (
+    <div className="bg-white rounded-lg overflow-hidden shadow border border-gray-200 animate-pulse">
+      <div className="w-full h-48 bg-gray-200"></div>
+      <div className="p-4">
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <div className="w-3/4">
+            <div className="h-5 bg-gray-200 rounded w-3/4 mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+          </div>
+          <div className="w-6 h-6 rounded-full bg-gray-200"></div>
+        </div>
+        <div className="flex items-center justify-between mt-2">
+          <div className="h-5 w-16 bg-gray-200 rounded-full"></div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const AccommodationCard = ({
   accommodation,
   onEdit,
   onToggleStatus,
   onDelete,
   onAddToFeatured,
+  onRemoveFromFeatured,
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [menuPosition, setMenuPosition] = useState("bottom"); // 'top' or 'bottom'
@@ -139,6 +162,18 @@ const AccommodationCard = ({
       },
       className: "text-gray-700 hover:bg-gray-100",
     },
+    ...(featuredSections.length > 0
+      ? [
+          {
+            label: "Remove from",
+            onClick: () => {
+              onRemoveFromFeatured(accommodation._id, featuredSections);
+              setShowMenu(false);
+            },
+            className: "text-amber-600 hover:bg-amber-50",
+          },
+        ]
+      : []),
     {
       label: "Delete",
       onClick: () => {
@@ -359,56 +394,66 @@ const DeleteConfirmationModal = ({
 
 const Accommodations = () => {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedSource, setSelectedSource] = useState("all");
-  const [deleteModal, setDeleteModal] = useState({
-    isOpen: false,
-    id: null,
-    title: "",
-  });
   const [accommodations, setAccommodations] = useState([]);
-  const [availableSources, setAvailableSources] = useState(DEFAULT_SOURCES);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
-
-  // Add to Featured section state
-  const [featuredModal, setFeaturedModal] = useState({
-    isOpen: false,
-    id: null,
-    title: "",
-  });
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [selectedListingId, setSelectedListingId] = useState(null);
+  const [selectedListingTitle, setSelectedListingTitle] = useState("");
+  const [addToFeaturedModalOpen, setAddToFeaturedModalOpen] = useState(false);
+  const [selectedForFeatured, setSelectedForFeatured] = useState(null);
+  const [removeFromFeaturedModalOpen, setRemoveFromFeaturedModalOpen] =
+    useState(false);
+  const [featuredSectionsToRemove, setFeaturedSectionsToRemove] = useState([]);
+  const [filteredSource, setFilteredSource] = useState("all");
+  const [sources, setSources] = useState(DEFAULT_SOURCES);
   const [featuredCounts, setFeaturedCounts] = useState({
     featured_accommodations: 0,
     new_accommodations: 0,
     popular_accommodations: 0,
   });
 
-  // Fetch accommodations on component mount
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [limit] = useState(9);
+  const [search, setSearch] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+
+  // Remove the form submission functions and keep the direct search input
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    // Search as you type
+    setSearch(e.target.value);
+    if (page !== 1) {
+      setPage(1); // Reset to first page when searching
+    }
+  };
+
   useEffect(() => {
     fetchAccommodations();
     fetchFeaturedCounts();
-  }, [selectedSource]);
+  }, [page, search]); // Refetch when page or search changes
 
-  // Function to fetch all accommodations
   const fetchAccommodations = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
+      const result = await getPaginatedListings(page, limit, search);
+      setAccommodations(result.listings);
+      setTotalPages(result.pagination.pages);
+      setTotalItems(result.pagination.total);
 
-      // Fetch all accommodations
-      const data = await getAllListings();
-      setAccommodations(data);
-
-      // Extract unique sources from the data
-      const sources = extractUniqueSources(data);
-      if (sources.length > 0) {
-        setAvailableSources(sources);
+      // Extract unique sources for filtering
+      const uniqueSources = extractUniqueSources(result.listings);
+      if (uniqueSources.length > 0) {
+        setSources(uniqueSources);
       }
-
-      setError(null);
-    } catch (err) {
-      console.error("Error fetching accommodations:", err);
+    } catch (error) {
+      console.error("Error fetching accommodations:", error);
       setError("Failed to load accommodations. Please try again later.");
+      // Keep the default sources on error
     } finally {
       setLoading(false);
     }
@@ -431,18 +476,18 @@ const Accommodations = () => {
   // Handler for adding to featured section (displays modal)
   const handleAddToFeatured = (id) => {
     const accommodation = accommodations.find((acc) => acc._id === id);
-    setFeaturedModal({
-      isOpen: true,
-      id,
-      title: accommodation?.title || "this listing",
-    });
+    setAddToFeaturedModalOpen(true);
+    setSelectedForFeatured(accommodation);
   };
 
   // Handler for confirming add to featured
   const handleConfirmAddToFeatured = async (section) => {
     try {
       setLoading(true);
-      const response = await addToFeaturedSection(featuredModal.id, section);
+      const response = await addToFeaturedSection(
+        selectedForFeatured._id,
+        section
+      );
 
       // Check if there were any skipped listings
       if (
@@ -461,7 +506,8 @@ const Accommodations = () => {
         }, 5000);
 
         setLoading(false);
-        setFeaturedModal({ isOpen: false, id: null, title: "" });
+        setAddToFeaturedModalOpen(false);
+        setSelectedForFeatured(null);
         return;
       }
 
@@ -487,7 +533,7 @@ const Accommodations = () => {
       // Update the listing status
       setAccommodations((prevAccommodations) => {
         return prevAccommodations.map((acc) => {
-          if (acc._id === featuredModal.id) {
+          if (acc._id === selectedForFeatured._id) {
             // Add this section to the featured sections (calculated in AccommodationCard)
             return acc; // The card will re-fetch the featured status
           }
@@ -510,7 +556,56 @@ const Accommodations = () => {
       }
     } finally {
       setLoading(false);
-      setFeaturedModal({ isOpen: false, id: null, title: "" });
+      setAddToFeaturedModalOpen(false);
+      setSelectedForFeatured(null);
+    }
+  };
+
+  // Handler for removing from featured section (displays modal)
+  const handleRemoveFromFeatured = (id, featuredSections) => {
+    const accommodation = accommodations.find((acc) => acc._id === id);
+    setRemoveFromFeaturedModalOpen(true);
+    setSelectedForFeatured(accommodation);
+    setFeaturedSectionsToRemove(featuredSections);
+  };
+
+  // Handler for confirming remove from featured
+  const handleConfirmRemoveFromFeatured = async (section) => {
+    try {
+      setLoading(true);
+      await removeFromFeaturedSection(selectedForFeatured._id, section);
+
+      // Show success message
+      setSuccessMessage(
+        `Accommodation removed from ${
+          section === "featured_accommodations"
+            ? "Featured Accommodations"
+            : section === "new_accommodations"
+            ? "New Accommodations"
+            : "Popular Accommodations"
+        } successfully`
+      );
+
+      // Refresh the featured counts
+      await fetchFeaturedCounts();
+
+      // Clear the message after a few seconds
+      setTimeout(() => {
+        setSuccessMessage("");
+      }, 3000);
+
+      // The card will re-fetch the featured status
+      await fetchAccommodations();
+
+      setError(null);
+    } catch (err) {
+      console.error("Error removing from featured section:", err);
+      setError("Failed to remove from featured section. Please try again.");
+    } finally {
+      setLoading(false);
+      setRemoveFromFeaturedModalOpen(false);
+      setSelectedForFeatured(null);
+      setFeaturedSectionsToRemove([]);
     }
   };
 
@@ -580,22 +675,20 @@ const Accommodations = () => {
 
   // Handler for deleting an accommodation
   const handleDelete = (id, title) => {
-    setDeleteModal({
-      isOpen: true,
-      id,
-      title: title || "this listing",
-    });
+    setDeleteConfirmOpen(true);
+    setSelectedListingId(id);
+    setSelectedListingTitle(title || "this listing");
   };
 
   // Handler for confirming deletion
   const handleConfirmDelete = async () => {
     try {
       setLoading(true);
-      await deleteListing(deleteModal.id);
+      await deleteListing(selectedListingId);
 
       // Remove the deleted accommodation from state
       setAccommodations((prevAccommodations) =>
-        prevAccommodations.filter((acc) => acc._id !== deleteModal.id)
+        prevAccommodations.filter((acc) => acc._id !== selectedListingId)
       );
 
       setError(null);
@@ -604,43 +697,41 @@ const Accommodations = () => {
       setError("Failed to delete accommodation. Please try again.");
     } finally {
       setLoading(false);
-      setDeleteModal({ isOpen: false, id: null, title: "" });
+      setDeleteConfirmOpen(false);
+      setSelectedListingId(null);
+      setSelectedListingTitle("");
     }
   };
 
-  // Filter accommodations based on search query and selected source
+  // Add pagination controls
+  const handlePreviousPage = () => {
+    if (page > 1) {
+      setPage(page - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (page < totalPages) {
+      setPage(page + 1);
+    }
+  };
+
+  // Filter accommodations based on selected source
   const filteredAccommodations = accommodations.filter((acc) => {
     // Skip filtering if accommodation object is invalid
     if (!acc) return false;
 
     // Check source filter match
-    const sourceMatch =
-      selectedSource === "all" ||
+    return (
+      filteredSource === "all" ||
       (acc.source &&
         acc.source.name &&
-        acc.source.name.toLowerCase() === selectedSource);
-
-    // Skip term filtering if search query is empty
-    if (!searchQuery) return sourceMatch;
-
-    // Check if title or address matches search query
-    const titleMatch =
-      acc.title &&
-      acc.title.toString().toLowerCase().includes(searchQuery.toLowerCase());
-
-    const addressMatch =
-      acc.location &&
-      acc.location.address &&
-      acc.location.address
-        .toString()
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase());
-
-    return sourceMatch && (titleMatch || addressMatch);
+        acc.source.name.toLowerCase() === filteredSource)
+    );
   });
 
   return (
-    <div className="p-6">
+    <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
@@ -668,9 +759,8 @@ const Accommodations = () => {
         </div>
       )}
 
-      {/* Filters */}
-      <div className="flex flex-col md:flex-row gap-4 mb-8">
-        {/* Search */}
+      {/* Search and filter section */}
+      <div className="flex flex-col md:flex-row items-stretch gap-3 mb-6">
         <div className="flex-1">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -678,7 +768,7 @@ const Accommodations = () => {
               type="text"
               placeholder="Search listings..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={handleSearchChange}
               className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
             />
           </div>
@@ -688,12 +778,12 @@ const Accommodations = () => {
         <div className="flex items-center gap-2">
           <Filter className="w-5 h-5 text-gray-400" />
           <select
-            value={selectedSource}
-            onChange={(e) => setSelectedSource(e.target.value)}
+            value={filteredSource}
+            onChange={(e) => setFilteredSource(e.target.value)}
             className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
           >
             <option value="all">All Sources</option>
-            {availableSources.map((source) => (
+            {sources.map((source) => (
               <option key={source.id} value={source.id}>
                 {source.name}
               </option>
@@ -704,8 +794,12 @@ const Accommodations = () => {
 
       {/* Loading State */}
       {loading && (
-        <div className="flex justify-center items-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand"></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array(9)
+            .fill()
+            .map((_, index) => (
+              <SkeletonCard key={`skeleton-${index}`} />
+            ))}
         </div>
       )}
 
@@ -720,6 +814,7 @@ const Accommodations = () => {
               onToggleStatus={handleToggleStatus}
               onDelete={handleDelete}
               onAddToFeatured={handleAddToFeatured}
+              onRemoveFromFeatured={handleRemoveFromFeatured}
             />
           ))}
         </div>
@@ -733,23 +828,136 @@ const Accommodations = () => {
         </div>
       )}
 
+      {/* Pagination controls */}
+      <div className="flex items-center justify-between border-t border-gray-200 px-4 py-3 sm:px-6 mt-6">
+        <div className="flex flex-1 justify-between sm:hidden">
+          <button
+            onClick={handlePreviousPage}
+            disabled={page <= 1}
+            className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md ${
+              page <= 1
+                ? "bg-gray-100 text-gray-400"
+                : "bg-white text-gray-700 hover:bg-gray-50"
+            }`}
+          >
+            Previous
+          </button>
+          <button
+            onClick={handleNextPage}
+            disabled={page >= totalPages}
+            className={`ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md ${
+              page >= totalPages
+                ? "bg-gray-100 text-gray-400"
+                : "bg-white text-gray-700 hover:bg-gray-50"
+            }`}
+          >
+            Next
+          </button>
+        </div>
+        <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm text-gray-700">
+              Showing{" "}
+              <span className="font-medium">
+                {filteredAccommodations.length > 0 ? (page - 1) * limit + 1 : 0}
+              </span>{" "}
+              to{" "}
+              <span className="font-medium">
+                {filteredSource !== "all"
+                  ? Math.min(
+                      (page - 1) * limit + filteredAccommodations.length,
+                      totalItems
+                    )
+                  : Math.min(page * limit, totalItems)}
+              </span>{" "}
+              of{" "}
+              <span className="font-medium">
+                {filteredSource !== "all"
+                  ? filteredAccommodations.length
+                  : totalItems}
+              </span>{" "}
+              results
+              {filteredSource !== "all" &&
+                ` (filtered from ${totalItems} total)`}
+            </p>
+          </div>
+          <div>
+            <nav
+              className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+              aria-label="Pagination"
+            >
+              <button
+                onClick={handlePreviousPage}
+                disabled={page <= 1}
+                className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium ${
+                  page <= 1 ? "text-gray-300" : "text-gray-500 hover:bg-gray-50"
+                }`}
+              >
+                <span className="sr-only">Previous</span>
+                &larr;
+              </button>
+              {/* Page numbers would go here */}
+              <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                Page {page} of {totalPages}
+              </span>
+              <button
+                onClick={handleNextPage}
+                disabled={page >= totalPages}
+                className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium ${
+                  page >= totalPages
+                    ? "text-gray-300"
+                    : "text-gray-500 hover:bg-gray-50"
+                }`}
+              >
+                <span className="sr-only">Next</span>
+                &rarr;
+              </button>
+            </nav>
+          </div>
+        </div>
+      </div>
+
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
-        isOpen={deleteModal.isOpen}
-        onClose={() => setDeleteModal({ isOpen: false, id: null, title: "" })}
+        isOpen={deleteConfirmOpen}
+        onClose={() => {
+          setDeleteConfirmOpen(false);
+          setSelectedListingId(null);
+          setSelectedListingTitle("");
+        }}
         onConfirm={handleConfirmDelete}
-        listingTitle={deleteModal.title}
+        listingTitle={selectedListingTitle}
       />
 
       {/* Add to Featured Modal */}
       <AddToFeaturedModal
-        isOpen={featuredModal.isOpen}
-        onClose={() => setFeaturedModal({ isOpen: false, id: null, title: "" })}
+        isOpen={addToFeaturedModalOpen}
+        onClose={() => {
+          setAddToFeaturedModalOpen(false);
+          setSelectedForFeatured(null);
+        }}
         onConfirm={handleConfirmAddToFeatured}
-        listingId={featuredModal.id}
-        listingTitle={featuredModal.title}
+        listingId={selectedForFeatured?._id}
+        listingTitle={selectedForFeatured?.title || "this listing"}
         currentCounts={featuredCounts}
         maxAllowed={6}
+      />
+
+      {/* Remove from Featured Modal */}
+      <AddToFeaturedModal
+        isOpen={removeFromFeaturedModalOpen}
+        onClose={() => {
+          setRemoveFromFeaturedModalOpen(false);
+          setSelectedForFeatured(null);
+          setFeaturedSectionsToRemove([]);
+        }}
+        onConfirm={handleConfirmRemoveFromFeatured}
+        listingId={selectedForFeatured?._id}
+        listingTitle={selectedForFeatured?.title || "this listing"}
+        currentCounts={featuredCounts}
+        maxAllowed={6}
+        sections={featuredSectionsToRemove}
+        isRemoveMode={true}
       />
 
       {/* Success Message */}
