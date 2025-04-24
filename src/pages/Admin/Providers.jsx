@@ -17,19 +17,83 @@ import {
   deleteProvider,
 } from "../../api/adminAPI";
 import avatar from "../../assets/avatar.png";
+import { toast } from "react-hot-toast";
+
+// Skeleton for loading state
+const SkeletonTable = () => {
+  return (
+    <div className="bg-white rounded-lg shadow-sm border overflow-hidden animate-pulse">
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              {[...Array(7)].map((_, i) => (
+                <th key={i} className="px-4 py-3">
+                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {[...Array(8)].map((_, rowIndex) => (
+              <tr key={rowIndex}>
+                <td className="px-4 py-4">
+                  <div className="flex items-center">
+                    <div className="w-10 h-10 rounded-full bg-gray-200 mr-3"></div>
+                    <div>
+                      <div className="h-4 bg-gray-200 rounded w-32 mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded w-24"></div>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-4 py-4">
+                  <div className="h-4 bg-gray-200 rounded w-32"></div>
+                </td>
+                <td className="px-4 py-4">
+                  <div className="h-4 bg-gray-200 rounded w-32"></div>
+                </td>
+                <td className="px-4 py-4 text-center">
+                  <div className="h-4 bg-gray-200 rounded w-8 mx-auto"></div>
+                </td>
+                <td className="px-4 py-4">
+                  <div className="h-5 bg-gray-200 rounded-full w-16 mx-auto"></div>
+                </td>
+                <td className="px-4 py-4">
+                  <div className="h-4 bg-gray-200 rounded w-24"></div>
+                </td>
+                <td className="px-4 py-4">
+                  <div className="flex justify-end">
+                    <div className="h-8 w-8 bg-gray-200 rounded-full"></div>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="px-4 py-3 border-t flex justify-between">
+        <div className="h-4 bg-gray-200 rounded w-48"></div>
+        <div className="flex gap-2">
+          <div className="h-6 w-16 bg-gray-200 rounded"></div>
+          <div className="h-6 w-16 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // ProviderDetailModal component for viewing provider details
 const ProviderDetailModal = ({ provider, isOpen, onClose, onBanUnban }) => {
   if (!isOpen || !provider) return null;
-  
+
   return (
     <>
       {/* Overlay */}
-      <div 
-        className="fixed inset-0 bg-black bg-opacity-50 z-50" 
+      <div
+        className="fixed inset-0 bg-black bg-opacity-50 z-50"
         onClick={onClose}
       />
-      
+
       {/* Modal */}
       <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl z-50 w-full max-w-2xl">
         <div className="p-6">
@@ -37,7 +101,7 @@ const ProviderDetailModal = ({ provider, isOpen, onClose, onBanUnban }) => {
             <h3 className="text-xl font-semibold text-gray-900">
               Provider Details
             </h3>
-            <button 
+            <button
               onClick={onClose}
               className="p-2 hover:bg-gray-100 rounded-full transition-colors"
             >
@@ -57,13 +121,13 @@ const ProviderDetailModal = ({ provider, isOpen, onClose, onBanUnban }) => {
               </svg>
             </button>
           </div>
-          
+
           {/* Provider Profile */}
           <div className="flex items-center mb-6">
             <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200 mr-4">
-              <img 
-                src={provider.profilePicture ? provider.profilePicture : avatar} 
-                alt={provider.displayName || provider.username} 
+              <img
+                src={provider.profilePicture ? provider.profilePicture : avatar}
+                alt={provider.displayName || provider.username}
                 className="w-full h-full object-cover"
                 onError={(e) => {
                   e.target.onerror = null;
@@ -93,7 +157,7 @@ const ProviderDetailModal = ({ provider, isOpen, onClose, onBanUnban }) => {
               </div>
             </div>
           </div>
-          
+
           {/* Provider Information */}
           <div className="space-y-4 mb-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -121,7 +185,7 @@ const ProviderDetailModal = ({ provider, isOpen, onClose, onBanUnban }) => {
               </div>
             </div>
           </div>
-          
+
           {/* Provider's Bio */}
           {provider.bio && (
             <div className="mb-6">
@@ -131,7 +195,7 @@ const ProviderDetailModal = ({ provider, isOpen, onClose, onBanUnban }) => {
               </p>
             </div>
           )}
-          
+
           {/* Provider's Listings */}
           {provider.listings && provider.listings.length > 0 && (
             <div className="mb-6">
@@ -182,7 +246,7 @@ const ProviderDetailModal = ({ provider, isOpen, onClose, onBanUnban }) => {
               </div>
             </div>
           )}
-          
+
           {/* Actions */}
           <div className="flex justify-end gap-3">
             <button
@@ -231,7 +295,7 @@ const DeleteConfirmationModal = ({
         className="fixed inset-0 bg-black bg-opacity-50 z-50"
         onClick={onClose}
       />
-      
+
       {/* Modal */}
       <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl z-50 w-96 max-w-[90%]">
         <div className="p-6">
@@ -239,14 +303,14 @@ const DeleteConfirmationModal = ({
             <AlertTriangle className="w-6 h-6 mr-2" />
             <h3 className="text-lg font-medium">Delete Provider</h3>
           </div>
-          
+
           <p className="text-gray-600 mb-6">
             Are you sure you want to delete "
             <span className="font-medium">{providerName}</span>"? This action
             cannot be undone and will remove all provider data including their
             listings from the system.
           </p>
-          
+
           <div className="flex justify-end gap-3">
             <button
               onClick={onClose}
@@ -286,10 +350,10 @@ const ProviderRow = ({ provider, onAction }) => {
       const buttonRect = buttonRef.current.getBoundingClientRect();
       const windowHeight = window.innerHeight;
       const spaceBelow = windowHeight - buttonRect.bottom;
-      
+
       // Lower threshold for mobile (100px) vs desktop (150px)
       const threshold = window.innerWidth < 768 ? 100 : 150;
-      
+
       // If there's not enough space below, position menu above
       if (spaceBelow < threshold) {
         setMenuPosition("top");
@@ -347,9 +411,9 @@ const ProviderRow = ({ provider, onAction }) => {
       <td className="px-4 py-4 whitespace-nowrap">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
-            <img 
-              src={provider.profilePicture ? provider.profilePicture : avatar} 
-              alt={provider.displayName || provider.username} 
+            <img
+              src={provider.profilePicture ? provider.profilePicture : avatar}
+              alt={provider.displayName || provider.username}
               className="w-full h-full object-cover"
               onError={(e) => {
                 e.target.onerror = null;
@@ -387,7 +451,7 @@ const ProviderRow = ({ provider, onAction }) => {
       </td>
       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
         <div className="relative" ref={menuRef}>
-          <button 
+          <button
             ref={buttonRef}
             className="p-2 hover:bg-gray-100 rounded-full"
             onClick={() => setShowMenu(!showMenu)}
@@ -395,7 +459,7 @@ const ProviderRow = ({ provider, onAction }) => {
           >
             <MoreHorizontal className="w-5 h-5 text-gray-500" />
           </button>
-          
+
           {/* Mobile Dropdown Menu - Opens at bottom of screen */}
           {showMenu && window.innerWidth < 768 && (
             <>
@@ -404,11 +468,11 @@ const ProviderRow = ({ provider, onAction }) => {
                 className="fixed inset-0 bg-black/20 z-40"
                 onClick={() => setShowMenu(false)}
               />
-              
+
               {/* Menu fixed to bottom of screen */}
               <div className="fixed inset-x-0 bottom-0 bg-white rounded-t-lg shadow-lg z-50 p-2">
                 <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-3"></div>
-                
+
                 <button
                   onClick={handleView}
                   className="w-full text-left px-4 py-3 text-sm flex items-center gap-2 border-b border-gray-100"
@@ -416,7 +480,7 @@ const ProviderRow = ({ provider, onAction }) => {
                   <Eye className="w-5 h-5 text-gray-500" />
                   <span>View details</span>
                 </button>
-                
+
                 {provider.profileStatus !== "banned" ? (
                   <button
                     onClick={handleBanUnban}
@@ -434,7 +498,7 @@ const ProviderRow = ({ provider, onAction }) => {
                     <span>Unban provider</span>
                   </button>
                 )}
-                
+
                 <button
                   onClick={handleDelete}
                   className="w-full text-left px-4 py-3 text-sm flex items-center gap-2 text-red-600"
@@ -442,7 +506,7 @@ const ProviderRow = ({ provider, onAction }) => {
                   <AlertTriangle className="w-5 h-5" />
                   <span>Delete</span>
                 </button>
-                
+
                 <button
                   onClick={() => setShowMenu(false)}
                   className="w-full py-3 mt-2 text-sm font-medium text-gray-500 border-t border-gray-100"
@@ -452,12 +516,12 @@ const ProviderRow = ({ provider, onAction }) => {
               </div>
             </>
           )}
-          
+
           {/* Desktop Dropdown Menu - Smart positioning */}
           {showMenu && window.innerWidth >= 768 && (
-            <div 
+            <div
               className="fixed right-auto w-36 bg-white rounded-md shadow-lg z-[1000] border border-gray-200 py-1"
-              style={{ 
+              style={{
                 left: buttonRef.current
                   ? buttonRef.current.getBoundingClientRect().left - 100
                   : "auto",
@@ -481,7 +545,7 @@ const ProviderRow = ({ provider, onAction }) => {
                 <Eye className="w-4 h-4 text-gray-500" />
                 <span>View details</span>
               </button>
-              
+
               {provider.profileStatus !== "banned" ? (
                 <button
                   onClick={handleBanUnban}
@@ -499,7 +563,7 @@ const ProviderRow = ({ provider, onAction }) => {
                   <span>Unban provider</span>
                 </button>
               )}
-              
+
               <button
                 onClick={handleDelete}
                 className="w-full text-left px-3 py-2 text-sm flex items-center gap-2 text-red-600 hover:bg-red-50"
@@ -522,9 +586,9 @@ const ProviderCard = ({ provider, onAction }) => {
       <div className="flex justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
-            <img 
-              src={provider.profilePicture ? provider.profilePicture : avatar} 
-              alt={provider.displayName || provider.username} 
+            <img
+              src={provider.profilePicture ? provider.profilePicture : avatar}
+              alt={provider.displayName || provider.username}
               className="w-full h-full object-cover"
               onError={(e) => {
                 e.target.onerror = null;
@@ -541,7 +605,7 @@ const ProviderCard = ({ provider, onAction }) => {
           </div>
         </div>
         <div className="relative">
-          <button 
+          <button
             className="p-2 hover:bg-gray-100 rounded-full"
             onClick={() => onAction("view", provider)}
           >
@@ -549,7 +613,7 @@ const ProviderCard = ({ provider, onAction }) => {
           </button>
         </div>
       </div>
-      
+
       <div className="mt-3 flex justify-between items-center">
         <div className="text-sm text-gray-600">
           <span className="font-medium">{provider.listings?.length || 0}</span>{" "}
@@ -571,7 +635,7 @@ const ProviderCard = ({ provider, onAction }) => {
             : "Pending"}
         </span>
       </div>
-      
+
       <div className="mt-3 pt-3 border-t flex gap-2">
         <button
           onClick={() => onAction("view", provider)}
@@ -609,7 +673,7 @@ const ProviderCard = ({ provider, onAction }) => {
 const exportToCSV = (data, filename) => {
   // Create headers
   const headers = ["Name", "Email", "Listings", "Status", "JoinedDate"];
-  
+
   // Convert data to CSV rows
   const csvRows = [
     // Headers row
@@ -628,24 +692,24 @@ const exportToCSV = (data, filename) => {
         item.profileStatus,
         joinedDate,
       ];
-      
+
       // Handle CSV special characters
       return values
         .map((value) => {
-        const stringValue = String(value);
+          const stringValue = String(value);
           if (
             stringValue.includes(",") ||
             stringValue.includes('"') ||
             stringValue.includes("\n")
           ) {
-          return `"${stringValue.replace(/"/g, '""')}"`;
-        }
-        return stringValue;
-    })
+            return `"${stringValue.replace(/"/g, '""')}"`;
+          }
+          return stringValue;
+        })
         .join(",");
     }),
   ].join("\n");
-  
+
   // Create and download the file
   const blob = new Blob([csvRows], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
@@ -669,7 +733,7 @@ const Providers = () => {
   const [providers, setProviders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   // Fetch providers on component mount
   useEffect(() => {
     const fetchProviders = async () => {
@@ -699,10 +763,10 @@ const Providers = () => {
         (selectedStatus === "pending" &&
           (provider.profileStatus === "pending verification" ||
             provider.profileStatus === "not verified"))) &&
-    (provider.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-     provider.lastName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-     provider.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-     provider.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (provider.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        provider.lastName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        provider.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        provider.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (provider.displayName &&
           provider.displayName
             .toLowerCase()
@@ -719,15 +783,21 @@ const Providers = () => {
       case "ban":
         try {
           setLoading(true);
-          await updateProviderStatus(provider._id, "banned");
-          
+          console.log("Attempting to ban provider:", provider._id);
+
+          // Set error to null before attempting the action
+          setError(null);
+
+          const response = await updateProviderStatus(provider._id, "banned");
+          console.log("Ban provider response:", response);
+
           // Update local state
           setProviders((prev) =>
             prev.map((p) =>
               p._id === provider._id ? { ...p, profileStatus: "banned" } : p
             )
           );
-          
+
           // Update selected provider if detail modal is open
           if (selectedProvider && selectedProvider._id === provider._id) {
             setSelectedProvider({
@@ -735,11 +805,16 @@ const Providers = () => {
               profileStatus: "banned",
             });
           }
-          
-          setError(null);
+
+          toast.success("Provider banned successfully");
         } catch (err) {
           console.error("Error banning provider:", err);
-          setError("Failed to ban provider. Please try again.");
+          setError(
+            `Failed to ban provider: ${
+              err.response?.data?.message || err.message
+            }`
+          );
+          toast.error("Failed to ban provider");
         } finally {
           setLoading(false);
         }
@@ -747,15 +822,21 @@ const Providers = () => {
       case "unban":
         try {
           setLoading(true);
-          await updateProviderStatus(provider._id, "verified");
-          
+          console.log("Attempting to unban provider:", provider._id);
+
+          // Set error to null before attempting the action
+          setError(null);
+
+          const response = await updateProviderStatus(provider._id, "verified");
+          console.log("Unban provider response:", response);
+
           // Update local state
           setProviders((prev) =>
             prev.map((p) =>
               p._id === provider._id ? { ...p, profileStatus: "verified" } : p
             )
           );
-          
+
           // Update selected provider if detail modal is open
           if (selectedProvider && selectedProvider._id === provider._id) {
             setSelectedProvider({
@@ -763,11 +844,16 @@ const Providers = () => {
               profileStatus: "verified",
             });
           }
-          
-          setError(null);
+
+          toast.success("Provider unbanned successfully");
         } catch (err) {
           console.error("Error unbanning provider:", err);
-          setError("Failed to unban provider. Please try again.");
+          setError(
+            `Failed to unban provider: ${
+              err.response?.data?.message || err.message
+            }`
+          );
+          toast.error("Failed to unban provider");
         } finally {
           setLoading(false);
         }
@@ -787,7 +873,7 @@ const Providers = () => {
       try {
         setLoading(true);
         await deleteProvider(providerToDelete._id);
-        
+
         // Remove the deleted provider from state
         setProviders((prev) =>
           prev.filter((p) => p._id !== providerToDelete._id)
@@ -808,20 +894,34 @@ const Providers = () => {
   const handleDetailBanUnban = async (id, status) => {
     try {
       setLoading(true);
-      await updateProviderStatus(id, status);
-      
+      console.log(
+        `Attempting to update provider ${id} status to ${status} from detail modal`
+      );
+
+      // Set error to null before attempting the action
+      setError(null);
+
+      const response = await updateProviderStatus(id, status);
+      console.log(`Provider status update response:`, response);
+
       // Update local state
       setProviders((prev) =>
         prev.map((p) => (p._id === id ? { ...p, profileStatus: status } : p))
       );
-      
+
       // Update selected provider
       setSelectedProvider((prev) => ({ ...prev, profileStatus: status }));
-      
-      setError(null);
+
+      const actionText = status === "banned" ? "banned" : "unbanned";
+      toast.success(`Provider ${actionText} successfully`);
     } catch (err) {
       console.error("Error updating provider status:", err);
-      setError("Failed to update provider status. Please try again.");
+      setError(
+        `Failed to update provider status: ${
+          err.response?.data?.message || err.message
+        }`
+      );
+      toast.error("Failed to update provider status");
     } finally {
       setLoading(false);
     }
@@ -894,13 +994,9 @@ const Providers = () => {
       </div>
 
       {/* Loading State */}
-      {loading && (
-        <div className="flex justify-center items-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand"></div>
-        </div>
-      )}
+      {loading && <SkeletonTable />}
 
-      {/* Desktop View - Table */}
+      {/* Providers Table */}
       {!loading && (
         <div className="hidden md:block bg-white border rounded-lg shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
@@ -942,9 +1038,9 @@ const Providers = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredProviders.length > 0 ? (
                   filteredProviders.map((provider) => (
-                    <ProviderRow 
-                      key={provider._id} 
-                      provider={provider} 
+                    <ProviderRow
+                      key={provider._id}
+                      provider={provider}
                       onAction={handleProviderAction}
                     />
                   ))
@@ -992,9 +1088,9 @@ const Providers = () => {
         <div className="md:hidden space-y-4">
           {filteredProviders.length > 0 ? (
             filteredProviders.map((provider) => (
-              <ProviderCard 
-                key={provider._id} 
-                provider={provider} 
+              <ProviderCard
+                key={provider._id}
+                provider={provider}
                 onAction={handleProviderAction}
               />
             ))
@@ -1003,7 +1099,7 @@ const Providers = () => {
               No providers found matching your criteria
             </div>
           )}
-          
+
           {/* Mobile Pagination */}
           {filteredProviders.length > 0 && (
             <div className="mt-4 flex items-center justify-between">

@@ -13,6 +13,94 @@ import {
 import { getAllUsers, updateUserStatus, deleteUser } from "../../api/adminAPI";
 import avatar from "../../assets/avatar.png";
 
+// Skeleton for loading state
+const SkeletonTable = () => {
+  return (
+    <div className="hidden md:block bg-white border rounded-lg shadow-sm overflow-hidden animate-pulse">
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              {[...Array(6)].map((_, i) => (
+                <th key={i} className="px-4 py-3">
+                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {[...Array(8)].map((_, rowIndex) => (
+              <tr key={rowIndex} className="border-b">
+                <td className="px-4 py-4">
+                  <div className="flex items-center">
+                    <div className="w-10 h-10 rounded-full bg-gray-200 mr-3"></div>
+                    <div>
+                      <div className="h-4 bg-gray-200 rounded w-32 mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded w-24"></div>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-4 py-4">
+                  <div className="h-4 bg-gray-200 rounded w-40"></div>
+                </td>
+                <td className="px-4 py-4">
+                  <div className="h-4 bg-gray-200 rounded w-28"></div>
+                </td>
+                <td className="px-4 py-4 text-center">
+                  <div className="h-4 bg-gray-200 rounded w-8 mx-auto"></div>
+                </td>
+                <td className="px-4 py-4">
+                  <div className="h-5 bg-gray-200 rounded-full w-16"></div>
+                </td>
+                <td className="px-4 py-4">
+                  <div className="flex gap-2">
+                    <div className="h-5 w-5 bg-gray-200 rounded-full"></div>
+                    <div className="h-5 w-5 bg-gray-200 rounded-full"></div>
+                    <div className="h-5 w-5 bg-gray-200 rounded-full"></div>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+// Mobile skeleton cards
+const SkeletonCards = () => {
+  return (
+    <div className="md:hidden space-y-4">
+      {[...Array(5)].map((_, index) => (
+        <div
+          key={index}
+          className="bg-white rounded-lg border p-4 animate-pulse"
+        >
+          <div className="flex items-center mb-3">
+            <div className="w-12 h-12 rounded-full bg-gray-200 mr-3"></div>
+            <div>
+              <div className="h-4 bg-gray-200 rounded w-32 mb-2"></div>
+              <div className="h-3 bg-gray-200 rounded w-24"></div>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="h-4 bg-gray-200 rounded w-full"></div>
+            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+            <div className="flex justify-between mt-4">
+              <div className="h-5 bg-gray-200 rounded-full w-16"></div>
+              <div className="flex gap-2">
+                <div className="h-8 w-8 bg-gray-200 rounded-full"></div>
+                <div className="h-8 w-8 bg-gray-200 rounded-full"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 // CustomerDetailModal component for viewing customer details
 const CustomerDetailModal = ({ customer, isOpen, onClose, onBanUnban }) => {
   if (!isOpen || !customer) return null;
@@ -938,9 +1026,10 @@ const Customers = () => {
 
       {/* Loading State */}
       {loading && (
-        <div className="flex justify-center items-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand"></div>
-        </div>
+        <>
+          <SkeletonTable />
+          <SkeletonCards />
+        </>
       )}
 
       {/* Desktop View - Table */}
