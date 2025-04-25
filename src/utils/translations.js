@@ -1005,6 +1005,61 @@ const translations = {
     update_failed: "Update failed",
     save_changes: "Save Changes",
     try_again: "Try Again",
+// Button states
+saving: "Saving...",
+update_failed: "Update failed",
+save_changes: "Save Changes",
+try_again: "Try Again",
+
+contact_us: "Contact Us",
+we_are_here_to_help: "We are here to help",
+our_founder: "Our Founder",
+ready_to_assist: "Ready to assist with your pet-friendly travel needs",
+call_us: "Call Us",
+schedule_callback: "Schedule a Callback",
+
+
+
+ // Chat-related translations
+ messages: "Messages",
+ all: "All",
+ unread: "Unread",
+ search_messages: "Search messages...",
+ no_messages_found: "No messages found",
+ adjust_search: "Try adjusting your search",
+ no_conversations_yet: "No conversations yet",
+ no_messages_yet: "No messages yet",
+ start_conversation: "Start typing to begin a conversation",
+ type_a_message: "Type a message...",
+ type_message: "Type a message...",
+ send: "Send",
+ select_conversation: "Select a conversation",
+ choose_conversation: "Choose a conversation from the list",
+ choose_contact_to_chat: "Choose a contact to start chatting",
+ 
+ // User roles
+ provider: "Provider",
+ guest: "Guest",
+ 
+ // Message-related actions
+ show_more_details: "Show more details",
+ show_less: "Show less",
+ 
+ // Booking details in chat
+ booking_details: "Booking Details",
+ night: "night",
+ nights: "nights",
+ dog: "dog",
+ dogs: "dogs",
+ guests: "guests",
+ guest: "guest",
+ booking_id: "Booking ID",
+ total_amount: "Total Amount",
+ 
+ // Chat statuses
+ loading_messages: "Loading messages...",
+
+
   },
 
   de: {
@@ -1019,6 +1074,66 @@ const translations = {
     account_deletion_failed:
       "Konto konnte nicht gelöscht werden. Bitte versuche es erneut oder kontaktiere den Support.",
     account_actions: "Kontoaktionen",
+
+
+     // Chat-related translations
+  messages: "Nachrichten",
+  all: "Alle",
+  unread: "Ungelesen",
+  search_messages: "Nachrichten durchsuchen...",
+  no_messages_found: "Keine Nachrichten gefunden",
+  adjust_search: "Versuchen Sie, Ihre Suche anzupassen",
+  no_conversations_yet: "Noch keine Gespräche",
+  no_messages_yet: "Noch keine Nachrichten",
+  start_conversation: "Beginnen Sie zu tippen, um ein Gespräch zu beginnen",
+  type_a_message: "Nachricht eingeben...",
+  type_message: "Nachricht eingeben...",
+  send: "Senden",
+  select_conversation: "Wählen Sie ein Gespräch aus",
+  choose_conversation: "Wählen Sie ein Gespräch aus der Liste",
+  choose_contact_to_chat: "Wählen Sie einen Kontakt, um mit dem Chatten zu beginnen",
+  
+  // User roles
+  provider: "Anbieter",
+  guest: "Gast",
+  
+  // Message-related actions
+  show_more_details: "Mehr Details anzeigen",
+  show_less: "Weniger anzeigen",
+  
+  // Booking details in chat
+  booking_details: "Buchungsdetails",
+  night: "Nacht",
+  nights: "Nächte",
+  dog: "Hund",
+  dogs: "Hunde",
+  guests: "Gäste",
+  guest: "Gast",
+  booking_id: "Buchungs-ID",
+  total_amount: "Gesamtbetrag",
+  
+  // Chat statuses
+  loading_messages: "Nachrichten werden geladen...",
+
+
+    contact_us: "Kontaktiere uns",
+    we_are_here_to_help: "Wir sind hier, um zu helfen",
+    our_founder: "Unser Gründer",
+    ready_to_assist: "Bereit, bei Ihren haustierfreundlichen Reisebedürfnissen zu helfen",
+    call_us: "Rufen Sie uns an",
+    schedule_callback: "Rückruf vereinbaren",
+
+
+// Account-related translations
+account: "Konto",
+account_settings: "Kontoeinstellungen",
+account_settings_desc: "Verwalte deine Kontoeinstellungen und -präferenzen",
+account_type: "Kontotyp",
+account_type_desc: "Wähle zwischen Kunden- und Anbietermodus",
+account_deletion_requested: "Die Löschung deines Kontos wurde angefragt",
+account_deletion_success: "Dein Konto wurde erfolgreich deaktiviert",
+account_deletion_failed: "Konto konnte nicht gelöscht werden. Bitte versuche es erneut oder kontaktiere den Support.",
+account_actions: "Kontoaktionen",
 
     // Profile-related translations
     profile_settings: "Profileinstellungen",

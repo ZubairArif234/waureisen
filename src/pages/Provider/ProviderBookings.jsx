@@ -121,13 +121,6 @@ const BookingCardMobile = ({ booking, onMessage, onAcceptBooking, onCancelBookin
             </div>
 
             <div className="w-full flex flex-col space-y-2 mt-2">
-              <button
-                onClick={() => onMessage(booking.id || booking._id)}
-                className="w-full flex items-center justify-center gap-1 bg-gray-100 text-gray-700 rounded-lg p-2 text-xs"
-              >
-                <Send className="w-3 h-3" />
-                <span>{t('message_guest')}</span>
-              </button>
               
               {booking.status === 'pending' && (
                 <div className="flex space-x-2">
@@ -269,7 +262,12 @@ const ProviderBookings = () => {
         )
       );
       
+      // Show a success message
       alert(`Booking ${bookingId} has been accepted.`);
+      
+      // Redirect to messages page with booking ID as a parameter
+      navigate(`/provider/messages?booking=${bookingId}`);
+      
     } catch (error) {
       console.error("Error accepting booking:", error);
       alert("Failed to accept booking. Please try again.");
@@ -594,14 +592,6 @@ return (
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm">
                     <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleMessage(booking.id || booking._id)}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
-                      >
-                        <Send className="w-4 h-4" />
-                        <span>{t('message')}</span>
-                      </button>
-                      
                       {booking.status === 'pending' && (
                         <>
                           <button

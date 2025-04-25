@@ -3,40 +3,50 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Send, Search, Calendar, User, Info, MoreHorizontal } from 'lucide-react';
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
-import avatar from '../../assets/avatar.png';
-import i1 from '../../assets/i1.png';
-import i2 from '../../assets/i2.png';
 import { useLanguage } from '../../utils/LanguageContext';
+import { getProviderConversations, getConversationMessages, sendMessage, markConversationAsRead, getConversationByBooking } from '../../api/conversationAPI';
+import { useSocket } from '../../utils/SocketContext';
+import defaultAvatar from '../../assets/avatar.png';
 
 // ContactCard component for the sidebar
 const ContactCard = ({ contact, isActive, onClick }) => {
+  // Format date
+  const timestamp = contact.lastMessageTime 
+    ? new Date(contact.lastMessageTime).toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit'
+      })
+    : '';
+  
+  // Get customer name
+  const customerName = contact.customer?.firstName && contact.customer?.lastName
+    ? `${contact.customer.firstName} ${contact.customer.lastName}`
+    : contact.customer?.username || 'Guest';
+  
   return (
     <div 
       className={`flex items-center gap-3 p-4 cursor-pointer rounded-lg ${
         isActive ? 'bg-brand/10' : 'hover:bg-gray-100'
       }`}
-      onClick={() => onClick(contact.id)}
+      onClick={() => onClick(contact._id)}
     >
       <div className="relative">
         <img 
-          src={contact.avatar} 
-          alt={contact.name} 
+          src={contact.customer?.profilePicture || defaultAvatar} 
+          alt={customerName} 
           className="w-12 h-12 rounded-full object-cover"
         />
-        {contact.isOnline && (
-          <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
-        )}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between">
-          <h3 className={`font-medium ${isActive ? 'text-brand' : 'text-gray-900'} truncate`}>{contact.name}</h3>
-          <span className="text-xs text-gray-500">{contact.lastMessageTime}</span>
+          <h3 className={`font-medium ${isActive ? 'text-brand' : 'text-gray-900'} truncate`}>{customerName}</h3>
+          <span className="text-xs text-gray-500">{timestamp}</span>
         </div>
-        <p className="text-sm text-gray-500 truncate">{contact.lastMessage}</p>
+        <p className="text-sm text-gray-500 truncate">{contact.lastMessage || 'No messages yet'}</p>
       </div>
-      {contact.unreadCount > 0 && (
+      {(contact.unreadProvider > 0) && (
         <span className="flex items-center justify-center min-w-[20px] h-5 rounded-full bg-brand text-white text-xs px-1">
-          {contact.unreadCount}
+          {contact.unreadProvider}
         </span>
       )}
     </div>
@@ -45,18 +55,24 @@ const ContactCard = ({ contact, isActive, onClick }) => {
 
 // Message bubble component
 const MessageBubble = ({ message, isOwn }) => {
+  const messageTime = new Date(message.createdAt).toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit'
+  });
+
   return (
     <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-4`}>
       {!isOwn && (
-        <img src={message.sender.avatar} alt={message.sender.name} className="w-8 h-8 rounded-full mr-2 self-end" />
+        <img 
+          src={defaultAvatar} 
+          alt="Sender" 
+          className="w-8 h-8 rounded-full mr-2 self-end"
+        />
       )}
       <div className={`max-w-[70%] ${isOwn ? 'bg-brand text-white' : 'bg-gray-100 text-gray-800'} p-3 rounded-lg`}>
-        <p className="text-sm">{message.text}</p>
-        {message.media && (
-          <img src={message.media} alt="Attached media" className="mt-2 rounded-md w-full h-auto" />
-        )}
+        <p className="text-sm">{message.content}</p>
         <div className={`text-xs mt-1 text-right ${isOwn ? 'text-brand-light' : 'text-gray-500'}`}>
-          {message.time}
+          {messageTime}
         </div>
       </div>
     </div>
@@ -64,12 +80,31 @@ const MessageBubble = ({ message, isOwn }) => {
 };
 
 // Booking Info Card component
-const BookingInfoCard = ({ booking }) => {
-  const { t } = useLanguage();
+const BookingInfoCard = ({ booking, t }) => {
+  if (!booking) return null;
+  
+  // Format dates
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+  
+  // Calculate nights
+  const calculateNights = (checkIn, checkOut) => {
+    if (!checkIn || !checkOut) return 0;
+    const start = new Date(checkIn);
+    const end = new Date(checkOut);
+    const diffTime = Math.abs(end - start);
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  };
+  
+  const nights = calculateNights(booking.checkInDate, booking.checkOutDate);
+  
   return (
     <div className="border border-gray-200 rounded-lg overflow-hidden shadow-sm mb-4">
       <div className="p-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-      <h3 className="font-medium text-gray-900">{t('booking_details')}</h3>
+        <h3 className="font-medium text-gray-900">{t('booking_details')}</h3>
         <span className={`text-xs font-medium px-2 py-1 rounded-full ${
           booking.status === 'confirmed' 
             ? 'bg-green-100 text-green-800' 
@@ -83,14 +118,14 @@ const BookingInfoCard = ({ booking }) => {
       <div className="p-4">
         <div className="flex mb-4">
           <img 
-            src={booking.property.image} 
-            alt={booking.property.name} 
+            src={booking.listing?.images?.[0] || defaultAvatar} 
+            alt={booking.listing?.title || "Property"} 
             className="w-16 h-16 object-cover rounded-md"
           />
-          <div className="ml-3">
-            <h4 className="font-medium text-gray-900">{booking.property.name}</h4>
-            <p className="text-sm text-gray-500">{booking.property.location}</p>
-          </div>
+          {/* <div className="ml-3">
+            <h4 className="font-medium text-gray-900">{booking.listing?.title || "Property"}</h4>
+            <p className="text-sm text-gray-500">{booking.listing?.location?.address || "Unknown location"}</p>
+          </div> */}
         </div>
         
         <div className="space-y-3">
@@ -98,10 +133,10 @@ const BookingInfoCard = ({ booking }) => {
             <Calendar className="w-4 h-4 text-gray-400" />
             <div className="text-sm">
               <span className="text-gray-900">
-                {booking.checkIn} - {booking.checkOut}
+                {formatDate(booking.checkInDate)} - {formatDate(booking.checkOutDate)}
               </span>
               <span className="text-gray-500 ml-1">
-              ({booking.nights} {booking.nights === 1 ? t('night') : t('nights')})
+                ({nights} {nights === 1 ? t('night') : t('nights')})
               </span>
             </div>
           </div>
@@ -109,21 +144,22 @@ const BookingInfoCard = ({ booking }) => {
           <div className="flex items-center gap-2">
             <User className="w-4 h-4 text-gray-400" />
             <span className="text-sm text-gray-900">
-            {booking.guests} {booking.guests === 1 ? t('guest') : t('guests')}, {booking.dogs} {booking.dogs === 1 ? t('dog') : t('dogs')}
+              {booking.capacity?.people || 1} {booking.capacity?.people === 1 ? t('guest') : t('guests')}, 
+              {' '}{booking.capacity?.dogs || 0} {booking.capacity?.dogs === 1 ? t('dog') : t('dogs')}
             </span>
           </div>
           
           <div className="flex items-center gap-2">
             <Info className="w-4 h-4 text-gray-400" />
             <span className="text-sm text-gray-900">
-            {t('booking_id')}: #{booking.id}
+              {t('booking_id')}: #{booking._id || booking.id}
             </span>
           </div>
           
           <div className="pt-2 mt-2 border-t border-gray-200">
             <div className="flex justify-between">
-            <span className="text-sm text-gray-500">{t('total_amount')}</span>
-              <span className="text-sm font-medium text-brand">{booking.totalAmount} CHF</span>
+              <span className="text-sm text-gray-500">{t('total_amount')}</span>
+              <span className="text-sm font-medium text-brand">{booking.totalPrice} CHF</span>
             </div>
           </div>
         </div>
@@ -138,6 +174,7 @@ const ProviderMessages = () => {
   const location = useLocation();
   const messageInputRef = useRef(null);
   const messageContainerRef = useRef(null);
+  const messageEndRef = useRef(null);
   
   // Parse query params to get booking ID if it exists
   const queryParams = new URLSearchParams(location.search);
@@ -147,185 +184,286 @@ const ProviderMessages = () => {
   const [selectedContact, setSelectedContact] = useState(null);
   const [newMessage, setNewMessage] = useState('');
   const [showBookingInfo, setShowBookingInfo] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const messageSentFlag = useRef(false);
+
   
-  // Mock data for contacts
-  const [contacts, setContacts] = useState([
-    {
-      id: 'C1',
-      name: 'John Doe',
-      avatar: avatar,
-      lastMessage: 'Hi there, is the studio still available for the dates I requested?',
-      lastMessageTime: '10:12 AM',
-      isOnline: true,
-      unreadCount: 2,
-      booking: {
-        id: 'B1001',
-        property: {
-          name: 'Modern Studio in City Center',
-          location: 'Zurich, Switzerland',
-          image: i1
-        },
-        checkIn: 'Apr 12, 2025',
-        checkOut: 'Apr 16, 2025',
-        nights: 4,
-        guests: 2,
-        dogs: 1,
-        status: 'confirmed',
-        totalAmount: '480'
-      },
-      messages: [
-        {
-          id: 'M1',
-          sender: { id: 'C1', name: 'John Doe', avatar: avatar },
-          text: 'Hi there, is the studio still available for the dates I requested?',
-          time: '10:12 AM',
-          isRead: false
-        },
-        {
-          id: 'M2',
-          sender: { id: 'owner', name: 'Me', avatar: avatar },
-          text: 'Hello John! Yes, the studio is available for your requested dates (Apr 12-16).',
-          time: '10:15 AM',
-          isRead: true
-        },
-        {
-          id: 'M3',
-          sender: { id: 'C1', name: 'John Doe', avatar: avatar },
-          text: 'Great! Do you offer any discount for a 4-night stay?',
-          time: '10:17 AM',
-          isRead: false
-        }
-      ]
-    },
-    {
-      id: 'C2',
-      name: 'Alice Johnson',
-      avatar: avatar,
-      lastMessage: 'Thanks for approving my booking! Looking forward to our stay.',
-      lastMessageTime: 'Yesterday',
-      isOnline: false,
-      unreadCount: 0,
-      booking: {
-        id: 'B1002',
-        property: {
-          name: 'Mountain View Chalet',
-          location: 'Swiss Alps, Switzerland',
-          image: i2
-        },
-        checkIn: 'Apr 20, 2025',
-        checkOut: 'Apr 23, 2025',
-        nights: 3,
-        guests: 4,
-        dogs: 2,
-        status: 'pending',
-        totalAmount: '690'
-      },
-      messages: [
-        {
-          id: 'M4',
-          sender: { id: 'C2', name: 'Alice Johnson', avatar: avatar },
-          text: 'Hi, I just submitted a booking request for your chalet. We\'re a family of 4 with 2 dogs.',
-          time: 'Yesterday, 3:30 PM',
-          isRead: true
-        },
-        {
-          id: 'M5',
-          sender: { id: 'owner', name: 'Me', avatar: avatar },
-          text: 'Hello Alice! I received your booking request. Is this your first time in the Swiss Alps?',
-          time: 'Yesterday, 4:15 PM',
-          isRead: true
-        },
-        {
-          id: 'M6',
-          sender: { id: 'C2', name: 'Alice Johnson', avatar: avatar },
-          text: 'Thanks for approving my booking! Looking forward to our stay.',
-          time: 'Yesterday, 5:20 PM',
-          isRead: true
-        }
-      ]
-    }
-  ]);
+  const [conversations, setConversations] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [currentConversation, setCurrentConversation] = useState(null);
   
-  // If a booking ID was provided in the URL, select the corresponding contact
+  const { socket } = useSocket();
+  
+  // Load conversations on mount
   useEffect(() => {
-    if (bookingId) {
-      const contact = contacts.find(c => c.booking.id === bookingId);
-      if (contact) {
-        setSelectedContact(contact.id);
+    const fetchConversations = async () => {
+      setIsLoading(true);
+      try {
+        const data = await getProviderConversations();
+        setConversations(data);
+        
+        // If a booking ID is provided in the URL, find or create the conversation
+        if (bookingId) {
+          try {
+            const conversation = await getConversationByBooking(bookingId);
+            if (conversation) {
+              setSelectedContact(conversation._id);
+              setCurrentConversation(conversation);
+            }
+          } catch (err) {
+            console.error('Error getting conversation for booking:', err);
+          }
+        } else if (data.length > 0 && !selectedContact) {
+          // Select first conversation by default
+          setSelectedContact(data[0]._id);
+          setCurrentConversation(data[0]);
+        }
+      } catch (err) {
+        console.error('Error fetching conversations:', err);
+        setError('Failed to load conversations');
+      } finally {
+        setIsLoading(false);
       }
-    } else if (contacts.length > 0 && !selectedContact) {
-      setSelectedContact(contacts[0].id);
-    }
-  }, [bookingId, contacts]);
+    };
+    
+    fetchConversations();
+  }, [bookingId]);
   
-  // Auto-scroll to the bottom of messages when a new message is added or contact changes
+  
   useEffect(() => {
-    if (messageContainerRef.current) {
-      messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
+    if (!socket) return;
+    
+    // Keep track of processed message IDs to avoid duplicates
+    const processedMessageIds = new Set();
+    
+    // Listen for new messages
+    socket.on('new_message', (message) => {
+      // Skip if we've already processed this message or it's a temp message
+      if (processedMessageIds.has(message._id)) return;
+      processedMessageIds.add(message._id);
+      
+      // Check if the message belongs to the current conversation
+      if (selectedContact && message.conversation === selectedContact) {
+        // If it's our own message, check if we need to replace a temp message
+        if (message.senderType === 'Provider') {
+          setMessages(prevMessages => {
+            // Check if we have a pending message with similar content and timestamp
+            const hasPendingMatch = prevMessages.some(msg => 
+              msg.isPending && 
+              msg.content === message.content &&
+              Math.abs(new Date(msg.createdAt) - new Date(message.createdAt)) < 5000
+            );
+            
+            if (hasPendingMatch) {
+              // Replace the pending message with the confirmed one
+              return prevMessages.map(msg => 
+                (msg.isPending && msg.content === message.content) ? message : msg
+              );
+            } else {
+              // No pending message to replace, just add it
+              return [...prevMessages, message];
+            }
+          });
+        } else {
+          // It's from the other party, just add it
+          setMessages(prevMessages => [...prevMessages, message]);
+          
+          // Mark as read if it's from the customer
+          markConversationAsRead(selectedContact).catch(console.error);
+        }
+      }
+      
+      // Update the conversation list (unread count, last message)
+      setConversations(prevConversations => 
+        prevConversations.map(conv => 
+          conv._id === message.conversation
+            ? { 
+                ...conv, 
+                lastMessage: message.content,
+                lastMessageTime: message.createdAt,
+                unreadProvider: conv._id === selectedContact 
+                  ? 0 // If this conversation is selected, mark as read
+                  : (conv.unreadProvider || 0) + (message.senderType === 'User' ? 1 : 0)
+              }
+            : conv
+        )
+      );
+    });
+    
+    // Listen for "messages read" events
+    socket.on('messages_read', ({ conversationId }) => {
+      setConversations(prevConversations => 
+        prevConversations.map(conv => 
+          conv._id === conversationId
+            ? { ...conv, unreadCustomer: 0 }
+            : conv
+        )
+      );
+    });
+    
+    return () => {
+      socket.off('new_message');
+      socket.off('messages_read');
+      processedMessageIds.clear();
+    };
+  }, [socket, selectedContact]);
+  
+  // Fetch messages when a conversation is selected
+  useEffect(() => {
+    if (!selectedContact) return;
+    
+    const fetchMessages = async () => {
+      try {
+        // Join the conversation room
+        if (socket) {
+          socket.emit('join_conversation', selectedContact);
+        }
+        
+        // Find the current conversation
+        const conversation = conversations.find(c => c._id === selectedContact);
+        if (conversation) {
+          setCurrentConversation(conversation);
+        }
+        
+        // Fetch messages
+        const data = await getConversationMessages(selectedContact);
+        
+        // Sort messages by date (oldest first)
+        const sortedMessages = [...data].sort((a, b) => 
+          new Date(a.createdAt) - new Date(b.createdAt)
+        );
+        
+        setMessages(sortedMessages);
+        
+        // Mark messages as read if there are unread messages
+        const convo = conversations.find(c => c._id === selectedContact);
+        if (convo && convo.unreadProvider > 0) {
+          await markConversationAsRead(selectedContact);
+          
+          // Update local state to reflect read status
+          setConversations(prevConversations => 
+            prevConversations.map(conv => 
+              conv._id === selectedContact
+                ? { ...conv, unreadProvider: 0 }
+                : conv
+            )
+          );
+        }
+      } catch (err) {
+        console.error('Error fetching messages:', err);
+      }
+    };
+    
+    fetchMessages();
+    
+    // Cleanup: leave the conversation room
+    return () => {
+      if (socket) {
+        socket.emit('leave_conversation', selectedContact);
+      }
+    };
+  }, [selectedContact, socket, conversations]);
+  
+  useEffect(() => {
+    if (messageContainerRef.current && messages.length > 0) {
+      // Small delay to ensure all content is rendered
+      setTimeout(() => {
+        messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
+      }, 100);
     }
-  }, [selectedContact, contacts]);
+  }, [messages]);
+
+  useEffect(() => {
+    return () => {
+      messageSentFlag.current = false; // Reset the flag when the component unmounts
+    };
+  }, []);
+  
   
   // Filter contacts based on search query
-  const filteredContacts = contacts.filter(contact => 
-    contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    contact.booking.property.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-  
-  const currentContact = contacts.find(contact => contact.id === selectedContact);
+  const filteredContacts = conversations.filter(contact => {
+    // Get customer name
+    const customerName = contact.customer?.firstName && contact.customer?.lastName
+      ? `${contact.customer.firstName} ${contact.customer.lastName}`
+      : contact.customer?.username || '';
+    
+    // Get listing title  
+    const listingTitle = contact.listing?.title || '';
+    
+    return customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+           listingTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+           (contact.lastMessage || '').toLowerCase().includes(searchQuery.toLowerCase());
+  });
   
   const handleContactSelect = (contactId) => {
     setSelectedContact(contactId);
-    
-    // Mark messages as read when selecting a contact
-    setContacts(prevContacts => 
-      prevContacts.map(contact => 
-        contact.id === contactId 
-          ? { 
-              ...contact, 
-              unreadCount: 0,
-              messages: contact.messages.map(msg => ({ ...msg, isRead: true }))
-            }
-          : contact
-      )
-    );
   };
   
-  const handleSendMessage = () => {
-    if (newMessage.trim() === '') return;
-    
-    const now = new Date();
-    const timeString = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    
-    const newMsg = {
-      id: `M${Math.random().toString(36).substr(2, 9)}`,
-      sender: { id: 'owner', name: 'Me', avatar: avatar },
-      text: newMessage.trim(),
-      time: timeString,
-      isRead: false
-    };
-    
-    // Update contacts with the new message
-    setContacts(prevContacts => 
-      prevContacts.map(contact => 
-        contact.id === selectedContact 
-          ? { 
-              ...contact, 
-              messages: [...contact.messages, newMsg],
-              lastMessage: newMessage.trim(),
-              lastMessageTime: timeString
-            }
-          : contact
-      )
-    );
-    
-    // Clear the input field
-    setNewMessage('');
-    
-    // Focus back on the input field
-    if (messageInputRef.current) {
-      messageInputRef.current.focus();
+  const handleSendMessage = async (e) => {
+    if (e) e.preventDefault();
+    if (messageSentFlag.current || newMessage.trim() === '' || !selectedContact) return;
+  
+    try {
+      // Generate a temporary ID that we can track
+      const tempId = `temp-${Date.now()}`;
+      
+      // Optimistic update - add message to UI immediately
+      const tempMessage = {
+        _id: tempId,
+        content: newMessage.trim(),
+        sender: 'me',
+        senderType: 'Provider',
+        createdAt: new Date().toISOString(),
+        isPending: true // Add this flag to identify pending messages
+      };
+  
+      setMessages(prevMessages => [...prevMessages, tempMessage]);
+      setNewMessage('');
+      messageSentFlag.current = true; // Set the flag to true
+  
+      // Focus back on the input field
+      if (messageInputRef.current) {
+        messageInputRef.current.focus();
+      }
+  
+      // Actually send the message
+      const sentMessage = await sendMessage(selectedContact, newMessage.trim());
+      
+      // Update the temporary message with the real one
+      setMessages(prevMessages => 
+        prevMessages.map(msg => 
+          msg._id === tempId ? { ...sentMessage, isTemp: false } : msg
+        )
+      );
+  
+      // Update conversation in the list
+      setConversations(prevConversations => 
+        prevConversations.map(conv => 
+          conv._id === selectedContact
+            ? { 
+                ...conv, 
+                lastMessage: newMessage.trim(),
+                lastMessageTime: new Date().toISOString(),
+                unreadCustomer: (conv.unreadCustomer || 0) + 1
+              }
+            : conv
+        )
+      );
+    } catch (error) {
+      console.error('Error sending message:', error);
+      // Remove the temporary message on error
+      setMessages(prevMessages => 
+        prevMessages.filter(msg => !msg.isPending)
+      );
+    } finally {
+      // Reset the flag after a short delay
+      setTimeout(() => {
+        messageSentFlag.current = false;
+      }, 500);
     }
   };
+  
   
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -368,45 +506,48 @@ const ProviderMessages = () => {
                 </div>
                 
                 <div className="flex-1 overflow-y-auto">
-                  {filteredContacts.map(contact => (
-                    <ContactCard
-                      key={contact.id}
-                      contact={contact}
-                      isActive={selectedContact === contact.id}
-                      onClick={handleContactSelect}
-                    />
-                  ))}
-                  
-                  {filteredContacts.length === 0 && (
-                    <div className="p-4 text-center text-gray-500">
-                      {t('no_conversations_found')}
+                  {isLoading ? (
+                    <div className="flex justify-center items-center h-32">
+                      <div className="w-8 h-8 border-4 border-t-brand border-gray-200 rounded-full animate-spin"></div>
                     </div>
+                  ) : filteredContacts.length === 0 ? (
+                    <div className="p-4 text-center text-gray-500">
+                      {error ? error : t('no_conversations_found')}
+                    </div>
+                  ) : (
+                    filteredContacts.map(contact => (
+                      <ContactCard
+                        key={contact._id}
+                        contact={contact}
+                        isActive={selectedContact === contact._id}
+                        onClick={handleContactSelect}
+                      />
+                    ))
                   )}
                 </div>
               </div>
               
               {/* Right Section with Chat */}
-              <div className="hidden sm:flex flex-col w-2/3">
-                {currentContact ? (
+              <div className="hidden sm:flex flex-col w-2/3 h-[calc(100vh-180px)]">
+                {currentConversation ? (
                   <>
                     {/* Chat Header */}
                     <div className="p-4 border-b border-gray-200 flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="relative">
                           <img 
-                            src={currentContact.avatar} 
-                            alt={currentContact.name} 
+                            src={currentConversation.customer?.profilePicture || defaultAvatar} 
+                            alt={currentConversation.customer?.username || 'Guest'} 
                             className="w-10 h-10 rounded-full object-cover"
                           />
-                          {currentContact.isOnline && (
-                            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></span>
-                          )}
                         </div>
                         <div>
-                          <h3 className="font-medium text-gray-900">{currentContact.name}</h3>
-                          <p className="text-xs text-gray-500">
-                          {currentContact.isOnline ? t('online') : t('last_active_yesterday')}
-                          </p>
+                          <h3 className="font-medium text-gray-900">
+                            {currentConversation.customer?.firstName && currentConversation.customer?.lastName
+                              ? `${currentConversation.customer.firstName} ${currentConversation.customer.lastName}`
+                              : currentConversation.customer?.username || 'Guest'}
+                          </h3>
+                          <p className="text-xs text-gray-500">{t('guest')}</p>
                         </div>
                       </div>
                       
@@ -425,26 +566,39 @@ const ProviderMessages = () => {
                       </div>
                     </div>
                     
-                    {/* Chat Body */}
-                    <div className="flex-1 flex">
+                   {/* Chat Body */}
+                   <div className="flex-1 flex" style={{ maxHeight: 'calc(100vh - 280px)' }}>
                       <div 
                         ref={messageContainerRef}
                         className={`flex-1 p-4 overflow-y-auto ${showBookingInfo ? 'w-2/3' : 'w-full'}`}
+                        style={{ maxHeight: 'calc(100vh - 230px)' }}
                       >
-                        {/* Message bubbles */}
-                        {currentContact.messages.map(message => (
-                          <MessageBubble
-                            key={message.id}
-                            message={message}
-                            isOwn={message.sender.id === 'owner'}
-                          />
-                        ))}
+                        {isLoading ? (
+                          <div className="flex justify-center items-center h-32">
+                            <div className="w-8 h-8 border-4 border-t-brand border-gray-200 rounded-full animate-spin"></div>
+                          </div>
+                        ) : messages.length === 0 ? (
+                          <div className="flex flex-col items-center justify-center h-full">
+                            <p className="text-gray-500">{t('no_messages_yet')}</p>
+                            <p className="text-sm text-gray-400 mt-2">{t('start_conversation')}</p>
+                          </div>
+                        ) : (
+                          /* Message bubbles */
+                          messages.map(message => (
+                            <MessageBubble
+                              key={message._id}
+                              message={message}
+                              isOwn={message.sender === 'me' || message.senderType === 'Provider'}
+                            />
+                          ))
+                        )}
+                        <div ref={messageEndRef}></div> {/* Add this line if it doesn't exist */}
                       </div>
                       
                       {/* Booking info sidebar */}
                       {showBookingInfo && (
-                        <div className="w-1/3 border-l border-gray-200 p-4 overflow-y-auto">
-                          <BookingInfoCard booking={currentContact.booking} />
+                        <div className="w-1/3 border-l border-gray-200 p-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 230px)' }}>
+                          <BookingInfoCard booking={currentConversation.booking} t={t} />
                         </div>
                       )}
                     </div>
@@ -480,8 +634,8 @@ const ProviderMessages = () => {
                 ) : (
                   <div className="flex-1 flex items-center justify-center">
                     <div className="text-center">
-                    <p className="text-gray-500 mb-2">{t('select_conversation')}</p>
-                    <p className="text-gray-400 text-sm">{t('choose_contact_to_chat')}</p>
+                      <p className="text-gray-500 mb-2">{t('select_conversation')}</p>
+                      <p className="text-gray-400 text-sm">{t('choose_contact_to_chat')}</p>
                     </div>
                   </div>
                 )}

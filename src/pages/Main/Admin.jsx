@@ -8,7 +8,7 @@ import TravelMagazine from '../Admin/TravelMagazine';
 import CreateBlogPost from '../Admin/CreateBlogPost'; // Import the new component
 import Customers from '../Admin/Customers';
 import Providers from '../Admin/Providers';
-import AdminMessages from '../Admin/AdminMessages';
+// import AdminMessages from '../Admin/AdminMessages';
 import DiscountVouchers from '../Admin/DiscountVouchers';
 import FiltersManagement from '../Admin/FiltersManagement';
 import Campers from '../Admin/Campers';
@@ -33,7 +33,7 @@ const AdminLayout = () => {
           <Route path="/magazine/edit/:id" element={<CreateBlogPost />} /> {/* New edit route */}
           <Route path="/customers" element={<Customers />} />
           <Route path="/providers" element={<Providers />} />
-          <Route path="/messages" element={<AdminMessages />} />
+          {/* <Route path="/messages" element={<AdminMessages />} /> */}
           <Route path="/vouchers" element={<DiscountVouchers />} />
           <Route path="/filters" element={<FiltersManagement />} />
           <Route path="/campers" element={<Campers />} />
