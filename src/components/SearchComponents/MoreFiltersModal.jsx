@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Users, Dog, Lock, Bath, DollarSign, Tv, ChefHat, Eclipse,
   Baby, Waves, UtensilsCrossed, Car, Mountain, Dumbbell, Cigarette,
@@ -34,6 +34,24 @@ const FilterSection = ({ icon, title, options, selected, onChange }) => (
 );
 
 const MoreFiltersModal = ({ isOpen, onClose }) => {
+  const [filters, setFilters] = useState([]);
+
+  useEffect(() => {
+    const fetchFilters = async () => {
+      try {
+        const response = await fetch('/api/filters/template');
+        const data = await response.json();
+        const amenities = data.subsections.find(sub => sub.name === 'Amenities');
+        setFilters(amenities);
+      } catch (error) {
+        console.error('Error fetching filters:', error);
+      }
+    };
+
+    if (isOpen) {
+      fetchFilters();
+    }
+  }, [isOpen]);
   const { t } = useLanguage();
   const [ranges, setRanges] = useState({
     people: { min: 1, max: 25 },
@@ -67,7 +85,7 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
     }));
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !filters) return null;
 
   return (
     <>
@@ -133,7 +151,23 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
             currency
           />
 
-          {/* Checkboxes */}
+          {/* Dynamic Filters */}
+      {filters.subsubsections?.map(subsection => (
+        <div key={subsection._id} className="mb-8">
+          <h3 className="text-gray-700 font-medium mb-4">{subsection.name}</h3>
+          <div className="space-y-3">
+            {subsection.filters?.map(filter => (
+              <label key={filter._id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer">
+                <input
+                  type={filter.type}
+                  className="w-5 h-5 rounded border-gray-300 text-brand focus:ring-brand"
+                />
+                <span className="text-gray-700">{filter.name}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      ))}
           <FilterSection
             icon={<Tv className="w-5 h-5 text-gray-400" />}
             title="Accommodation features"
