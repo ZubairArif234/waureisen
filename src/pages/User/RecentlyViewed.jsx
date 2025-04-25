@@ -1,110 +1,124 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
-import Navbar from '../../components/Shared/Navbar';
-import Footer from '../../components/Shared/Footer';
-import AccommodationCard from '../../components/HomeComponents/AccommodationCard';
-import i3 from '../../assets/i3.png';
-import i2 from '../../assets/i2.png';
-import s1 from '../../assets/s1.png';
-import s2 from '../../assets/s2.png';
-import { useLanguage } from '../../utils/LanguageContext';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
+import Navbar from "../../components/Shared/Navbar";
+import Footer from "../../components/Shared/Footer";
+import AccommodationCard from "../../components/HomeComponents/AccommodationCard";
+import { useLanguage } from "../../utils/LanguageContext";
+import API from "../../api/config";
 
 const RecentlyViewed = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const [recentListings, setRecentListings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock data - in real app this would come from an API/state
-  const viewedListings = [
-    {
-      date: 'March 17, 2025',
-      items: [
-        {
-          id: '1',
-          image: i3,
-          price: 230.00,
-          location: "Room in Rio de Janeiro, Brazil",
-          provider: "Waureisen",
-          beds: 2,
-          rating: 4.83
-        },
-        {
-          id: '2',
-          image: i2,
-          price: 180.00,
-          location: "Villa in Bali, Indonesia",
-          provider: "Waureisen",
-          beds: 3,
-          rating: 4.95
-        }
-      ]
-    },
-    {
-      date: 'March 16, 2025',
-      items: [
-        {
-          id: '3',
-          image: s1,
-          price: 150.00,
-          location: "Apartment in Paris, France",
-          provider: "Interhome",
-          beds: 1,
-          rating: 4.75
-        },
-        {
-          id: '4',
-          image: s2,
-          price: 320.00,
-          location: "Chalet in Swiss Alps",
-          provider: "Waureisen",
-          beds: 4,
-          rating: 5.0
-        }
-      ]
+  // Fetch recently viewed listings from API
+  useEffect(() => {
+    const fetchRecentlyViewed = async () => {
+      try {
+        setLoading(true);
+        const response = await API.get("/users/recently-viewed");
+        setRecentListings(response.data);
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching recently viewed:", err);
+        setError(err.message || "Failed to load recently viewed items");
+        setLoading(false);
+      }
+    };
+
+    fetchRecentlyViewed();
+  }, []);
+
+  // Handle removing from recently viewed
+  const handleRemoveFromRecentlyViewed = async (listingId) => {
+    try {
+      await API.delete(`/users/recently-viewed/${listingId}`);
+      // Update local state to remove the item
+      setRecentListings(
+        recentListings.filter((listing) => listing._id !== listingId)
+      );
+    } catch (err) {
+      console.error("Error removing from recently viewed:", err);
     }
-  ];
+  };
 
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
-      
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 mt-20">
         {/* Header with Back Button */}
         <div className="flex items-center gap-4 mb-8">
           <button
-            onClick={() => navigate('/wishlist')}
+            onClick={() => navigate("/wishlist")}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
             <ArrowLeft className="w-6 h-6 text-gray-600" />
           </button>
-          <h1 className="text-3xl font-semibold text-gray-900">{t('recently_viewed')}</h1>
+          <h1 className="text-3xl font-semibold text-gray-900">
+            {t("recently_viewed")}
+          </h1>
         </div>
 
-        {/* Listings by Date */}
-        <div className="space-y-12">
-          {viewedListings.map((dateGroup, index) => (
-            <div key={index} className="space-y-6">
-              <h2 className="text-xl font-medium text-gray-900">
-                {dateGroup.date}
-              </h2>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {dateGroup.items.map((listing) => (
-                  <AccommodationCard
-                    key={listing.id}
-                    id={listing.id}
-                    image={listing.image}
-                    price={listing.price}
-                    location={listing.location}
-                    provider={listing.provider}
-                    beds={listing.beds}
-                    rating={listing.rating}
-                  />
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+        {/* Loading State */}
+        {loading && (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="text-center py-8">
+            <p className="text-red-500">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700"
+            >
+              Try Again
+            </button>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && !error && recentListings.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500 mb-4">{t("no_recently_viewed")}</p>
+            <button
+              onClick={() => navigate("/")}
+              className="px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700"
+            >
+              {t("explore_accommodations")}
+            </button>
+          </div>
+        )}
+
+        {/* Listings Grid */}
+        {!loading && !error && recentListings.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {recentListings.map((listing) => (
+              <AccommodationCard
+                key={listing._id}
+                id={listing._id}
+                image={
+                  listing.images && listing.images.length > 0
+                    ? listing.images[0]
+                    : null
+                }
+                price={listing.pricePerNight?.price || 150}
+                location={listing.title || listing.location}
+                provider={listing.source?.name || "Waureisen"}
+                isFavorited={false}
+                onToggleFavorite={() =>
+                  handleRemoveFromRecentlyViewed(listing._id)
+                }
+              />
+            ))}
+          </div>
+        )}
       </main>
 
       <Footer />

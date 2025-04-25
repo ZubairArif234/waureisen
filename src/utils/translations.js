@@ -903,205 +903,219 @@ const translations = {
     per_night: "per night",
     no_listings_available: "No listings available",
 
-
     // Account-related translations
-account: "Account",
-account_settings: "Account Settings",
-account_settings_desc: "Manage your account preferences and settings",
-account_type: "Account Type",
-account_type_desc: "Choose between customer and provider mode",
-account_deletion_requested: "Your account deletion has been requested",
-account_deletion_success: "Your account has been deactivated successfully",
-account_deletion_failed: "Failed to delete account. Please try again or contact support.",
-account_actions: "Account Actions",
+    account: "Account",
+    account_settings: "Account Settings",
+    account_settings_desc: "Manage your account preferences and settings",
+    account_type: "Account Type",
+    account_type_desc: "Choose between customer and provider mode",
+    account_deletion_requested: "Your account deletion has been requested",
+    account_deletion_success: "Your account has been deactivated successfully",
+    account_deletion_failed:
+      "Failed to delete account. Please try again or contact support.",
+    account_actions: "Account Actions",
 
-// Profile-related translations
-profile_settings: "Profile Settings",
-personal_info: "Personal Information",
-personal_info_desc: "Update your personal information and profile picture",
-personal_info_management: "Manage your personal information and profile",
-supported_formats: "Supported formats: JPEG, PNG (max 5MB)",
-bio_description: "Tell guests about yourself and what makes you a great host",
-bio_placeholder: "Share a bit about yourself, your experience, and what you love about hosting...",
-image_uploaded_successfully: "Profile image uploaded successfully",
-image_upload_failed: "Failed to upload profile image",
-profile_updated_successfully: "Profile updated successfully",
-profile_update_failed: "Failed to update profile",
+    // Profile-related translations
+    profile_settings: "Profile Settings",
+    personal_info: "Personal Information",
+    personal_info_desc: "Update your personal information and profile picture",
+    personal_info_management: "Manage your personal information and profile",
+    supported_formats: "Supported formats: JPEG, PNG (max 5MB)",
+    bio_description:
+      "Tell guests about yourself and what makes you a great host",
+    bio_placeholder:
+      "Share a bit about yourself, your experience, and what you love about hosting...",
+    image_uploaded_successfully: "Profile image uploaded successfully",
+    image_upload_failed: "Failed to upload profile image",
+    profile_updated_successfully: "Profile updated successfully",
+    profile_update_failed: "Failed to update profile",
 
-// Banking-related translations
-banking_details: "Banking Details",
-banking_details_desc: "Manage your payment information and payout methods",
-banking_details_management: "Manage your banking information and payout settings",
-banking_details_required: "Please provide your banking details for receiving payments",
-banking_details_updated: "Banking details updated successfully",
-bank_name: "Bank Name",
-account_holder_name: "Account Holder Name",
-iban: "IBAN Number",
-swift_code: "SWIFT/BIC Code (Optional)",
-match_bank_account_name: "Must match the name on your bank account",
-payment_information: "Payment Information",
-payment_explanation: "Payments are processed securely. You'll receive payouts on the 1st and 15th of each month for completed stays.",
-edit_banking_details: "Edit Banking Details",
+    // Banking-related translations
+    banking_details: "Banking Details",
+    banking_details_desc: "Manage your payment information and payout methods",
+    banking_details_management:
+      "Manage your banking information and payout settings",
+    banking_details_required:
+      "Please provide your banking details for receiving payments",
+    banking_details_updated: "Banking details updated successfully",
+    bank_name: "Bank Name",
+    account_holder_name: "Account Holder Name",
+    iban: "IBAN Number",
+    swift_code: "SWIFT/BIC Code (Optional)",
+    match_bank_account_name: "Must match the name on your bank account",
+    payment_information: "Payment Information",
+    payment_explanation:
+      "Payments are processed securely. You'll receive payouts on the 1st and 15th of each month for completed stays.",
+    edit_banking_details: "Edit Banking Details",
 
-// Security-related translations
-login_security: "Login & Security",
-login_security_desc: "Manage your password and account security settings",
-password_requirements: "Must be at least 8 characters with uppercase, lowercase, and a number",
-password_requirements_not_met: "Password must have at least 8 characters, including uppercase, lowercase and a number",
-current_password: "Current Password",
-new_password: "New Password",
-confirm_password: "Confirm Password",
-current_password_required: "Current password is required",
-new_password_required: "New password is required",
-passwords_dont_match: "Passwords don't match",
-password: "Password",
-password_updated_successfully: "Password updated successfully",
-current_password_incorrect: "Current password is incorrect",
-password_update_failed: "Failed to update password",
-update_password: "Update Password",
-last_updated: "Last updated",
-email_access_tip: "This email is used for account access and notifications",
-edit_security: "Edit Security Settings",
+    // Security-related translations
+    login_security: "Login & Security",
+    login_security_desc: "Manage your password and account security settings",
+    password_requirements:
+      "Must be at least 8 characters with uppercase, lowercase, and a number",
+    password_requirements_not_met:
+      "Password must have at least 8 characters, including uppercase, lowercase and a number",
+    current_password: "Current Password",
+    new_password: "New Password",
+    confirm_password: "Confirm Password",
+    current_password_required: "Current password is required",
+    new_password_required: "New password is required",
+    passwords_dont_match: "Passwords don't match",
+    password: "Password",
+    password_updated_successfully: "Password updated successfully",
+    current_password_incorrect: "Current password is incorrect",
+    password_update_failed: "Failed to update password",
+    update_password: "Update Password",
+    last_updated: "Last updated",
+    email_access_tip: "This email is used for account access and notifications",
+    edit_security: "Edit Security Settings",
 
-// Settings-related translations
-notification_preferences: "Notification Preferences",
-email_notifications: "Email Notifications",
-email_notifications_desc: "Receive notifications about your account via email",
-booking_notifications: "Booking Notifications",
-booking_notifications_desc: "Get notified when guests book your properties",
-marketing_emails: "Marketing Emails",
-marketing_emails_desc: "Receive updates about new features and promotions",
-language_and_currency: "Language & Currency",
-language: "Language",
-currency: "Currency",
-settings_updated: "Settings updated successfully",
-save_settings: "Save Settings",
-none: "None",
-on_other_platforms: "On Other Platforms",
-professional: "Professional",
+    // Settings-related translations
+    notification_preferences: "Notification Preferences",
+    email_notifications: "Email Notifications",
+    email_notifications_desc:
+      "Receive notifications about your account via email",
+    booking_notifications: "Booking Notifications",
+    booking_notifications_desc: "Get notified when guests book your properties",
+    marketing_emails: "Marketing Emails",
+    marketing_emails_desc: "Receive updates about new features and promotions",
+    language_and_currency: "Language & Currency",
+    language: "Language",
+    currency: "Currency",
+    settings_updated: "Settings updated successfully",
+    save_settings: "Save Settings",
+    none: "None",
+    on_other_platforms: "On Other Platforms",
+    professional: "Professional",
 
-// Account actions
-log_out: "Log Out",
-delete_account: "Delete Account",
-confirm_deletion: "Confirm Account Deletion",
-deletion_warning: "This action is irreversible. Your profile will be deactivated, all listings will be made inactive, and you won't be able to access your account.",
-cancel: "Cancel",
-yes_delete_account: "Yes, Delete My Account",
+    // Account actions
+    log_out: "Log Out",
+    delete_account: "Delete Account",
+    confirm_deletion: "Confirm Account Deletion",
+    deletion_warning:
+      "This action is irreversible. Your profile will be deactivated, all listings will be made inactive, and you won't be able to access your account.",
+    cancel: "Cancel",
+    yes_delete_account: "Yes, Delete My Account",
 
-// Quick actions in dashboard
-account: "Account",
+    // Quick actions in dashboard
+    account: "Account",
 
-// Button states
-saving: "Saving...",
-update_failed: "Update failed",
-save_changes: "Save Changes",
-try_again: "Try Again",
-
-
-
-
+    // Button states
+    saving: "Saving...",
+    update_failed: "Update failed",
+    save_changes: "Save Changes",
+    try_again: "Try Again",
   },
 
   de: {
+    // Account-related translations
+    account: "Konto",
+    account_settings: "Kontoeinstellungen",
+    account_settings_desc: "Verwalte deine Kontoeinstellungen und -präferenzen",
+    account_type: "Kontotyp",
+    account_type_desc: "Wähle zwischen Kunden- und Anbietermodus",
+    account_deletion_requested: "Die Löschung deines Kontos wurde angefragt",
+    account_deletion_success: "Dein Konto wurde erfolgreich deaktiviert",
+    account_deletion_failed:
+      "Konto konnte nicht gelöscht werden. Bitte versuche es erneut oder kontaktiere den Support.",
+    account_actions: "Kontoaktionen",
 
+    // Profile-related translations
+    profile_settings: "Profileinstellungen",
+    personal_info: "Persönliche Informationen",
+    personal_info_desc:
+      "Aktualisiere deine persönlichen Daten und dein Profilbild",
+    personal_info_management:
+      "Verwalte deine persönlichen Daten und dein Profil",
+    supported_formats: "Unterstützte Formate: JPEG, PNG (max. 5 MB)",
+    bio_description:
+      "Erzähle Gästen etwas über dich und was dich zu einem großartigen Gastgeber macht",
+    bio_placeholder:
+      "Erzähle etwas über dich, deine Erfahrungen und was du am Gastgebersein liebst...",
+    image_uploaded_successfully: "Profilbild wurde erfolgreich hochgeladen",
+    image_upload_failed: "Profilbild konnte nicht hochgeladen werden",
+    profile_updated_successfully: "Profil wurde erfolgreich aktualisiert",
+    profile_update_failed: "Profilaktualisierung fehlgeschlagen",
 
-// Account-related translations
-account: "Konto",
-account_settings: "Kontoeinstellungen",
-account_settings_desc: "Verwalte deine Kontoeinstellungen und -präferenzen",
-account_type: "Kontotyp",
-account_type_desc: "Wähle zwischen Kunden- und Anbietermodus",
-account_deletion_requested: "Die Löschung deines Kontos wurde angefragt",
-account_deletion_success: "Dein Konto wurde erfolgreich deaktiviert",
-account_deletion_failed: "Konto konnte nicht gelöscht werden. Bitte versuche es erneut oder kontaktiere den Support.",
-account_actions: "Kontoaktionen",
+    // Banking-related translations
+    banking_details: "Bankdaten",
+    banking_details_desc:
+      "Verwalte deine Zahlungsinformationen und Auszahlungsmethoden",
+    banking_details_management:
+      "Verwalte deine Bankinformationen und Auszahlungseinstellungen",
+    banking_details_required:
+      "Bitte gib deine Bankdaten an, um Zahlungen zu erhalten",
+    banking_details_updated: "Bankdaten erfolgreich aktualisiert",
+    bank_name: "Bankname",
+    account_holder_name: "Name des Kontoinhabers",
+    iban: "IBAN-Nummer",
+    swift_code: "SWIFT/BIC-Code (optional)",
+    match_bank_account_name:
+      "Muss mit dem Namen auf deinem Bankkonto übereinstimmen",
+    payment_information: "Zahlungsinformationen",
+    payment_explanation:
+      "Zahlungen werden sicher verarbeitet. Du erhältst Auszahlungen am 1. und 15. jedes Monats für abgeschlossene Aufenthalte.",
+    edit_banking_details: "Bankdaten bearbeiten",
 
-// Profile-related translations
-profile_settings: "Profileinstellungen",
-personal_info: "Persönliche Informationen",
-personal_info_desc: "Aktualisiere deine persönlichen Daten und dein Profilbild",
-personal_info_management: "Verwalte deine persönlichen Daten und dein Profil",
-supported_formats: "Unterstützte Formate: JPEG, PNG (max. 5 MB)",
-bio_description: "Erzähle Gästen etwas über dich und was dich zu einem großartigen Gastgeber macht",
-bio_placeholder: "Erzähle etwas über dich, deine Erfahrungen und was du am Gastgebersein liebst...",
-image_uploaded_successfully: "Profilbild wurde erfolgreich hochgeladen",
-image_upload_failed: "Profilbild konnte nicht hochgeladen werden",
-profile_updated_successfully: "Profil wurde erfolgreich aktualisiert",
-profile_update_failed: "Profilaktualisierung fehlgeschlagen",
+    // Security-related translations
+    login_security: "Anmeldung & Sicherheit",
+    login_security_desc:
+      "Verwalte dein Passwort und deine Sicherheitseinstellungen",
+    password_requirements:
+      "Muss mindestens 8 Zeichen enthalten, darunter Groß- und Kleinbuchstaben sowie eine Zahl",
+    password_requirements_not_met:
+      "Passwort muss mindestens 8 Zeichen enthalten, einschließlich Groß- und Kleinbuchstaben und einer Zahl",
+    current_password: "Aktuelles Passwort",
+    new_password: "Neues Passwort",
+    confirm_password: "Passwort bestätigen",
+    current_password_required: "Aktuelles Passwort ist erforderlich",
+    new_password_required: "Neues Passwort ist erforderlich",
+    passwords_dont_match: "Passwörter stimmen nicht überein",
+    password: "Passwort",
+    password_updated_successfully: "Passwort wurde erfolgreich aktualisiert",
+    current_password_incorrect: "Aktuelles Passwort ist falsch",
+    password_update_failed: "Passwortaktualisierung fehlgeschlagen",
+    update_password: "Passwort aktualisieren",
+    last_updated: "Zuletzt aktualisiert",
+    email_access_tip:
+      "Diese E-Mail wird für den Kontozugriff und Benachrichtigungen verwendet",
+    edit_security: "Sicherheitseinstellungen bearbeiten",
 
-// Banking-related translations
-banking_details: "Bankdaten",
-banking_details_desc: "Verwalte deine Zahlungsinformationen und Auszahlungsmethoden",
-banking_details_management: "Verwalte deine Bankinformationen und Auszahlungseinstellungen",
-banking_details_required: "Bitte gib deine Bankdaten an, um Zahlungen zu erhalten",
-banking_details_updated: "Bankdaten erfolgreich aktualisiert",
-bank_name: "Bankname",
-account_holder_name: "Name des Kontoinhabers",
-iban: "IBAN-Nummer",
-swift_code: "SWIFT/BIC-Code (optional)",
-match_bank_account_name: "Muss mit dem Namen auf deinem Bankkonto übereinstimmen",
-payment_information: "Zahlungsinformationen",
-payment_explanation: "Zahlungen werden sicher verarbeitet. Du erhältst Auszahlungen am 1. und 15. jedes Monats für abgeschlossene Aufenthalte.",
-edit_banking_details: "Bankdaten bearbeiten",
+    // Settings-related translations
+    notification_preferences: "Benachrichtigungseinstellungen",
+    email_notifications: "E-Mail-Benachrichtigungen",
+    email_notifications_desc: "Erhalte Konto-Benachrichtigungen per E-Mail",
+    booking_notifications: "Buchungsbenachrichtigungen",
+    booking_notifications_desc:
+      "Erhalte eine Benachrichtigung, wenn Gäste deine Unterkünfte buchen",
+    marketing_emails: "Marketing-E-Mails",
+    marketing_emails_desc: "Erhalte Updates zu neuen Funktionen und Aktionen",
+    language_and_currency: "Sprache & Währung",
+    language: "Sprache",
+    currency: "Währung",
+    settings_updated: "Einstellungen wurden erfolgreich aktualisiert",
+    save_settings: "Einstellungen speichern",
+    none: "Keine",
+    on_other_platforms: "Auf anderen Plattformen",
+    professional: "Professionell",
 
-// Security-related translations
-login_security: "Anmeldung & Sicherheit",
-login_security_desc: "Verwalte dein Passwort und deine Sicherheitseinstellungen",
-password_requirements: "Muss mindestens 8 Zeichen enthalten, darunter Groß- und Kleinbuchstaben sowie eine Zahl",
-password_requirements_not_met: "Passwort muss mindestens 8 Zeichen enthalten, einschließlich Groß- und Kleinbuchstaben und einer Zahl",
-current_password: "Aktuelles Passwort",
-new_password: "Neues Passwort",
-confirm_password: "Passwort bestätigen",
-current_password_required: "Aktuelles Passwort ist erforderlich",
-new_password_required: "Neues Passwort ist erforderlich",
-passwords_dont_match: "Passwörter stimmen nicht überein",
-password: "Passwort",
-password_updated_successfully: "Passwort wurde erfolgreich aktualisiert",
-current_password_incorrect: "Aktuelles Passwort ist falsch",
-password_update_failed: "Passwortaktualisierung fehlgeschlagen",
-update_password: "Passwort aktualisieren",
-last_updated: "Zuletzt aktualisiert",
-email_access_tip: "Diese E-Mail wird für den Kontozugriff und Benachrichtigungen verwendet",
-edit_security: "Sicherheitseinstellungen bearbeiten",
+    // Account actions
+    log_out: "Abmelden",
+    delete_account: "Konto löschen",
+    confirm_deletion: "Konto-Löschung bestätigen",
+    deletion_warning:
+      "Dieser Vorgang ist unwiderruflich. Dein Profil wird deaktiviert, alle Inserate werden inaktiv geschaltet und du kannst nicht mehr auf dein Konto zugreifen.",
+    cancel: "Abbrechen",
+    yes_delete_account: "Ja, mein Konto löschen",
 
-// Settings-related translations
-notification_preferences: "Benachrichtigungseinstellungen",
-email_notifications: "E-Mail-Benachrichtigungen",
-email_notifications_desc: "Erhalte Konto-Benachrichtigungen per E-Mail",
-booking_notifications: "Buchungsbenachrichtigungen",
-booking_notifications_desc: "Erhalte eine Benachrichtigung, wenn Gäste deine Unterkünfte buchen",
-marketing_emails: "Marketing-E-Mails",
-marketing_emails_desc: "Erhalte Updates zu neuen Funktionen und Aktionen",
-language_and_currency: "Sprache & Währung",
-language: "Sprache",
-currency: "Währung",
-settings_updated: "Einstellungen wurden erfolgreich aktualisiert",
-save_settings: "Einstellungen speichern",
-none: "Keine",
-on_other_platforms: "Auf anderen Plattformen",
-professional: "Professionell",
+    // Quick actions in dashboard
+    account: "Konto",
 
-// Account actions
-log_out: "Abmelden",
-delete_account: "Konto löschen",
-confirm_deletion: "Konto-Löschung bestätigen",
-deletion_warning: "Dieser Vorgang ist unwiderruflich. Dein Profil wird deaktiviert, alle Inserate werden inaktiv geschaltet und du kannst nicht mehr auf dein Konto zugreifen.",
-cancel: "Abbrechen",
-yes_delete_account: "Ja, mein Konto löschen",
-
-// Quick actions in dashboard
-account: "Konto",
-
-// Button states
-saving: "Speichern...",
-update_failed: "Aktualisierung fehlgeschlagen",
-save_changes: "Änderungen speichern",
-try_again: "Erneut versuchen",
-
-
-
-
-
+    // Button states
+    saving: "Speichern...",
+    update_failed: "Aktualisierung fehlgeschlagen",
+    save_changes: "Änderungen speichern",
+    try_again: "Erneut versuchen",
 
     showing_page: "Seite {page} von {total}",
     try_adjusting_filters:

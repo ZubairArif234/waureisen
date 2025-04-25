@@ -33,7 +33,8 @@ import {
   fetchInterhomeAvailability,
 } from "../../api/interhomeAPI"; // Import fetchInterhomeAvailability
 import moment from "moment";
-import AccommodationDetails from '../../components/AccommodationDetails';
+import AccommodationDetails from "../../components/AccommodationDetails";
+import API from "../../api/config";
 
 const PlaceOffer = ({ icon: Icon, text, value }) => (
   <div className="flex-1 flex flex-col items-center text-center p-4 border-r border-[#767676] last:border-r-0 md:p-4 p-2">
@@ -237,6 +238,24 @@ const AccommodationPage = () => {
         console.log("Date from search:", dateFromSearch);
 
         const data = await getListingById(id);
+
+        // If we have price data from search results, use it
+        if (priceFromSearch) {
+          console.log("Using price data from search results:", priceFromSearch);
+          data.pricePerNight = priceFromSearch;
+        }
+        // Otherwise, fetch price data if needed
+
+        // Add to recently viewed if user is logged in
+        const token = localStorage.getItem("token");
+        if (token && id) {
+          try {
+            await API.post(`/users/recently-viewed/${id}`);
+            console.log("Added to recently viewed:", id);
+          } catch (err) {
+            console.error("Error adding to recently viewed:", err);
+          }
+        }
 
         // Fetch availability data if it's an Interhome listing
         if (data.provider === "Interhome" && data.Code) {
@@ -590,8 +609,8 @@ const AccommodationPage = () => {
                 </section>
               )}
 
-             {/* Accommodation Details */}
-        <AccommodationDetails accommodation={accommodation} />
+            {/* Accommodation Details */}
+            <AccommodationDetails accommodation={accommodation} />
 
             {/* Location */}
             <section className="mb-10">
@@ -883,5 +902,3 @@ const AccommodationPage = () => {
 };
 
 export default AccommodationPage;
-
-       

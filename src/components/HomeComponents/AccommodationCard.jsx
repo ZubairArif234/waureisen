@@ -1,7 +1,7 @@
-import React, { useState, memo } from "react";
+import React, { useState, memo, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Heart } from "lucide-react";
-import { useLanguage } from "../../utils/LanguageContext";
+import API from "../../api/config";
 
 const AccommodationCard = ({
   id = "1",
@@ -12,13 +12,18 @@ const AccommodationCard = ({
   listingSource, // Add listingSource prop
   isFavorited = false,
   pricePerNight,
+  onToggleFavorite, // New prop for parent component callback
 }) => {
-  const { t } = useLanguage();
   const [isFavorite, setIsFavorite] = useState(isFavorited);
   const navigate = useNavigate();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const checkInDate = searchParams.get("dates")?.split(" - ")[0] || "";
+
+  // Update local state when prop changes
+  useEffect(() => {
+    setIsFavorite(isFavorited);
+  }, [isFavorited]);
 
   // Format the date if needed
   const formatDate = (dateStr) => {
@@ -44,6 +49,34 @@ const AccommodationCard = ({
     });
   };
 
+  // Handle favorite toggle
+  const handleFavoriteToggle = async (e) => {
+    e.stopPropagation();
+
+    try {
+      // Update local state immediately for responsive UI
+      const newFavoriteState = !isFavorite;
+      setIsFavorite(newFavoriteState);
+
+      if (newFavoriteState) {
+        // Add to favorites
+        await API.post(`/users/favorites/${id}`);
+      } else {
+        // Remove from favorites
+        await API.delete(`/users/favorites/${id}`);
+      }
+
+      // If parent provided a callback, call it
+      if (onToggleFavorite) {
+        onToggleFavorite(id);
+      }
+    } catch (err) {
+      console.error("Failed to toggle favorite status:", err);
+      // Revert UI state on error
+      setIsFavorite(isFavorite);
+    }
+  };
+
   // Determine the display source - use listingSource with priority
   // If not available, use provider, but never default to "Waureisen"
   const displaySource = listingSource || provider || "Unknown";
@@ -60,10 +93,7 @@ const AccommodationCard = ({
           className="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
         />
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsFavorite(!isFavorite);
-          }}
+          onClick={handleFavoriteToggle}
           className="absolute top-3 right-3 p-2 rounded-full bg-white/50 backdrop-blur-sm hover:bg-white/70 transition-colors"
         >
           <Heart

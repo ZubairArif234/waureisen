@@ -201,12 +201,17 @@ const AccommodationCard = ({
   return (
     <div className="bg-white rounded-lg overflow-hidden shadow border border-gray-200">
       <div className="relative">
-        {accommodation.photos && accommodation.photos.length > 0 ? (
+        {(accommodation.photos && accommodation.photos.length > 0) ||
+        (accommodation.images && accommodation.images.length > 0) ? (
           <img
             src={
-              isCloudinaryUrl(accommodation.photos[0])
-                ? accommodation.photos[0]
-                : getCloudinaryUrl(accommodation.photos[0])
+              accommodation.photos && accommodation.photos.length > 0
+                ? isCloudinaryUrl(accommodation.photos[0])
+                  ? accommodation.photos[0]
+                  : getCloudinaryUrl(accommodation.photos[0])
+                : isCloudinaryUrl(accommodation.images[0])
+                ? accommodation.images[0]
+                : getCloudinaryUrl(accommodation.images[0])
             }
             alt={accommodation.title}
             className="w-full h-48 object-cover"

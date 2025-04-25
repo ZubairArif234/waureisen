@@ -35,6 +35,7 @@ const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [userType, setUserType] = useState(null);
+  const [profileImageError, setProfileImageError] = useState(false);
   const navigate = useNavigate();
   const globeButtonRef = useRef(null);
   const { language, switchLanguage, t } = useLanguage();
@@ -42,25 +43,114 @@ const Navbar = () => {
   useEffect(() => {
     // Check authentication status when component mounts or when dependencies change
     const checkAuth = () => {
+      console.log("Checking auth status in Navbar");
       const authStatus = isAuthenticated();
       setIsLoggedIn(authStatus);
+
       if (authStatus) {
-        setCurrentUser(getCurrentUser());
-        setUserType(getUserType());
+        // Always reset the profile image error state when checking authentication
+        setProfileImageError(false);
+
+        // Refresh user data from the server if authenticated
+        const refreshUserData = async () => {
+          try {
+            const userType = getUserType();
+            if (userType === "provider") {
+              const { getProviderProfile } = await import(
+                "../../api/providerAPI"
+              );
+              const freshData = await getProviderProfile();
+              if (freshData && freshData.profilePicture) {
+                // Update provider user in localStorage
+                const providerData = JSON.parse(
+                  localStorage.getItem("provider_user") || "{}"
+                );
+                providerData.profilePicture = freshData.profilePicture;
+                localStorage.setItem(
+                  "provider_user",
+                  JSON.stringify(providerData)
+                );
+                // Manually trigger state update
+                setCurrentUser({ ...providerData });
+              }
+            } else if (userType === "user") {
+              const { getUserProfile } = await import("../../api/authAPI");
+              const freshData = await getUserProfile();
+              if (freshData && freshData.profilePicture) {
+                // Update user data in localStorage
+                const userData = JSON.parse(
+                  localStorage.getItem("user_data") || "{}"
+                );
+                userData.profilePicture = freshData.profilePicture;
+                localStorage.setItem("user_data", JSON.stringify(userData));
+                // Manually trigger state update
+                setCurrentUser({ ...userData });
+              }
+            }
+          } catch (err) {
+            console.warn("Could not refresh user data:", err);
+          }
+        };
+
+        // Get current user from localStorage first (for immediate display)
+        const user = getCurrentUser();
+        console.log("Current user data:", user);
+
+        if (user) {
+          setCurrentUser(user);
+          setUserType(getUserType());
+
+          // Verify the profile picture URL by preloading it
+          if (user.profilePicture) {
+            console.log("Found profile picture:", user.profilePicture);
+
+            // Create a test image element to verify the URL works
+            const testImg = new Image();
+            testImg.onload = () => {
+              console.log("Profile image loaded successfully");
+              setProfileImageError(false);
+            };
+            testImg.onerror = () => {
+              console.error(
+                "Failed to load profile image:",
+                user.profilePicture
+              );
+              setProfileImageError(true);
+
+              // If image fails to load, try refreshing from server
+              refreshUserData();
+            };
+            testImg.src = user.profilePicture;
+          } else {
+            // No profile picture in localStorage, try getting fresh data
+            refreshUserData();
+          }
+        } else {
+          console.warn("No user data found despite being authenticated");
+          // Try to fetch fresh data
+          refreshUserData();
+        }
       } else {
+        console.log("User not authenticated");
         setCurrentUser(null);
         setUserType(null);
       }
     };
 
+    // Check auth immediately when component mounts
     checkAuth();
 
     // Add an event listener for storage events to detect changes to localStorage
     // This helps with synchronizing login/logout across tabs
-    window.addEventListener("storage", checkAuth);
+    const handleStorageChange = (event) => {
+      console.log("Storage changed, rechecking auth");
+      checkAuth();
+    };
+
+    window.addEventListener("storage", handleStorageChange);
 
     return () => {
-      window.removeEventListener("storage", checkAuth);
+      window.removeEventListener("storage", handleStorageChange);
     };
   }, []);
 
@@ -141,6 +231,7 @@ const Navbar = () => {
     setCurrentUser(null);
     setUserType(null);
     setIsProfileMenuOpen(false);
+    setProfileImageError(false);
     // Redirect to home page
     navigate("/");
   };
@@ -313,11 +404,35 @@ const Navbar = () => {
           {/* Profile Button */}
           <div className="relative">
             <button
-              className="p-2 rounded-full"
-              style={{ backgroundColor: "#B4A481" }}
+              className="rounded-full flex items-center justify-center overflow-hidden p-0"
+              style={{
+                backgroundColor:
+                  currentUser?.profilePicture && !profileImageError
+                    ? "transparent"
+                    : "#B4A481",
+                width: "40px",
+                height: "40px",
+              }}
               onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
             >
-              <User className="h-6 w-6 text-white" />
+              {isLoggedIn &&
+              currentUser &&
+              currentUser.profilePicture &&
+              !profileImageError ? (
+                <img
+                  src={currentUser.profilePicture}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    console.error("Profile image load error:", e);
+                    setProfileImageError(true);
+                  }}
+                />
+              ) : (
+                <div className="flex items-center justify-center w-full h-full">
+                  <User className="h-6 w-6 text-white" />
+                </div>
+              )}
             </button>
 
             {/* Profile Menu Popup */}
@@ -327,7 +442,7 @@ const Navbar = () => {
                   className="fixed inset-0 z-40"
                   onClick={() => setIsProfileMenuOpen(false)}
                 />
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50 py-1">
+                <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg z-50 py-1">
                   {!isLoggedIn ? (
                     <>
                       <Link
@@ -350,15 +465,40 @@ const Navbar = () => {
                   ) : (
                     <>
                       {currentUser && (
-                        <div className="px-4 py-2 border-b border-gray-100">
-                          <p className="font-medium text-sm text-gray-800">
-                            {currentUser.firstName ||
-                              currentUser.name ||
-                              "User"}
-                          </p>
-                          <p className="text-xs text-gray-500 truncate">
-                            {currentUser.email}
-                          </p>
+                        <div className="px-4 py-3 border-b border-gray-100">
+                          <div className="flex items-center">
+                            <div className="w-10 h-10 mr-3 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+                              {currentUser.profilePicture &&
+                              !profileImageError ? (
+                                <img
+                                  src={currentUser.profilePicture}
+                                  alt="Profile"
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    console.error(
+                                      "Profile image load error:",
+                                      e
+                                    );
+                                    setProfileImageError(true);
+                                  }}
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <User className="w-5 h-5 text-gray-500" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="overflow-hidden">
+                              <p className="font-medium text-sm text-gray-800 truncate">
+                                {currentUser.firstName ||
+                                  currentUser.name ||
+                                  "User"}
+                              </p>
+                              <p className="text-xs text-gray-500 truncate">
+                                {currentUser.email}
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       )}
                       <button
