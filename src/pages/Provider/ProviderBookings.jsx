@@ -213,10 +213,10 @@ const ProviderBookings = () => {
           status: statusParam,
           page: pageToFetch,
           limit: 10,
-          sortOrder: sortBy === 'checkInDate' ? 'asc' : 'desc'
+          sortOrder: 'desc', 
+          sortBy: 'createdAt'
         });
         
-        console.log('Bookings fetched:', response);
         
         // Update state with the paginated data
         setBookings(response.bookings || []);

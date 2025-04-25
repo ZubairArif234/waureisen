@@ -75,3 +75,24 @@ export const markConversationAsRead = async (conversationId) => {
     throw error;
   }
 };
+
+
+export const getUserUnreadCount = async () => {
+  try {
+    const conversations = await getUserConversations();
+    return conversations.reduce((total, conv) => total + (conv.unreadCustomer || 0), 0);
+  } catch (error) {
+    console.error('Error getting user unread count:', error);
+    return 0;
+  }
+};
+
+export const getProviderUnreadCount = async () => {
+  try {
+    const conversations = await getProviderConversations();
+    return conversations.reduce((total, conv) => total + (conv.unreadProvider || 0), 0);
+  } catch (error) {
+    console.error('Error getting provider unread count:', error);
+    return 0;
+  }
+};

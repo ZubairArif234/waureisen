@@ -18,15 +18,15 @@ import {
   Calendar,
 } from "lucide-react";
 import logo from "../../assets/logo.png";
-import LanguagePopup from "../HomeComponents/LanguagePopup";
 import { useLanguage } from "../../utils/LanguageContext";
+import { useSocket } from "../../utils/SocketContext"; // Import the socket context
 import {
   isAuthenticated,
   logout,
   getCurrentUser,
   getUserType,
-  isUserType,
 } from "../../utils/authService";
+import { getUserUnreadCount, getProviderUnreadCount } from "../../api/conversationAPI";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -36,12 +36,73 @@ const Navbar = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [userType, setUserType] = useState(null);
   const [profileImageError, setProfileImageError] = useState(false);
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
   const navigate = useNavigate();
-  const globeButtonRef = useRef(null);
   const { language, switchLanguage, t } = useLanguage();
+  const { socket } = useSocket(); // Get socket from context
 
+  // Extract fetchUnreadCount function outside of useEffect for reuse
+  const fetchUnreadCount = async () => {
+    if (!isLoggedIn) {
+      setUnreadMessageCount(0);
+      return;
+    }
+    
+    try {
+      if (userType === "provider") {
+        const count = await getProviderUnreadCount();
+        setUnreadMessageCount(count);
+      } else if (userType === "user") {
+        const count = await getUserUnreadCount();
+        setUnreadMessageCount(count);
+      }
+    } catch (error) {
+      console.error("Failed to fetch unread messages:", error);
+    }
+  };
+
+  // Fetch unread count on mount and periodically
   useEffect(() => {
-    // Check authentication status when component mounts or when dependencies change
+    if (!isLoggedIn) return;
+    
+    fetchUnreadCount();
+    
+    // Set up interval to check periodically
+    const intervalId = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(intervalId);
+  }, [isLoggedIn, userType]);
+
+  // Socket integration for real-time updates
+  useEffect(() => {
+    if (!socket || !isLoggedIn) return;
+    
+    console.log("Setting up socket listeners in Navbar");
+    
+    // Listen for new messages
+    const handleNewMessage = (message) => {
+      console.log("New message received in Navbar:", message);
+      
+      // Increment count immediately when receiving a message meant for this user
+      const shouldIncrement = 
+        (userType === 'user' && message.senderType === 'Provider') ||
+        (userType === 'provider' && message.senderType === 'User');
+        
+      if (shouldIncrement) {
+        console.log("Incrementing unread count");
+        setUnreadMessageCount(prev => prev + 1);
+      }
+    };
+    
+    socket.on('new_message', handleNewMessage);
+    
+    return () => {
+      console.log("Cleaning up socket listeners in Navbar");
+      socket.off('new_message', handleNewMessage);
+    };
+  }, [socket, isLoggedIn, userType]);
+
+  // Check authentication status when component mounts or when dependencies change
+  useEffect(() => {
     const checkAuth = () => {
       console.log("Checking auth status in Navbar");
       const authStatus = isAuthenticated();
@@ -50,47 +111,6 @@ const Navbar = () => {
       if (authStatus) {
         // Always reset the profile image error state when checking authentication
         setProfileImageError(false);
-
-        // Refresh user data from the server if authenticated
-        const refreshUserData = async () => {
-          try {
-            const userType = getUserType();
-            if (userType === "provider") {
-              const { getProviderProfile } = await import(
-                "../../api/providerAPI"
-              );
-              const freshData = await getProviderProfile();
-              if (freshData && freshData.profilePicture) {
-                // Update provider user in localStorage
-                const providerData = JSON.parse(
-                  localStorage.getItem("provider_user") || "{}"
-                );
-                providerData.profilePicture = freshData.profilePicture;
-                localStorage.setItem(
-                  "provider_user",
-                  JSON.stringify(providerData)
-                );
-                // Manually trigger state update
-                setCurrentUser({ ...providerData });
-              }
-            } else if (userType === "user") {
-              const { getUserProfile } = await import("../../api/authAPI");
-              const freshData = await getUserProfile();
-              if (freshData && freshData.profilePicture) {
-                // Update user data in localStorage
-                const userData = JSON.parse(
-                  localStorage.getItem("user_data") || "{}"
-                );
-                userData.profilePicture = freshData.profilePicture;
-                localStorage.setItem("user_data", JSON.stringify(userData));
-                // Manually trigger state update
-                setCurrentUser({ ...userData });
-              }
-            }
-          } catch (err) {
-            console.warn("Could not refresh user data:", err);
-          }
-        };
 
         // Get current user from localStorage first (for immediate display)
         const user = getCurrentUser();
@@ -116,19 +136,9 @@ const Navbar = () => {
                 user.profilePicture
               );
               setProfileImageError(true);
-
-              // If image fails to load, try refreshing from server
-              refreshUserData();
             };
             testImg.src = user.profilePicture;
-          } else {
-            // No profile picture in localStorage, try getting fresh data
-            refreshUserData();
           }
-        } else {
-          console.warn("No user data found despite being authenticated");
-          // Try to fetch fresh data
-          refreshUserData();
         }
       } else {
         console.log("User not authenticated");
@@ -160,6 +170,7 @@ const Navbar = () => {
       icon: <MessageSquare className="h-4 w-4" />,
       label: t("messages"),
       path: "/messages",
+      badge: unreadMessageCount > 0 ? unreadMessageCount : null,
     },
     {
       icon: <Map className="h-4 w-4" />,
@@ -187,7 +198,8 @@ const Navbar = () => {
     {
       icon: <MessageSquare className="h-4 w-4" />,
       label: t("messages"),
-      path: "/messages",
+      path: "/provider/messages",
+      badge: unreadMessageCount > 0 ? unreadMessageCount : null,
     },
     {
       icon: <LayoutDashboard className="h-4 w-4" />,
@@ -232,6 +244,7 @@ const Navbar = () => {
     setUserType(null);
     setIsProfileMenuOpen(false);
     setProfileImageError(false);
+    setUnreadMessageCount(0);
     // Redirect to home page
     navigate("/");
   };
@@ -341,13 +354,19 @@ const Navbar = () => {
           {shouldShowMenuIcon && (
             <div className="relative">
               <button
-                className="p-2 hover:bg-gray-300 rounded-full"
+                className="p-2 hover:bg-gray-300 rounded-full relative"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
               >
                 {isMenuOpen ? (
                   <X className="h-6 w-6 text-gray-700" />
                 ) : (
-                  <Menu className="h-6 w-6 text-gray-700" />
+                  <>
+                    <Menu className="h-6 w-6 text-gray-700" />
+                    {/* Notification dot */}
+                    {unreadMessageCount > 0 && (
+                      <span className="absolute top-0 right-0 h-3 w-3 bg-[#B4A481] rounded-full"></span>
+                    )}
+                  </>
                 )}
               </button>
 
@@ -388,11 +407,18 @@ const Navbar = () => {
                       <Link
                         key={index}
                         to={item.path}
-                        className="flex items-center px-3 py-1.5 text-gray-700 hover:bg-gray-50"
+                        className="flex items-center justify-between px-3 py-1.5 text-gray-700 hover:bg-gray-50"
                         onClick={() => setIsMenuOpen(false)}
                       >
-                        {item.icon}
-                        <span className="ml-2 text-sm">{item.label}</span>
+                        <div className="flex items-center">
+                          {item.icon}
+                          <span className="ml-2 text-sm">{item.label}</span>
+                        </div>
+                        {item.badge && (
+                          <span className="bg-[#B4A481] text-white text-xs font-medium px-2 py-0.5 rounded-full">
+                            {item.badge}
+                          </span>
+                        )}
                       </Link>
                     ))}
                   </div>

@@ -79,7 +79,7 @@ const MessageBubble = ({ message, isOwn }) => {
   );
 };
 
-// Booking Info Card component
+
 const BookingInfoCard = ({ booking, t }) => {
   if (!booking) return null;
   
@@ -100,6 +100,7 @@ const BookingInfoCard = ({ booking, t }) => {
   };
   
   const nights = calculateNights(booking.checkInDate, booking.checkOutDate);
+  const displayBookingId = booking.bookingId || booking._id?.substring(0, 8) || 'N/A';
   
   return (
     <div className="border border-gray-200 rounded-lg overflow-hidden shadow-sm mb-4">
@@ -122,10 +123,10 @@ const BookingInfoCard = ({ booking, t }) => {
             alt={booking.listing?.title || "Property"} 
             className="w-16 h-16 object-cover rounded-md"
           />
-          {/* <div className="ml-3">
+          <div className="ml-3">
             <h4 className="font-medium text-gray-900">{booking.listing?.title || "Property"}</h4>
             <p className="text-sm text-gray-500">{booking.listing?.location?.address || "Unknown location"}</p>
-          </div> */}
+          </div>
         </div>
         
         <div className="space-y-3">
@@ -152,7 +153,7 @@ const BookingInfoCard = ({ booking, t }) => {
           <div className="flex items-center gap-2">
             <Info className="w-4 h-4 text-gray-400" />
             <span className="text-sm text-gray-900">
-              {t('booking_id')}: #{booking._id || booking.id}
+              {t('booking_id')}: {displayBookingId}
             </span>
           </div>
           
@@ -547,11 +548,36 @@ const ProviderMessages = () => {
                               ? `${currentConversation.customer.firstName} ${currentConversation.customer.lastName}`
                               : currentConversation.customer?.username || 'Guest'}
                           </h3>
-                          <p className="text-xs text-gray-500">{t('guest')}</p>
+                          <div className="flex items-center text-xs text-gray-500 gap-1">
+                            <span className="flex items-center">
+                            <Calendar className="w-3 h-3 mr-1" />
+                            {new Date(currentConversation.booking?.checkInDate).toLocaleDateString()} - {new Date(currentConversation.booking?.checkOutDate).toLocaleDateString()}
+                          </span>
+                          <span className="mx-1">•</span>
+                          <span className="flex items-center">
+                            <User className="w-3 h-3 mr-1" />
+                            {currentConversation.booking?.capacity?.people || 1} {currentConversation.booking?.capacity?.people !== 1 ? t('guests') : t('guest')}, 
+                            {' '}{currentConversation.booking?.capacity?.dogs || 0} {currentConversation.booking?.capacity?.dogs !== 1 ? t('dogs') : t('dog')}
+                          </span>
+                          <span className="mx-1">•</span>
+                          <span className="flex items-center">
+                            <Info className="w-3 h-3 mr-1" />
+                            {t('booking_id')}: {currentConversation.booking?.bookingId || currentConversation.booking?._id?.substring(0, 8) || 'N/A'}
+                          </span>
+                        </div>
                         </div>
                       </div>
                       
                       <div className="flex items-center gap-2">
+                        <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                          currentConversation.booking?.status === 'confirmed' 
+                            ? 'bg-green-100 text-green-800' 
+                            : currentConversation.booking?.status === 'pending'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {currentConversation.booking?.status.charAt(0).toUpperCase() + currentConversation.booking?.status.slice(1)}
+                        </span>
                         <button 
                           className="p-2 text-gray-500 hover:bg-gray-100 rounded-full"
                           onClick={() => setShowBookingInfo(!showBookingInfo)}
@@ -567,41 +593,34 @@ const ProviderMessages = () => {
                     </div>
                     
                    {/* Chat Body */}
-                   <div className="flex-1 flex" style={{ maxHeight: 'calc(100vh - 280px)' }}>
-                      <div 
-                        ref={messageContainerRef}
-                        className={`flex-1 p-4 overflow-y-auto ${showBookingInfo ? 'w-2/3' : 'w-full'}`}
-                        style={{ maxHeight: 'calc(100vh - 230px)' }}
-                      >
-                        {isLoading ? (
-                          <div className="flex justify-center items-center h-32">
-                            <div className="w-8 h-8 border-4 border-t-brand border-gray-200 rounded-full animate-spin"></div>
-                          </div>
-                        ) : messages.length === 0 ? (
-                          <div className="flex flex-col items-center justify-center h-full">
-                            <p className="text-gray-500">{t('no_messages_yet')}</p>
-                            <p className="text-sm text-gray-400 mt-2">{t('start_conversation')}</p>
-                          </div>
-                        ) : (
-                          /* Message bubbles */
-                          messages.map(message => (
-                            <MessageBubble
-                              key={message._id}
-                              message={message}
-                              isOwn={message.sender === 'me' || message.senderType === 'Provider'}
-                            />
-                          ))
-                        )}
-                        <div ref={messageEndRef}></div> {/* Add this line if it doesn't exist */}
-                      </div>
-                      
-                      {/* Booking info sidebar */}
-                      {showBookingInfo && (
-                        <div className="w-1/3 border-l border-gray-200 p-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 230px)' }}>
-                          <BookingInfoCard booking={currentConversation.booking} t={t} />
+                  <div className="flex-1 flex">
+                    <div 
+                      ref={messageContainerRef}
+                      className="flex-1 p-4 overflow-y-auto"
+                      style={{ maxHeight: 'calc(100vh - 220px)' }}
+                    >
+                      {isLoading ? (
+                        <div className="flex justify-center items-center h-32">
+                          <div className="w-8 h-8 border-4 border-t-brand border-gray-200 rounded-full animate-spin"></div>
                         </div>
+                      ) : messages.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-full">
+                          <p className="text-gray-500">{t('no_messages_yet')}</p>
+                          <p className="text-sm text-gray-400 mt-2">{t('start_conversation')}</p>
+                        </div>
+                      ) : (
+                        /* Message bubbles */
+                        messages.map(message => (
+                          <MessageBubble
+                            key={message._id}
+                            message={message}
+                            isOwn={message.sender === 'me' || message.senderType === 'Provider'}
+                          />
+                        ))
                       )}
+                      <div ref={messageEndRef}></div>
                     </div>
+                  </div>
                     
                     {/* Chat Input */}
                     <div className="p-4 border-t border-gray-200">

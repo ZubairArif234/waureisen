@@ -193,46 +193,38 @@ export const deleteListing = async (id) => {
 
 export const getProviderBookings = async (params = {}) => {
   try {
-    const {
-      status = "all",
-      page = 1,
+    const { 
+      status = 'all', 
+      page = 1, 
       limit = 10,
-      sortOrder = "asc",
+      sortOrder = 'desc',
+      sortBy = 'createdAt',
       dateRange,
-      listingId,
+      listingId
     } = params;
-
-    console.log("Getting provider bookings with params:", {
-      status,
-      page,
-      limit,
-      sortOrder,
-      dateRange,
-      listingId,
-    });
-
+    
     const queryParams = new URLSearchParams();
-
-    if (status !== "all") {
-      queryParams.append("status", status);
+    
+    if (status !== 'all') {
+      queryParams.append('status', status);
     }
-
+    
     if (listingId) {
-      queryParams.append("listingId", listingId);
+      queryParams.append('listingId', listingId);
     }
-
+    
     if (dateRange) {
-      queryParams.append("dateRange", dateRange);
+      queryParams.append('dateRange', dateRange);
     }
-
-    queryParams.append("page", page.toString());
-    queryParams.append("limit", limit.toString());
-    queryParams.append("sortOrder", sortOrder);
-
+    
+    queryParams.append('page', page.toString());
+    queryParams.append('limit', limit.toString());
+    queryParams.append('sortOrder', sortOrder);
+    queryParams.append('sortBy', sortBy);  // Add this line
+    
     const response = await API.get(`/providers/bookings?${queryParams}`);
-
-    console.log("Bookings API response:", response.data);
-
+    
+    
     if (response.data.bookings && response.data.pagination) {
       return response.data;
     } else {
@@ -242,20 +234,20 @@ export const getProviderBookings = async (params = {}) => {
           totalCount: Array.isArray(response.data) ? response.data.length : 0,
           page: 1,
           limit: limit,
-          totalPages: 1,
-        },
+          totalPages: 1
+        }
       };
     }
   } catch (error) {
-    console.error("Error fetching provider bookings:", error);
+    console.error('Error fetching provider bookings:', error);
     return {
       bookings: [],
       pagination: {
         totalCount: 0,
         page: 1,
         limit: 10,
-        totalPages: 1,
-      },
+        totalPages: 1
+      }
     };
   }
 };
