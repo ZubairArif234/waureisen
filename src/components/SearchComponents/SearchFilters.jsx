@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar, Home, Filter, Dog, SlidersHorizontal } from 'lucide-react';
 import FilterModal from './FilterModal';
 import { accommodationTypes, mainFilters, dogFilters } from './filterData';
@@ -41,12 +41,29 @@ const FilterGroup = ({ options, selectedFilters, onFilterChange }) => {
 };
 
 const SearchFilters = ({ dateRange }) => {
-  const [activeModal, setActiveModal] = useState(null);
+  const [activeModal, setActiveModal] = useState({ isOpen: false });
   const { t } = useLanguage();
   const [isMoreFiltersOpen, setIsMoreFiltersOpen] = useState(false);
+  const [filters, setFilters] = useState([]);
+  const [selectedFilters, setSelectedFilters] = useState([]);
   const [selectedAccommodations, setSelectedAccommodations] = useState([]);
   const [selectedMainFilters, setSelectedMainFilters] = useState([]);
   const [selectedDogFilters, setSelectedDogFilters] = useState([]);
+
+  useEffect(() => {
+    const fetchFilters = async () => {
+      try {
+        const response = await fetch('/api/filters/template');
+        const data = await response.json();
+        const amenities = data.subsections.find(sub => sub.name === 'Amenities');
+        setFilters(amenities.subsubsections.slice(0, 3));
+      } catch (error) {
+        console.error('Error fetching filters:', error);
+      }
+    };
+
+    fetchFilters();
+  }, []);
 
   const handleAccommodationChange = (accommodation) => {
     setSelectedAccommodations(prev => 
@@ -81,24 +98,35 @@ const SearchFilters = ({ dateRange }) => {
             label={dateRange}
             active={true}
           />
-          <FilterButton
-            icon={Home}
-            label={t('accommodation_type')}
-            active={selectedAccommodations.length > 0}
-            onClick={() => setActiveModal('accommodation')}
-          />
-          <FilterButton
-            icon={Filter}
-            label={t('main_filters')}
-            active={selectedMainFilters.length > 0}
-            onClick={() => setActiveModal('main')}
-          />
-          <FilterButton
-            icon={Dog}
-            label={t('dog_filters')}
-            active={selectedDogFilters.length > 0}
-            onClick={() => setActiveModal('dog')}
-          />
+          {filters.map((filter, index) => (
+            <FilterButton
+              key={index}
+              icon={Filter}
+              label={filter.name}
+              active={selectedFilters.some(f => f.category === filter.name)}
+              onClick={() => {
+                const selectedFilter = filters.find(f => f.name === filter.name);
+                if (selectedFilter) {
+  console.log('Filter button clicked:', selectedFilter);
+console.log('Active Modal State Before:', activeModal);
+console.log('Filter Data:', selectedFilter);
+
+                  setActiveModal({ 
+                    isOpen: true,
+                    name: filter.name, 
+                    filters: selectedFilter.filters,
+                    subsubsection: selectedFilter.subsubsections?.length > 0 ? selectedFilter.subsubsections[0] : null
+                  });
+console.log('Active Modal State After:', {
+  name: filter.name, 
+  filters: selectedFilter.filters,
+  subsubsection: selectedFilter.subsubsections?.length > 0 ? selectedFilter.subsubsections[0] : null
+});
+                  console.log('Selected Filter:', selectedFilter);
+                }
+              }}
+            />
+          ))}
           <div className="ml-auto">
           <FilterButton
             icon={SlidersHorizontal}
@@ -110,43 +138,26 @@ const SearchFilters = ({ dateRange }) => {
         </div>
       </div>
 
-      {/* Accommodation Type Modal */}
       <FilterModal
-        isOpen={activeModal === 'accommodation'}
+        isOpen={!!activeModal.isOpen}
         onClose={() => setActiveModal(null)}
-        title={t('accommodation_type')}
+        title={activeModal?.name}
+        activeModal={activeModal || { isOpen: false }}
+        onClose={() => setActiveModal({ isOpen: false })}
       >
-        <FilterGroup
-          options={accommodationTypes}
-          selectedFilters={selectedAccommodations}
-          onFilterChange={handleAccommodationChange}
-        />
-      </FilterModal>
-
-      {/* Main Filters Modal */}
-      <FilterModal
-        isOpen={activeModal === 'main'}
-        onClose={() => setActiveModal(null)}
-        title={t('main_filters')}
-      >
-        <FilterGroup
-          options={mainFilters}
-          selectedFilters={selectedMainFilters}
-          onFilterChange={handleMainFilterChange}
-        />
-      </FilterModal>
-
-      {/* Dog Filters Modal */}
-      <FilterModal
-        isOpen={activeModal === 'dog'}
-        onClose={() => setActiveModal(null)}
-        title={t('dog_filters')}
-      >
-        <FilterGroup
-          options={dogFilters}
-          selectedFilters={selectedDogFilters}
-          onFilterChange={handleDogFilterChange}
-        />
+        {/* Render filters inside modal */}
+        {activeModal?.filters?.map(filter => (
+          <div key={filter._id} className="space-y-3">
+            <p className="text-sm text-gray-500">Type: {filter.type}</p>
+            <label className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer">
+              <input
+                type={filter.type}
+                className="w-5 h-5 rounded border-gray-300 text-brand focus:ring-brand"
+              />
+              <span className="text-gray-700">{filter.name}</span>
+            </label>
+          </div>
+        ))}
       </FilterModal>
 
       {/* More Filters Modal */}
