@@ -39,7 +39,7 @@ const Payment = () => {
       checkOutDate: new Date(details?.endDate),
       providerAccountId: "809jujj9ehfhjf99g",
       paymentDelayDays: diffDays,
-      providerAccountId:data?.owner?.stripeAccountId
+      
     });
     setPaymentIntent({
       clientSecret: res.data.clientSecret,
