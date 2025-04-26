@@ -16,7 +16,7 @@ import {
   addListingMarkers,
   clearMarkers,
   addMapMoveListener,
-} from "../../utils/googlemapsutils";
+} from "../../utils/googleMapsUtils";
 
 // Import dummy images for now
 import i1 from "../../assets/i1.png";
