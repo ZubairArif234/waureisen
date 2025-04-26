@@ -36,21 +36,43 @@ export const login = async (credentials, userType) => {
       localStorage.setItem(TOKEN_KEY, response.token);
       localStorage.setItem(USER_TYPE_KEY, userType);
 
-      // Store user data based on type
-      if (userType === "provider" && response.provider) {
-        localStorage.setItem(
-          PROVIDER_USER_KEY,
-          JSON.stringify(response.provider)
-        );
-      } else if (userType === "user" && response.user) {
-        localStorage.setItem(USER_DATA_KEY, JSON.stringify(response.user));
-      } else if (userType === "admin" && response.admin) {
-        localStorage.setItem(ADMIN_DATA_KEY, JSON.stringify(response.admin));
-      }
-
       // Set the authorization header immediately for subsequent requests
       API.defaults.headers.common["Authorization"] = `Bearer ${response.token}`;
       console.log("Token saved and auth header set");
+
+      // Get full profile data with profile picture
+      try {
+        if (userType === "provider") {
+          const { getProviderProfile } = await import("../api/providerAPI");
+          const profileData = await getProviderProfile();
+          console.log("Provider profile data fetched:", profileData);
+          localStorage.setItem(PROVIDER_USER_KEY, JSON.stringify(profileData));
+        } else if (userType === "user") {
+          const { getUserProfile } = await import("../api/authAPI");
+          const profileData = await getUserProfile();
+          console.log("User profile data fetched:", profileData);
+          localStorage.setItem(USER_DATA_KEY, JSON.stringify(profileData));
+        } else if (userType === "admin" && response.admin) {
+          localStorage.setItem(ADMIN_DATA_KEY, JSON.stringify(response.admin));
+        }
+      } catch (profileError) {
+        console.error("Error fetching full profile after login:", profileError);
+
+        // Still store basic user data if profile fetch fails
+        if (userType === "provider" && response.provider) {
+          localStorage.setItem(
+            PROVIDER_USER_KEY,
+            JSON.stringify(response.provider)
+          );
+        } else if (userType === "user" && response.user) {
+          localStorage.setItem(USER_DATA_KEY, JSON.stringify(response.user));
+        } else if (userType === "admin" && response.admin) {
+          localStorage.setItem(ADMIN_DATA_KEY, JSON.stringify(response.admin));
+        }
+      }
+
+      // Dispatch storage event to notify all components of auth change
+      window.dispatchEvent(new Event("storage"));
     } else {
       console.error("No token returned in login response");
     }
@@ -76,6 +98,9 @@ export const logout = (options = {}) => {
 
   // Clear auth header
   delete API.defaults.headers.common["Authorization"];
+
+  // Dispatch storage event to notify all components of auth change
+  window.dispatchEvent(new Event("storage"));
 
   // Handle redirects based on options
   if (options.redirect) {
@@ -259,4 +284,36 @@ export const isAccountNotFoundError = (error) => {
     message.includes("not found") ||
     message.toLowerCase().includes("user not exist")
   );
+};
+
+// Add this function at the end of the file
+export const updateUserProfilePicture = (profilePictureUrl) => {
+  const userType = localStorage.getItem(USER_TYPE_KEY);
+
+  if (!userType) return null;
+
+  let storageKey;
+
+  switch (userType) {
+    case "provider":
+      storageKey = PROVIDER_USER_KEY;
+      break;
+    case "admin":
+      storageKey = ADMIN_DATA_KEY;
+      break;
+    case "user":
+    default:
+      storageKey = USER_DATA_KEY;
+      break;
+  }
+
+  const userData = JSON.parse(localStorage.getItem(storageKey) || "{}");
+  userData.profilePicture = profilePictureUrl;
+  localStorage.setItem(storageKey, JSON.stringify(userData));
+
+  // Dispatch storage event to notify all components including Navbar
+  window.dispatchEvent(new Event("storage"));
+
+  console.log("Profile picture updated:", profilePictureUrl);
+  return userData;
 };

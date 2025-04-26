@@ -1,5 +1,6 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { SocketProvider } from './utils/SocketContext'
 import Home from './pages/Main/Home'
 import SearchResults from './pages/Search/SearchResults'
 import AccommodationPage from './pages/Accommodation/AccommodationPage'
@@ -33,6 +34,7 @@ import Payment from './pages/Stripe/Payment'
 function App() {
   return (
     <Router>
+      <SocketProvider>
       <ScrollToTop />
       <div className="bg-white">
         <Routes>
@@ -77,6 +79,7 @@ function App() {
 
         </Routes>
       </div>
+      </SocketProvider>
     </Router>
   )
 }

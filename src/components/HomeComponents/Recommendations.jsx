@@ -21,6 +21,29 @@ const SkeletonCard = memo(() => {
 // Memoize the RecommendationsSection component
 const RecommendationsSection = memo(({ title, listings, isLoading }) => {
   const { t } = useLanguage();
+  const [favorites, setFavorites] = useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Check if the user is logged in and fetch favorites if they are
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token);
+
+    if (token) {
+      const fetchFavorites = async () => {
+        try {
+          const response = await API.get("/users/favorites");
+          // Create an array of favorite listing IDs for lookup
+          const favoriteIds = response.data.map((listing) => listing._id);
+          setFavorites(favoriteIds);
+        } catch (err) {
+          console.error("Error fetching favorites:", err);
+        }
+      };
+
+      fetchFavorites();
+    }
+  }, []);
 
   // Memoize the skeleton cards array to prevent recreation on each render
   const skeletonCards = useMemo(
@@ -61,6 +84,7 @@ const RecommendationsSection = memo(({ title, listings, isLoading }) => {
                   ? { price: listing.dynamicPrice, currency: "CHF" }
                   : listing.pricePerNight
               }
+              isFavorited={isLoggedIn && favorites.includes(listing._id)}
             />
           ))
         ) : (

@@ -1,10 +1,54 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useLanguage } from '../../utils/LanguageContext';
 
+
 const FilterModal = ({ isOpen, onClose, title, children }) => {
+  const [subsubsectionFilters, setSubsubsectionFilters] = useState([]);
+  const [loading, setLoading] = useState(false);
+  
+  useEffect(() => {
+    if (isOpen) {
+      const fetchFilters = async () => {
+        try {
+          const response = await fetch('/api/filters/template');
+          const data = await response.json();
+          const subsubsection = data.subsections
+            .flatMap(section => section.subsubsections)
+            .find(sub => sub.name === title);
+          if (subsubsection) {
+            setActiveModal(prev => ({ ...prev, subsubsection }));
+          }
+        } catch (error) {
+          console.error('Error fetching filters:', error);
+        }
+      };
+      fetchFilters();
+    }
+  }, [isOpen, title]);
   const { t } = useLanguage();
-  if (!isOpen) return null;
+  const [activeModal, setActiveModal] = useState({ isOpen: false });
+  useEffect(() => {
+    if (isOpen && title) {
+      setLoading(true);
+      fetch(`/api/filters/template?title=${encodeURIComponent(title)}`)
+        .then(response => response.json())
+        .then(data => {
+          const filters = data.subsections
+            .flatMap(section => section.subsubsections)
+            .find(sub => sub.name === title)?.filters;
+          setSubsubsectionFilters(filters);
+        })
+        .catch(error => console.error('Error fetching filters:', error))
+        .finally(() => setLoading(false));
+    }
+  }, [isOpen, title]);
+
+  if (!isOpen) {
+  console.log('Modal closed, isOpen:', isOpen);
+  return null;
+}
+console.log('Modal opened with props:', { isOpen, title, children });
 
   return (
     <>
@@ -29,7 +73,19 @@ const FilterModal = ({ isOpen, onClose, title, children }) => {
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-3 min-h-0">
-          {children}
+
+          {(subsubsectionFilters || activeModal?.subsubsection?.filters)?.map(filter => (
+          <div key={filter._id} className="space-y-3">
+            {/* <p className="text-sm text-gray-500">Type: {filter.type}</p> */}
+            <label className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer">
+              <input
+                type={filter.type}
+                className="w-5 h-5 rounded border-gray-300 text-brand focus:ring-brand"
+              />
+              <span className="text-gray-700">{filter.name}</span>
+            </label>
+          </div>
+        ))}
         </div>
 
         {/* Footer - Fixed at bottom */}

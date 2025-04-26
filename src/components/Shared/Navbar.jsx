@@ -18,15 +18,15 @@ import {
   Calendar,
 } from "lucide-react";
 import logo from "../../assets/logo.png";
-import LanguagePopup from "../HomeComponents/LanguagePopup";
 import { useLanguage } from "../../utils/LanguageContext";
+import { useSocket } from "../../utils/SocketContext"; // Import the socket context
 import {
   isAuthenticated,
   logout,
   getCurrentUser,
   getUserType,
-  isUserType,
 } from "../../utils/authService";
+import { getUserUnreadCount, getProviderUnreadCount } from "../../api/conversationAPI";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -35,32 +35,132 @@ const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [userType, setUserType] = useState(null);
+  const [profileImageError, setProfileImageError] = useState(false);
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
   const navigate = useNavigate();
-  const globeButtonRef = useRef(null);
   const { language, switchLanguage, t } = useLanguage();
+  const { socket } = useSocket(); // Get socket from context
 
+  // Extract fetchUnreadCount function outside of useEffect for reuse
+  const fetchUnreadCount = async () => {
+    if (!isLoggedIn) {
+      setUnreadMessageCount(0);
+      return;
+    }
+    
+    try {
+      if (userType === "provider") {
+        const count = await getProviderUnreadCount();
+        setUnreadMessageCount(count);
+      } else if (userType === "user") {
+        const count = await getUserUnreadCount();
+        setUnreadMessageCount(count);
+      }
+    } catch (error) {
+      console.error("Failed to fetch unread messages:", error);
+    }
+  };
+
+  // Fetch unread count on mount and periodically
   useEffect(() => {
-    // Check authentication status when component mounts or when dependencies change
+    if (!isLoggedIn) return;
+    
+    fetchUnreadCount();
+    
+    // Set up interval to check periodically
+    const intervalId = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(intervalId);
+  }, [isLoggedIn, userType]);
+
+  // Socket integration for real-time updates
+  useEffect(() => {
+    if (!socket || !isLoggedIn) return;
+    
+    console.log("Setting up socket listeners in Navbar");
+    
+    // Listen for new messages
+    const handleNewMessage = (message) => {
+      console.log("New message received in Navbar:", message);
+      
+      // Increment count immediately when receiving a message meant for this user
+      const shouldIncrement = 
+        (userType === 'user' && message.senderType === 'Provider') ||
+        (userType === 'provider' && message.senderType === 'User');
+        
+      if (shouldIncrement) {
+        console.log("Incrementing unread count");
+        setUnreadMessageCount(prev => prev + 1);
+      }
+    };
+    
+    socket.on('new_message', handleNewMessage);
+    
+    return () => {
+      console.log("Cleaning up socket listeners in Navbar");
+      socket.off('new_message', handleNewMessage);
+    };
+  }, [socket, isLoggedIn, userType]);
+
+  // Check authentication status when component mounts or when dependencies change
+  useEffect(() => {
     const checkAuth = () => {
+      console.log("Checking auth status in Navbar");
       const authStatus = isAuthenticated();
       setIsLoggedIn(authStatus);
+
       if (authStatus) {
-        setCurrentUser(getCurrentUser());
-        setUserType(getUserType());
+        // Always reset the profile image error state when checking authentication
+        setProfileImageError(false);
+
+        // Get current user from localStorage first (for immediate display)
+        const user = getCurrentUser();
+        console.log("Current user data:", user);
+
+        if (user) {
+          setCurrentUser(user);
+          setUserType(getUserType());
+
+          // Verify the profile picture URL by preloading it
+          if (user.profilePicture) {
+            console.log("Found profile picture:", user.profilePicture);
+
+            // Create a test image element to verify the URL works
+            const testImg = new Image();
+            testImg.onload = () => {
+              console.log("Profile image loaded successfully");
+              setProfileImageError(false);
+            };
+            testImg.onerror = () => {
+              console.error(
+                "Failed to load profile image:",
+                user.profilePicture
+              );
+              setProfileImageError(true);
+            };
+            testImg.src = user.profilePicture;
+          }
+        }
       } else {
+        console.log("User not authenticated");
         setCurrentUser(null);
         setUserType(null);
       }
     };
 
+    // Check auth immediately when component mounts
     checkAuth();
 
     // Add an event listener for storage events to detect changes to localStorage
     // This helps with synchronizing login/logout across tabs
-    window.addEventListener("storage", checkAuth);
+    const handleStorageChange = (event) => {
+      console.log("Storage changed, rechecking auth");
+      checkAuth();
+    };
+
+    window.addEventListener("storage", handleStorageChange);
 
     return () => {
-      window.removeEventListener("storage", checkAuth);
+      window.removeEventListener("storage", handleStorageChange);
     };
   }, []);
 
@@ -70,6 +170,7 @@ const Navbar = () => {
       icon: <MessageSquare className="h-4 w-4" />,
       label: t("messages"),
       path: "/messages",
+      badge: unreadMessageCount > 0 ? unreadMessageCount : null,
     },
     {
       icon: <Map className="h-4 w-4" />,
@@ -97,7 +198,8 @@ const Navbar = () => {
     {
       icon: <MessageSquare className="h-4 w-4" />,
       label: t("messages"),
-      path: "/messages",
+      path: "/provider/messages",
+      badge: unreadMessageCount > 0 ? unreadMessageCount : null,
     },
     {
       icon: <LayoutDashboard className="h-4 w-4" />,
@@ -141,6 +243,8 @@ const Navbar = () => {
     setCurrentUser(null);
     setUserType(null);
     setIsProfileMenuOpen(false);
+    setProfileImageError(false);
+    setUnreadMessageCount(0);
     // Redirect to home page
     navigate("/");
   };
@@ -250,13 +354,19 @@ const Navbar = () => {
           {shouldShowMenuIcon && (
             <div className="relative">
               <button
-                className="p-2 hover:bg-gray-300 rounded-full"
+                className="p-2 hover:bg-gray-300 rounded-full relative"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
               >
                 {isMenuOpen ? (
                   <X className="h-6 w-6 text-gray-700" />
                 ) : (
-                  <Menu className="h-6 w-6 text-gray-700" />
+                  <>
+                    <Menu className="h-6 w-6 text-gray-700" />
+                    {/* Notification dot */}
+                    {unreadMessageCount > 0 && (
+                      <span className="absolute top-0 right-0 h-3 w-3 bg-[#B4A481] rounded-full"></span>
+                    )}
+                  </>
                 )}
               </button>
 
@@ -297,11 +407,18 @@ const Navbar = () => {
                       <Link
                         key={index}
                         to={item.path}
-                        className="flex items-center px-3 py-1.5 text-gray-700 hover:bg-gray-50"
+                        className="flex items-center justify-between px-3 py-1.5 text-gray-700 hover:bg-gray-50"
                         onClick={() => setIsMenuOpen(false)}
                       >
-                        {item.icon}
-                        <span className="ml-2 text-sm">{item.label}</span>
+                        <div className="flex items-center">
+                          {item.icon}
+                          <span className="ml-2 text-sm">{item.label}</span>
+                        </div>
+                        {item.badge && (
+                          <span className="bg-[#B4A481] text-white text-xs font-medium px-2 py-0.5 rounded-full">
+                            {item.badge}
+                          </span>
+                        )}
                       </Link>
                     ))}
                   </div>
@@ -313,11 +430,35 @@ const Navbar = () => {
           {/* Profile Button */}
           <div className="relative">
             <button
-              className="p-2 rounded-full"
-              style={{ backgroundColor: "#B4A481" }}
+              className="rounded-full flex items-center justify-center overflow-hidden p-0"
+              style={{
+                backgroundColor:
+                  currentUser?.profilePicture && !profileImageError
+                    ? "transparent"
+                    : "#B4A481",
+                width: "40px",
+                height: "40px",
+              }}
               onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
             >
-              <User className="h-6 w-6 text-white" />
+              {isLoggedIn &&
+              currentUser &&
+              currentUser.profilePicture &&
+              !profileImageError ? (
+                <img
+                  src={currentUser.profilePicture}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    console.error("Profile image load error:", e);
+                    setProfileImageError(true);
+                  }}
+                />
+              ) : (
+                <div className="flex items-center justify-center w-full h-full">
+                  <User className="h-6 w-6 text-white" />
+                </div>
+              )}
             </button>
 
             {/* Profile Menu Popup */}
@@ -327,7 +468,7 @@ const Navbar = () => {
                   className="fixed inset-0 z-40"
                   onClick={() => setIsProfileMenuOpen(false)}
                 />
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50 py-1">
+                <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg z-50 py-1">
                   {!isLoggedIn ? (
                     <>
                       <Link
@@ -350,15 +491,40 @@ const Navbar = () => {
                   ) : (
                     <>
                       {currentUser && (
-                        <div className="px-4 py-2 border-b border-gray-100">
-                          <p className="font-medium text-sm text-gray-800">
-                            {currentUser.firstName ||
-                              currentUser.name ||
-                              "User"}
-                          </p>
-                          <p className="text-xs text-gray-500 truncate">
-                            {currentUser.email}
-                          </p>
+                        <div className="px-4 py-3 border-b border-gray-100">
+                          <div className="flex items-center">
+                            <div className="w-10 h-10 mr-3 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+                              {currentUser.profilePicture &&
+                              !profileImageError ? (
+                                <img
+                                  src={currentUser.profilePicture}
+                                  alt="Profile"
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    console.error(
+                                      "Profile image load error:",
+                                      e
+                                    );
+                                    setProfileImageError(true);
+                                  }}
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <User className="w-5 h-5 text-gray-500" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="overflow-hidden">
+                              <p className="font-medium text-sm text-gray-800 truncate">
+                                {currentUser.firstName ||
+                                  currentUser.name ||
+                                  "User"}
+                              </p>
+                              <p className="text-xs text-gray-500 truncate">
+                                {currentUser.email}
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       )}
                       <button

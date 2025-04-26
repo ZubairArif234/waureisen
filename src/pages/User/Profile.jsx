@@ -4,6 +4,9 @@ import Navbar from "../../components/Shared/Navbar";
 import Footer from "../../components/Shared/Footer";
 import { useLanguage } from "../../utils/LanguageContext";
 import { getUserProfile, updateUserProfile } from "../../api/authAPI";
+import { updateProviderProfile } from "../../api/providerAPI";
+import { getProviderProfile } from "../../api/providerAPI";
+import { getUserType, isUserType } from "../../utils/authService";
 
 const Profile = () => {
   const { t } = useLanguage();
@@ -43,7 +46,15 @@ const Profile = () => {
         const tokenData = JSON.parse(atob(token.split(".")[1]));
         const userId = tokenData.id;
 
-        const userData = await getUserProfile(userId);
+        // Determine whether to use user or provider API based on user type
+        const userType = getUserType();
+        let userData;
+
+        if (userType === "provider") {
+          userData = await getProviderProfile();
+        } else {
+          userData = await getUserProfile(userId);
+        }
 
         // Map backend data to component state
         setProfileData({
@@ -209,20 +220,49 @@ const Profile = () => {
         })),
       };
 
-      // If profile picture was updated and is a string (URL), include it
-      if (previewImage && typeof previewImage === "string") {
-        updateData.profilePicture = previewImage;
+      // Handle the profile picture properly
+      if (profileData.profilePicture) {
+        // If it's a File object, it will be uploaded in the API function
+        // If it's already a string URL, pass it as is
+        updateData.profilePicture = profileData.profilePicture;
       }
 
       console.log("Sending update data:", updateData);
 
-      const result = await updateUserProfile(updateData);
+      // Determine whether to use user or provider update API based on user type
+      let result;
+      const userType = getUserType();
+
+      if (userType === "provider") {
+        result = await updateProviderProfile(updateData);
+      } else {
+        result = await updateUserProfile(updateData);
+      }
+
       console.log("Update result:", result);
+
+      // Update the user data in localStorage to reflect changes in Navbar
+      if (result) {
+        // Get the correct storage key based on user type
+        const storageKey =
+          userType === "provider" ? "provider_user" : "user_data";
+        const userData = JSON.parse(localStorage.getItem(storageKey) || "{}");
+        const updatedUserData = {
+          ...userData,
+          firstName: result.firstName || userData.firstName,
+          lastName: result.lastName || userData.lastName,
+          profilePicture: result.profilePicture || userData.profilePicture,
+        };
+        localStorage.setItem(storageKey, JSON.stringify(updatedUserData));
+
+        // Force refresh the navbar by triggering a storage event
+        window.dispatchEvent(new Event("storage"));
+      }
 
       setIsEditing(false);
       // Show success message or notification
     } catch (error) {
-      console.error("Failed to update profile:", error);
+      console.error("Error updating profile:", error);
       setError("Failed to update profile. Please try again.");
     } finally {
       setIsLoading(false);
@@ -262,6 +302,10 @@ const Profile = () => {
                       src={previewImage}
                       alt="Profile"
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.error("Error loading profile image:", e);
+                        setPreviewImage(null);
+                      }}
                     />
                   ) : (
                     <Camera className="w-8 h-8 text-gray-400" />
@@ -410,7 +454,11 @@ const Profile = () => {
                   </p>
                 </div>
                 <div className="text-lg font-semibold text-brand">
-                  {profileData.customerNumber || "Not assigned"}
+                  {profileData.customerNumber ? (
+                    profileData.customerNumber
+                  ) : (
+                    <span className="text-gray-400">Not assigned</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -739,42 +787,6 @@ const Profile = () => {
       <Footer />
     </div>
   );
-
-  // Show loading state
-  if (isLoading && !isEditing) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="container mx-auto px-4 py-8 mt-20">
-          <div className="flex justify-center items-center h-64">
-            <p className="text-gray-500">Loading profile...</p>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
-  // Show error state
-  if (error && !isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="container mx-auto px-4 py-8 mt-20">
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-            {error}
-          </div>
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-          >
-            Try Again
-          </button>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
 };
 
 export default Profile;
