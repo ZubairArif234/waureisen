@@ -1,236 +1,307 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Check, HelpCircle } from 'lucide-react';
-import Navbar from '../../components/Shared/Navbar';
-import Footer from '../../components/Shared/Footer';
-import { completeProviderRegistration } from '../../api/authAPI';
-import { useLanguage } from '../../utils/LanguageContext';
+import React, { useState, useEffect, useMemo } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { ArrowLeft, Check, HelpCircle } from "lucide-react";
+import Navbar from "../../components/Shared/Navbar";
+import Footer from "../../components/Shared/Footer";
+import { completeProviderRegistration } from "../../api/authAPI";
+import { useLanguage } from "../../utils/LanguageContext";
+import { connectToStripe, getStripeAccount } from "../../api/paymentAPI";
 
 const ProviderRegistration = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const searchParams = new URLSearchParams(location.search);
+  const accountId = searchParams.get("account") ;
+
+  const savedCurrentStep = localStorage.getItem("currentStep");
+  const [stripeLoading, setStripeLoading] = useState(false);
+  const [stripeAccount, setStripeAccount] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState(() => {
     // Try to get data from sessionStorage first (from signup flow)
-    const savedData = sessionStorage.getItem('providerSignupData');
+    const savedData = sessionStorage.getItem("providerSignupData");
     const parsedData = savedData ? JSON.parse(savedData) : null;
-    
+
     return {
       // Default form structure
-      firstName: '',
-      lastName: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-      phone: '',
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      phone: "",
       address: {
-        street: '',
-        city: '',
-        postalCode: '',
-        country: 'Switzerland'
+        street: "",
+        city: "",
+        postalCode: "",
+        country: "Switzerland",
       },
-      dateOfBirth: '',
-      
+      dateOfBirth: "",
+
       // Business Information
-      businessName: '',
-      businessType: 'individual',
-      vatNumber: '',
-      website: '',
-      
+      businessName: "",
+      businessType: "individual",
+      vatNumber: "",
+      website: "",
+
       // Banking Details
-      bankName: '',
-      accountHolder: '',
-      iban: '',
-      swift: '',
-      
+      bankName: "",
+      accountHolder: "",
+      iban: "",
+      swift: "",
+
+      // stripe account ID
+      stripeAccountId: "",
+
       // Additional Information
-      hostingExperience: 'none',
-      propertyCount: '1',
-      heardAboutUs: '',
+      hostingExperience: "none",
+      propertyCount: "1",
+      heardAboutUs: "",
       terms: false,
       newsletter: false,
-      
+
       // Override with data from signup if available
       ...(parsedData && {
-        firstName: parsedData.firstName || '',
-        lastName: parsedData.lastName || '',
-        email: parsedData.email || '',
-        phone: parsedData.phoneNumber || '',
+        firstName: parsedData.firstName || "",
+        lastName: parsedData.lastName || "",
+        email: parsedData.email || "",
+        phone: parsedData.phoneNumber || "",
         // Don't pre-fill passwords for security
       }),
     };
   });
-  
+
+  const savedData = useMemo(() => {
+    return JSON.parse(localStorage.getItem("providerSignupData"));
+  }, []);
+
+  const handleConnectStripe = async () => {
+    const res = await connectToStripe({ email: formData.email });
+    console.log(res);
+    window.location.href = res.url;
+  };
+
   const [errors, setErrors] = useState({});
-  
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
-    if (type === 'checkbox') {
+console.log(name , value);
+
+    if (type === "checkbox") {
+      console.log("ye chala");
+      
       setFormData({
         ...formData,
-        [name]: checked
+        [name]: checked,
       });
     } else {
+      console.log("ya ye chala");
       setFormData({
         ...formData,
-        [name]: value
+        [name]: value,
       });
     }
+    console.log(formData , "formData");
   };
-  
   const handleAddressChange = (e) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
       address: {
         ...formData.address,
-        [name]: value
-      }
+        [name]: value,
+      },
     });
   };
-  
+
   const validateStep = (step) => {
     const newErrors = {};
-    
+
     if (step === 1) {
-      if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
-      if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
+      if (!formData.firstName.trim())
+        newErrors.firstName = "First name is required";
+      if (!formData.lastName.trim())
+        newErrors.lastName = "Last name is required";
       if (!formData.email.trim()) {
-        newErrors.email = 'Email is required';
+        newErrors.email = "Email is required";
       } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
-        newErrors.email = 'Email is invalid';
+        newErrors.email = "Email is invalid";
       }
-      if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
-      if (!formData.address.street.trim()) newErrors.street = 'Street address is required';
-      if (!formData.address.city.trim()) newErrors.city = 'City is required';
-      if (!formData.address.postalCode.trim()) newErrors.postalCode = 'Postal code is required';
+      if (!formData.phone.trim()) newErrors.phone = "Phone number is required";
+      if (!formData.address.street.trim())
+        newErrors.street = "Street address is required";
+      if (!formData.address.city.trim()) newErrors.city = "City is required";
+      if (!formData.address.postalCode.trim())
+        newErrors.postalCode = "Postal code is required";
     }
-    
+
     if (step === 2) {
-      if (!formData.businessName.trim() && formData.businessType !== 'individual') {
-        newErrors.businessName = 'Business name is required for businesses';
+      if (
+        !formData.businessName.trim() &&
+        formData.businessType !== "individual"
+      ) {
+        newErrors.businessName = "Business name is required for businesses";
       }
       // VAT number is optional
     }
-    
+
     if (step === 3) {
-      if (!formData.bankName.trim()) newErrors.bankName = 'Bank name is required';
-      if (!formData.accountHolder.trim()) newErrors.accountHolder = 'Account holder name is required';
-      if (!formData.iban.trim()) {
-        newErrors.iban = 'IBAN is required';
-      } else if (!/^[A-Z]{2}[0-9]{2}[A-Z0-9]{12,30}$/.test(formData.iban.replace(/\s/g, ''))) {
-        newErrors.iban = 'IBAN format is invalid';
+      if (!formData.stripeAccountId.trim()) {
+        newErrors.stripeAccountId = "Stripe ccount is required";
       }
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  
+
   const nextStep = () => {
     const isValid = validateStep(currentStep);
-    
+
     if (isValid) {
       setCurrentStep(currentStep + 1);
+      localStorage.setItem("providerSignupData", JSON.stringify(formData));
+      localStorage.setItem("currentStep", currentStep + 1);
       window.scrollTo(0, 0);
     }
   };
-  
+
   const prevStep = () => {
     setCurrentStep(currentStep - 1);
     window.scrollTo(0, 0);
   };
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const isValid = validateStep(currentStep);
-    
+
     if (!isValid) return;
-    
+
     if (!formData.terms) {
       setErrors({
         ...errors,
-        terms: 'You must agree to the terms and conditions'
+        terms: "You must agree to the terms and conditions",
       });
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     try {
       // Prepare the data for the API call
       const registrationData = {
         firstName: formData.firstName,
         lastName: formData.lastName,
         phoneNumber: formData.phone,
-        
+
         // Address
         address: formData.address,
-        
+
         // Business information
         businessName: formData.businessName,
         businessType: formData.businessType,
         vatNumber: formData.vatNumber,
         website: formData.website,
-        
+
         // Banking details
         bankName: formData.bankName,
         accountHolder: formData.accountHolder,
         iban: formData.iban,
         swift: formData.swift,
-        
+
+        // stripe Account ID
+        stripeAccountId: formData?.stripeAccountId,
+
         // Additional information
         hostingExperience: formData.hostingExperience,
         propertyCount: formData.propertyCount,
         heardAboutUs: formData.heardAboutUs,
-        
+
         // Preferences
         newsletter: formData.newsletter,
-        
+
         // Update registration status
-        registrationStatus: 'complete'
+        registrationStatus: "complete",
       };
-      
+
       // Call the API to complete registration
       const response = await completeProviderRegistration(registrationData);
-      
+
       // Clear the sessionStorage data now that we're done with it
-      sessionStorage.removeItem('providerSignupData');
-      
+      sessionStorage.removeItem("providerSignupData");
+
       // Success! Navigate to success page
-      navigate('/provider/registration-success');
+      localStorage.removeItem("currentStep");
+      localStorage.removeItem("providerSignupData");
+      navigate("/provider/registration-success");
     } catch (error) {
-      console.error('Registration error:', error);
-      
+      console.error("Registration error:", error);
+
       if (error.response && error.response.data) {
         // Handle API validation errors
-        setErrors(error.response.data.errors || {
-          form: error.response.data.message || 'Registration failed'
-        });
+        setErrors(
+          error.response.data.errors || {
+            form: error.response.data.message || "Registration failed",
+          }
+        );
       } else {
         // Handle generic error
         setErrors({
-          form: 'Registration failed. Please try again later.'
+          form: "Registration failed. Please try again later.",
         });
       }
     } finally {
       setIsSubmitting(false);
     }
   };
-  
+  useEffect(() => {
+    if (savedCurrentStep) {
+      setCurrentStep(parseInt(savedCurrentStep, 10));
+    }
+  }, [savedCurrentStep]);
+
+  useEffect(() => {
+    if (savedData?.firstName) {
+      setFormData({...savedData,stripeAccountId:accountId || savedData.stripeAccountId});
+        }
+  }, [savedData ]);
+
+  const handleGetStripeAccount = async ()=>{
+    setStripeLoading(true)
+    const res= await getStripeAccount(accountId)
+    if (res){
+      setStripeAccount(res?.data?.details_submitted)
+      setStripeLoading(false)
+    }
+    setStripeLoading(false)
+
+  }
+
+  useEffect(()=>{
+    if(accountId){
+      handleGetStripeAccount(accountId)
+    }
+  },[accountId])
+
   const renderStep = () => {
     switch (currentStep) {
       case 1:
         return (
           <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900">{t('personal_information')}</h2>
-            
+            <h2 className="text-xl font-semibold text-gray-900">
+              {t("personal_information")}
+            </h2>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('first_name')} *
+                <label
+                  htmlFor="firstName"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  {t("first_name")} *
                 </label>
                 <input
                   type="text"
@@ -239,17 +310,22 @@ const ProviderRegistration = () => {
                   value={formData.firstName}
                   onChange={handleInputChange}
                   className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand ${
-                    errors.firstName ? 'border-red-500' : 'border-gray-300'
+                    errors.firstName ? "border-red-500" : "border-gray-300"
                   }`}
                 />
                 {errors.firstName && (
-                  <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.firstName}
+                  </p>
                 )}
               </div>
-              
+
               <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('last_name')} *
+                <label
+                  htmlFor="lastName"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  {t("last_name")} *
                 </label>
                 <input
                   type="text"
@@ -258,7 +334,7 @@ const ProviderRegistration = () => {
                   value={formData.lastName}
                   onChange={handleInputChange}
                   className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand ${
-                    errors.lastName ? 'border-red-500' : 'border-gray-300'
+                    errors.lastName ? "border-red-500" : "border-gray-300"
                   }`}
                 />
                 {errors.lastName && (
@@ -266,10 +342,13 @@ const ProviderRegistration = () => {
                 )}
               </div>
             </div>
-            
+
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              {t('email_address')} *
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                {t("email_address")} *
               </label>
               <input
                 type="email"
@@ -278,17 +357,20 @@ const ProviderRegistration = () => {
                 value={formData.email}
                 onChange={handleInputChange}
                 className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand ${
-                  errors.email ? 'border-red-500' : 'border-gray-300'
+                  errors.email ? "border-red-500" : "border-gray-300"
                 }`}
               />
               {errors.email && (
                 <p className="mt-1 text-sm text-red-600">{errors.email}</p>
               )}
             </div>
-            
+
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-              {t('phone_number')} *
+              <label
+                htmlFor="phone"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                {t("phone_number")} *
               </label>
               <input
                 type="tel"
@@ -297,17 +379,20 @@ const ProviderRegistration = () => {
                 value={formData.phone}
                 onChange={handleInputChange}
                 className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand ${
-                  errors.phone ? 'border-red-500' : 'border-gray-300'
+                  errors.phone ? "border-red-500" : "border-gray-300"
                 }`}
               />
               {errors.phone && (
                 <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
               )}
             </div>
-            
+
             <div>
-              <label htmlFor="street" className="block text-sm font-medium text-gray-700 mb-1">
-              {t('street_address')} *
+              <label
+                htmlFor="street"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                {t("street_address")} *
               </label>
               <input
                 type="text"
@@ -316,18 +401,21 @@ const ProviderRegistration = () => {
                 value={formData.address.street}
                 onChange={handleAddressChange}
                 className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand ${
-                  errors.street ? 'border-red-500' : 'border-gray-300'
+                  errors.street ? "border-red-500" : "border-gray-300"
                 }`}
               />
               {errors.street && (
                 <p className="mt-1 text-sm text-red-600">{errors.street}</p>
               )}
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('city')} *
+                <label
+                  htmlFor="city"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  {t("city")} *
                 </label>
                 <input
                   type="text"
@@ -336,17 +424,20 @@ const ProviderRegistration = () => {
                   value={formData.address.city}
                   onChange={handleAddressChange}
                   className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand ${
-                    errors.city ? 'border-red-500' : 'border-gray-300'
+                    errors.city ? "border-red-500" : "border-gray-300"
                   }`}
                 />
                 {errors.city && (
                   <p className="mt-1 text-sm text-red-600">{errors.city}</p>
                 )}
               </div>
-              
+
               <div>
-                <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('postal_code')} *
+                <label
+                  htmlFor="postalCode"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  {t("postal_code")} *
                 </label>
                 <input
                   type="text"
@@ -355,17 +446,22 @@ const ProviderRegistration = () => {
                   value={formData.address.postalCode}
                   onChange={handleAddressChange}
                   className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand ${
-                    errors.postalCode ? 'border-red-500' : 'border-gray-300'
+                    errors.postalCode ? "border-red-500" : "border-gray-300"
                   }`}
                 />
                 {errors.postalCode && (
-                  <p className="mt-1 text-sm text-red-600">{errors.postalCode}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.postalCode}
+                  </p>
                 )}
               </div>
-              
+
               <div>
-                <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('country')} *
+                <label
+                  htmlFor="country"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  {t("country")} *
                 </label>
                 <select
                   id="country"
@@ -382,10 +478,13 @@ const ProviderRegistration = () => {
                 </select>
               </div>
             </div>
-            
+
             <div>
-              <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700 mb-1">
-              {t('date_of_birth')}
+              <label
+                htmlFor="dateOfBirth"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                {t("date_of_birth")}
               </label>
               <input
                 type="date"
@@ -398,92 +497,118 @@ const ProviderRegistration = () => {
             </div>
           </div>
         );
-        
+
       case 2:
         return (
           <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900">{t('business_information')}</h2>
-            
+            <h2 className="text-xl font-semibold text-gray-900">
+              {t("business_information")}
+            </h2>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('business_type')}
+                {t("business_type")}
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div
                   className={`border rounded-lg p-4 cursor-pointer ${
-                    formData.businessType === 'individual'
-                      ? 'border-brand bg-brand/5'
-                      : 'border-gray-200 hover:bg-gray-50'
+                    formData.businessType === "individual"
+                      ? "border-brand bg-brand/5"
+                      : "border-gray-200 hover:bg-gray-50"
                   }`}
-                  onClick={() => setFormData({ ...formData, businessType: 'individual' })}
+                  onClick={() =>
+                    setFormData({ ...formData, businessType: "individual" })
+                  }
                 >
                   <div className="flex items-center gap-2">
-                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                      formData.businessType === 'individual' ? 'border-brand' : 'border-gray-300'
-                    }`}>
-                      {formData.businessType === 'individual' && (
+                    <div
+                      className={`w-5 h-5 rounded-full border flex items-center justify-center ${
+                        formData.businessType === "individual"
+                          ? "border-brand"
+                          : "border-gray-300"
+                      }`}
+                    >
+                      {formData.businessType === "individual" && (
                         <div className="w-3 h-3 rounded-full bg-brand"></div>
                       )}
                     </div>
-                    <span className="font-medium">{t('individual')}</span>
+                    <span className="font-medium">{t("individual")}</span>
                   </div>
                   <p className="mt-2 text-xs text-gray-500">
-                    {t('renting_personal_property')}
+                    {t("renting_personal_property")}
                   </p>
                 </div>
-                
+
                 <div
                   className={`border rounded-lg p-4 cursor-pointer ${
-                    formData.businessType === 'company'
-                      ? 'border-brand bg-brand/5'
-                      : 'border-gray-200 hover:bg-gray-50'
+                    formData.businessType === "company"
+                      ? "border-brand bg-brand/5"
+                      : "border-gray-200 hover:bg-gray-50"
                   }`}
-                  onClick={() => setFormData({ ...formData, businessType: 'company' })}
+                  onClick={() =>
+                    setFormData({ ...formData, businessType: "company" })
+                  }
                 >
                   <div className="flex items-center gap-2">
-                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                      formData.businessType === 'company' ? 'border-brand' : 'border-gray-300'
-                    }`}>
-                      {formData.businessType === 'company' && (
+                    <div
+                      className={`w-5 h-5 rounded-full border flex items-center justify-center ${
+                        formData.businessType === "company"
+                          ? "border-brand"
+                          : "border-gray-300"
+                      }`}
+                    >
+                      {formData.businessType === "company" && (
                         <div className="w-3 h-3 rounded-full bg-brand"></div>
                       )}
                     </div>
-                    <span className="font-medium">{t('company')}</span>
+                    <span className="font-medium">{t("company")}</span>
                   </div>
                   <p className="mt-2 text-xs text-gray-500">
-                  {t('represent_registered_business')}
+                    {t("represent_registered_business")}
                   </p>
                 </div>
-                
+
                 <div
                   className={`border rounded-lg p-4 cursor-pointer ${
-                    formData.businessType === 'property_manager'
-                      ? 'border-brand bg-brand/5'
-                      : 'border-gray-200 hover:bg-gray-50'
+                    formData.businessType === "property_manager"
+                      ? "border-brand bg-brand/5"
+                      : "border-gray-200 hover:bg-gray-50"
                   }`}
-                  onClick={() => setFormData({ ...formData, businessType: 'property_manager' })}
+                  onClick={() =>
+                    setFormData({
+                      ...formData,
+                      businessType: "property_manager",
+                    })
+                  }
                 >
                   <div className="flex items-center gap-2">
-                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                      formData.businessType === 'property_manager' ? 'border-brand' : 'border-gray-300'
-                    }`}>
-                      {formData.businessType === 'property_manager' && (
+                    <div
+                      className={`w-5 h-5 rounded-full border flex items-center justify-center ${
+                        formData.businessType === "property_manager"
+                          ? "border-brand"
+                          : "border-gray-300"
+                      }`}
+                    >
+                      {formData.businessType === "property_manager" && (
                         <div className="w-3 h-3 rounded-full bg-brand"></div>
                       )}
                     </div>
-                    <span className="font-medium">{t('property_manager')}</span>
+                    <span className="font-medium">{t("property_manager")}</span>
                   </div>
                   <p className="mt-2 text-xs text-gray-500">
-                  {t('manage_properties_for_others')}
+                    {t("manage_properties_for_others")}
                   </p>
                 </div>
               </div>
             </div>
-            
-            {formData.businessType !== 'individual' && (
+
+            {formData.businessType !== "individual" && (
               <div>
-                <label htmlFor="businessName" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('business_name')} *
+                <label
+                  htmlFor="businessName"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  {t("business_name")} *
                 </label>
                 <input
                   type="text"
@@ -492,18 +617,23 @@ const ProviderRegistration = () => {
                   value={formData.businessName}
                   onChange={handleInputChange}
                   className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand ${
-                    errors.businessName ? 'border-red-500' : 'border-gray-300'
+                    errors.businessName ? "border-red-500" : "border-gray-300"
                   }`}
                 />
                 {errors.businessName && (
-                  <p className="mt-1 text-sm text-red-600">{errors.businessName}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.businessName}
+                  </p>
                 )}
               </div>
             )}
-            
+
             <div>
-              <label htmlFor="vatNumber" className="block text-sm font-medium text-gray-700 mb-1">
-              {t('vat_number')} ({t('optional')})
+              <label
+                htmlFor="vatNumber"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                {t("vat_number")} ({t("optional")})
               </label>
               <input
                 type="text"
@@ -514,10 +644,13 @@ const ProviderRegistration = () => {
                 className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
               />
             </div>
-            
+
             <div>
-              <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-1">
-              {t('website')} ({t('optional')})
+              <label
+                htmlFor="website"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                {t("website")} ({t("optional")})
               </label>
               <input
                 type="url"
@@ -529,26 +662,32 @@ const ProviderRegistration = () => {
                 placeholder="https://"
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('properties_to_list')}
+                {t("properties_to_list")}
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {['1', '2-5', '6-10', '10+'].map((count) => (
+                {["1", "2-5", "6-10", "10+"].map((count) => (
                   <div
                     key={count}
                     className={`border rounded-lg p-4 cursor-pointer ${
                       formData.propertyCount === count
-                        ? 'border-brand bg-brand/5'
-                        : 'border-gray-200 hover:bg-gray-50'
+                        ? "border-brand bg-brand/5"
+                        : "border-gray-200 hover:bg-gray-50"
                     }`}
-                    onClick={() => setFormData({ ...formData, propertyCount: count })}
+                    onClick={() =>
+                      setFormData({ ...formData, propertyCount: count })
+                    }
                   >
                     <div className="flex items-center gap-2">
-                      <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                        formData.propertyCount === count ? 'border-brand' : 'border-gray-300'
-                      }`}>
+                      <div
+                        className={`w-5 h-5 rounded-full border flex items-center justify-center ${
+                          formData.propertyCount === count
+                            ? "border-brand"
+                            : "border-gray-300"
+                        }`}
+                      >
                         {formData.propertyCount === count && (
                           <div className="w-3 h-3 rounded-full bg-brand"></div>
                         )}
@@ -559,30 +698,39 @@ const ProviderRegistration = () => {
                 ))}
               </div>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('hosting_experience')}
+                {t("hosting_experience")}
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {[
-                  { value: 'none', label: 'None' },
-                  { value: 'other_platforms', label: 'On other platforms' },
-                  { value: 'professional', label: 'Professional' }
+                  { value: "none", label: "None" },
+                  { value: "other_platforms", label: "On other platforms" },
+                  { value: "professional", label: "Professional" },
                 ].map((option) => (
                   <div
                     key={option.value}
                     className={`border rounded-lg p-4 cursor-pointer ${
                       formData.hostingExperience === option.value
-                        ? 'border-brand bg-brand/5'
-                        : 'border-gray-200 hover:bg-gray-50'
+                        ? "border-brand bg-brand/5"
+                        : "border-gray-200 hover:bg-gray-50"
                     }`}
-                    onClick={() => setFormData({ ...formData, hostingExperience: option.value })}
+                    onClick={() =>
+                      setFormData({
+                        ...formData,
+                        hostingExperience: option.value,
+                      })
+                    }
                   >
                     <div className="flex items-center gap-2">
-                      <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                        formData.hostingExperience === option.value ? 'border-brand' : 'border-gray-300'
-                      }`}>
+                      <div
+                        className={`w-5 h-5 rounded-full border flex items-center justify-center ${
+                          formData.hostingExperience === option.value
+                            ? "border-brand"
+                            : "border-gray-300"
+                        }`}
+                      >
                         {formData.hostingExperience === option.value && (
                           <div className="w-3 h-3 rounded-full bg-brand"></div>
                         )}
@@ -595,16 +743,47 @@ const ProviderRegistration = () => {
             </div>
           </div>
         );
-        
+
       case 3:
         return (
           <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900">{t('banking_details')}</h2>
+            <h2 className="text-xl font-semibold text-gray-900">
+              {t("banking_details")}
+            </h2>
             <p className="text-sm text-gray-500 mb-4">
-            {t('banking_details_required')}
+              {t("banking_details_required")}
             </p>
-            
-            <div>
+            { !stripeAccount && (
+              <div className="flex justify-center">
+                <button
+                  className="bg-brand text-white py-3 px-4 rounded-lg font-medium hover:bg-brand-dark transition-color"
+                  onClick={handleConnectStripe}
+                >
+                  Connect to stripe
+                </button>
+              </div>
+            )}
+           {accountId  && !stripeAccount ? (
+  <p className="text-red-500 text-center">
+    Failed to connect to stripe, Please try again!
+  </p>
+) : accountId !== null && accountId !== "failed" ? (
+  !stripeLoading ? (
+    <div>
+      <p className="text-xl font-semibold">Account Connected</p>
+      <p className="font-semibold">
+        Account ID:{" "}
+        <span className="font-medium text-slate-500">
+          {accountId || formData.stripeAccountId}
+        </span>
+      </p>
+    </div>
+  ) : (
+    <p>Connecting...</p>
+  )
+) : null}
+
+            {/* <div>
               <label htmlFor="bankName" className="block text-sm font-medium text-gray-700 mb-1">
               {t('bank_name')} *
               </label>
@@ -689,35 +868,39 @@ const ProviderRegistration = () => {
                   </p>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         );
-        
+
       case 4:
         return (
           <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900">{t('final_steps')}</h2>
-            
+            <h2 className="text-xl font-semibold text-gray-900">
+              {t("final_steps")}
+            </h2>
             <div>
-              <label htmlFor="heardAboutUs" className="block text-sm font-medium text-gray-700 mb-1">
-              {t('heard_about_us')}
+              <label
+                htmlFor="heardAboutUs"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                {t("heard_about_us")}
               </label>
               <select
                 id="heardAboutUs"
                 name="heardAboutUs"
-                value={formData.heardAboutUs}
+                value={formData?.heardAboutUs || ""} 
                 onChange={handleInputChange}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
               >
-                <option value="">{t('select_option')}</option>
-                <option value="search">{t('search_engine')}</option>
-                <option value="social">{t('social_media')}</option>
-                <option value="friend">{t('friend_colleague')}</option>
-                <option value="advertisement">{t('advertisement')}</option>
-                <option value="other">{t('other')}</option>
+                <option value="">{t("select_option")}</option>
+                <option value="search">{t("search_engine")}</option>
+                <option value="social">{t("social_media")}</option>
+                <option value="friend">{t("friend_colleague")}</option>
+                <option value="advertisement">{t("advertisement")}</option>
+                <option value="other">{t("other")}</option>
               </select>
             </div>
-            
+
             <div className="space-y-4 pt-4">
               <div className="flex items-start gap-3">
                 <div className="flex items-center h-5 mt-1">
@@ -728,20 +911,30 @@ const ProviderRegistration = () => {
                     checked={formData.terms}
                     onChange={handleInputChange}
                     className={`h-4 w-4 rounded border-gray-300 text-brand focus:ring-brand ${
-                      errors.terms ? 'border-red-500' : ''
+                      errors.terms ? "border-red-500" : ""
                     }`}
                   />
                 </div>
                 <div>
                   <label htmlFor="terms" className="text-sm text-gray-700">
-                  {t('agree_to')} <a href="/terms" className="text-brand hover:underline">{t('terms_and_conditions')}</a> {t('and')} <a href="/privacy-policy" className="text-brand hover:underline">{t('privacy_policy')}</a>
+                    {t("agree_to")}{" "}
+                    <a href="/terms" className="text-brand hover:underline">
+                      {t("terms_and_conditions")}
+                    </a>{" "}
+                    {t("and")}{" "}
+                    <a
+                      href="/privacy-policy"
+                      className="text-brand hover:underline"
+                    >
+                      {t("privacy_policy")}
+                    </a>
                   </label>
                   {errors.terms && (
                     <p className="mt-1 text-sm text-red-600">{errors.terms}</p>
                   )}
                 </div>
               </div>
-              
+
               <div className="flex items-start gap-3">
                 <div className="flex items-center h-5 mt-1">
                   <input
@@ -755,45 +948,47 @@ const ProviderRegistration = () => {
                 </div>
                 <div>
                   <label htmlFor="newsletter" className="text-sm text-gray-700">
-                  {t('newsletter_opt_in')}
+                    {t("newsletter_opt_in")}
                   </label>
                 </div>
               </div>
             </div>
-            
+
             <div className="bg-gray-50 p-6 rounded-lg mt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('what_happens_next')}</h3>
-              
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                {t("what_happens_next")}
+              </h3>
+
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
                   <div className="flex items-center justify-center w-6 h-6 rounded-full bg-brand text-white flex-shrink-0 mt-0.5">
                     <span className="text-xs font-medium">1</span>
                   </div>
                   <p className="text-sm text-gray-600">
-                  {t('application_review')}
+                    {t("application_review")}
                   </p>
                 </div>
-                
+
                 <div className="flex items-start gap-3">
                   <div className="flex items-center justify-center w-6 h-6 rounded-full bg-brand text-white flex-shrink-0 mt-0.5">
                     <span className="text-xs font-medium">2</span>
                   </div>
                   <p className="text-sm text-gray-600">
-                  {t('create_listings_when_approved')}
+                    {t("create_listings_when_approved")}
                   </p>
                 </div>
-                
+
                 <div className="flex items-start gap-3">
                   <div className="flex items-center justify-center w-6 h-6 rounded-full bg-brand text-white flex-shrink-0 mt-0.5">
                     <span className="text-xs font-medium">3</span>
                   </div>
                   <p className="text-sm text-gray-600">
-                  {t('optimize_listings')}
+                    {t("optimize_listings")}
                   </p>
                 </div>
               </div>
             </div>
-            
+
             {errors.form && (
               <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-4">
                 {errors.form}
@@ -801,16 +996,16 @@ const ProviderRegistration = () => {
             )}
           </div>
         );
-        
+
       default:
         return null;
     }
   };
-  
+
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
-      
+
       <main className="max-w-4xl mx-auto px-4 py-12 mt-20">
         <div className="flex items-center gap-4 mb-8">
           <button
@@ -820,25 +1015,27 @@ const ProviderRegistration = () => {
             <ArrowLeft className="w-5 h-5 text-gray-600" />
           </button>
           <h1 className="text-2xl font-semibold text-gray-900">
-          {t('register_as_provider')}
+            {t("register_as_provider")}
           </h1>
         </div>
-        
+
         {/* Progress Steps */}
         <div className="mb-8">
           <div className="hidden sm:flex items-center justify-between">
             {[1, 2, 3, 4].map((step) => (
-              <div 
+              <div
                 key={step}
-                className={`flex items-center ${step !== 4 ? 'flex-1' : ''}`}
+                className={`flex items-center ${step !== 4 ? "flex-1" : ""}`}
               >
-                <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
-                  step === currentStep
-                    ? 'border-brand bg-brand text-white'
-                    : step < currentStep
-                    ? 'border-brand bg-brand text-white'
-                    : 'border-gray-300 text-gray-500'
-                }`}>
+                <div
+                  className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
+                    step === currentStep
+                      ? "border-brand bg-brand text-white"
+                      : step < currentStep
+                      ? "border-brand bg-brand text-white"
+                      : "border-gray-300 text-gray-500"
+                  }`}
+                >
                   {step < currentStep ? (
                     <Check className="w-5 h-5" />
                   ) : (
@@ -846,45 +1043,55 @@ const ProviderRegistration = () => {
                   )}
                 </div>
                 {step !== 4 && (
-                  <div className={`h-0.5 w-full ${
-                    step < currentStep ? 'bg-brand' : 'bg-gray-200'
-                  }`}></div>
+                  <div
+                    className={`h-0.5 w-full ${
+                      step < currentStep ? "bg-brand" : "bg-gray-200"
+                    }`}
+                  ></div>
                 )}
               </div>
             ))}
           </div>
-          
+
           <div className="flex justify-between mt-2">
-          <span className="text-xs font-medium text-gray-500">{t('personal_info')}</span>
-          <span className="text-xs font-medium text-gray-500">{t('business_info')}</span>
-          <span className="text-xs font-medium text-gray-500">{t('banking_details')}</span>
-          <span className="text-xs font-medium text-gray-500">{t('final_steps')}</span>
+            <span className="text-xs font-medium text-gray-500">
+              {t("personal_info")}
+            </span>
+            <span className="text-xs font-medium text-gray-500">
+              {t("business_info")}
+            </span>
+            <span className="text-xs font-medium text-gray-500">
+              {t("banking_details")}
+            </span>
+            <span className="text-xs font-medium text-gray-500">
+              {t("final_steps")}
+            </span>
           </div>
         </div>
-        
+
         {/* Form Content */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           {renderStep()}
-          
+
           {/* Navigation Buttons */}
           <div className="mt-8 pt-6 border-t flex justify-between">
             <button
               type="button"
               onClick={prevStep}
               className={`px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors ${
-                currentStep === 1 ? 'invisible' : ''
+                currentStep === 1 ? "invisible" : ""
               }`}
             >
-                {t('previous')}
+              {t("previous")}
             </button>
-            
+
             {currentStep < 4 ? (
               <button
                 type="button"
                 onClick={nextStep}
                 className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand/90 transition-colors"
               >
-                {t('next')}
+                {t("next")}
               </button>
             ) : (
               <button
@@ -896,17 +1103,17 @@ const ProviderRegistration = () => {
                 {isSubmitting ? (
                   <div className="flex items-center">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                    <span>{t('complete_registration')}</span>
+                    <span>{t("complete_registration")}</span>
                   </div>
                 ) : (
-                  t('complete_registration')
+                  t("complete_registration")
                 )}
               </button>
             )}
           </div>
         </div>
       </main>
-      
+
       <Footer />
     </div>
   );

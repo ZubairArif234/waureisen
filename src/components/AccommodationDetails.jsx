@@ -53,7 +53,7 @@ const AccommodationDetails = ({ accommodation }) => {
       <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
         {t('details')}
       </h2>
-      {filterData && filterData.subsections.map((subsection, index) => (
+      {filterData && filterData?.subsections?.map((subsection, index) => (
         subsection.name === 'Amenities' && (
           <div key={index}>
             {subsection.subsubsections.map((subsubsection, subIndex) => (

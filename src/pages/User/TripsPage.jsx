@@ -11,6 +11,8 @@ import i3 from "../../assets/i3.png";
 import { useLanguage } from "../../utils/LanguageContext";
 import { getMyBooking } from "../../api/bookingApi";
 import moment from "moment";
+import { refundPayment } from "../../api/paymentAPI";
+import CancelBookingModal from "../../components/SearchComponents/CancelBookingModal";
 
 // Edit Trip Modal Component
 const EditTripModal = ({ isOpen, onClose, trip, onSave, onCancel }) => {
@@ -289,17 +291,27 @@ const EditTripModal = ({ isOpen, onClose, trip, onSave, onCancel }) => {
 };
 
 const TripCard = ({ trip, onEdit }) => {
+  const [activeModal, setActiveModal] = useState(false);
   const { t } = useLanguage();
   const navigate = useNavigate();
 
-const start = moment(trip?.checkInDate);
-const end = moment(trip?.checkOutDate);
+  const start = moment(trip?.checkInDate);
+  const end = moment(trip?.checkOutDate);
 
-const formattedDate = `${start.format('MMM D')}-${end.format('D, YYYY')}`;
+  const formattedDate = `${start.format("MMM D")}-${end.format("D, YYYY")}`;
+
+  const handleCancelBooking = async () => {
+    const res = await refundPayment(trip?._id);
+    console.log(res);
+  };
+
+  const handleOpenModal = () => {
+    setActiveModal(true);
+  };
   return (
     <div
       className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-      onClick={() => navigate(`/accommodation/${trip?.listing?._id}`)}
+      // onClick={() => navigate(`/accommodation/${trip?.listing?._id}`)}
     >
       <div className="flex flex-col md:flex-row">
         <div className="md:w-72 h-48 md:h-auto relative">
@@ -308,7 +320,7 @@ const formattedDate = `${start.format('MMM D')}-${end.format('D, YYYY')}`;
             alt={trip?.title}
             className="w-full h-full object-cover"
           />
-          {trip.status === "cancelled" && (
+          {trip.status === "canceled" && (
             <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-sm">
               {t("cancelled")}
             </div>
@@ -318,9 +330,19 @@ const formattedDate = `${start.format('MMM D')}-${end.format('D, YYYY')}`;
         <div className="p-4 md:p-6 flex-1">
           <div className="flex flex-col h-full">
             <div className="flex justify-between items-start">
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                {trip?.listing?.title}
-              </h3>
+              <div className="flex items-center justify-between w-full">
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  {trip?.listing?.title}
+                </h3>
+                {trip?.status === "pending" && (
+                  <button
+                    onClick={handleOpenModal}
+                    className="px-4 z-20 bg-red-500 text-white py-2 rounded-lg font-medium hover:bg-brand-dark transition-colors"
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
 
               {/* Edit Button - Stop propagation to prevent navigation */}
               {trip.status === "upcoming" && (
@@ -355,7 +377,8 @@ const formattedDate = `${start.format('MMM D')}-${end.format('D, YYYY')}`;
 
             <div className="flex items-center justify-between mt-auto pt-4 border-t">
               <div className="text-gray-600">
-                {t("host")} <span className="font-medium">{trip.listing?.provider}</span>
+                {t("host")}{" "}
+                <span className="font-medium">{trip.listing?.provider}</span>
               </div>
               <div className="text-brand font-medium">
                 {trip.status === "pending"
@@ -368,6 +391,17 @@ const formattedDate = `${start.format('MMM D')}-${end.format('D, YYYY')}`;
           </div>
         </div>
       </div>
+      <CancelBookingModal
+        isOpen={activeModal}
+        onClose={() => setActiveModal(false)}
+        title={t("cancel_booking")}
+        onConfirm={handleCancelBooking}
+      >
+        <p className="text-center">
+          Are you sure , you want to cancel your booking? This action can't be
+          undone!
+        </p>
+      </CancelBookingModal>
     </div>
   );
 };
@@ -439,8 +473,8 @@ const TripsPage = () => {
 
   const handleGetMyBooking = async () => {
     const res = await getMyBooking();
-  
-    setTrips(res)
+
+    setTrips(res);
   };
 
   useEffect(() => {
