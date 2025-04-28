@@ -84,29 +84,24 @@ const SearchFilters = ({ dateRange }) => {
 
   const handleFilterChange = (filterName, isSelected) => {
     setSelectedFilters(prev => {
-      const newFilters = isSelected 
+      return isSelected 
         ? [...prev, filterName]
         : prev.filter(f => f !== filterName);
-      
-      // Update URL with new filters
-      const searchParams = new URLSearchParams(location.search);
-      if (newFilters.length > 0) {
-        searchParams.set('filters', JSON.stringify(newFilters));
-      } else {
-        searchParams.delete('filters');
-      }
-      navigate(`${location.pathname}?${searchParams.toString()}`, { replace: true });
-      
-      return newFilters;
     });
   };
 
   const handleApplyFilters = () => {
+    // Update URL with current filters
+    const searchParams = new URLSearchParams(location.search);
+    if (selectedFilters.length > 0) {
+      searchParams.set('filters', JSON.stringify(selectedFilters));
+    } else {
+      searchParams.delete('filters');
+    }
+    navigate(`${location.pathname}?${searchParams.toString()}`, { replace: true });
+    
     // Close the modal
     setActiveModal({ isOpen: false });
-    
-    // The URL update will trigger a new search automatically
-    // through the useEffect in SearchResults component
   };
 
   const handleClearFilters = () => {
