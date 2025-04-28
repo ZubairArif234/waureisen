@@ -66,6 +66,7 @@ const AccommodationDetails = ({ accommodation }) => {
         {t("details")}
       </h2>
 
+
       {filterData &&
         filterData.subsections &&
         filterData.subsections.map(
@@ -123,6 +124,7 @@ const AccommodationDetails = ({ accommodation }) => {
                 })}
                 <span className="text-gray-700 text-sm">{attr.name}</span>
               </div>
+
             ))}
           </div>
         )}

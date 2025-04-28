@@ -527,12 +527,14 @@ const AccommodationPage = () => {
       const iframeUrl = `https://www.interhome.com/Forward.aspx?navigationid=12&aCode=${accommodation.Code}&dtCheckin=${checkInDate}&duration=${duration}&partnerid=${partnerId}&adrAdults=${guests.people}&iniframe=1`;
       window.location.href = iframeUrl;
     } else {
+      console.log(dateRange.start, dateRange.end  , getNoOfDays(dateRange.start, dateRange.end));
+      let  days = getNoOfDays(dateRange.start, dateRange.end);
       navigate("/payment", {
         state: {
           price: location.state,
           data: accommodation,
           details: {
-            noOfDays: getNoOfDays(dateRange?.start, dateRange?.endDate),
+            noOfDays: days,
             startDate: dateRange?.start,
             endDate: dateRange?.end,
           },

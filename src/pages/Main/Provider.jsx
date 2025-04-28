@@ -45,7 +45,7 @@ const ProviderLayout = () => {
         <Route path="/messages" element={<ProviderMessages />} />
         <Route path="/analytics" element={<ProviderAnalytics />} />
         <Route path="/calendar" element={<ProviderCalendar />} />
-        <Route path="/registration" element={<ProviderRegistration />} />
+        <Route path="/registration/:id?" element={<ProviderRegistration />} />
         <Route path="/registration-success" element={<RegistrationSuccess />} />
         <Route path="/analytics/listing/:id" element={<ProviderAnalytics />} />
         <Route path="/account" element={<ProviderAccountPage />} />

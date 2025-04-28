@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowLeft, Edit3, CreditCard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
 import { useLanguage } from '../../utils/LanguageContext';
+import { myCardDetails } from '../../api/paymentAPI';
 
 const InputField = ({ label, type = "text", placeholder, optional = false, value, onChange, name }) => (
   <div className="space-y-2">
@@ -36,6 +37,21 @@ const PaymentMethodsPage = () => {
     country: ''
   });
 
+  const handleGetMyCardDetails =async () => {
+    const res  = await myCardDetails()
+    
+    if(res?.success) {
+
+      setFormData({...formData,
+        cardNumber: "**** **** **** "+res?.card?.last4 || '',
+
+      })
+    }
+  }
+
+  useEffect(() => {
+    handleGetMyCardDetails()
+  },[])
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -48,6 +64,7 @@ const PaymentMethodsPage = () => {
     e.preventDefault();
     // Handle form submission
   };
+
 
   return (
     <div className="min-h-screen bg-[#FEFCF5]">
@@ -88,7 +105,7 @@ const PaymentMethodsPage = () => {
                   type="text"
                   name="cardNumber"
                   placeholder={t('card_number')}
-                  value={formData.cardNumber}
+                  value={formData.cardNumber }
                   onChange={handleInputChange}
                   className="w-full pl-12 pr-4 py-2 rounded-lg border focus:ring-2 focus:ring-brand/20 focus:border-brand"
                 />
