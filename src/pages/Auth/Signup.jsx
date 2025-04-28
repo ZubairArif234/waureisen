@@ -8,6 +8,8 @@ import TermsContent from "../../components/Auth/TermsContent";
 import PrivacyContent from "../../components/Auth/PrivacyContent";
 import { useLanguage } from "../../utils/LanguageContext";
 import { userSignup, providerSignup } from "../../api/authAPI";
+import { sendVerificationCode, verifyCode } from "../../api/verificationAPI";
+import toast from "react-hot-toast";
 
 const Signup = () => {
   const [userType, setUserType] = useState("");
@@ -23,6 +25,14 @@ const Signup = () => {
     phoneNumber: "",
     password: "",
   });
+  
+  // Email verification states
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
+  const [enteredCode, setEnteredCode] = useState("");
+  const [showVerificationField, setShowVerificationField] = useState(false);
+  const [verificationLoading, setVerificationLoading] = useState(false);
+  
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [redirectAfterSignup, setRedirectAfterSignup] = useState(null);
   const navigate = useNavigate();
@@ -57,11 +67,82 @@ const Signup = () => {
       ...prev,
       [name]: value,
     }));
+    
+    // Reset verification status if email changes
+    if (name === "email") {
+      setIsEmailVerified(false);
+      setShowVerificationField(false);
+    }
+  };
+
+  // Handle sending verification code
+  const handleSendVerification = async () => {
+    if (!formData.email) {
+      setError("Please enter your email address first");
+      return;
+    }
+    
+    // Simple email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+    
+    try {
+      setVerificationLoading(true);
+      setError("");
+      
+      // Map customer to user for the API
+      const apiUserType = userType === "customer" ? "user" : userType;
+      
+      const response = await sendVerificationCode(formData.email, apiUserType);
+      
+      if (response.success) {
+        toast.success("Verification code sent to your email");
+        setShowVerificationField(true);
+      }
+    } catch (error) {
+      console.error("Error sending verification code:", error);
+      setError(error.response?.data?.message || "Failed to send verification code");
+    } finally {
+      setVerificationLoading(false);
+    }
+  };
+
+  // Handle verifying the code
+  const handleVerifyCode = async () => {
+    if (!enteredCode) {
+      setError("Please enter the verification code");
+      return;
+    }
+    
+    try {
+      setVerificationLoading(true);
+      setError("");
+      
+      const response = await verifyCode(formData.email, enteredCode);
+      
+      if (response.success) {
+        setIsEmailVerified(true);
+        toast.success("Email verified successfully");
+      }
+    } catch (error) {
+      console.error("Error verifying code:", error);
+      setError(error.response?.data?.message || "Invalid verification code");
+    } finally {
+      setVerificationLoading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
   
+    if (!isEmailVerified) {
+      setError("Please verify your email before signing up");
+      return;
+    }
+    
     if (!acceptTerms) {
       setError(
         t("please_accept_terms") || "Please accept the terms and conditions"
@@ -237,16 +318,76 @@ const Signup = () => {
                       <label className="block text-sm font-medium text-gray-700">
                         {t("email")}
                       </label>
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        placeholder={t("email_placeholder")}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
-                        required
-                      />
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          placeholder={t("email_placeholder")}
+                          className={`flex-1 px-4 py-3 rounded-lg border ${
+                            isEmailVerified 
+                              ? "border-green-300 bg-green-50" 
+                              : "border-gray-300"
+                          } focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]`}
+                          required
+                          disabled={isEmailVerified}
+                        />
+                        {!isEmailVerified && (
+                          <button
+                            type="button"
+                            onClick={handleSendVerification}
+                            disabled={verificationLoading || !formData.email || !userType}
+                            className={`px-4 py-3 rounded-lg text-sm font-medium ${
+                              verificationLoading || !formData.email || !userType
+                                ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                : "bg-[#B4A481] text-white hover:bg-[#a3927b]"
+                            } transition-colors`}
+                          >
+                            {verificationLoading ? t("sending") : t("verify")}
+                          </button>
+                        )}
+                        {isEmailVerified && (
+                          <div className="px-3 py-2 bg-green-100 text-green-800 rounded-lg text-sm font-medium">
+                            {t("verified")}
+                          </div>
+                        )}
+                      </div>
                     </div>
+
+                    {/* Verification code input field */}
+                    {showVerificationField && !isEmailVerified && (
+                      <div className="space-y-3">
+                        <label className="block text-sm font-medium text-gray-700">
+                          {t("verification_code")}
+                        </label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={enteredCode}
+                            onChange={(e) => setEnteredCode(e.target.value)}
+                            placeholder={t("enter_verification_code")}
+                            className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={handleVerifyCode}
+                            disabled={verificationLoading || !enteredCode}
+                            className={`px-4 py-3 rounded-lg text-sm font-medium ${
+                              verificationLoading || !enteredCode
+                                ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                : "bg-[#B4A481] text-white hover:bg-[#a3927b]"
+                            } transition-colors`}
+                          >
+                            {verificationLoading ? t("verifying") : t("submit")}
+                          </button>
+                        </div>
+                        <p className="text-sm text-gray-500">
+                          {t("verification_code_info")}
+                        </p>
+                      </div>
+                    )}
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-3">
@@ -383,9 +524,9 @@ const Signup = () => {
                 {/* Signup Button */}
                 <button
                   type="submit"
-                  disabled={!acceptTerms || isLoading || !userType}
+                  disabled={!acceptTerms || isLoading || !userType || !isEmailVerified}
                   className={`w-full py-3 rounded-lg font-medium ${
-                    acceptTerms && !isLoading && userType
+                    acceptTerms && !isLoading && userType && isEmailVerified
                       ? "bg-gray-100 text-gray-800 hover:bg-gray-200"
                       : "bg-gray-100 text-gray-400 cursor-not-allowed"
                   }`}

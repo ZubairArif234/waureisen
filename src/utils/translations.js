@@ -1060,9 +1060,36 @@ schedule_callback: "Schedule a Callback",
  loading_messages: "Loading messages...",
 
 
+ verify: "Verify",
+  sending: "Sending...",
+  verified: "Verified",
+  verification_code: "Verification Code",
+  enter_verification_code: "Enter 6-digit code",
+  verification_code_info: "Please check your email for the verification code. It will expire in 10 minutes.",
+  verifying: "Verifying...",
+  submit: "Submit",
+  please_verify_email: "Please verify your email before signing up",
+
+
   },
 
   de: {
+
+
+
+    verify: "Verifizieren",
+  sending: "Senden...",
+  verified: "Verifiziert",
+  verification_code: "Bestätigungscode",
+  enter_verification_code: "Geben Sie den 6-stelligen Code ein",
+  verification_code_info: "Bitte überprüfen Sie Ihre E-Mail für den Bestätigungscode. Er läuft in 10 Minuten ab.",
+  verifying: "Überprüfung...",
+  submit: "Absenden",
+  please_verify_email: "Bitte verifizieren Sie Ihre E-Mail-Adresse vor der Registrierung",
+
+
+
+
     // Account-related translations
     account: "Konto",
     account_settings: "Kontoeinstellungen",
