@@ -7,6 +7,7 @@ import {
 import RangeSlider from './RangeSlider';
 import * as filterData from './moreFiltersData';
 import { useLanguage } from '../../utils/LanguageContext';
+import { usePriceFilter } from '../../context/PriceFilterContext';
 
 const FilterSection = ({ icon, title, options, selected, onChange }) => (
   <div className="mb-8">
@@ -34,31 +35,15 @@ const FilterSection = ({ icon, title, options, selected, onChange }) => (
 );
 
 const MoreFiltersModal = ({ isOpen, onClose }) => {
+  const { priceRange, setPriceRange, setIsPriceFilterActive } = usePriceFilter();
   const [filters, setFilters] = useState([]);
-
-  useEffect(() => {
-    const fetchFilters = async () => {
-      try {
-        const response = await fetch('/api/filters/template');
-        const data = await response.json();
-        const amenities = data.subsections.find(sub => sub.name === 'Amenities');
-        setFilters(amenities);
-      } catch (error) {
-        console.error('Error fetching filters:', error);
-      }
-    };
-
-    if (isOpen) {
-      fetchFilters();
-    }
-  }, [isOpen]);
   const { t } = useLanguage();
   const [ranges, setRanges] = useState({
     people: { min: 1, max: 25 },
     dogs: { min: 0, max: 25 },
     rooms: { min: 1, max: 25 },
     bathrooms: { min: 1, max: 25 },
-    price: { min: 1, max: 10000 }
+    price: priceRange
   });
 
   const [selected, setSelected] = useState({
@@ -76,13 +61,102 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
     accessibility: []
   });
 
-  const handleSelectionChange = (category, option) => {
-    setSelected(prev => ({
+  useEffect(() => {
+    const fetchFilters = async () => {
+      try {
+        const response = await fetch('/api/filters/template');
+        const data = await response.json();
+        const amenities = data.subsections.find(sub => sub.name === 'Amenities');
+        setFilters(amenities);
+      } catch (error) {
+        console.error('Error fetching filters:', error);
+      }
+    };
+
+    if (isOpen) {
+      fetchFilters();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    setRanges(prev => ({
       ...prev,
-      [category]: prev[category].includes(option)
-        ? prev[category].filter(item => item !== option)
-        : [...prev[category], option]
+      price: priceRange
     }));
+  }, [priceRange]);
+
+  const handleSelectionChange = (category, option) => {
+    setSelected(prev => {
+      // Ensure the category exists in the state
+      if (!prev[category]) {
+        prev[category] = [];
+      }
+      return {
+        ...prev,
+        [category]: prev[category].includes(option)
+          ? prev[category].filter(item => item !== option)
+          : [...prev[category], option]
+      };
+    });
+  };
+
+  const handleApplyFilters = () => {
+    // Update the global price filter
+    setPriceRange(ranges.price);
+    setIsPriceFilterActive(true);
+
+    // Create filter object with all selected filters
+    const filterObject = {
+      ranges: {
+        ...ranges,
+        price: {
+          min: Number(ranges.price.min) || 0,
+          max: Number(ranges.price.max) || 10000
+        }
+      },
+      selected
+    };
+
+    console.log('Applying filters with price:', {
+      priceRange: ranges.price,
+      filterObject
+    });
+
+    // Update URL with filters
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set('moreFilters', JSON.stringify(filterObject));
+    window.history.replaceState({}, '', `${window.location.pathname}?${searchParams.toString()}`);
+
+    // Close modal
+    onClose();
+  };
+
+  const handleClearFilters = () => {
+    const defaultPriceRange = { min: 0, max: 10000 };
+    setPriceRange(defaultPriceRange);
+    setIsPriceFilterActive(false);
+    
+    setRanges({
+      people: { min: 1, max: 25 },
+      dogs: { min: 0, max: 25 },
+      rooms: { min: 1, max: 25 },
+      bathrooms: { min: 1, max: 25 },
+      price: defaultPriceRange
+    });
+    setSelected({
+      accommodation: [],
+      kitchen: [],
+      pool: [],
+      wellness: [],
+      kids: [],
+      water: [],
+      catering: [],
+      parking: [],
+      view: [],
+      sport: [],
+      smoking: [],
+      accessibility: []
+    });
   };
 
   if (!isOpen || !filters) return null;
@@ -127,7 +201,7 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
           />
           <RangeSlider
             icon={<Lock className="w-5 h-5 text-gray-400" />}
-            label="No. of room"
+            label="No. of rooms"
             min={1}
             max={25}
             value={ranges.rooms}
@@ -135,7 +209,7 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
           />
           <RangeSlider
             icon={<Bath className="w-5 h-5 text-gray-400" />}
-            label="No. of bathroom"
+            label="No. of bathrooms"
             min={1}
             max={25}
             value={ranges.bathrooms}
@@ -144,7 +218,7 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
           <RangeSlider
             icon={<DollarSign className="w-5 h-5 text-gray-400" />}
             label="Price per person/night in CHF from"
-            min={1}
+            min={0}
             max={10000}
             value={ranges.price}
             onChange={(value) => setRanges(prev => ({ ...prev, price: value }))}
@@ -160,6 +234,8 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
               <label key={filter._id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer">
                 <input
                   type={filter.type}
+                  checked={selected[subsection.name.toLowerCase()]?.includes(filter.name)}
+                  onChange={() => handleSelectionChange(subsection.name.toLowerCase(), filter.name)}
                   className="w-5 h-5 rounded border-gray-300 text-brand focus:ring-brand"
                 />
                 <span className="text-gray-700">{filter.name}</span>
@@ -258,35 +334,13 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
         <div className="p-4 border-t bg-white sticky bottom-0">
           <div className="flex gap-4">
             <button
-              onClick={() => {
-                setRanges({
-                  people: { min: 1, max: 25 },
-                  dogs: { min: 0, max: 25 },
-                  rooms: { min: 1, max: 25 },
-                  bathrooms: { min: 1, max: 25 },
-                  price: { min: 1, max: 10000 }
-                });
-                setSelected({
-                  accommodation: [],
-                  kitchen: [],
-                  pool: [],
-                  wellness: [],
-                  kids: [],
-                  water: [],
-                  catering: [],
-                  parking: [],
-                  view: [],
-                  sport: [],
-                  smoking: [],
-                  accessibility: []
-                });
-              }}
+              onClick={handleClearFilters}
               className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
             >
               {t('clear_all')}
             </button>
             <button
-              onClick={onClose}
+              onClick={handleApplyFilters}
               className="flex-1 px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand/90 transition-colors"
             >
               {t('show_results')}

@@ -31,127 +31,130 @@ import TravelMagazineDetail from "./components/Footer/TravelMagazineDetail";
 import CamperDetail from "./pages/Main/CamperDetail";
 import Payment from "./pages/Stripe/Payment";
 import ProtectedRoute from "./components/Shared/ProtectedRoute";
+import { PriceFilterProvider } from './context/PriceFilterContext';
 
 function App() {
   return (
-    <Router>
-      <SocketProvider>
-        <ScrollToTop />
-        <div className="bg-white">
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/search" element={<SearchResults />} />
-            <Route path="/accommodation/:id" element={<AccommodationPage />} />
-            <Route path="/camper-rental" element={<CamperRental />} />
-            <Route path="/camper/:id" element={<CamperDetail />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
+    <PriceFilterProvider>
+      <Router>
+        <SocketProvider>
+          <ScrollToTop />
+          <div className="bg-white">
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<Home />} />
+              <Route path="/search" element={<SearchResults />} />
+              <Route path="/accommodation/:id" element={<AccommodationPage />} />
+              <Route path="/camper-rental" element={<CamperRental />} />
+              <Route path="/camper/:id" element={<CamperDetail />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
 
-            {/* Payment requires authentication */}
-            <Route
-              path="/payment"
-              element={
-                <ProtectedRoute>
-                  <Payment />
-                </ProtectedRoute>
-              }
-            />
+              {/* Payment requires authentication */}
+              <Route
+                path="/payment"
+                element={
+                  <ProtectedRoute>
+                    <Payment />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* User Routes - Protected */}
-            <Route
-              path="/messages"
-              element={
-                <ProtectedRoute allowedRoles={["user", "provider", "admin"]}>
-                  <Messages />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute allowedRoles={["user", "provider", "admin"]}>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/wishlist"
-              element={
-                <ProtectedRoute allowedRoles={["user"]}>
-                  <WishlistHome />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/wishlist/recently-viewed"
-              element={
-                <ProtectedRoute allowedRoles={["user"]}>
-                  <RecentlyViewed />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/wishlist/favorites"
-              element={
-                <ProtectedRoute allowedRoles={["user"]}>
-                  <YourFavorites />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/account"
-              element={
-                <ProtectedRoute allowedRoles={["user"]}>
-                  <AccountPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/account/security"
-              element={
-                <ProtectedRoute allowedRoles={["user"]}>
-                  <LoginSecurityPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/account/payments"
-              element={
-                <ProtectedRoute allowedRoles={["user"]}>
-                  <PaymentMethodsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/trips"
-              element={
-                <ProtectedRoute allowedRoles={["user"]}>
-                  <TripsPage />
-                </ProtectedRoute>
-              }
-            />
+              {/* User Routes - Protected */}
+              <Route
+                path="/messages"
+                element={
+                  <ProtectedRoute allowedRoles={["user", "provider", "admin"]}>
+                    <Messages />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute allowedRoles={["user", "provider", "admin"]}>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/wishlist"
+                element={
+                  <ProtectedRoute allowedRoles={["user"]}>
+                    <WishlistHome />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/wishlist/recently-viewed"
+                element={
+                  <ProtectedRoute allowedRoles={["user"]}>
+                    <RecentlyViewed />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/wishlist/favorites"
+                element={
+                  <ProtectedRoute allowedRoles={["user"]}>
+                    <YourFavorites />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/account"
+                element={
+                  <ProtectedRoute allowedRoles={["user"]}>
+                    <AccountPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/account/security"
+                element={
+                  <ProtectedRoute allowedRoles={["user"]}>
+                    <LoginSecurityPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/account/payments"
+                element={
+                  <ProtectedRoute allowedRoles={["user"]}>
+                    <PaymentMethodsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/trips"
+                element={
+                  <ProtectedRoute allowedRoles={["user"]}>
+                    <TripsPage />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Footer Routes */}
-            <Route path="/faq" element={<FAQ />} />
-            <Route path="/about-us" element={<AboutUs />} />
-            <Route path="/partners" element={<Partners />} />
-            <Route path="/imprint" element={<Imprint />} />
-            <Route path="/star-membership" element={<StarMembership />} />
-            <Route path="/host" element={<HostRegistration />} />
-            <Route path="/publicmagazine" element={<TravelMagazine />} />
-            <Route path="/travelshop" element={<TravelShop />} />
-            <Route path="/magazine/:id" element={<TravelMagazineDetail />} />
+              {/* Footer Routes */}
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/about-us" element={<AboutUs />} />
+              <Route path="/partners" element={<Partners />} />
+              <Route path="/imprint" element={<Imprint />} />
+              <Route path="/star-membership" element={<StarMembership />} />
+              <Route path="/host" element={<HostRegistration />} />
+              <Route path="/publicmagazine" element={<TravelMagazine />} />
+              <Route path="/travelshop" element={<TravelShop />} />
+              <Route path="/magazine/:id" element={<TravelMagazineDetail />} />
 
-            {/* Admin Routes - Already protected in the AdminLayout component */}
-            <Route path="/admin/*" element={<AdminLayout />} />
+              {/* Admin Routes - Already protected in the AdminLayout component */}
+              <Route path="/admin/*" element={<AdminLayout />} />
 
-            {/* Provider Routes - Already protected in the ProviderLayout component */}
-            <Route path="/provider/*" element={<ProviderLayout />} />
-          </Routes>
-        </div>
-      </SocketProvider>
-    </Router>
+              {/* Provider Routes - Already protected in the ProviderLayout component */}
+              <Route path="/provider/*" element={<ProviderLayout />} />
+            </Routes>
+          </div>
+        </SocketProvider>
+      </Router>
+    </PriceFilterProvider>
   );
 }
 

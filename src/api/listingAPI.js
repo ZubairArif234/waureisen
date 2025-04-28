@@ -29,7 +29,7 @@ export const getListingById = async (id) => {
 // Search listings with parameters (combined function)
 export const searchListings = async (params) => {
   try {
-    const { lat, lng, page, pageSize, filters } = params;
+    const { lat, lng, page, pageSize, filters, moreFilters } = params;
     
     // Build query parameters
     const queryParams = new URLSearchParams({
@@ -42,6 +42,11 @@ export const searchListings = async (params) => {
     // Add filters if provided - encode as a single JSON string
     if (filters && filters.length > 0) {
       queryParams.append('filters', JSON.stringify(filters));
+    }
+
+    // Add more filters if provided
+    if (moreFilters) {
+      queryParams.append('moreFilters', JSON.stringify(moreFilters));
     }
 
     const response = await axios.get(`${API_URL}/api/listings/search?${queryParams.toString()}`);

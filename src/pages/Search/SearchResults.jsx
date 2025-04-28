@@ -17,6 +17,7 @@ import {
   clearMarkers,
   addMapMoveListener,
 } from "../../utils/googleMapsUtils";
+import { usePriceFilter } from "../../context/PriceFilterContext";
 
 // Import dummy images for now
 import i1 from "../../assets/i1.png";
@@ -27,6 +28,7 @@ const SearchResults = () => {
   const location = useLocation();
   const { t } = useLanguage();
   const searchParams = new URLSearchParams(location.search);
+  const { applyPriceFilter } = usePriceFilter();
 
   // Extract search parameters
   const locationParam = searchParams.get("location") || "";
@@ -230,18 +232,21 @@ const SearchResults = () => {
         // Get filters from URL
         const searchParams = new URLSearchParams(location.search);
         const filtersParam = searchParams.get('filters');
+        const moreFiltersParam = searchParams.get('moreFilters');
         const selectedFilters = filtersParam ? JSON.parse(filtersParam) : null;
+        const moreFilters = moreFiltersParam ? JSON.parse(moreFiltersParam) : null;
 
         const response = await searchListings({
           lat,
           lng,
           page: pageNum,
           pageSize: 10,
-          filters: selectedFilters, // Pass filters to API
+          filters: selectedFilters,
+          moreFilters: moreFilters,
         });
 
         // Process listings and fetch Interhome prices
-        const processedListings = await Promise.all(
+        let processedListings = await Promise.all(
           (response?.listings || []).map(async (listing) => {
             if (listing.provider === "Interhome" && listing.Code) {
               try {
@@ -273,12 +278,6 @@ const SearchResults = () => {
                     const calculatedPricePerNight = Math.round(
                       selectedOption.price / 7
                     );
-                    console.log(`Listing ${listing.Code} - Selected option:`, {
-                      totalPrice: selectedOption.price,
-                      duration: 7,
-                      paxUpTo: selectedOption.paxUpTo,
-                      pricePerNight: calculatedPricePerNight,
-                    });
                     // Update the listing with calculated price per night
                     return {
                       ...listing,
@@ -309,6 +308,9 @@ const SearchResults = () => {
           })
         );
 
+        // Apply price filter using the context
+        processedListings = applyPriceFilter(processedListings);
+
         if (append) {
           setListings((prev) => [...prev, ...processedListings]);
         } else {
@@ -336,7 +338,7 @@ const SearchResults = () => {
         setLoading(false);
       }
     },
-    [getLocationName, formattedStartDate, location.search]
+    [getLocationName, formattedStartDate, location.search, applyPriceFilter]
   );
 
   // Transform listings for map display - FIX THIS FUNCTION
