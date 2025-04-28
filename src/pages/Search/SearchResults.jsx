@@ -227,11 +227,17 @@ const SearchResults = () => {
     async (lat, lng, pageNum, append = false) => {
       setIsUpdating(true);
       try {
+        // Get filters from URL
+        const searchParams = new URLSearchParams(location.search);
+        const filtersParam = searchParams.get('filters');
+        const selectedFilters = filtersParam ? JSON.parse(filtersParam) : null;
+
         const response = await searchListings({
           lat,
           lng,
           page: pageNum,
           pageSize: 10,
+          filters: selectedFilters, // Pass filters to API
         });
 
         // Process listings and fetch Interhome prices
@@ -245,63 +251,12 @@ const SearchResults = () => {
                   checkInDate: formattedStartDate,
                   los: true,
                 });
-
-                // Calculate price per night from Interhome data
-                let pricePerNight = listing.pricePerNight?.price || 0;
-
-                if (
-                  priceData &&
-                  priceData.priceList &&
-                  priceData.priceList.prices &&
-                  priceData.priceList.prices.price &&
-                  priceData.priceList.prices.price.length > 0
-                ) {
-                  // Filter for duration 7 options
-                  const duration7Options =
-                    priceData.priceList.prices.price.filter(
-                      (option) => option.duration === 7
-                    );
-
-                  if (duration7Options.length > 0) {
-                    // Sort by paxUpTo (ascending)
-                    duration7Options.sort((a, b) => a.paxUpTo - b.paxUpTo);
-
-                    // Use the option with lowest paxUpTo
-                    const selectedOption = duration7Options[0];
-
-                    // Calculate price per night
-                    const calculatedPricePerNight = Math.round(
-                      selectedOption.price / 7
-                    );
-
-                    console.log(`Listing ${listing.Code} - Selected option:`, {
-                      totalPrice: selectedOption.price,
-                      duration: 7,
-                      paxUpTo: selectedOption.paxUpTo,
-                      pricePerNight: calculatedPricePerNight,
-                    });
-
-                    // Update the listing with calculated price per night
-                    return {
-                      ...listing,
-                      interhomePriceData: priceData,
-                      pricePerNight: {
-                        price: calculatedPricePerNight,
-                        currency: priceData.priceList.currency || "CHF",
-                        totalPrice: selectedOption.price,
-                        duration: 7,
-                        paxUpTo: selectedOption.paxUpTo,
-                      },
-                    };
-                  }
-                }
-
                 return {
                   ...listing,
-                  interhomePriceData: priceData,
+                  pricePerNight: priceData.pricePerNight,
                 };
               } catch (error) {
-                console.warn(
+                console.error(
                   `Failed to fetch Interhome prices for ${listing.Code}:`,
                   error
                 );
@@ -339,7 +294,7 @@ const SearchResults = () => {
         setLoading(false);
       }
     },
-    [getLocationName, formattedStartDate]
+    [getLocationName, formattedStartDate, location.search]
   );
 
   // Transform listings for map display - FIX THIS FUNCTION

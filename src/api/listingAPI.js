@@ -2,6 +2,8 @@
 import API from './config';
 import axios from 'axios';
 
+const API_URL = process.env.REACT_APP_API_URL || '';
+
 // Get all listings
 export const getAllListings = async () => {
   try {
@@ -27,39 +29,23 @@ export const getListingById = async (id) => {
 // Search listings with parameters (combined function)
 export const searchListings = async (params) => {
   try {
-    if (typeof params === 'number' || typeof params === 'string') {
-      const [lat, lng, page = 1, pageSize = 10] = arguments;
-      
-      const response = await API.get('/listings/search', {
-        params: {
-          lat,
-          lng,
-          page,
-          pageSize,
-          select: 'Code title description images location pricePerNight provider' // Added Code to selection
-        }
-      });
-      
-      return {
-        listings: response?.data?.listings || [],
-        hasMore: response?.data?.hasMore || false,
-        ...response.data
-      };
-    }
+    const { lat, lng, page, pageSize, filters } = params;
     
-    // For regular search, ensure Code is included in the response
-    const response = await API.get('/listings/search', { 
-      params: {
-        ...params,
-        select: 'Code title description images location pricePerNight provider' // Added Code to selection
-      }
+    // Build query parameters
+    const queryParams = new URLSearchParams({
+      lat,
+      lng,
+      page,
+      pageSize,
     });
-    
-    return {
-      listings: response?.data?.listings || [],
-      hasMore: response?.data?.hasMore || false,
-      ...response.data
-    };
+
+    // Add filters if provided
+    if (filters && filters.length > 0) {
+      queryParams.append('filters', JSON.stringify(filters));
+    }
+
+    const response = await axios.get(`${API_URL}/api/listings/search?${queryParams.toString()}`);
+    return response.data;
   } catch (error) {
     console.error('Error searching listings:', error);
     throw error;

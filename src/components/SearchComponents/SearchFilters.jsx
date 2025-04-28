@@ -4,6 +4,7 @@ import FilterModal from './FilterModal';
 import { accommodationTypes, mainFilters, dogFilters } from './filterData';
 import MoreFiltersModal from './MoreFiltersModal';
 import { useLanguage } from '../../utils/LanguageContext';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const FilterButton = ({ icon: Icon, label, active, onClick }) => (
   <button
@@ -41,6 +42,8 @@ const FilterGroup = ({ options, selectedFilters, onFilterChange }) => {
 };
 
 const SearchFilters = ({ dateRange }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [activeModal, setActiveModal] = useState({ isOpen: false });
   const { t } = useLanguage();
   const [isMoreFiltersOpen, setIsMoreFiltersOpen] = useState(false);
@@ -49,6 +52,20 @@ const SearchFilters = ({ dateRange }) => {
   const [selectedAccommodations, setSelectedAccommodations] = useState([]);
   const [selectedMainFilters, setSelectedMainFilters] = useState([]);
   const [selectedDogFilters, setSelectedDogFilters] = useState([]);
+
+  // Initialize selected filters from URL
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const filtersParam = searchParams.get('filters');
+    if (filtersParam) {
+      try {
+        const parsedFilters = JSON.parse(filtersParam);
+        setSelectedFilters(parsedFilters);
+      } catch (error) {
+        console.error('Error parsing filters from URL:', error);
+      }
+    }
+  }, [location.search]);
 
   useEffect(() => {
     const fetchFilters = async () => {
@@ -65,28 +82,39 @@ const SearchFilters = ({ dateRange }) => {
     fetchFilters();
   }, []);
 
-  const handleAccommodationChange = (accommodation) => {
-    setSelectedAccommodations(prev => 
-      prev.includes(accommodation)
-        ? prev.filter(item => item !== accommodation)
-        : [...prev, accommodation]
-    );
+  const handleFilterChange = (filterName, isSelected) => {
+    setSelectedFilters(prev => {
+      const newFilters = isSelected 
+        ? [...prev, filterName]
+        : prev.filter(f => f !== filterName);
+      
+      // Update URL with new filters
+      const searchParams = new URLSearchParams(location.search);
+      if (newFilters.length > 0) {
+        searchParams.set('filters', JSON.stringify(newFilters));
+      } else {
+        searchParams.delete('filters');
+      }
+      navigate(`${location.pathname}?${searchParams.toString()}`, { replace: true });
+      
+      return newFilters;
+    });
   };
 
-  const handleMainFilterChange = (filter) => {
-    setSelectedMainFilters(prev => 
-      prev.includes(filter)
-        ? prev.filter(item => item !== filter)
-        : [...prev, filter]
-    );
+  const handleApplyFilters = () => {
+    // Close the modal
+    setActiveModal({ isOpen: false });
+    
+    // The URL update will trigger a new search automatically
+    // through the useEffect in SearchResults component
   };
 
-  const handleDogFilterChange = (filter) => {
-    setSelectedDogFilters(prev => 
-      prev.includes(filter)
-        ? prev.filter(item => item !== filter)
-        : [...prev, filter]
-    );
+  const handleClearFilters = () => {
+    setSelectedFilters([]);
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.delete('filters');
+    navigate(`${location.pathname}?${searchParams.toString()}`, { replace: true });
+    setActiveModal({ isOpen: false });
   };
 
   return (
@@ -103,64 +131,42 @@ const SearchFilters = ({ dateRange }) => {
               key={index}
               icon={Filter}
               label={filter.name}
-              active={selectedFilters.some(f => f.category === filter.name)}
+              active={selectedFilters.some(f => f === filter.name)}
               onClick={() => {
                 const selectedFilter = filters.find(f => f.name === filter.name);
                 if (selectedFilter) {
-  console.log('Filter button clicked:', selectedFilter);
-console.log('Active Modal State Before:', activeModal);
-console.log('Filter Data:', selectedFilter);
-
                   setActiveModal({ 
                     isOpen: true,
                     name: filter.name, 
                     filters: selectedFilter.filters,
                     subsubsection: selectedFilter.subsubsections?.length > 0 ? selectedFilter.subsubsections[0] : null
                   });
-console.log('Active Modal State After:', {
-  name: filter.name, 
-  filters: selectedFilter.filters,
-  subsubsection: selectedFilter.subsubsections?.length > 0 ? selectedFilter.subsubsections[0] : null
-});
-                  console.log('Selected Filter:', selectedFilter);
                 }
               }}
             />
           ))}
           <div className="ml-auto">
-          <FilterButton
-            icon={SlidersHorizontal}
-            label={t('more_filters')}
-            active={true}
-            onClick={() => setIsMoreFiltersOpen(true)}
-          />
+            <FilterButton
+              icon={SlidersHorizontal}
+              label={t('more_filters')}
+              active={true}
+              onClick={() => setIsMoreFiltersOpen(true)}
+            />
           </div>
         </div>
       </div>
 
       <FilterModal
         isOpen={!!activeModal.isOpen}
-        onClose={() => setActiveModal(null)}
-        title={activeModal?.name}
-        activeModal={activeModal || { isOpen: false }}
         onClose={() => setActiveModal({ isOpen: false })}
-      >
-        {/* Render filters inside modal */}
-        {activeModal?.filters?.map(filter => (
-          <div key={filter._id} className="space-y-3">
-            <p className="text-sm text-gray-500">Type: {filter.type}</p>
-            <label className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer">
-              <input
-                type={filter.type}
-                className="w-5 h-5 rounded border-gray-300 text-brand focus:ring-brand"
-              />
-              <span className="text-gray-700">{filter.name}</span>
-            </label>
-          </div>
-        ))}
-      </FilterModal>
+        title={activeModal?.name}
+        activeModal={activeModal}
+        selectedFilters={selectedFilters}
+        onFilterChange={handleFilterChange}
+        onApply={handleApplyFilters}
+        onClear={handleClearFilters}
+      />
 
-      {/* More Filters Modal */}
       <MoreFiltersModal
         isOpen={isMoreFiltersOpen}
         onClose={() => setIsMoreFiltersOpen(false)}

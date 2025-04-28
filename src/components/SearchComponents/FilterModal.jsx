@@ -2,32 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useLanguage } from '../../utils/LanguageContext';
 
-
-const FilterModal = ({ isOpen, onClose, title, children }) => {
+const FilterModal = ({ 
+  isOpen, 
+  onClose, 
+  title, 
+  activeModal,
+  selectedFilters,
+  onFilterChange,
+  onApply,
+  onClear
+}) => {
   const [subsubsectionFilters, setSubsubsectionFilters] = useState([]);
   const [loading, setLoading] = useState(false);
-  
-  useEffect(() => {
-    if (isOpen) {
-      const fetchFilters = async () => {
-        try {
-          const response = await fetch('/api/filters/template');
-          const data = await response.json();
-          const subsubsection = data.subsections
-            .flatMap(section => section.subsubsections)
-            .find(sub => sub.name === title);
-          if (subsubsection) {
-            setActiveModal(prev => ({ ...prev, subsubsection }));
-          }
-        } catch (error) {
-          console.error('Error fetching filters:', error);
-        }
-      };
-      fetchFilters();
-    }
-  }, [isOpen, title]);
   const { t } = useLanguage();
-  const [activeModal, setActiveModal] = useState({ isOpen: false });
+
   useEffect(() => {
     if (isOpen && title) {
       setLoading(true);
@@ -44,11 +32,12 @@ const FilterModal = ({ isOpen, onClose, title, children }) => {
     }
   }, [isOpen, title]);
 
-  if (!isOpen) {
-  console.log('Modal closed, isOpen:', isOpen);
-  return null;
-}
-console.log('Modal opened with props:', { isOpen, title, children });
+  if (!isOpen) return null;
+
+  const handleFilterToggle = (filterName) => {
+    const isSelected = selectedFilters.includes(filterName);
+    onFilterChange(filterName, !isSelected);
+  };
 
   return (
     <>
@@ -73,36 +62,42 @@ console.log('Modal opened with props:', { isOpen, title, children });
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-3 min-h-0">
-
-          {(subsubsectionFilters || activeModal?.subsubsection?.filters)?.map(filter => (
-          <div key={filter._id} className="space-y-3">
-            {/* <p className="text-sm text-gray-500">Type: {filter.type}</p> */}
-            <label className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer">
-              <input
-                type={filter.type}
-                className="w-5 h-5 rounded border-gray-300 text-brand focus:ring-brand"
-              />
-              <span className="text-gray-700">{filter.name}</span>
-            </label>
-          </div>
-        ))}
+          {loading ? (
+            <div className="flex justify-center items-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-brand"></div>
+            </div>
+          ) : (
+            (subsubsectionFilters || activeModal?.subsubsection?.filters)?.map(filter => (
+              <div key={filter._id} className="space-y-3">
+                <label className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={selectedFilters.includes(filter.name)}
+                    onChange={() => handleFilterToggle(filter.name)}
+                    className="w-5 h-5 rounded border-gray-300 text-brand focus:ring-brand"
+                  />
+                  <span className="text-gray-700">{filter.name}</span>
+                </label>
+              </div>
+            ))
+          )}
         </div>
 
         {/* Footer - Fixed at bottom */}
         <div className="flex-shrink-0 p-3 border-t bg-white mt-auto">
           <div className="flex gap-2 safe-bottom">
-          <button
-  onClick={onClose}
-  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
->
-  {t('clear')}
-</button>
-<button
-  onClick={onClose}
-  className="flex-1 px-3 py-2 bg-brand text-white text-sm font-medium rounded-lg hover:bg-brand/90 transition-colors"
->
-  {t('apply')}
-</button>
+            <button
+              onClick={onClear}
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              {t('clear')}
+            </button>
+            <button
+              onClick={onApply}
+              className="flex-1 px-3 py-2 bg-brand text-white text-sm font-medium rounded-lg hover:bg-brand/90 transition-colors"
+            >
+              {t('apply')}
+            </button>
           </div>
         </div>
       </div>
