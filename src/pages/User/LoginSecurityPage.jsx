@@ -1,21 +1,46 @@
 import React, { useState, useEffect } from "react";
 import { ArrowLeft, Edit3, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
 import Navbar from "../../components/Shared/Navbar";
 import Footer from "../../components/Shared/Footer";
 import { useLanguage } from "../../utils/LanguageContext";
 import { getCurrentUser } from "../../utils/authService";
-import { updateUserPassword, updateProviderPassword } from "../../api/authAPI";
-import toast from "react-hot-toast";
+import API from "../../api/config";
+
+// Custom eye toggle button component to ensure consistent styling
+const PasswordToggle = ({ show, toggle }) => {
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      className="absolute right-3 text-gray-500"
+      style={{ color: "#6b7280" }} /* Forcing gray color with inline style */
+    >
+      {show ? (
+        <EyeOff
+          className="w-5 h-5"
+          style={{ color: "#6b7280", strokeWidth: 1.5 }}
+        />
+      ) : (
+        <Eye
+          className="w-5 h-5"
+          style={{ color: "#6b7280", strokeWidth: 1.5 }}
+        />
+      )}
+    </button>
+  );
+};
 
 const LoginSecurityPage = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState({});
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     currentPassword: "",
@@ -39,63 +64,81 @@ const LoginSecurityPage = () => {
       ...prev,
       [name]: value,
     }));
-
-    // Clear error for this field when user starts typing
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: null }));
-    }
   };
 
   const validateForm = () => {
-    const newErrors = {};
+    // Reset error
+    setError(null);
 
+    // Check if current password is provided
     if (!formData.currentPassword) {
-      newErrors.currentPassword = t("current_password_required");
+      setError(
+        t("current_password_required") || "Current password is required"
+      );
+      return false;
     }
 
+    // Check if new password is provided
     if (!formData.newPassword) {
-      newErrors.newPassword = t("new_password_required");
-    } else if (formData.newPassword.length < 6) {
-      newErrors.newPassword = t("password_min_length");
+      setError(t("new_password_required") || "New password is required");
+      return false;
     }
 
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = t("confirm_password_required");
-    } else if (formData.newPassword !== formData.confirmPassword) {
-      newErrors.confirmPassword = t("passwords_do_not_match");
+    // Check if new password meets requirements (min 8 chars, 1 uppercase, 1 lowercase, 1 number)
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+    if (!passwordRegex.test(formData.newPassword)) {
+      setError(
+        t("password_requirements_not_met") ||
+          "Password doesn't meet requirements"
+      );
+      return false;
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    // Check if passwords match
+    if (formData.newPassword !== formData.confirmPassword) {
+      setError(t("passwords_dont_match") || "Passwords don't match");
+      return false;
+    }
+
+    return true;
+  };
+
+  const updateUserSecurity = async (securityData) => {
+    try {
+      const response = await API.put("/users/security", securityData);
+      return response.data;
+    } catch (error) {
+      console.error("Error updating security:", error);
+      throw error;
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validate form
     if (!validateForm()) {
       return;
     }
 
-    setIsLoading(true);
-
     try {
-      // Get current user type
-      const userType = localStorage.getItem("userType") || "user";
+      setIsLoading(true);
 
-      // Prepare data
-      const passwordData = {
+      // Prepare data for API
+      const securityData = {
         currentPassword: formData.currentPassword,
         newPassword: formData.newPassword,
       };
 
-      // Use the appropriate function based on user type
-      if (userType === "provider") {
-        await updateProviderPassword(passwordData);
-      } else {
-        await updateUserPassword(passwordData);
-      }
+      // Update password
+      await updateUserSecurity(securityData);
 
-      // Reset form fields
+      // Success notification
+      toast.success(
+        t("password_updated_successfully") || "Password updated successfully"
+      );
+
+      // Reset form
       setFormData((prev) => ({
         ...prev,
         currentPassword: "",
@@ -105,47 +148,17 @@ const LoginSecurityPage = () => {
 
       // Exit edit mode
       setIsEditing(false);
+    } catch (err) {
+      console.error("Error updating password:", err);
 
-      // Show success toast
-      toast.success(t("password_updated_successfully"), {
-        position: "top-right",
-        duration: 3000,
-        style: {
-          borderRadius: "10px",
-          background: "#333",
-          color: "#fff",
-        },
-        iconTheme: {
-          primary: "#B4A481",
-          secondary: "white",
-        },
-      });
-    } catch (error) {
-      console.error("Error changing password:", error);
-
-      // Handle specific error responses
-      if (
-        error.response &&
-        error.response.data &&
-        error.response.data.message
-      ) {
-        // If the API returns a specific error message
-        if (error.response.data.message.includes("current password")) {
-          setErrors({ currentPassword: error.response.data.message });
-        } else {
-          toast.error(error.response.data.message);
-        }
+      // Handle specific errors
+      if (err.response && err.response.status === 401) {
+        setError(
+          t("current_password_incorrect") || "Current password is incorrect"
+        );
       } else {
-        // Generic error message
-        toast.error(t("password_update_failed"), {
-          position: "top-right",
-          duration: 3000,
-          style: {
-            borderRadius: "10px",
-            background: "#333",
-            color: "#fff",
-          },
-        });
+        setError(t("password_update_failed") || "Failed to update password");
+        toast.error(t("password_update_failed") || "Failed to update password");
       }
     } finally {
       setIsLoading(false);
@@ -174,20 +187,7 @@ const LoginSecurityPage = () => {
             <div className="flex justify-between items-center">
               <p className="text-gray-600">{t("login_security_desc")}</p>
               <button
-                onClick={() => {
-                  setIsEditing(!isEditing);
-                  // Reset form errors when toggling edit mode
-                  setErrors({});
-                  // Reset password fields when canceling edit
-                  if (isEditing) {
-                    setFormData((prev) => ({
-                      ...prev,
-                      currentPassword: "",
-                      newPassword: "",
-                      confirmPassword: "",
-                    }));
-                  }
-                }}
+                onClick={() => setIsEditing(!isEditing)}
                 className="flex items-center gap-2 text-sm text-brand hover:text-brand/80 transition-colors"
               >
                 <Edit3 className="w-4 h-4" />
@@ -195,6 +195,13 @@ const LoginSecurityPage = () => {
               </button>
             </div>
           </div>
+
+          {/* Error banner */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-800 m-6 p-4 rounded-lg">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-8">
             {/* Email Section */}
@@ -221,35 +228,21 @@ const LoginSecurityPage = () => {
                   <label className="text-sm font-medium text-gray-700">
                     {t("current_password")}
                   </label>
-                  <div className="relative">
+                  <div className="relative flex items-center">
                     <input
                       type={showCurrentPassword ? "text" : "password"}
                       name="currentPassword"
                       value={formData.currentPassword}
                       onChange={handleInputChange}
-                      className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-brand/20 focus:border-brand ${
-                        errors.currentPassword ? "border-red-500" : ""
-                      }`}
+                      className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-brand/20 focus:border-brand pr-10"
                     />
-                    <button
-                      type="button"
-                      onClick={() =>
+                    <PasswordToggle
+                      show={showCurrentPassword}
+                      toggle={() =>
                         setShowCurrentPassword(!showCurrentPassword)
                       }
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-                    >
-                      {showCurrentPassword ? (
-                        <EyeOff className="w-5 h-5" />
-                      ) : (
-                        <Eye className="w-5 h-5" />
-                      )}
-                    </button>
+                    />
                   </div>
-                  {errors.currentPassword && (
-                    <p className="text-sm text-red-600">
-                      {errors.currentPassword}
-                    </p>
-                  )}
                 </div>
 
                 {/* New Password */}
@@ -257,57 +250,45 @@ const LoginSecurityPage = () => {
                   <label className="text-sm font-medium text-gray-700">
                     {t("new_password")}
                   </label>
-                  <div className="relative">
+                  <div className="relative flex items-center">
                     <input
                       type={showNewPassword ? "text" : "password"}
                       name="newPassword"
                       value={formData.newPassword}
                       onChange={handleInputChange}
-                      className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-brand/20 focus:border-brand ${
-                        errors.newPassword ? "border-red-500" : ""
-                      }`}
+                      className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-brand/20 focus:border-brand pr-10"
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowNewPassword(!showNewPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-                    >
-                      {showNewPassword ? (
-                        <EyeOff className="w-5 h-5" />
-                      ) : (
-                        <Eye className="w-5 h-5" />
-                      )}
-                    </button>
+                    <PasswordToggle
+                      show={showNewPassword}
+                      toggle={() => setShowNewPassword(!showNewPassword)}
+                    />
                   </div>
-                  {errors.newPassword && (
-                    <p className="text-sm text-red-600">{errors.newPassword}</p>
-                  )}
                   <p className="text-sm text-gray-500">
-                    {t("password_requirements")}
+                    {t("password_requirements") ||
+                      "Password must be at least 8 characters long, include uppercase, lowercase, and a number"}
                   </p>
                 </div>
 
-                {/* Confirm New Password */}
+                {/* Confirm Password */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">
-                    {t("confirm_password")}
+                    {t("confirm_password") || "Confirm Password"}
                   </label>
-                  <div className="relative">
+                  <div className="relative flex items-center">
                     <input
-                      type={showNewPassword ? "text" : "password"}
+                      type={showConfirmPassword ? "text" : "password"}
                       name="confirmPassword"
                       value={formData.confirmPassword}
                       onChange={handleInputChange}
-                      className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-brand/20 focus:border-brand ${
-                        errors.confirmPassword ? "border-red-500" : ""
-                      }`}
+                      className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-brand/20 focus:border-brand pr-10"
+                    />
+                    <PasswordToggle
+                      show={showConfirmPassword}
+                      toggle={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                     />
                   </div>
-                  {errors.confirmPassword && (
-                    <p className="text-sm text-red-600">
-                      {errors.confirmPassword}
-                    </p>
-                  )}
                 </div>
               </>
             )}
@@ -318,14 +299,13 @@ const LoginSecurityPage = () => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className={`px-6 py-2 bg-brand text-white rounded-lg hover:bg-brand/90 transition-colors font-medium flex items-center ${
+                  className={`px-6 py-2 bg-brand text-white rounded-lg hover:bg-brand/90 transition-colors font-medium ${
                     isLoading ? "opacity-70 cursor-not-allowed" : ""
                   }`}
                 >
-                  {isLoading && (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                  )}
-                  {t("save_changes")}
+                  {isLoading
+                    ? t("saving") || "Saving..."
+                    : t("save_changes") || "Save Changes"}
                 </button>
               </div>
             )}
