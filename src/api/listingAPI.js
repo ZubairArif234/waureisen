@@ -29,7 +29,7 @@ export const getListingById = async (id) => {
 // Search listings with parameters (combined function)
 export const searchListings = async (params) => {
   try {
-    const { lat, lng, page, pageSize, filters, moreFilters } = params;
+    const { lat, lng, page, pageSize, filters, moreFilters, radius } = params;
     
     // Build query parameters
     const queryParams = new URLSearchParams({
@@ -38,6 +38,11 @@ export const searchListings = async (params) => {
       page,
       pageSize,
     });
+
+    // Add radius parameter if provided (in km)
+    if (radius) {
+      queryParams.append('radius', radius);
+    }
 
     // Add filters if provided - encode as a single JSON string
     if (filters && filters.length > 0) {
@@ -149,13 +154,13 @@ export const getProviderDashboardStats = async (timeFrame = 'month') => {
 // Fetch listings by map bounds
 export const fetchListingsByMapBounds = async (params) => {
   try {
-    const { lat, lng, radius, bounds, page = 1, limit = 10, filters = {} } = params;
+    const { lat, lng, radius, bounds, page = 1, limit = 20, filters = {} } = params;
     
     // Build query parameters
     const queryParams = new URLSearchParams({
       lat,
       lng,
-      radius: radius || 10, // Default 10km radius
+      radius: radius || 1000, // Default 1000km radius
       page,
       limit,
       ...filters
@@ -169,7 +174,7 @@ export const fetchListingsByMapBounds = async (params) => {
       queryParams.append('swLng', bounds.sw.lng);
     }
     
-    const response = await API.get(`/api/listings/map?${queryParams.toString()}`);
+    const response = await axios.get(`${API_URL}/api/listings/map?${queryParams.toString()}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching listings by map bounds:', error);

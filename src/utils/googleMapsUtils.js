@@ -71,7 +71,7 @@ export const loadGoogleMapsScript = (callback) => {
           resolve();
           callback(true);
         } else {
-          // Google object is not available despite script loading
+          // Google object is not available despite script load
           const error = new Error('Google Maps not available after script load');
           scriptLoadError = error;
           reject(error);
@@ -83,7 +83,7 @@ export const loadGoogleMapsScript = (callback) => {
       googleMapScript.addEventListener('error', (error) => {
         isLoadingScript = false;
         scriptLoadError = error;
-        // console.error('Error loading Google Maps script:', error);
+        console.error('Error loading Google Maps script:', error);
         reject(error);
         callback(false);
       });
@@ -167,7 +167,7 @@ export const createMap = (mapRef, center = { lat: 46.818188, lng: 8.227512 }) =>
     // Create map with centered location
     const map = new window.google.maps.Map(mapRef.current, {
       center: validCenter,
-      zoom: 12, // Better zoom level for city/location view
+      zoom: 8, // Better zoom level for showing more accommodations
       mapTypeControl: false,
       streetViewControl: false,
       fullscreenControl: false,
@@ -210,6 +210,28 @@ export const createMap = (mapRef, center = { lat: 46.818188, lng: 8.227512 }) =>
       }
     }
 
+    // Add a fixed radius circle (500km by default)
+    try {
+      const circle = new window.google.maps.Circle({
+        map: map,
+        center: validCenter,
+        radius: 500 * 1000, // 500km in meters
+        fillColor: '#B4A481',
+        fillOpacity: 0.1,
+        strokeColor: '#B4A481',
+        strokeWeight: 1,
+        strokeOpacity: 0.5
+      });
+      
+      // Fit map to circle bounds
+      const bounds = circle.getBounds();
+      if (bounds) {
+        map.fitBounds(bounds);
+      }
+    } catch (error) {
+      console.error('Error adding radius circle:', error);
+    }
+
     return map;
   } catch (error) {
     console.error('Error creating map:', error);
@@ -225,9 +247,18 @@ export const addMapMoveListener = (map, callback, debounceTime = 500) => {
   }
 
   let timeoutId = null;
+  let userInitiatedMove = false;
+  
+  // Track when user initiates map movement
+  map.addListener('dragstart', () => {
+    userInitiatedMove = true;
+  });
   
   // Create the event listener with debounce
   const listener = map.addListener('idle', () => {
+    // Only proceed if this was a user-initiated move
+    if (!userInitiatedMove) return;
+    
     // Clear any existing timeout
     if (timeoutId) {
       clearTimeout(timeoutId);
@@ -244,26 +275,21 @@ export const addMapMoveListener = (map, callback, debounceTime = 500) => {
         const ne = bounds.getNorthEast();
         const sw = bounds.getSouthWest();
         
-        // Calculate approximate radius in km (rough estimate)
-        const latDiff = ne.lat() - sw.lat();
-        const lngDiff = ne.lng() - sw.lng();
-        const radius = Math.max(
-          haversineDistance(center.lat(), center.lng(), center.lat() + latDiff/2, center.lng()),
-          haversineDistance(center.lat(), center.lng(), center.lat(), center.lng() + lngDiff/2)
-        );
-        
-        // Pass the map instance to the callback so we can manage markers properly
+        // Pass the map data to the callback
         callback({
           map,
-          lat,
-          lng,
-          radius: Math.min(50, radius), // Cap at 50km
+          center: { lat, lng },
+          radius: 500, // Fixed 500km radius
           bounds: {
             ne: { lat: ne.lat(), lng: ne.lng() },
             sw: { lat: sw.lat(), lng: sw.lng() }
-          }
+          },
+          zoom: map.getZoom()
         });
       }
+      
+      // Reset the user initiated flag
+      userInitiatedMove = false;
     }, debounceTime);
   });
   

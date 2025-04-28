@@ -63,6 +63,9 @@ const SearchResults = () => {
   // Get latitude and longitude from URL if available
   const initialLat = parseFloat(searchParams.get("lat")) || 46.818188;
   const initialLng = parseFloat(searchParams.get("lng")) || 8.227512;
+  
+  // Fixed search radius of 500km
+  const SEARCH_RADIUS = 500;
 
   const [showMap, setShowMap] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
@@ -182,6 +185,9 @@ const SearchResults = () => {
           if (map) {
             setMapInstance(map);
 
+            // Set a more appropriate zoom level
+            map.setZoom(8);
+
             // Add markers for current listings
             if (listings.length > 0) {
               const markers = addListingMarkers(map, listings);
@@ -202,7 +208,7 @@ const SearchResults = () => {
       const queryParams = new URLSearchParams({
         lat,
         lng,
-        radius: radius || 10, // Default 10km radius
+        radius: radius || SEARCH_RADIUS, // Use fixed radius
         ...filters,
       });
 
@@ -243,6 +249,7 @@ const SearchResults = () => {
           pageSize: 10,
           filters: selectedFilters,
           moreFilters: moreFilters,
+          radius: SEARCH_RADIUS // Always use fixed radius
         });
 
         // Process listings and fetch Interhome prices
@@ -414,6 +421,7 @@ const SearchResults = () => {
           pricePerNight: listing.pricePerNight || { price: 0, currency: "CHF" },
           images: listing.images || [],
           capacity: listing.capacity || { people: 2, dogs: 1 },
+          url: `/accommodations/${listing._id || listing.id}`,
         };
       })
       .filter(Boolean); // Remove any null entries
@@ -478,7 +486,7 @@ const SearchResults = () => {
     }
   }, [page, fetchListings, mapViewport.center]);
 
-  // Handle map viewport changes
+  // Handle map viewport changes - only update when user manually changes location
   const handleMapChange = useCallback(
     (newViewport) => {
       // Update viewport state
@@ -663,6 +671,7 @@ const SearchResults = () => {
                   listings={mapReadyListings}
                   locationName={areaName}
                   onMapChange={handleMapChange}
+                  radius={SEARCH_RADIUS}
                 />
               )}
             </div>
