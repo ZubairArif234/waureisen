@@ -180,14 +180,34 @@ const ProviderProfilePage = () => {
       const updatedProfile = await updateProviderProfile(updateData);
 
       // Success notification
-      toast.success(t("profile_updated_successfully"));
+      toast.success(t("profile_updated_successfully"), {
+        position: "top-right",
+        duration: 3000,
+        style: {
+          borderRadius: "10px",
+          background: "#333",
+          color: "#fff",
+        },
+        iconTheme: {
+          primary: "#B4A481",
+          secondary: "white",
+        },
+      });
 
       // Exit edit mode
       setIsEditing(false);
     } catch (err) {
       console.error("Error updating profile:", err);
       setError("Failed to update profile. Please try again.");
-      toast.error(t("profile_update_failed"));
+      toast.error(t("profile_update_failed"), {
+        position: "top-right",
+        duration: 3000,
+        style: {
+          borderRadius: "10px",
+          background: "#333",
+          color: "#fff",
+        },
+      });
     } finally {
       setIsSaving(false);
     }

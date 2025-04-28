@@ -399,32 +399,39 @@ const DeleteConfirmationModal = ({
 
 const Accommodations = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [loadingOperation, setLoadingOperation] = useState(""); // Track specific operation
   const [accommodations, setAccommodations] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState("");
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [selectedListingId, setSelectedListingId] = useState(null);
-  const [selectedListingTitle, setSelectedListingTitle] = useState("");
-  const [addToFeaturedModalOpen, setAddToFeaturedModalOpen] = useState(false);
-  const [selectedForFeatured, setSelectedForFeatured] = useState(null);
-  const [removeFromFeaturedModalOpen, setRemoveFromFeaturedModalOpen] =
-    useState(false);
-  const [featuredSectionsToRemove, setFeaturedSectionsToRemove] = useState([]);
-  const [filteredSource, setFilteredSource] = useState("all");
+  const [totalPages, setTotalPages] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
   const [sources, setSources] = useState(DEFAULT_SOURCES);
-  const [featuredCounts, setFeaturedCounts] = useState({
+  const [selectedSource, setSelectedSource] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [currentFeaturedCounts, setCurrentFeaturedCounts] = useState({
     featured_accommodations: 0,
     new_accommodations: 0,
     popular_accommodations: 0,
   });
+
+  // Delete confirmation modal
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [selectedForDelete, setSelectedForDelete] = useState(null);
+
+  // Add to featured modal
+  const [addToFeaturedModalOpen, setAddToFeaturedModalOpen] = useState(false);
+  const [removeFromFeaturedModalOpen, setRemoveFromFeaturedModalOpen] =
+    useState(false);
+  const [selectedForFeatured, setSelectedForFeatured] = useState(null);
+  const [featuredSectionsToRemove, setFeaturedSectionsToRemove] = useState([]);
 
   // Pagination state
   const [page, setPage] = useState(1);
   const [limit] = useState(9);
   const [search, setSearch] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 
   // Remove the form submission functions and keep the direct search input
@@ -442,39 +449,109 @@ const Accommodations = () => {
     fetchFeaturedCounts();
   }, [page, search]); // Refetch when page or search changes
 
-  const fetchAccommodations = async () => {
-    setLoading(true);
+  // Fetch accommodations with pagination, filtering, and search
+  const fetchAccommodations = async (retryCount = 0) => {
     try {
-      const result = await getPaginatedListings(page, limit, search);
-      setAccommodations(result.listings);
-      setTotalPages(result.pagination.pages);
-      setTotalItems(result.pagination.total);
+      setLoading(true);
+      setLoadingOperation("fetchingAccommodations");
 
-      // Extract unique sources for filtering
-      const uniqueSources = extractUniqueSources(result.listings);
-      if (uniqueSources.length > 0) {
+      // Build query parameters
+      const queryParams = {
+        page: currentPage,
+        search: searchTerm,
+      };
+
+      // Add filters if selected
+      if (selectedSource) {
+        queryParams.source = selectedSource;
+      }
+      if (selectedStatus) {
+        queryParams.status = selectedStatus;
+      }
+
+      // Fetch listings with pagination and filters
+      const response = await getPaginatedListings(
+        queryParams.page,
+        9, // Fixed page size
+        queryParams.search
+      );
+
+      setAccommodations(response.listings || []);
+      setTotalPages(response.totalPages || 1);
+
+      // Extract unique sources
+      if (response.listings?.length > 0) {
+        const uniqueSources = extractUniqueSources(response.listings);
         setSources(uniqueSources);
       }
-    } catch (error) {
-      console.error("Error fetching accommodations:", error);
-      setError("Failed to load accommodations. Please try again later.");
-      // Keep the default sources on error
+
+      setError("");
+    } catch (err) {
+      console.error("Error fetching accommodations:", err);
+
+      // Handle network errors with retry
+      if (!err.response && retryCount < 2) {
+        // Wait a moment then retry
+        const delay = Math.pow(2, retryCount) * 1000;
+        console.log(`Retrying fetchAccommodations after ${delay}ms...`);
+
+        setTimeout(() => {
+          fetchAccommodations(retryCount + 1);
+        }, delay);
+        return;
+      }
+
+      if (err.message?.includes("Network error")) {
+        setError(
+          "Network error while loading accommodations. Please check your connection and try again."
+        );
+      } else {
+        setError("Failed to load accommodations. Please try again.");
+      }
+
+      // Clear error after 5 seconds
+      setTimeout(() => {
+        setError("");
+      }, 5000);
     } finally {
       setLoading(false);
+      setLoadingOperation("");
     }
   };
 
-  // Function to fetch featured counts
-  const fetchFeaturedCounts = async () => {
+  // Fetch counts of featured items
+  const fetchFeaturedCounts = async (retryCount = 0) => {
     try {
       const featured = await getFeaturedAccommodations();
-      setFeaturedCounts({
-        featured_accommodations: featured.featured_accommodations.length || 0,
-        new_accommodations: featured.new_accommodations.length || 0,
-        popular_accommodations: featured.popular_accommodations.length || 0,
+
+      // Update featured counts
+      setCurrentFeaturedCounts({
+        featured_accommodations: featured.featured_accommodations.length,
+        new_accommodations: featured.new_accommodations.length,
+        popular_accommodations: featured.popular_accommodations.length,
       });
-    } catch (error) {
-      console.error("Error fetching featured counts:", error);
+    } catch (err) {
+      console.error("Error fetching featured counts:", err);
+
+      // Handle network errors with retry
+      if (!err.response && retryCount < 2) {
+        // Wait a moment then retry
+        const delay = Math.pow(2, retryCount) * 1000;
+        console.log(`Retrying fetchFeaturedCounts after ${delay}ms...`);
+
+        setTimeout(() => {
+          fetchFeaturedCounts(retryCount + 1);
+        }, delay);
+        return;
+      }
+
+      // We don't show error for this as it's not critical
+      // But we set default values
+      setCurrentFeaturedCounts({
+        featured_accommodations: 0,
+        new_accommodations: 0,
+        popular_accommodations: 0,
+      });
     }
   };
 
@@ -487,8 +564,22 @@ const Accommodations = () => {
 
   // Handler for confirming add to featured
   const handleConfirmAddToFeatured = async (section) => {
+    // Create section-specific loading state
+    const sectionName =
+      section === "featured_accommodations"
+        ? "Featured"
+        : section === "new_accommodations"
+        ? "New"
+        : "Popular";
+
+    setLoading(true);
+    setSuccessMessage(""); // Clear any previous success messages
+    setError(""); // Clear any previous errors
+
+    // Add a specific processing message
+    setSuccessMessage(`Adding to ${sectionName} section... Please wait.`);
+
     try {
-      setLoading(true);
       const response = await addToFeaturedSection(
         selectedForFeatured._id,
         section
@@ -506,59 +597,61 @@ const Accommodations = () => {
             skipped.reason
           }`
         );
+        // Clear the error after 5 seconds
         setTimeout(() => {
-          setError(null);
+          setError("");
         }, 5000);
 
+        setSuccessMessage(""); // Clear the processing message
         setLoading(false);
         setAddToFeaturedModalOpen(false);
         setSelectedForFeatured(null);
         return;
       }
 
-      // Show success message
-      setSuccessMessage(
-        `Accommodation added to ${
-          section === "featured_accommodations"
-            ? "Featured Accommodations"
-            : section === "new_accommodations"
-            ? "New Accommodations"
-            : "Popular Accommodations"
-        } successfully`
-      );
+      // Clear the processing message
+      setSuccessMessage("");
 
-      // Refresh the featured counts
+      // Show success message with section name
+      setSuccessMessage(`Successfully added to ${sectionName} Accommodations!`);
+
+      // Refresh the featured counts to update the UI
       await fetchFeaturedCounts();
 
-      // Clear the message after a few seconds
+      // Clear the success message after a few seconds
       setTimeout(() => {
         setSuccessMessage("");
       }, 3000);
 
-      // Update the listing status
-      setAccommodations((prevAccommodations) => {
-        return prevAccommodations.map((acc) => {
-          if (acc._id === selectedForFeatured._id) {
-            // Add this section to the featured sections (calculated in AccommodationCard)
-            return acc; // The card will re-fetch the featured status
-          }
-          return acc;
-        });
-      });
+      // Update the UI to show the change immediately
+      await fetchAccommodations();
 
-      setError(null);
+      setError("");
     } catch (err) {
       console.error("Error adding to featured section:", err);
+      setSuccessMessage(""); // Clear any processing message
 
+      // Show more helpful error messages
       if (err.response?.data?.message?.includes("Listing with ID")) {
         setError(
           `The listing could not be added. The server reported: ${err.response.data.message}`
         );
+      } else if (err.message?.includes("Network error")) {
+        setError(
+          `Network error while adding to ${sectionName} Accommodations. Please check your connection and try again.`
+        );
       } else if (err.response?.data?.message) {
         setError(err.response.data.message);
       } else {
-        setError("Failed to add to featured section. Please try again.");
+        setError(
+          `Failed to add to ${sectionName} Accommodations. Please try again.`
+        );
       }
+
+      // Clear error after 5 seconds
+      setTimeout(() => {
+        setError("");
+      }, 5000);
     } finally {
       setLoading(false);
       setAddToFeaturedModalOpen(false);
@@ -576,25 +669,36 @@ const Accommodations = () => {
 
   // Handler for confirming remove from featured
   const handleConfirmRemoveFromFeatured = async (section) => {
+    // Create section-specific loading state
+    const sectionName =
+      section === "featured_accommodations"
+        ? "Featured"
+        : section === "new_accommodations"
+        ? "New"
+        : "Popular";
+
+    setLoading(true);
+    setSuccessMessage(""); // Clear any previous success messages
+    setError(""); // Clear any previous errors
+
+    // Add a specific processing message
+    setSuccessMessage(`Removing from ${sectionName} section... Please wait.`);
+
     try {
-      setLoading(true);
       await removeFromFeaturedSection(selectedForFeatured._id, section);
+
+      // Clear processing message
+      setSuccessMessage("");
 
       // Show success message
       setSuccessMessage(
-        `Accommodation removed from ${
-          section === "featured_accommodations"
-            ? "Featured Accommodations"
-            : section === "new_accommodations"
-            ? "New Accommodations"
-            : "Popular Accommodations"
-        } successfully`
+        `Successfully removed from ${sectionName} Accommodations!`
       );
 
       // Refresh the featured counts
       await fetchFeaturedCounts();
 
-      // Clear the message after a few seconds
+      // Clear the success message after a few seconds
       setTimeout(() => {
         setSuccessMessage("");
       }, 3000);
@@ -602,10 +706,28 @@ const Accommodations = () => {
       // The card will re-fetch the featured status
       await fetchAccommodations();
 
-      setError(null);
+      setError("");
     } catch (err) {
       console.error("Error removing from featured section:", err);
-      setError("Failed to remove from featured section. Please try again.");
+      setSuccessMessage(""); // Clear processing message
+
+      // Show more helpful error messages
+      if (err.message?.includes("Network error")) {
+        setError(
+          `Network error while removing from ${sectionName} Accommodations. Please check your connection and try again.`
+        );
+      } else if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError(
+          `Failed to remove from ${sectionName} Accommodations. Please try again.`
+        );
+      }
+
+      // Clear error after 5 seconds
+      setTimeout(() => {
+        setError("");
+      }, 5000);
     } finally {
       setLoading(false);
       setRemoveFromFeaturedModalOpen(false);
@@ -680,20 +802,19 @@ const Accommodations = () => {
 
   // Handler for deleting an accommodation
   const handleDelete = (id, title) => {
-    setDeleteConfirmOpen(true);
-    setSelectedListingId(id);
-    setSelectedListingTitle(title || "this listing");
+    setConfirmDeleteOpen(true);
+    setSelectedForDelete(id);
   };
 
   // Handler for confirming deletion
   const handleConfirmDelete = async () => {
     try {
       setLoading(true);
-      await deleteListing(selectedListingId);
+      await deleteListing(selectedForDelete);
 
       // Remove the deleted accommodation from state
       setAccommodations((prevAccommodations) =>
-        prevAccommodations.filter((acc) => acc._id !== selectedListingId)
+        prevAccommodations.filter((acc) => acc._id !== selectedForDelete)
       );
 
       setError(null);
@@ -702,9 +823,8 @@ const Accommodations = () => {
       setError("Failed to delete accommodation. Please try again.");
     } finally {
       setLoading(false);
-      setDeleteConfirmOpen(false);
-      setSelectedListingId(null);
-      setSelectedListingTitle("");
+      setConfirmDeleteOpen(false);
+      setSelectedForDelete(null);
     }
   };
 
@@ -728,15 +848,57 @@ const Accommodations = () => {
 
     // Check source filter match
     return (
-      filteredSource === "all" ||
+      selectedSource === "all" ||
       (acc.source &&
         acc.source.name &&
-        acc.source.name.toLowerCase() === filteredSource)
+        acc.source.name.toLowerCase() === selectedSource)
     );
   });
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
+      {/* Toast notifications for errors and success messages */}
+      {error && (
+        <div
+          className="fixed top-4 right-4 z-50 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded shadow-md flex items-center max-w-md animate-fade-in"
+          role="alert"
+        >
+          <AlertTriangle className="w-5 h-5 mr-2" />
+          <span>{error}</span>
+          <button
+            onClick={() => setError("")}
+            className="ml-auto pl-3 -mr-1 text-red-700 font-bold"
+          >
+            ×
+          </button>
+        </div>
+      )}
+
+      {successMessage && (
+        <div
+          className="fixed top-4 right-4 z-50 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded shadow-md flex items-center max-w-md animate-fade-in"
+          role="alert"
+        >
+          {loadingOperation ? (
+            <div className="flex items-center">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-700 mr-2"></div>
+              <span>{successMessage}</span>
+            </div>
+          ) : (
+            <>
+              <Star className="w-5 h-5 mr-2" />
+              <span>{successMessage}</span>
+              <button
+                onClick={() => setSuccessMessage("")}
+                className="ml-auto pl-3 -mr-1 text-green-700 font-bold"
+              >
+                ×
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
@@ -757,13 +919,6 @@ const Accommodations = () => {
         </button>
       </div>
 
-      {/* Error Display */}
-      {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
-          {error}
-        </div>
-      )}
-
       {/* Search and filter section */}
       <div className="flex flex-col md:flex-row items-stretch gap-3 mb-6">
         <div className="flex-1">
@@ -783,8 +938,8 @@ const Accommodations = () => {
         <div className="flex items-center gap-2">
           <Filter className="w-5 h-5 text-gray-400" />
           <select
-            value={filteredSource}
-            onChange={(e) => setFilteredSource(e.target.value)}
+            value={selectedSource}
+            onChange={(e) => setSelectedSource(e.target.value)}
             className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
           >
             <option value="all">All Sources</option>
@@ -868,7 +1023,7 @@ const Accommodations = () => {
               </span>{" "}
               to{" "}
               <span className="font-medium">
-                {filteredSource !== "all"
+                {selectedSource !== "all"
                   ? Math.min(
                       (page - 1) * limit + filteredAccommodations.length,
                       totalItems
@@ -877,12 +1032,12 @@ const Accommodations = () => {
               </span>{" "}
               of{" "}
               <span className="font-medium">
-                {filteredSource !== "all"
+                {selectedSource !== "all"
                   ? filteredAccommodations.length
                   : totalItems}
               </span>{" "}
               results
-              {filteredSource !== "all" &&
+              {selectedSource !== "all" &&
                 ` (filtered from ${totalItems} total)`}
             </p>
           </div>
@@ -924,14 +1079,13 @@ const Accommodations = () => {
 
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
-        isOpen={deleteConfirmOpen}
+        isOpen={confirmDeleteOpen}
         onClose={() => {
-          setDeleteConfirmOpen(false);
-          setSelectedListingId(null);
-          setSelectedListingTitle("");
+          setConfirmDeleteOpen(false);
+          setSelectedForDelete(null);
         }}
         onConfirm={handleConfirmDelete}
-        listingTitle={selectedListingTitle}
+        listingTitle={selectedForDelete?.title || "this listing"}
       />
 
       {/* Add to Featured Modal */}
@@ -944,7 +1098,7 @@ const Accommodations = () => {
         onConfirm={handleConfirmAddToFeatured}
         listingId={selectedForFeatured?._id}
         listingTitle={selectedForFeatured?.title || "this listing"}
-        currentCounts={featuredCounts}
+        currentCounts={currentFeaturedCounts}
         maxAllowed={6}
       />
 
@@ -959,18 +1113,11 @@ const Accommodations = () => {
         onConfirm={handleConfirmRemoveFromFeatured}
         listingId={selectedForFeatured?._id}
         listingTitle={selectedForFeatured?.title || "this listing"}
-        currentCounts={featuredCounts}
+        currentCounts={currentFeaturedCounts}
         maxAllowed={6}
         sections={featuredSectionsToRemove}
         isRemoveMode={true}
       />
-
-      {/* Success Message */}
-      {successMessage && (
-        <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-600">
-          {successMessage}
-        </div>
-      )}
     </div>
   );
 };

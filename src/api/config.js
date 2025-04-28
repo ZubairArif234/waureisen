@@ -8,15 +8,23 @@ const API = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 15000, // 15 seconds timeout
+  timeout: 30000, // Increase timeout from 15s to 30s
 });
 
 // Set constant token key
 const TOKEN_KEY = "token";
 
+// Maximum number of retries for network errors
+const MAX_RETRIES = 3;
+
 // Add request interceptor to include auth token for protected routes
 API.interceptors.request.use(
   (config) => {
+    // Add retry count to config if not already present
+    if (config.retryCount === undefined) {
+      config.retryCount = 0;
+    }
+
     const token = localStorage.getItem(TOKEN_KEY);
     if (token) {
       // Ensure we're using the correct Bearer format
@@ -51,12 +59,35 @@ API.interceptors.response.use(
     });
     return response;
   },
-  (error) => {
-    // Handle network errors
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Handle network errors with retry logic
     if (!error.response) {
       console.error("Network error - no response from server");
+
+      // Check if we should retry the request
+      if (originalRequest.retryCount < MAX_RETRIES) {
+        originalRequest.retryCount++;
+
+        // Exponential backoff delay
+        const delay = Math.pow(2, originalRequest.retryCount) * 1000;
+
+        console.log(
+          `Retrying request (${originalRequest.retryCount}/${MAX_RETRIES}) after ${delay}ms...`
+        );
+
+        // Wait for the delay before retrying
+        await new Promise((resolve) => setTimeout(resolve, delay));
+
+        // Retry the request
+        return API(originalRequest);
+      }
+
       return Promise.reject(
-        new Error("Network error - please check your connection")
+        new Error(
+          `Network error - please check your connection (after ${MAX_RETRIES} retries)`
+        )
       );
     }
 

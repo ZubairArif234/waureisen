@@ -2,7 +2,7 @@
 import API from "./config";
 
 // Featured, Popular, and New Accommodations
-export const getFeaturedAccommodations = async () => {
+export const getFeaturedAccommodations = async (retryCount = 0) => {
   try {
     // Create empty default structure for recommendations
     const defaultData = {
@@ -35,6 +35,17 @@ export const getFeaturedAccommodations = async () => {
   } catch (error) {
     console.error("Error fetching featured accommodations:", error);
 
+    // Implement manual retry for this specific function
+    if (!error.response && retryCount < 3) {
+      console.log(
+        `Retrying getFeaturedAccommodations (attempt ${retryCount + 1})...`
+      );
+      // Exponential backoff
+      const delay = Math.pow(2, retryCount) * 1000;
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      return getFeaturedAccommodations(retryCount + 1);
+    }
+
     // Return empty arrays as fallback
     return {
       featured_accommodations: [],
@@ -55,6 +66,7 @@ export const addToFeaturedSection = async (id, section) => {
 
     // First verify this listing ID exists
     try {
+      console.log(`Verifying listing ID ${id} exists...`);
       const listingCheck = await API.get(`/listings/${id}`);
       if (!listingCheck.data || !listingCheck.data._id) {
         throw {
@@ -98,7 +110,11 @@ export const addToFeaturedSection = async (id, section) => {
       throw listingErr;
     }
 
+    // Add a small delay between verification and update to reduce race conditions
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
     // Get current items to check count - just to display a warning if we're over limit
+    console.log(`Getting current featured items for ${section}...`);
     const currentFeatures = await getFeaturedAccommodations();
     const currentItems = currentFeatures[section] || [];
 
@@ -123,6 +139,7 @@ export const addToFeaturedSection = async (id, section) => {
       : [...currentItems, id]; // Add if not already in list
 
     // Call the API endpoint - backend will enforce the 6 item limit
+    console.log(`Updating ${section} with new listing ID ${id}...`);
     const response = await API.put(`/admins/recommendations/${endpoint}`, {
       listingIds: updatedListingIds,
     });
@@ -143,6 +160,13 @@ export const addToFeaturedSection = async (id, section) => {
           data: { message: error.response.data.message },
         },
       };
+    }
+
+    // More detailed error handling for network issues
+    if (!error.response) {
+      throw new Error(
+        `Network error while updating ${section}. Please try again.`
+      );
     }
 
     throw error;

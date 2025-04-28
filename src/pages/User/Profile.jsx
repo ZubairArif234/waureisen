@@ -7,6 +7,7 @@ import { getUserProfile, updateUserProfile } from "../../api/authAPI";
 import { updateProviderProfile } from "../../api/providerAPI";
 import { getProviderProfile } from "../../api/providerAPI";
 import { getUserType, isUserType } from "../../utils/authService";
+import { toast } from "react-hot-toast";
 
 const Profile = () => {
   const { t } = useLanguage();
@@ -260,10 +261,33 @@ const Profile = () => {
       }
 
       setIsEditing(false);
-      // Show success message or notification
+      // Show success toast notification
+      toast.success(t("profile_saved_successfully"), {
+        position: "top-right",
+        duration: 3000,
+        style: {
+          borderRadius: "10px",
+          background: "#333",
+          color: "#fff",
+        },
+        iconTheme: {
+          primary: "#B4A481",
+          secondary: "white",
+        },
+      });
     } catch (error) {
       console.error("Error updating profile:", error);
       setError("Failed to update profile. Please try again.");
+      // Show error toast notification
+      toast.error(t("profile_update_failed"), {
+        position: "top-right",
+        duration: 3000,
+        style: {
+          borderRadius: "10px",
+          background: "#333",
+          color: "#fff",
+        },
+      });
     } finally {
       setIsLoading(false);
     }

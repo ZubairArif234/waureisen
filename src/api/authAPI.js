@@ -252,6 +252,30 @@ export const verifyToken = async () => {
   }
 };
 
+// Update user password
+export const updateUserPassword = async (passwordData) => {
+  try {
+    console.log("Updating user password");
+    const response = await API.put("/users/profile/security", passwordData);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating password:", error);
+    throw error;
+  }
+};
+
+// Update provider password
+export const updateProviderPassword = async (passwordData) => {
+  try {
+    console.log("Updating provider password");
+    const response = await API.put("/providers/profile/security", passwordData);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating provider password:", error);
+    throw error;
+  }
+};
+
 // Logout function - only clears frontend state
 export const logout = () => {
   // Return a resolved promise for consistency with other functions
