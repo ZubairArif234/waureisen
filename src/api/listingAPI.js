@@ -39,7 +39,7 @@ export const searchListings = async (params) => {
       pageSize,
     });
 
-    // Add filters if provided
+    // Add filters if provided - encode as a single JSON string
     if (filters && filters.length > 0) {
       queryParams.append('filters', JSON.stringify(filters));
     }
