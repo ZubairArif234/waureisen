@@ -11,7 +11,7 @@ import Navbar from "../../components/Shared/Navbar";
 import Footer from "../../components/Shared/Footer";
 import i1 from "../../assets/i1.png";
 import { useLanguage } from "../../utils/LanguageContext";
-import { getProviderListings, deleteListing, getListingDetails } from "../../api/providerAPI";
+import { deleteListing, getListingDetails, getProviderListings } from "../../api/providerAPI";
 
 // DeleteConfirmationModal component
 const DeleteConfirmationModal = ({
@@ -186,18 +186,20 @@ const YourListings = () => {
       setError(null);
       try {
         const data = await getProviderListings();
+        
         const formatted = data.map((l) => ({
           id: l._id,
           title: l.title || "Unnamed Listing",
           location: l.location?.address || "Unknown location",
           price: l.pricePerNight?.price || 0,
-
+          currency: l.pricePerNight?.currency || "CHF",
           status: l.status || "draft",
           image: l.images?.[0] || i1,
           bookings: l.totalBookings || 0,
-          listingSource: l.listingSource,
+          listingSource: l.source?.name || "waureisen",
           propertyType: l.listingType || "Other",
         }));
+        
         setListings(formatted);
       } catch (err) {
         console.error(err);

@@ -219,7 +219,7 @@ const Navbar = () => {
     {
       icon: <Settings className="h-4 w-4" />,
       label: t("account"),
-      path: "/account",
+      path: "/provider/account",
     },
   ];
 

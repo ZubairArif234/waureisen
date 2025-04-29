@@ -1070,12 +1070,42 @@ schedule_callback: "Schedule a Callback",
   submit: "Submit",
   please_verify_email: "Please verify your email before signing up",
 
+  unblock_dates: "Unblock Dates",
+  select_property_to_view_dates: "Select a property to view blocked dates",
+  no_blocked_dates_for_property: "No blocked dates found for this property",
+  blocked_date: "blocked date",
+  blocked_dates: "blocked dates",
+  deselect_all: "Deselect All",
+  select_all: "Select All",
+  reason: "Reason",
+  unblocking: "Unblocking...",
+  unblock_selected: "Unblock Selected",
+  dates_unblocked_successfully: "Dates have been unblocked successfully",
+  error_unblocking_dates: "Error unblocking dates. Please try again",
+  no_dates_were_unblocked: "No dates were unblocked. They might already be available.",
+
 
   },
 
   de: {
 
+    no_dates_were_unblocked: "Es wurden keine Termine freigegeben. Möglicherweise sind sie bereits verfügbar.",
 
+
+
+
+    unblock_dates: "Termine freigeben",
+    select_property_to_view_dates: "Wählen Sie eine Immobilie, um blockierte Termine anzuzeigen",
+    no_blocked_dates_for_property: "Keine blockierten Termine für diese Immobilie gefunden",
+    blocked_date: "blockierter Termin",
+    blocked_dates: "blockierte Termine",
+    deselect_all: "Alle abwählen",
+    select_all: "Alle auswählen",
+    reason: "Grund",
+    unblocking: "Wird freigegeben...",
+    unblock_selected: "Ausgewählte freigeben",
+    dates_unblocked_successfully: "Termine wurden erfolgreich freigegeben",
+    error_unblocking_dates: "Fehler beim Freigeben der Termine. Bitte versuchen Sie es erneut",
 
     verify: "Verifizieren",
   sending: "Senden...",

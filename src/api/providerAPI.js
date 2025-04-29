@@ -427,12 +427,19 @@ export const blockDates = async (blockData) => {
 export const unblockDates = async (unblockData) => {
   try {
     setAuthHeader();
-    const response = await API.delete("/providers/calendar/unblock-dates", {
-      data: unblockData,
+    console.log('Sending unblock dates request with data:', unblockData);
+    
+    // Make sure we're sending the data in the format expected by the backend
+    const response = await API.delete('/providers/calendar/unblock-dates', {
+      data: {
+        listingId: unblockData.listingId,
+        dates: unblockData.dates
+      }
     });
+    
     return response.data;
   } catch (error) {
-    console.error("Error unblocking dates:", error);
+    console.error('Error unblocking dates:', error);
     throw error;
   }
 };

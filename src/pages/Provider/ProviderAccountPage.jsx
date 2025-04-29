@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Banknote, Shield, Settings } from 'lucide-react';
+import { FileText, Banknote, Shield, Settings, ArrowLeft } from 'lucide-react';
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
 import { useLanguage } from '../../utils/LanguageContext';
@@ -103,7 +103,15 @@ const ProviderAccountPage = () => {
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
           {/* Header */}
           <div className="bg-brand/10 px-6 py-8 sm:px-8">
-            <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 mb-2">{t('account')}</h1>
+            <div className="flex items-center gap-4 mb-4">
+              <button
+                onClick={() => navigate('/provider/dashboard')}
+                className="p-2 hover:bg-white/50 rounded-full transition-colors"
+              >
+                <ArrowLeft className="w-6 h-6 text-gray-600" />
+              </button>
+              <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">{t('account')}</h1>
+            </div>
             <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
               <span className="text-gray-600">{providerName}</span>
               <span className="hidden sm:block text-gray-400">•</span>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar as CalendarIcon, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Calendar as CalendarIcon, Filter, ChevronLeft, ChevronRight, Lock, Unlock } from 'lucide-react';
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
 import { useLanguage } from '../../utils/LanguageContext';
@@ -9,9 +9,11 @@ import {
   getProviderBookings,
   getUnavailableDates,
   blockDates,
+  unblockDates,
   getProviderCalendarBookings
 } from '../../api/providerAPI';
-
+import UnblockDatesModal from '../../components/Provider/UnblockDatesModal';
+import { toast } from 'react-hot-toast';
 
 const formatDateWithoutTimezoneOffset = (date) => {
   const year = date.getFullYear();
@@ -615,6 +617,7 @@ const ProviderCalendar = () => {
   const [unavailableDates, setUnavailableDates] = useState([]);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
+  const [isUnblockModalOpen, setIsUnblockModalOpen] = useState(false);
   const [selectedDateForBlock, setSelectedDateForBlock] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -650,6 +653,7 @@ const ProviderCalendar = () => {
       const formattedUnavailableDates = unavailableDatesData.map(date => ({
         date: typeof date.date === 'string' ? date.date : new Date(date.date).toISOString().split('T')[0],
         listingId: date.listing?._id || date.listing || date.listingId,
+        listingTitle: date.listingTitle || '',
         reason: date.reason || 'unavailable'
       }));
       
@@ -688,8 +692,8 @@ const ProviderCalendar = () => {
           status: booking.status,
           listingId: booking.listing?._id || booking.listing,
           listingTitle: booking.listing?.title || 'Property',
-          guestCount: booking.guestCount || 1,
-          dogCount: booking.dogCount || 0
+          guestCount: booking.capacity?.people || 1,
+          dogCount: booking.capacity?.dogs || 0
         }));
         
         setBookings(formattedBookings);
@@ -720,10 +724,41 @@ const ProviderCalendar = () => {
       console.log('Block dates API response:', response);
       await fetchUnavailableDates();
       
-      alert(t('dates_blocked_successfully'));
+      toast.success(t('dates_blocked_successfully'));
     } catch (error) {
       console.error('Error blocking dates:', error);
-      alert(t('error_blocking_dates'));
+      toast.error(t('error_blocking_dates'));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleUnblockDates = async (unblockData) => {
+    try {
+      setIsLoading(true);
+      console.log('Sending unblock dates request with data:', unblockData);
+      const response = await unblockDates(unblockData);
+      console.log('Unblock dates API response:', response);
+      
+      // Force a refresh of unavailable dates to ensure UI is updated
+      await fetchUnavailableDates();
+      
+      // Check if any dates were actually unblocked
+      if (response && response.deletedCount > 0) {
+        toast.success(t('dates_unblocked_successfully'));
+      } else {
+        // Handle case where operation was successful but no dates were unblocked
+        toast.info(t('no_dates_were_unblocked'));
+      }
+      
+      // Return true to indicate operation completed successfully
+      return true;
+    } catch (error) {
+      console.error('Error unblocking dates:', error);
+      toast.error(t('error_unblocking_dates'));
+      
+      // Return false to indicate operation failed
+      return false;
     } finally {
       setIsLoading(false);
     }
@@ -822,12 +857,23 @@ const ProviderCalendar = () => {
             </select>
             </div>
             
-            <button
-              onClick={() => setIsBlockModalOpen(true)}
-              className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand/90 transition-colors"
-            >
+            <div className="flex space-x-2">
+              <button
+                onClick={() => setIsBlockModalOpen(true)}
+                className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand/90 transition-colors flex items-center"
+              >
+                <Lock className="w-4 h-4 mr-1" />
                 {t('block_dates')}
-            </button>
+              </button>
+              
+              <button
+                onClick={() => setIsUnblockModalOpen(true)}
+                className="px-4 py-2 bg-white border border-brand text-brand rounded-lg hover:bg-brand/10 transition-colors flex items-center"
+              >
+                <Unlock className="w-4 h-4 mr-1" />
+                {t('unblock_dates')}
+              </button>
+            </div>
           </div>
         </div>
         
@@ -860,6 +906,16 @@ const ProviderCalendar = () => {
         bookings={bookings}
         selectedDate={selectedDateForBlock ? formatDate(selectedDateForBlock) : null}
         onSave={handleBlockDates}
+      />
+      
+      {/* Unblock date modal */}
+      <UnblockDatesModal
+        isOpen={isUnblockModalOpen}
+        onClose={() => setIsUnblockModalOpen(false)}
+        listings={listings}
+        selectedListing={selectedListing !== 'all' ? selectedListing : ''}
+        unavailableDates={unavailableDates}
+        onUnblock={handleUnblockDates}
       />
       
       <Footer />
