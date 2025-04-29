@@ -80,7 +80,7 @@ const SubsectionModal = ({ isOpen, onClose, onSave, editingSubsection = null }) 
 };
 
 // Modal for adding/editing a filter
-const FilterModal = ({ isOpen, onClose, onSave, editingFilter = null, subsectionId }) => {
+const FilterModal = ({ isOpen, onClose, onSave, editingFilter = null, subsectionId, subsubsectionId }) => {
   const [formData, setFormData] = useState({
     name: editingFilter?.name || '',
     type: editingFilter?.type || 'text',
@@ -112,7 +112,7 @@ const FilterModal = ({ isOpen, onClose, onSave, editingFilter = null, subsection
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave({ ...formData, subsectionId });
+    onSave({ ...formData, subsectionId, subsubsectionId });
   };
 
   const addOption = () => {
@@ -335,22 +335,25 @@ const FiltersManagement = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedSubsections, setExpandedSubsections] = useState({});
+  const [expandedSubsubsections, setExpandedSubsubsections] = useState({});
   
   // Modal states
   const [subsectionModal, setSubsectionModal] = useState({ isOpen: false, editingSubsection: null });
   const [filterModal, setFilterModal] = useState({ 
     isOpen: false, 
     editingFilter: null, 
-    subsectionId: null 
+    subsectionId: null,
+    subsubsectionId: null
   });
   const [deleteModal, setDeleteModal] = useState({ 
     isOpen: false, 
     item: null, 
     type: null,
-    subsectionId: null
+    subsectionId: null,
+    subsubsectionId: null
   });
 
-  // Fetch active filters on component mount
+  // Fetch template filters on component mount
   useEffect(() => {
     fetchFilters();
   }, []);
@@ -385,6 +388,14 @@ const FiltersManagement = () => {
     setExpandedSubsections(prev => ({
       ...prev,
       [id]: !prev[id]
+    }));
+  };
+
+  // Toggle subsubsection expansion
+  const toggleSubsubsection = (subsectionId, subsubsectionId) => {
+    setExpandedSubsubsections(prev => ({
+      ...prev,
+      [`${subsectionId}-${subsubsectionId}`]: !prev[`${subsectionId}-${subsubsectionId}`]
     }));
   };
 
@@ -423,20 +434,20 @@ const FiltersManagement = () => {
   // Add or update filter
   const handleSaveFilter = async (formData) => {
     try {
-      const { subsectionId, ...filterData } = formData;
+      const { subsectionId, subsubsectionId, ...filterData } = formData;
       
       if (filterModal.editingFilter) {
         // Update existing filter
         await updateFilter(
           activeFilter._id,
           subsectionId,
-          filterModal.editingFilter._id,
+          subsubsectionId,
           filterData
         );
         toast.success('Filter updated successfully');
       } else {
         // Add new filter
-        await createFilter(activeFilter._id, subsectionId, filterData);
+        await createFilter(activeFilter._id, subsectionId, subsubsectionId, filterData);
         toast.success('Filter added successfully');
       }
       
@@ -451,7 +462,7 @@ const FiltersManagement = () => {
         toast.error('Failed to save filter');
       }
     } finally {
-      setFilterModal({ isOpen: false, editingFilter: null, subsectionId: null });
+      setFilterModal({ isOpen: false, editingFilter: null, subsectionId: null, subsubsectionId: null });
     }
   };
 
@@ -462,6 +473,10 @@ const FiltersManagement = () => {
         // Delete subsection
         await deleteSubsection(activeFilter._id, deleteModal.item._id);
         toast.success('Subsection deleted successfully');
+      } else if (deleteModal.type === 'subsubsection') {
+        // Delete subsubsection
+        await deleteSubsection(activeFilter._id, deleteModal.item._id);
+        toast.success('Subsubsection deleted successfully');
       } else if (deleteModal.type === 'filter') {
         // Delete filter
         await deleteFilter(
@@ -483,7 +498,7 @@ const FiltersManagement = () => {
         toast.error('Failed to delete item');
       }
     } finally {
-      setDeleteModal({ isOpen: false, item: null, type: null, subsectionId: null });
+      setDeleteModal({ isOpen: false, item: null, type: null, subsectionId: null, subsubsectionId: null });
     }
   };
 
@@ -627,7 +642,8 @@ const FiltersManagement = () => {
               {/* Filters List */}
               {expandedSubsections[subsection._id] && (
                 <div className="p-6 space-y-4">
-                  {subsection.filters && subsection.filters.length > 0 ? (
+                  {/* Direct filters in subsection */}
+                  {subsection.filters && subsection.filters.length > 0 && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {subsection.filters.map(filter => (
                         <div
@@ -694,22 +710,179 @@ const FiltersManagement = () => {
                         </div>
                       ))}
                     </div>
-                  ) : (
-                    <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
-                      No filters added yet.{' '}
-                      <button
-                        onClick={() => setFilterModal({
-                          isOpen: true,
-                          editingFilter: null,
-                          subsectionId: subsection._id
-                        })}
-                        className="text-brand hover:underline"
-                      >
-                        Add one now
-                      </button>
+                  )}
+
+                  {/* Subsubsections */}
+                  {subsection.subsubsections && subsection.subsubsections.length > 0 && (
+                    <div className="space-y-4">
+                      {subsection.subsubsections.map(subsubsection => (
+                        <div key={subsubsection._id} className="border rounded-lg overflow-hidden">
+                          {/* Subsubsection Header */}
+                          <div className="bg-gray-100 px-6 py-3 flex items-center justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-4">
+                                <button
+                                  onClick={() => toggleSubsubsection(subsection._id, subsubsection._id)}
+                                  className="text-gray-500 hover:text-gray-700"
+                                >
+                                  {expandedSubsubsections[`${subsection._id}-${subsubsection._id}`] ? (
+                                    <ChevronUp className="w-5 h-5" />
+                                  ) : (
+                                    <ChevronDown className="w-5 h-5" />
+                                  )}
+                                </button>
+                                <div className="flex items-center gap-2">
+                                  {subsubsection.predefined && (
+                                    <Lock className="w-4 h-4 text-brand" />
+                                  )}
+                                  <div>
+                                    <h4 className="text-md font-medium text-gray-900">
+                                      {subsubsection.name}
+                                    </h4>
+                                    {subsubsection.description && (
+                                      <p className="text-sm text-gray-500">{subsubsection.description}</p>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {!subsubsection.predefined && (
+                                <>
+                                  <button
+                                    onClick={() => setSubsectionModal({ 
+                                      isOpen: true, 
+                                      editingSubsection: subsubsection 
+                                    })}
+                                    className="p-2 text-gray-500 hover:text-gray-700"
+                                    title="Edit subsubsection"
+                                  >
+                                    <Edit className="w-5 h-5" />
+                                  </button>
+                                  <button
+                                    onClick={() => setDeleteModal({ 
+                                      isOpen: true, 
+                                      item: subsubsection,
+                                      type: 'subsubsection'
+                                    })}
+                                    className="p-2 text-red-500 hover:text-red-700"
+                                    title="Delete subsubsection"
+                                  >
+                                    <Trash className="w-5 h-5" />
+                                  </button>
+                                </>
+                              )}
+                              <button
+                                onClick={() => setFilterModal({
+                                  isOpen: true,
+                                  editingFilter: null,
+                                  subsectionId: subsection._id,
+                                  subsubsectionId: subsubsection._id
+                                })}
+                                className="p-2 text-gray-500 hover:text-gray-700"
+                                title="Add filter"
+                              >
+                                <Plus className="w-5 h-5" />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Subsubsection Filters */}
+                          {expandedSubsubsections[`${subsection._id}-${subsubsection._id}`] && (
+                            <div className="p-4">
+                              {subsubsection.filters && subsubsection.filters.length > 0 ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                  {subsubsection.filters.map(filter => (
+                                    <div
+                                      key={filter._id}
+                                      className={`border rounded-lg p-4 ${filter.predefined 
+                                        ? 'bg-gray-50 border-gray-300' 
+                                        : 'hover:bg-gray-50 transition-colors'} group`}
+                                    >
+                                      <div className="flex justify-between items-start">
+                                        <div className="flex items-start gap-3">
+                                          <div className="mt-1">
+                                            <FilterTypeIcon type={filter.type} />
+                                          </div>
+                                          <div>
+                                            <h4 className="font-medium text-gray-900 flex items-center gap-2">
+                                              {filter.name}
+                                              {filter.predefined && (
+                                                <Lock className="w-3 h-3 text-brand" />
+                                              )}
+                                            </h4>
+                                            <p className="text-sm text-gray-500 capitalize">{filter.type}</p>
+                                            
+                                            {/* Show options for select/radio/checkbox types */}
+                                            {['select', 'radio', 'checkbox'].includes(filter.type) && filter.options && filter.options.length > 0 && (
+                                              <p className="text-xs text-gray-500 mt-1">
+                                                {filter.options.length} option{filter.options.length !== 1 ? 's' : ''}
+                                              </p>
+                                            )}
+                                          </div>
+                                        </div>
+                                        {!filter.predefined && (
+                                          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button
+                                              onClick={() => setFilterModal({
+                                                isOpen: true,
+                                                editingFilter: filter,
+                                                subsectionId: subsection._id,
+                                                subsubsectionId: subsubsection._id
+                                              })}
+                                              className="text-gray-500 hover:text-gray-700"
+                                              title="Edit filter"
+                                            >
+                                              <Edit className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                              onClick={() => setDeleteModal({
+                                                isOpen: true,
+                                                item: filter,
+                                                type: 'filter',
+                                                subsectionId: subsection._id,
+                                                subsubsectionId: subsubsection._id
+                                              })}
+                                              className="text-red-500 hover:text-red-700"
+                                              title="Delete filter"
+                                            >
+                                              <Trash className="w-4 h-4" />
+                                            </button>
+                                          </div>
+                                        )}
+                                      </div>
+                                      {filter.required && (
+                                        <span className="mt-2 inline-block px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+                                          Required
+                                        </span>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="text-center py-4 text-gray-500">
+                                  No filters added yet.{' '}
+                                  <button
+                                    onClick={() => setFilterModal({
+                                      isOpen: true,
+                                      editingFilter: null,
+                                      subsectionId: subsection._id,
+                                      subsubsectionId: subsubsection._id
+                                    })}
+                                    className="text-brand hover:underline"
+                                  >
+                                    Add one now
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
                     </div>
                   )}
-                  
+
+                  {/* Add New Filter Button */}
                   <div className="flex justify-center mt-6">
                     <button
                       onClick={() => setFilterModal({
@@ -756,15 +929,16 @@ const FiltersManagement = () => {
 
       <FilterModal
         isOpen={filterModal.isOpen}
-        onClose={() => setFilterModal({ isOpen: false, editingFilter: null, subsectionId: null })}
+        onClose={() => setFilterModal({ isOpen: false, editingFilter: null, subsectionId: null, subsubsectionId: null })}
         onSave={handleSaveFilter}
         editingFilter={filterModal.editingFilter}
         subsectionId={filterModal.subsectionId}
+        subsubsectionId={filterModal.subsubsectionId}
       />
 
       <DeleteConfirmationModal
         isOpen={deleteModal.isOpen}
-        onClose={() => setDeleteModal({ isOpen: false, item: null, type: null, subsectionId: null })}
+        onClose={() => setDeleteModal({ isOpen: false, item: null, type: null, subsectionId: null, subsubsectionId: null })}
         onConfirm={handleDelete}
         itemName={deleteModal.item?.name}
         itemType={deleteModal.type === 'subsection' ? 'Subsection' : 'Filter'}
