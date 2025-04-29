@@ -1,14 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, X, ChevronDown, ChevronUp, Trash, AlertTriangle, ListFilter, Check, Edit, Lock } from 'lucide-react';
-import { getActiveFilters, createSubsection, updateSubsection, deleteSubsection, createFilter, updateFilter, deleteFilter } from '../../api/adminAPI';
+import { 
+  getActiveFilters, 
+  createSubsection, 
+  updateSubsection, 
+  deleteSubsection, 
+  createFilter, 
+  updateFilter, 
+  deleteFilter,
+  createSubsubsection,
+  updateSubsubsection,
+  deleteSubsubsection,
+  updateTemplateFilter
+} from '../../api/adminAPI';
 import { toast } from 'react-hot-toast';
 
 // Modal for adding/editing a subsection
 const SubsectionModal = ({ isOpen, onClose, onSave, editingSubsection = null }) => {
   const [formData, setFormData] = useState({
-    name: editingSubsection?.name || '',
-    description: editingSubsection?.description || ''
+    name: '',
+    description: '',
+    required: false
   });
+
+  useEffect(() => {
+    if (editingSubsection) {
+      setFormData({
+        name: editingSubsection.name || '',
+        description: editingSubsection.description || '',
+        required: editingSubsection.required || false
+      });
+    } else {
+      setFormData({
+        name: '',
+        description: '',
+        required: false
+      });
+    }
+  }, [editingSubsection]);
 
   if (!isOpen) return null;
 
@@ -57,6 +86,19 @@ const SubsectionModal = ({ isOpen, onClose, onSave, editingSubsection = null }) 
               />
             </div>
 
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="required"
+                checked={formData.required}
+                onChange={(e) => setFormData({ ...formData, required: e.target.checked })}
+                className="rounded border-gray-300 text-brand focus:ring-brand"
+              />
+              <label htmlFor="required" className="text-sm text-gray-700">
+                Required field
+              </label>
+            </div>
+
             <div className="flex justify-end gap-3 mt-6">
               <button
                 type="button"
@@ -70,6 +112,112 @@ const SubsectionModal = ({ isOpen, onClose, onSave, editingSubsection = null }) 
                 className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand/90"
               >
                 {editingSubsection ? 'Update' : 'Add'} Subsection
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </>
+  );
+};
+
+// Modal for adding/editing a subsubsection
+const SubsubsectionModal = ({ isOpen, onClose, onSave, editingSubsubsection = null }) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    required: false
+  });
+
+  useEffect(() => {
+    if (editingSubsubsection) {
+      setFormData({
+        name: editingSubsubsection.name || '',
+        description: editingSubsubsection.description || '',
+        required: editingSubsubsection.required || false
+      });
+    } else {
+      setFormData({
+        name: '',
+        description: '',
+        required: false
+      });
+    }
+  }, [editingSubsubsection]);
+
+  if (!isOpen) return null;
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  return (
+    <>
+      <div className="fixed inset-0 bg-black bg-opacity-50 z-50" onClick={onClose} />
+      <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl z-50 w-full max-w-md">
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-semibold text-gray-900">
+              {editingSubsubsection ? 'Edit Subsubsection' : 'Add New Subsubsection'}
+            </h3>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Subsubsection Name
+              </label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Description
+              </label>
+              <textarea
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                rows={3}
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="required"
+                checked={formData.required}
+                onChange={(e) => setFormData({ ...formData, required: e.target.checked })}
+                className="rounded border-gray-300 text-brand focus:ring-brand"
+              />
+              <label htmlFor="required" className="text-sm text-gray-700">
+                Required field
+              </label>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand/90"
+              >
+                {editingSubsubsection ? 'Update' : 'Add'} Subsubsection
               </button>
             </div>
           </form>
@@ -339,6 +487,11 @@ const FiltersManagement = () => {
   
   // Modal states
   const [subsectionModal, setSubsectionModal] = useState({ isOpen: false, editingSubsection: null });
+  const [subsubsectionModal, setSubsubsectionModal] = useState({ 
+    isOpen: false, 
+    editingSubsubsection: null,
+    subsectionId: null 
+  });
   const [filterModal, setFilterModal] = useState({ 
     isOpen: false, 
     editingFilter: null, 
@@ -407,12 +560,20 @@ const FiltersManagement = () => {
         await updateSubsection(
           activeFilter._id,
           subsectionModal.editingSubsection._id,
-          formData
+          {
+            name: formData.name,
+            description: formData.description,
+            required: formData.required
+          }
         );
         toast.success('Subsection updated successfully');
       } else {
         // Add new subsection
-        await createSubsection(activeFilter._id, formData);
+        await createSubsection(activeFilter._id, {
+          name: formData.name,
+          description: formData.description,
+          required: formData.required
+        });
         toast.success('Subsection added successfully');
       }
       
@@ -420,14 +581,49 @@ const FiltersManagement = () => {
       fetchFilters();
     } catch (err) {
       console.error('Error saving subsection:', err);
-      
-      if (err.response && err.response.data && err.response.data.message) {
-        toast.error(err.response.data.message);
-      } else {
-        toast.error('Failed to save subsection');
-      }
+      toast.error(err.response?.data?.message || 'Failed to save subsection');
     } finally {
       setSubsectionModal({ isOpen: false, editingSubsection: null });
+    }
+  };
+
+  // Add or update subsubsection
+  const handleSaveSubsubsection = async (formData) => {
+    try {
+      if (subsubsectionModal.editingSubsubsection) {
+        // Update existing subsubsection
+        await updateSubsubsection(
+          activeFilter._id,
+          subsubsectionModal.subsectionId,
+          subsubsectionModal.editingSubsubsection._id,
+          {
+            name: formData.name,
+            description: formData.description,
+            required: formData.required
+          }
+        );
+        toast.success('Subsubsection updated successfully');
+      } else {
+        // Add new subsubsection
+        await createSubsubsection(
+          activeFilter._id,
+          subsubsectionModal.subsectionId,
+          {
+            name: formData.name,
+            description: formData.description,
+            required: formData.required
+          }
+        );
+        toast.success('Subsubsection added successfully');
+      }
+      
+      // Refresh filters
+      fetchFilters();
+    } catch (err) {
+      console.error('Error saving subsubsection:', err);
+      toast.error(err.response?.data?.message || 'Failed to save subsubsection');
+    } finally {
+      setSubsubsectionModal({ isOpen: false, editingSubsubsection: null, subsectionId: null });
     }
   };
 
@@ -441,13 +637,19 @@ const FiltersManagement = () => {
         await updateFilter(
           activeFilter._id,
           subsectionId,
-          subsubsectionId,
-          filterData
+          filterModal.editingFilter._id,
+          filterData,
+          subsubsectionId
         );
         toast.success('Filter updated successfully');
       } else {
         // Add new filter
-        await createFilter(activeFilter._id, subsectionId, subsubsectionId, filterData);
+        await createFilter(
+          activeFilter._id,
+          subsectionId,
+          filterData,
+          subsubsectionId
+        );
         toast.success('Filter added successfully');
       }
       
@@ -475,14 +677,19 @@ const FiltersManagement = () => {
         toast.success('Subsection deleted successfully');
       } else if (deleteModal.type === 'subsubsection') {
         // Delete subsubsection
-        await deleteSubsection(activeFilter._id, deleteModal.item._id);
+        await deleteSubsubsection(
+          activeFilter._id,
+          deleteModal.subsectionId,
+          deleteModal.item._id
+        );
         toast.success('Subsubsection deleted successfully');
       } else if (deleteModal.type === 'filter') {
         // Delete filter
         await deleteFilter(
           activeFilter._id,
           deleteModal.subsectionId,
-          deleteModal.item._id
+          deleteModal.item._id,
+          deleteModal.subsubsectionId
         );
         toast.success('Filter deleted successfully');
       }
@@ -491,12 +698,7 @@ const FiltersManagement = () => {
       fetchFilters();
     } catch (err) {
       console.error('Error deleting item:', err);
-      
-      if (err.response && err.response.data && err.response.data.message) {
-        toast.error(err.response.data.message);
-      } else {
-        toast.error('Failed to delete item');
-      }
+      toast.error(err.response?.data?.message || 'Failed to delete item');
     } finally {
       setDeleteModal({ isOpen: false, item: null, type: null, subsectionId: null, subsubsectionId: null });
     }
@@ -591,11 +793,6 @@ const FiltersManagement = () => {
                           <p className="text-sm text-gray-500">{subsection.description}</p>
                         )}
                       </div>
-                      {subsection.predefined && (
-                        <span className="bg-brand/10 text-brand text-xs px-2 py-1 rounded-full">
-                          Predefined
-                        </span>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -626,13 +823,13 @@ const FiltersManagement = () => {
                     </>
                   )}
                   <button
-                    onClick={() => setFilterModal({
+                    onClick={() => setSubsubsectionModal({
                       isOpen: true,
-                      editingFilter: null,
+                      editingSubsubsection: null,
                       subsectionId: subsection._id
                     })}
                     className="p-2 text-gray-500 hover:text-gray-700"
-                    title="Add filter"
+                    title="Add subsubsection"
                   >
                     <Plus className="w-5 h-5" />
                   </button>
@@ -750,9 +947,10 @@ const FiltersManagement = () => {
                               {!subsubsection.predefined && (
                                 <>
                                   <button
-                                    onClick={() => setSubsectionModal({ 
+                                    onClick={() => setSubsubsectionModal({ 
                                       isOpen: true, 
-                                      editingSubsection: subsubsection 
+                                      editingSubsubsection: subsubsection,
+                                      subsectionId: subsection._id
                                     })}
                                     className="p-2 text-gray-500 hover:text-gray-700"
                                     title="Edit subsubsection"
@@ -763,7 +961,8 @@ const FiltersManagement = () => {
                                     onClick={() => setDeleteModal({ 
                                       isOpen: true, 
                                       item: subsubsection,
-                                      type: 'subsubsection'
+                                      type: 'subsubsection',
+                                      subsectionId: subsection._id
                                     })}
                                     className="p-2 text-red-500 hover:text-red-700"
                                     title="Delete subsubsection"
@@ -881,7 +1080,7 @@ const FiltersManagement = () => {
                       ))}
                     </div>
                   )}
-
+                  
                   {/* Add New Filter Button */}
                   <div className="flex justify-center mt-6">
                     <button
@@ -927,6 +1126,13 @@ const FiltersManagement = () => {
         editingSubsection={subsectionModal.editingSubsection}
       />
 
+      <SubsubsectionModal
+        isOpen={subsubsectionModal.isOpen}
+        onClose={() => setSubsubsectionModal({ isOpen: false, editingSubsubsection: null, subsectionId: null })}
+        onSave={handleSaveSubsubsection}
+        editingSubsubsection={subsubsectionModal.editingSubsubsection}
+      />
+
       <FilterModal
         isOpen={filterModal.isOpen}
         onClose={() => setFilterModal({ isOpen: false, editingFilter: null, subsectionId: null, subsubsectionId: null })}
@@ -941,7 +1147,7 @@ const FiltersManagement = () => {
         onClose={() => setDeleteModal({ isOpen: false, item: null, type: null, subsectionId: null, subsubsectionId: null })}
         onConfirm={handleDelete}
         itemName={deleteModal.item?.name}
-        itemType={deleteModal.type === 'subsection' ? 'Subsection' : 'Filter'}
+        itemType={deleteModal.type === 'subsection' ? 'Subsection' : (deleteModal.type === 'subsubsection' ? 'Subsubsection' : 'Filter')}
       />
     </div>
   );
