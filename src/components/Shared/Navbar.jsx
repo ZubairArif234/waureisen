@@ -449,10 +449,10 @@ const Navbar = () => {
                   src={currentUser.profilePicture}
                   alt="Profile"
                   className="w-full h-full object-cover"
-                  onError={(e) => {
-                    console.error("Profile image load error:", e);
-                    setProfileImageError(true);
-                  }}
+                  // onError={(e) => {
+                  //   console.error("Profile image load error:", e);
+                  //   setProfileImageError(true);
+                  // }}
                 />
               ) : (
                 <div className="flex items-center justify-center w-full h-full">

@@ -700,15 +700,17 @@ const AccommodationPage = () => {
                     </p>
                   </div>
                 </div>
+                {accommodation?.provider !== "Interhome" &&
                 <div className="flex gap-4">
                   <Link to={"/public-profile"}
                   // state={{ user: { name: "John", age: 30 } }}
-                   state={{data:{...accommodation?.owner}}} 
-                   className="text-brand hover:underline text-sm">
+                  state={{data:{...accommodation?.owner}}} 
+                  className="text-brand hover:underline text-sm">
                     {t("view_profile")}
                   </Link>
                 
                 </div>
+                  }
               </div>
             </section>
           </div>
@@ -808,7 +810,7 @@ const AccommodationPage = () => {
 
               {/* Price Calculation */}
 
-              {accommodation?.provider == "Interhome" && (
+              {accommodation?.provider !== "Interhome" && (
                 <div className="mb-4">
                   <div className="flex justify-between items-center">
                     <p className="text-sm text-gray-700">
