@@ -10,6 +10,7 @@ import {
   createListing,
   updateListing,
   getListingById,
+  getTemplateFilter,
 } from "../../api/adminAPI";
 import { generateUniqueListingCode } from "../../utils/uniqueCodeGenerator";
 
@@ -17,8 +18,9 @@ const AddAccommodation = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEditMode = !!id;
-  const [isLoading, setIsLoading] = useState(isEditMode); // Start with loading if in edit mode
-  const [activeTab, setActiveTab] = useState("basicInfo");
+  const [isLoading, setIsLoading] = useState(isEditMode);
+  const [activeTab, setActiveTab] = useState(null); // Changed to null initially
+  const [template, setTemplate] = useState(null);
   const [formData, setFormData] = useState({
     // Basic Info
     title: "",
@@ -50,25 +52,6 @@ const AddAccommodation = () => {
     mainImage: null,
     galleryImages: [],
 
-    // Amenities
-    generalAmenities: {
-      kitchen: false,
-      airConditioning: false,
-      parking: false,
-      wifi: false,
-      dedicatedWorkspace: false,
-      fireworkFreeZone: false,
-      tv: false,
-      swimmingPool: false,
-      dogsAllowed: false,
-    },
-    dogFilters: {
-      fireworkFreeZone: false,
-      dogParksNearby: false,
-      dogFriendlyRestaurants: false,
-      petSupplies: false,
-    },
-
     // Description
     shortDescription: "",
     fullDescription: "",
@@ -89,6 +72,61 @@ const AddAccommodation = () => {
       },
     },
   });
+
+  // Define all possible tabs with their corresponding section names in template
+  const allTabs = [
+    { id: "basicInfo", label: "Basic Info", templateName: "Basic Info" },
+    { id: "photos", label: "Photos", templateName: "Photos" },
+    { id: "amenities", label: "Amenities", templateName: "Amenities" },
+    { id: "description", label: "Description", templateName: "Description" },
+    { id: "policiesLocation", label: "Policies & Location", templateName: "Policies & Location" },
+  ];
+
+  // Filter tabs based on template data
+  const availableTabs = template 
+    ? allTabs.filter(tab => 
+        template.subsections?.some(section => section.name === tab.templateName)
+      )
+    : [];
+
+  // Set initial active tab when template loads
+  useEffect(() => {
+    if (template && availableTabs.length > 0 && !activeTab) {
+      setActiveTab(availableTabs[0].id);
+    }
+  }, [template, availableTabs]);
+
+  // Fetch template filter on mount and initialize amenities
+  useEffect(() => {
+    const fetchTemplate = async () => {
+      try {
+        const data = await getTemplateFilter();
+        setTemplate(data);
+
+        // Initialize form data based on template structure
+        if (data?.subsections) {
+          const newFormData = { ...formData };
+
+          // Initialize amenities
+          const amenitiesSection = data.subsections.find(s => s.name === 'Amenities');
+          if (amenitiesSection?.subsubsections) {
+            amenitiesSection.subsubsections.forEach(subsection => {
+              const key = `amenities_${subsection.name.toLowerCase().replace(/\s+/g, '_')}`;
+              newFormData[key] = {};
+              subsection.filters.forEach(filter => {
+                newFormData[key][filter.name] = false;
+              });
+            });
+          }
+
+          setFormData(newFormData);
+        }
+      } catch (err) {
+        console.error('Failed to fetch template filter:', err);
+      }
+    };
+    fetchTemplate();
+  }, []);
 
   // Load data if in edit mode
   useEffect(() => {
@@ -155,6 +193,20 @@ const AddAccommodation = () => {
         photos.push(...galleryUrls);
       }
 
+      // Format selected filters based on template structure
+      const selectedFilters = {};
+      if (template?.subsections) {
+        const amenitiesSection = template.subsections.find(s => s.name === 'Amenities');
+        if (amenitiesSection?.subsubsections) {
+          amenitiesSection.subsubsections.forEach(subsection => {
+            const key = `amenities_${subsection.name.toLowerCase().replace(/\s+/g, '_')}`;
+            selectedFilters[key] = Object.entries(formData[key] || {})
+              .filter(([, value]) => value === true)
+              .map(([name]) => name);
+          });
+        }
+      }
+
       // Create a completely new data structure to ensure all required fields
       const listingSubmitData = {
         title: formData.title || "New Listing",
@@ -199,14 +251,7 @@ const AddAccommodation = () => {
         },
 
         // Format selected filters
-        selectedFilters: {
-          generalFilters: Object.entries(formData.generalAmenities || {})
-            .filter(([, value]) => value === true)
-            .map(([key]) => key),
-          dogFilters: Object.entries(formData.dogFilters || {})
-            .filter(([, value]) => value === true)
-            .map(([key]) => key),
-        },
+        selectedFilters,
       };
 
       // Log the exact data being sent for debugging
@@ -245,15 +290,17 @@ const AddAccommodation = () => {
     }
   };
 
-  const tabs = [
-    { id: "basicInfo", label: "Basic Info" },
-    { id: "photos", label: "Photos" },
-    { id: "amenities", label: "Amenities" },
-    { id: "description", label: "Description" },
-    { id: "policiesLocation", label: "Policies & Location" },
-  ];
-
   const renderForm = () => {
+    if (!template) return <div>Loading template...</div>;
+    if (!activeTab) return null;
+
+    const getSubsection = (name) => template.subsections?.find(s => s.name === name);
+    const currentTab = allTabs.find(tab => tab.id === activeTab);
+    const subsection = currentTab ? getSubsection(currentTab.templateName) : null;
+
+    // Only render if we have both the tab configuration and corresponding subsection
+    if (!subsection) return null;
+
     switch (activeTab) {
       case "basicInfo":
         return (
@@ -261,6 +308,7 @@ const AddAccommodation = () => {
             formData={formData}
             handleInputChange={handleInputChange}
             handleNestedInputChange={handleNestedInputChange}
+            subsection={subsection}
           />
         );
       case "photos":
@@ -268,6 +316,7 @@ const AddAccommodation = () => {
           <PhotosForm
             formData={formData}
             handleInputChange={handleInputChange}
+            subsection={subsection}
           />
         );
       case "amenities":
@@ -275,6 +324,7 @@ const AddAccommodation = () => {
           <AmenitiesForm
             formData={formData}
             handleNestedInputChange={handleNestedInputChange}
+            subsection={subsection}
           />
         );
       case "description":
@@ -282,6 +332,7 @@ const AddAccommodation = () => {
           <DescriptionForm
             formData={formData}
             handleInputChange={handleInputChange}
+            subsection={subsection}
           />
         );
       case "policiesLocation":
@@ -290,10 +341,11 @@ const AddAccommodation = () => {
             formData={formData}
             handleInputChange={handleInputChange}
             handleNestedInputChange={handleNestedInputChange}
+            subsection={subsection}
           />
         );
       default:
-        return <BasicInfoForm />;
+        return null;
     }
   };
 
@@ -314,22 +366,24 @@ const AddAccommodation = () => {
 
       {/* Form */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        {/* Tabs */}
-        <div className="flex border-b overflow-x-auto">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-6 py-4 text-sm font-medium whitespace-nowrap ${
-                activeTab === tab.id
-                  ? "text-gray-900 border-b-2 border-gray-900"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        {/* Only render tabs if template is loaded */}
+        {template && (
+          <div className="flex border-b overflow-x-auto">
+            {availableTabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-6 py-4 text-sm font-medium whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? "text-gray-900 border-b-2 border-gray-900"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Form Content */}
         <div className="p-6">

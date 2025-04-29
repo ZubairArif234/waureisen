@@ -1060,18 +1060,18 @@ const FiltersManagement = () => {
                                 </div>
                               ) : (
                                 <div className="text-center py-4 text-gray-500">
-                                  No filters added yet.{' '}
-                                  <button
-                                    onClick={() => setFilterModal({
-                                      isOpen: true,
-                                      editingFilter: null,
+                      No filters added yet.{' '}
+                      <button
+                        onClick={() => setFilterModal({
+                          isOpen: true,
+                          editingFilter: null,
                                       subsectionId: subsection._id,
                                       subsubsectionId: subsubsection._id
-                                    })}
-                                    className="text-brand hover:underline"
-                                  >
-                                    Add one now
-                                  </button>
+                        })}
+                        className="text-brand hover:underline"
+                      >
+                        Add one now
+                      </button>
                                 </div>
                               )}
                             </div>

@@ -616,3 +616,13 @@ export const deleteFilter = async (filterId, subsectionId, subFilterId, subsubse
     throw error;
   }
 };
+
+export const getTemplateFilter = async () => {
+  try {
+    const response = await API.get('/filters/template');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching template filter:', error);
+    throw error;
+  }
+};
