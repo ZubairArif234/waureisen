@@ -626,3 +626,13 @@ export const getTemplateFilter = async () => {
     throw error;
   }
 };
+
+export const createListingFilter = async (filterData) => {
+  try {
+    const response = await API.post('/filters', filterData);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating listing filter:', error);
+    throw error;
+  }
+};

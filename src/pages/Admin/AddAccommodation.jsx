@@ -11,6 +11,7 @@ import {
   updateListing,
   getListingById,
   getTemplateFilter,
+  createListingFilter,
 } from "../../api/adminAPI";
 import { generateUniqueListingCode } from "../../utils/uniqueCodeGenerator";
 
@@ -178,112 +179,168 @@ const AddAccommodation = () => {
 
       // Process the images array
       const photos = [];
-
-      // Add main image if available
       if (formData.mainImage) {
         photos.push(formData.mainImage);
       }
-
-      // Add gallery images if available
       if (formData.galleryImages && formData.galleryImages.length > 0) {
-        // Filter to make sure we only include string URLs (not File objects)
         const galleryUrls = formData.galleryImages.filter(
           (img) => typeof img === "string"
         );
         photos.push(...galleryUrls);
       }
 
-      // Format selected filters based on template structure
-      const selectedFilters = {};
-      if (template?.subsections) {
-        const amenitiesSection = template.subsections.find(s => s.name === 'Amenities');
-        if (amenitiesSection?.subsubsections) {
-          amenitiesSection.subsubsections.forEach(subsection => {
-            const key = `amenities_${subsection.name.toLowerCase().replace(/\s+/g, '_')}`;
-            selectedFilters[key] = Object.entries(formData[key] || {})
-              .filter(([, value]) => value === true)
-              .map(([name]) => name);
-          });
+      // Format coordinates correctly - transform from {lat, lng} to [longitude, latitude]
+      let coordinates = [0, 0];
+      if (formData.location?.mapLocation) {
+        const location = formData.location.mapLocation;
+        if (typeof location === 'string') {
+          try {
+            const parsed = JSON.parse(location);
+            coordinates = [parsed.lng, parsed.lat];
+          } catch (e) {
+            console.warn('Could not parse location coordinates:', e);
+          }
+        } else if (location.lat && location.lng) {
+          coordinates = [location.lng, location.lat];
         }
       }
 
-      // Create a completely new data structure to ensure all required fields
-      const listingSubmitData = {
-        title: formData.title || "New Listing",
-        description:
-          formData.fullDescription || formData.shortDescription || "",
-        shortDescription: formData.shortDescription || "",
-        listingType: formData.propertyType || "Studio",
-        status: "active",
-        provider: "Waureisen",
-        // Add unique code to prevent duplicate key error
+      // Map form data to Listing model structure
+      const listingData = {
         Code: uniqueCode,
-
-        // Format pricing data correctly
+        title: formData.title || "New Listing",
+        listingType: "waureisen", // Hardcoded to waureisen for admin-created listings
+        propertyType: formData.propertyType || "Studio", // Add propertyType field
+        description: {
+          general: formData.fullDescription || formData.shortDescription || "",
+        },
+        checkInTime: formData.availability?.checkInTime 
+          ? new Date(`1970-01-01T${formData.availability.checkInTime.hour}:00${formData.availability.checkInTime.period === 'PM' ? '+12:00' : ':00'}`)
+          : null,
+        checkOutTime: formData.availability?.checkOutTime
+          ? new Date(`1970-01-01T${formData.availability.checkOutTime.hour}:00${formData.availability.checkOutTime.period === 'PM' ? '+12:00' : ':00'}`)
+          : null,
+        location: {
+          address: formData.location?.fullAddress || "Default Address",
+          optional: formData.location?.city || "",
+          type: 'Point',
+          coordinates: coordinates,
+        },
         pricePerNight: {
           price: formData.pricing?.regularPrice || 0,
           currency: formData.pricing?.currency || "CHF",
         },
-
-        // Format location with required address
-        location: {
-          city: formData.location?.city || "",
-          address: formData.location?.fullAddress || "Default Address",
-          coordinates: formData.location?.mapLocation || [0, 0],
+        maxDogs: formData.capacity?.dogs || 0,
+        maxGuests: formData.capacity?.people || 6,
+        bedRooms: formData.capacity?.bedrooms || 0,
+        rooms: {
+          number: formData.capacity?.rooms || 0,
         },
-
-        // Copy capacity information
-        capacity: formData.capacity || {
-          people: 2,
-          dogs: 1,
-          bedrooms: 1,
-          rooms: 1,
-          washrooms: 1,
-        },
-
-        // Add processed photos array
-        photos: photos,
-
-        // Source information
+        washrooms: formData.capacity?.washrooms || 0,
+        status: formData.availability?.active ? "active" : "pending approval",
         source: {
-          name: "waureisen",
+          name: "waureisen", // Always set to waureisen for admin-created listings
           redirectLink: null,
         },
-
-        // Format selected filters
-        selectedFilters,
+        images: photos,
+        legal: {
+          cancellationPolicy: formData.policies?.cancellationPolicy || "flexible",
+        },
       };
 
-      // Log the exact data being sent for debugging
-      console.log(
-        "Sending data to server:",
-        JSON.stringify(listingSubmitData, null, 2)
-      );
+      // Create Filter document structure based on template
+      const filterData = {
+        subsections: []
+      };
 
-      let result;
-      if (isEditMode) {
-        result = await updateListing(id, listingSubmitData);
-        console.log(`Updated listing ${id}:`, result);
-      } else {
-        result = await createListing(listingSubmitData);
-        console.log("Created new listing:", result);
+      if (template?.subsections) {
+        template.subsections.forEach(section => {
+          const newSection = {
+            name: section.name,
+            description: section.description,
+            hasSubsections: section.hasSubsections,
+            subsubsections: [],
+            filters: []
+          };
+
+          // Handle direct filters in the section
+          if (section.filters) {
+            section.filters.forEach(filter => {
+              const value = formData[`${section.name.toLowerCase()}_${filter.name.toLowerCase()}`];
+              if (value !== undefined) {
+                newSection.filters.push({
+                  name: filter.name,
+                  type: filter.type,
+                  value: value
+                });
+              }
+            });
+          }
+
+          // Handle subsubsections and their filters
+          if (section.subsubsections) {
+            section.subsubsections.forEach(subsub => {
+              const newSubsub = {
+                name: subsub.name,
+                description: subsub.description,
+                filters: []
+              };
+
+              // Get the form data key for this subsubsection
+              const formDataKey = `amenities_${subsub.name.toLowerCase().replace(/\s+/g, '_')}`;
+              const subsectionData = formData[formDataKey] || {};
+
+              // Add filters that are selected (true)
+              subsub.filters.forEach(filter => {
+                if (subsectionData[filter.name]) {
+                  newSubsub.filters.push({
+                    name: filter.name,
+                    type: filter.type,
+                    value: true
+                  });
+                }
+              });
+
+              if (newSubsub.filters.length > 0) {
+                newSection.subsubsections.push(newSubsub);
+              }
+            });
+          }
+
+          filterData.subsections.push(newSection);
+        });
       }
 
-      // Show success message
-      alert(
-        isEditMode
-          ? "Listing updated successfully!"
-          : "Listing created successfully!"
-      );
+      // Create the listing first
+      const listingResponse = await createListing(listingData);
+      console.log("Created new listing:", listingResponse);
 
-      // Redirect back to accommodations list
-      navigate("/admin/accommodations");
+      // Create the filter document and link it to the listing
+      if (listingResponse._id) {
+        // Add the listing reference to the filter data
+        filterData.listing = listingResponse._id;
+        const filterResponse = await createListingFilter(filterData);
+        console.log("Created filters:", filterResponse);
+
+        // Update the listing with the filter reference
+        if (filterResponse._id) {
+          const updatedListingData = {
+            ...listingData,
+            filters: filterResponse._id
+          };
+          await updateListing(listingResponse._id, updatedListingData);
+        }
+
+        // Show success message
+        alert("Listing created successfully!");
+
+        // Redirect to the detail view
+        navigate(`/accommodation/${listingResponse._id}`);
+      }
     } catch (error) {
       console.error("Error saving listing:", error);
       alert(
-        `Failed to ${
-          isEditMode ? "update" : "create"
-        } listing. Please try again. Error: ${error.message}`
+        `Failed to ${isEditMode ? "update" : "create"} listing. Please try again. Error: ${error.message}`
       );
     } finally {
       setIsLoading(false);
