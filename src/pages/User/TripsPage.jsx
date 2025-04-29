@@ -13,6 +13,7 @@ import { getMyBooking } from "../../api/bookingApi";
 import moment from "moment";
 import { refundPayment } from "../../api/paymentAPI";
 import CancelBookingModal from "../../components/SearchComponents/CancelBookingModal";
+import Pagination from "../../components/HomeComponents/Pagination";
 
 // Edit Trip Modal Component
 const EditTripModal = ({ isOpen, onClose, trip, onSave, onCancel }) => {
@@ -504,9 +505,56 @@ const TripsPage = () => {
     setSuccessMessage(t("trip_cancelled_success"));
   };
 
-  const upcomingTrips = trips?.filter((trip) => trip.status === "pending");
-  const pastTrips = trips?.filter((trip) => trip.status === "confirmed");
-  const cancelledTrips = trips?.filter((trip) => trip.status === "canceled");
+  // const upcomingTrips = trips?.filter((trip) => trip.status === "pending");
+  // const pastTrips = trips?.filter((trip) => trip.status === "confirmed");
+  // const cancelledTrips = trips?.filter((trip) => trip.status === "canceled");
+
+  const [upcomingTrips, setUpcomingTrips] = useState([]);
+  const [pastTrips, setPastTrips] = useState([]);
+  const [cancelledTrips, setCancelledTrips] = useState([]);
+  const [currentUpcomingPage, setCurrentUpcomingPage] = useState(1);
+  const [currentCanceledPage, setCurrentCanceledPage] = useState(1);
+  const [currentConfirmedPage, setCurrentConfirmedPage] = useState(1);
+  const totalUpcomingPages = 5;
+  const itemPerPage = 5;
+  const totalConfirmedPages = 5;
+
+  const handlePageChange = (page, type) => {
+    if (type == "upcoming") {
+      setCurrentUpcomingPage(page);
+    } else if (type == "canceled") {
+      setCurrentCanceledPage(page);
+    } else {
+      setCurrentConfirmedPage(page);
+    }
+    // fetch data for new page here
+  };
+
+  useEffect(() => {
+    const startUpcoming = (currentUpcomingPage - 1) * itemPerPage;
+    const endUpcoming = startUpcoming + itemPerPage;
+    setUpcomingTrips(
+      trips
+        ?.filter((trip) => trip.status === "pending")
+        ?.slice(startUpcoming, endUpcoming)
+    );
+
+    const startConfirmed = (currentConfirmedPage - 1) * itemPerPage;
+    const endConfirmed = startConfirmed + itemPerPage;
+    setPastTrips(
+      trips
+        ?.filter((trip) => trip.status === "confirmed")
+        ?.slice(startConfirmed, endConfirmed)
+    );
+
+    const startCanceled = (currentCanceledPage - 1) * itemPerPage;
+    const endCanceled = startCanceled + itemPerPage;
+    setCancelledTrips(
+      trips
+        ?.filter((trip) => trip.status === "canceled")
+        ?.slice(startCanceled, endCanceled)
+    );
+  }, [currentCanceledPage, currentConfirmedPage, currentUpcomingPage, trips]);
 
   return (
     <div className="min-h-screen bg-[#FEFCF5]">
@@ -550,6 +598,17 @@ const TripsPage = () => {
                     />
                   ))}
                 </div>
+                <div className="flex justify-end">
+                  <Pagination
+                    type="upcoming"
+                    currentPage={currentUpcomingPage}
+                    totalPages={Math.ceil(
+                      trips?.filter((trip) => trip.status === "pending")
+                        ?.length / itemPerPage
+                    )}
+                    onPageChange={handlePageChange}
+                  />
+                </div>
               </div>
             )}
 
@@ -568,6 +627,17 @@ const TripsPage = () => {
                     />
                   ))}
                 </div>
+                <div className="flex justify-end">
+                  <Pagination
+                    type="cancelled"
+                    currentPage={currentCanceledPage}
+                    totalPages={Math.ceil(
+                      trips?.filter((trip) => trip.status === "canceled")
+                        ?.length / itemPerPage
+                    )}
+                    onPageChange={handlePageChange}
+                  />
+                </div>
               </div>
             )}
 
@@ -585,6 +655,17 @@ const TripsPage = () => {
                       onEdit={handleEditTrip}
                     />
                   ))}
+                </div>
+                <div className="flex justify-end">
+                  <Pagination
+                    type="confirmed"
+                    currentPage={currentConfirmedPage}
+                    totalPages={Math.ceil(
+                      trips?.filter((trip) => trip.status === "confirmed")
+                        ?.length / itemPerPage
+                    )}
+                    onPageChange={handlePageChange}
+                  />
                 </div>
               </div>
             )}
