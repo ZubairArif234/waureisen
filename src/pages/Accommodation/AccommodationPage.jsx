@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../components/Shared/Navbar";
 import DateRangePicker from "../../components/HomeComponents/DateRangePicker";
 import GuestSelector from "../../components/HomeComponents/GuestSelector";
@@ -662,12 +662,11 @@ const AccommodationPage = () => {
             </section>
 
             {/* Reviews */}
-            <section className="mb-10">
+            {/* <section className="mb-10">
               <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
                 {t("reviews")}
               </h2>
-              {/* Reviews would be implemented here */}
-            </section>
+            </section> */}
 
             {/* About the Listing Provider */}
             <section className="mb-10">
@@ -677,9 +676,9 @@ const AccommodationPage = () => {
               <div className="bg-gray-50 p-4 md:p-6 rounded-lg">
                 <div className="flex items-center gap-4 mb-4">
                   <img
-                    src={accommodation?.provider?.profilePicture || logo}
+                    src={accommodation?.owner?.profilePicture || logo}
                     alt={
-                      accommodation?.provider?.name ||
+                      accommodation?.owner?.displayName ||
                       accommodation?.listingSource ||
                       accommodation?.source?.name ||
                       "Provider"
@@ -689,26 +688,26 @@ const AccommodationPage = () => {
                   <div>
                     <h3 className="font-semibold md:text-base text-sm">
                       Hello, I'm{" "}
-                      {accommodation?.provider?.name ||
+                      {accommodation?.owner?.displayName ||
                         accommodation?.listingSource ||
                         accommodation?.source?.name ||
                         "Provider"}
                       .
                     </h3>
                     <p className="text-gray-600 text-sm">
-                      {accommodation?.provider?.description ||
+                      {accommodation?.owner?.bio ||
                         "This is an accommodation from one of our valued partners."}
                     </p>
                   </div>
                 </div>
                 <div className="flex gap-4">
-                  <button className="text-brand hover:underline text-sm">
+                  <Link to={"/public-profile"}
+                  // state={{ user: { name: "John", age: 30 } }}
+                   state={{data:{...accommodation?.owner}}} 
+                   className="text-brand hover:underline text-sm">
                     {t("view_profile")}
-                  </button>
-                  <span className="text-gray-400">•</span>
-                  <button className="text-brand hover:underline text-sm">
-                    {t("contact")}
-                  </button>
+                  </Link>
+                
                 </div>
               </div>
             </section>

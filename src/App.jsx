@@ -32,6 +32,7 @@ import CamperDetail from "./pages/Main/CamperDetail";
 import Payment from "./pages/Stripe/Payment";
 import ProtectedRoute from "./components/Shared/ProtectedRoute";
 import { PriceFilterProvider } from './context/PriceFilterContext';
+import ProviderPublicProfile from "./pages/User/ProviderPublicProfile";
 
 function App() {
   return (
@@ -75,6 +76,13 @@ function App() {
                   <ProtectedRoute allowedRoles={["user", "provider", "admin"]}>
                     <Profile />
                   </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/public-profile"
+                element={
+                 <ProviderPublicProfile />
+                  
                 }
               />
               <Route
