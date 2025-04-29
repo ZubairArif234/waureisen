@@ -26,10 +26,48 @@ import AddToFeaturedModal from "../../components/Admin/AddToFeaturedModal";
 
 // Default sources to use while loading or if API doesn't return any
 const DEFAULT_SOURCES = [
+  { id: "all", name: "All Sources" },
+  { id: "waureisen", name: "Waureisen" },
   { id: "interhome", name: "Interhome" },
   { id: "provider", name: "Provider" },
   { id: "admin", name: "Admin" },
 ];
+
+// Function to normalize source values
+const normalizeSource = (source) => {
+  if (!source) return null;
+  
+  if (typeof source === 'string') {
+    return source.toLowerCase();
+  }
+  
+  if (typeof source === 'object' && source.name) {
+    return source.name.toLowerCase();
+  }
+  
+  return null;
+};
+
+// Utility function to inspect source values in accommodations
+const inspectAccommodationSources = (accommodations) => {
+  console.log("Inspecting accommodation sources:");
+  const sourceInfo = accommodations.map(acc => ({
+    id: acc._id,
+    title: acc.title,
+    source: acc.source,
+    sourceName: acc.source?.name || acc.source,
+    sourceType: typeof acc.source
+  }));
+  console.table(sourceInfo);
+  
+  // Count occurrences of each source
+  const sourceCounts = {};
+  accommodations.forEach(acc => {
+    const sourceName = acc.source?.name || acc.source || 'unknown';
+    sourceCounts[sourceName] = (sourceCounts[sourceName] || 0) + 1;
+  });
+  console.log("Source distribution:", sourceCounts);
+};
 
 // Skeleton card for loading state
 const SkeletonCard = () => {
@@ -223,7 +261,7 @@ const AccommodationCard = ({
           </div>
         )}
         <div className="absolute top-3 right-3 bg-black/60 text-white px-2 py-1 rounded text-xs font-medium">
-          {accommodation.source?.name || "Unknown"}
+          {accommodation.source?.name || accommodation.source || "Unknown"}
         </div>
       </div>
       <div className="p-4">
@@ -406,7 +444,7 @@ const Accommodations = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [sources, setSources] = useState(DEFAULT_SOURCES);
-  const [selectedSource, setSelectedSource] = useState("");
+  const [selectedSource, setSelectedSource] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -434,6 +472,13 @@ const Accommodations = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [totalItems, setTotalItems] = useState(0);
 
+  // Handle source filter change
+  const handleSourceChange = (e) => {
+    const newSource = e.target.value;
+    console.log(`Changing source filter from ${selectedSource} to ${newSource}`);
+    setSelectedSource(newSource);
+  };
+
   // Remove the form submission functions and keep the direct search input
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -449,6 +494,14 @@ const Accommodations = () => {
     fetchFeaturedCounts();
   }, [page, search]); // Refetch when page or search changes
 
+  // Add debug effect to log when accommodations change
+  useEffect(() => {
+    if (accommodations.length > 0) {
+      console.log(`Loaded ${accommodations.length} accommodations`);
+      inspectAccommodationSources(accommodations);
+    }
+  }, [accommodations]);
+
   // Fetch accommodations with pagination, filtering, and search
   const fetchAccommodations = async (retryCount = 0) => {
     try {
@@ -462,7 +515,7 @@ const Accommodations = () => {
       };
 
       // Add filters if selected
-      if (selectedSource) {
+      if (selectedSource && selectedSource !== "all") {
         queryParams.source = selectedSource;
       }
       if (selectedStatus) {
@@ -470,18 +523,22 @@ const Accommodations = () => {
       }
 
       // Fetch listings with pagination and filters
+      console.log("Fetching accommodations with params:", queryParams);
       const response = await getPaginatedListings(
         queryParams.page,
         9, // Fixed page size
         queryParams.search
       );
 
+      console.log("Received accommodations:", response.listings?.length || 0);
       setAccommodations(response.listings || []);
-      setTotalPages(response.totalPages || 1);
+      setTotalPages(response.pagination?.pages || 1);
+      setTotalItems(response.pagination?.total || 0);
 
       // Extract unique sources
       if (response.listings?.length > 0) {
         const uniqueSources = extractUniqueSources(response.listings);
+        console.log("Extracted sources:", uniqueSources);
         setSources(uniqueSources);
       }
 
@@ -736,29 +793,32 @@ const Accommodations = () => {
     }
   };
 
-  // Extract unique sources from accommodation data
   const extractUniqueSources = (accommodationData) => {
     // Create a Map to store unique sources with id as the key
     const sourcesMap = new Map();
-
-    // Add default sources first (they'll be overwritten if actual data exists)
+  
+    // Add ALL default sources first (they'll be overwritten if actual data exists)
     DEFAULT_SOURCES.forEach((source) => {
       sourcesMap.set(source.id, source);
     });
-
+  
     // Extract sources from accommodation data
     accommodationData.forEach((acc) => {
-      if (acc.source && acc.source.name) {
-        const sourceId = acc.source.name.toLowerCase();
-        if (!sourcesMap.has(sourceId)) {
+      if (acc.source) {
+        // Handle both possible source data structures
+        const sourceName = acc.source.name?.toLowerCase() || 
+                          (typeof acc.source === 'string' ? acc.source.toLowerCase() : '');
+        const sourceId = sourceName || 'unknown';
+        
+        if (sourceId && !sourcesMap.has(sourceId)) {
           sourcesMap.set(sourceId, {
             id: sourceId,
-            name: acc.source.name,
+            name: acc.source.name || acc.source || 'Unknown',
           });
         }
       }
     });
-
+  
     // Convert map to array
     return Array.from(sourcesMap.values());
   };
@@ -841,19 +901,31 @@ const Accommodations = () => {
     }
   };
 
-  // Filter accommodations based on selected source
+  // Filter accommodations based on selected source (using the improved logic)
   const filteredAccommodations = accommodations.filter((acc) => {
     // Skip filtering if accommodation object is invalid
     if (!acc) return false;
 
-    // Check source filter match
-    return (
-      selectedSource === "all" ||
-      (acc.source &&
-        acc.source.name &&
-        acc.source.name.toLowerCase() === selectedSource)
-    );
+    // For "all" source filter, include all accommodations
+    if (selectedSource === "all") return true;
+
+    // Get normalized source from accommodation
+    const accSource = normalizeSource(acc.source);
+    
+    // Compare with selected source
+    return accSource === selectedSource.toLowerCase();
   });
+
+  // Debug output for filtered results
+  useEffect(() => {
+    console.log(`Filtered accommodations: ${filteredAccommodations.length} of ${accommodations.length}`);
+    if (filteredAccommodations.length === 0 && accommodations.length > 0) {
+      console.warn("No accommodations match the current filter:", selectedSource);
+      console.log("First few accommodations sources:", accommodations.slice(0, 3).map(acc => 
+        acc.source?.name || acc.source
+      ));
+    }
+  }, [filteredAccommodations.length, accommodations.length, selectedSource]);
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -939,10 +1011,9 @@ const Accommodations = () => {
           <Filter className="w-5 h-5 text-gray-400" />
           <select
             value={selectedSource}
-            onChange={(e) => setSelectedSource(e.target.value)}
+            onChange={handleSourceChange}
             className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
           >
-            <option value="all">All Sources</option>
             {sources.map((source) => (
               <option key={source.id} value={source.id}>
                 {source.name}

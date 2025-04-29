@@ -86,6 +86,28 @@ const SkeletonTable = () => {
 const ProviderDetailModal = ({ provider, isOpen, onClose, onBanUnban }) => {
   if (!isOpen || !provider) return null;
 
+  // Determine provider status text based on both profileStatus and registrationStatus
+  const getStatusText = () => {
+    if (provider.profileStatus === "banned") {
+      return "Banned Account";
+    } else if (provider.registrationStatus === "incomplete") {
+      return "Pending Registration";
+    } else {
+      return "Active Account";
+    }
+  };
+
+  // Determine status color class
+  const getStatusColorClass = () => {
+    if (provider.profileStatus === "banned") {
+      return "text-red-600";
+    } else if (provider.registrationStatus === "incomplete") {
+      return "text-amber-600";
+    } else {
+      return "text-green-600";
+    }
+  };
+
   return (
     <>
       {/* Overlay */}
@@ -142,18 +164,9 @@ const ProviderDetailModal = ({ provider, isOpen, onClose, onBanUnban }) => {
               </h4>
               <p className="text-gray-600">{provider.email}</p>
               <div
-                className={`mt-1 text-sm ${
-                  provider.profileStatus === "verified" ||
-                  provider.profileStatus === "pending verification"
-                    ? "text-green-600"
-                    : "text-red-600"
-                }`}
+                className={`mt-1 text-sm ${getStatusColorClass()}`}
               >
-                {provider.profileStatus === "verified"
-                  ? "Verified Account"
-                  : provider.profileStatus === "banned"
-                  ? "Banned Account"
-                  : "Pending Verification"}
+                {getStatusText()}
               </div>
             </div>
           </div>
@@ -181,6 +194,19 @@ const ProviderDetailModal = ({ provider, isOpen, onClose, onBanUnban }) => {
                 <p className="text-sm text-gray-500">Account Type</p>
                 <p className="font-medium">
                   {provider.role === "provider" ? "Provider" : "User"}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Registration Status</p>
+                <p className={`font-medium ${provider.registrationStatus === "incomplete" ? "text-amber-600" : "text-green-600"}`}>
+                  {provider.registrationStatus === "incomplete" ? "Incomplete" : "Complete"}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Profile Status</p>
+                <p className={`font-medium ${provider.profileStatus === "banned" ? "text-red-600" : 
+                  provider.profileStatus === "verified" ? "text-green-600" : "text-amber-600"}`}>
+                  {provider.profileStatus.charAt(0).toUpperCase() + provider.profileStatus.slice(1)}
                 </p>
               </div>
             </div>
@@ -337,12 +363,25 @@ const ProviderRow = ({ provider, onAction }) => {
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
 
+  // Update status colors based on both registration and profile status
   const statusColors = {
-    verified: "bg-green-100 text-green-800",
-    "pending verification": "bg-blue-100 text-blue-800",
-    "not verified": "bg-amber-100 text-amber-800",
-    banned: "bg-red-100 text-red-800",
+    active: "bg-green-100 text-green-800",
+    pending: "bg-amber-100 text-amber-800",
+    banned: "bg-red-100 text-red-800"
   };
+
+  // Determine provider status display value
+  const getProviderStatus = () => {
+    if (provider.profileStatus === "banned") {
+      return "banned";
+    } else if (provider.registrationStatus === "incomplete") {
+      return "pending";
+    } else {
+      return "active";
+    }
+  };
+
+  const providerStatus = getProviderStatus();
 
   // Calculate menu position when showing
   useEffect(() => {
@@ -439,12 +478,12 @@ const ProviderRow = ({ provider, onAction }) => {
       <td className="px-4 py-4 whitespace-nowrap">
         <span
           className={`px-2 py-1 rounded-full text-xs font-medium ${
-            statusColors[provider.profileStatus] || "bg-gray-100 text-gray-800"
+            statusColors[providerStatus] || "bg-gray-100 text-gray-800"
           }`}
         >
-          {provider.profileStatus === "verified"
+          {providerStatus === "active"
             ? "Active"
-            : provider.profileStatus === "banned"
+            : providerStatus === "banned"
             ? "Banned"
             : "Pending"}
         </span>
@@ -581,6 +620,19 @@ const ProviderRow = ({ provider, onAction }) => {
 
 // Mobile card view for providers (displayed on small screens)
 const ProviderCard = ({ provider, onAction }) => {
+  // Determine provider status display value
+  const getProviderStatus = () => {
+    if (provider.profileStatus === "banned") {
+      return "banned";
+    } else if (provider.registrationStatus === "incomplete") {
+      return "pending";
+    } else {
+      return "active";
+    }
+  };
+
+  const providerStatus = getProviderStatus();
+
   return (
     <div className="bg-white rounded-lg border shadow-sm p-4 mb-4">
       <div className="flex justify-between">
@@ -621,16 +673,16 @@ const ProviderCard = ({ provider, onAction }) => {
         </div>
         <span
           className={`px-2 py-1 rounded-full text-xs font-medium ${
-            provider.profileStatus === "verified"
+            providerStatus === "active"
               ? "bg-green-100 text-green-800"
-              : provider.profileStatus === "banned"
+              : providerStatus === "banned"
               ? "bg-red-100 text-red-800"
               : "bg-amber-100 text-amber-800"
           }`}
         >
-          {provider.profileStatus === "verified"
+          {providerStatus === "active"
             ? "Active"
-            : provider.profileStatus === "banned"
+            : providerStatus === "banned"
             ? "Banned"
             : "Pending"}
         </span>
@@ -685,11 +737,20 @@ const exportToCSV = (data, filename) => {
         `${item.firstName || ""} ${item.lastName || ""}`.trim() ||
         item.username;
       const joinedDate = new Date(item.createdAt).toLocaleDateString();
+      
+      // Set provider status based on both profileStatus and registrationStatus
+      let status = "Active";
+      if (item.profileStatus === "banned") {
+        status = "Banned";
+      } else if (item.registrationStatus === "incomplete") {
+        status = "Pending";
+      }
+      
       const values = [
         displayName,
         item.email,
         item.listings?.length || 0,
-        item.profileStatus,
+        status,
         joinedDate,
       ];
 
@@ -753,24 +814,32 @@ const Providers = () => {
     fetchProviders();
   }, []);
 
+  // Helper function to get provider status
+  const getProviderStatus = (provider) => {
+    if (provider.profileStatus === "banned") {
+      return "banned";
+    } else if (provider.registrationStatus === "incomplete") {
+      return "pending";
+    } else {
+      return "active";
+    }
+  };
+
   // Filter providers based on search query and status
   const filteredProviders = providers.filter(
-    (provider) =>
-      (selectedStatus === "all" ||
-        (selectedStatus === "active" &&
-          provider.profileStatus === "verified") ||
-        (selectedStatus === "banned" && provider.profileStatus === "banned") ||
-        (selectedStatus === "pending" &&
-          (provider.profileStatus === "pending verification" ||
-            provider.profileStatus === "not verified"))) &&
-      (provider.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        provider.lastName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        provider.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        provider.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (provider.displayName &&
-          provider.displayName
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase())))
+    (provider) => {
+      const providerStatus = getProviderStatus(provider);
+      
+      return (selectedStatus === "all" || selectedStatus === providerStatus) &&
+        (provider.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+         provider.lastName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+         provider.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+         provider.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+         (provider.displayName &&
+           provider.displayName
+             .toLowerCase()
+             .includes(searchQuery.toLowerCase())))
+    }
   );
 
   // Handle provider actions
