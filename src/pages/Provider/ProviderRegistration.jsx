@@ -11,9 +11,10 @@ const ProviderRegistration = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
-
+  
   const searchParams = new URLSearchParams(location.search);
   const accountId = searchParams.get("account") ;
+  console.log(location , accountId);
 
   const savedCurrentStep = localStorage.getItem("currentStep");
   const [stripeLoading, setStripeLoading] = useState(false);
@@ -774,7 +775,7 @@ console.log(name , value);
       <p className="font-semibold">
         Account ID:{" "}
         <span className="font-medium text-slate-500">
-          {accountId || formData.stripeAccountId}
+          {accountId || formData?.stripeAccountId}
         </span>
       </p>
     </div>
@@ -1114,7 +1115,7 @@ console.log(name , value);
         </div>
       </main>
 
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 };

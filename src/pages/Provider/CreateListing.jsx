@@ -401,7 +401,7 @@ const CreateListing = () => {
         </div>
       </main>
 
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 };

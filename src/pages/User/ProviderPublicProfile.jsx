@@ -12,6 +12,7 @@ import { useLocation } from "react-router-dom";
 import AccommodationCard from "../../components/HomeComponents/AccommodationCard";
 import API from "../../api/config";
 import { getListingById } from "../../api/listingAPI";
+import logo from "../../assets/logo.png";
 
 
 // Skeleton card for loading state
@@ -82,16 +83,25 @@ const RecommendationsSection = memo(({ title, listings, isLoading }) => {
 const ProviderPublicProfile = () => {
   const { t } = useLanguage();
   const {state} = useLocation()
+  const userType = localStorage?.getItem("userType")
   console.log(state);
   const [listings, setListings] = useState([]);
 
   const fetchListings = async () => {
     console.log("func chala");
-  
+  let data;
     try {
-      const data = await Promise.all(
-        state?.data?.listings?.slice(0,4)?.map((id) => getListingById(id))
-      );
+      if (state?.data?.role != "admin"){
+
+        data = await Promise.all(
+          state?.data?.listings?.slice(0,4)?.map((id) => getListingById(id))
+        );
+      }else{
+        data = await Promise.all(
+          state?.data?.topRecommendations?.slice(0,4)?.map((id) => getListingById(id))
+        );
+
+      }
       console.log("yaham tak jkjj");
       setListings(data);
     } catch (error) {
@@ -100,12 +110,13 @@ const ProviderPublicProfile = () => {
   };
   
   useEffect(() => {
-    if (state?.data?.listings?.length > 0) {
+    if (state?.data?.listings?.length > 0 || state?.data?.topRecommendations?.length > 0) {
       fetchListings();
     }
   }, [state?.data]);
 
   console.log(listings, state?.data?.listings);
+  console.log(listings, state?.data?.topRecommendations);
   
 
   // Update the initial state to use streetNumber instead of street
@@ -127,70 +138,71 @@ const ProviderPublicProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
 
   // Fetch user profile data when component mounts
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        setIsLoading(true);
-        // Get user ID from localStorage or context
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("No authentication token found");
-        }
+  // useEffect(() => {
+  //   const fetchUserProfile = async () => {
+  //     try {
+  //       setIsLoading(true);
+  //       // Get user ID from localStorage or context
+  //       const token = localStorage.getItem("token");
+  //       if (!token) {
+  //         throw new Error("No authentication token found");
+  //       }
 
-        // Decode token to get user ID
-        const tokenData = JSON.parse(atob(token.split(".")[1]));
-        const userId = tokenData.id;
+  //       // Decode token to get user ID
+  //       const tokenData = JSON.parse(atob(token.split(".")[1]));
+  //       const userId = tokenData.id;
 
-        // Determine whether to use user or provider API based on user type
-        const userType = getUserType();
-        let userData;
+  //       // Determine whether to use user or provider API based on user type
+  //       const userType = getUserType();
+  //       let userData;
 
-        if (userType === "provider") {
-          userData = await getProviderProfile();
-        } else {
-          userData = await getUserProfile(userId);
-        }
+  //       if (userType === "provider") {
+  //         userData = await getProviderProfile();
+  //       } else {
+  //         userData = await getUserProfile(userId);
+  //       }
 
-        // Map backend data to component state
-        setProfileData({
-          firstName: userData.firstName || "",
-          lastName: userData.lastName || "",
-          aboutYou: userData.aboutYou || "", // Consistent naming
-          streetNumber: userData.paymentMethod?.streetNumber || "", // Changed from street to streetNumber
-          dateOfBirth: userData.dateOfBirth || "",
-          nationality: userData.nationality || "",
-          gender: userData.gender || "",
-          isProvider: userData.isProvider || false, // Now mapping from the backend
-          profilePicture: null,
-          customerNumber: userData.customerNumber || "",
-          dogs: userData.dogs?.map((dog) => ({
-            id: Math.random().toString(36).substr(2, 9), // Generate a unique ID for frontend
-            name: dog.name || "",
-            gender: dog.gender || "",
-          })) || [{ id: 1, name: "", gender: "" }],
-          // Initialize travellers array even if it doesn't exist in backend data
-          travellers: userData.travellers?.map((traveller) => ({
-            id: Math.random().toString(36).substr(2, 9),
-            name: traveller.name || "",
-            gender: traveller.gender || "",
-            relationship: traveller.relationship || "",
-          })) || [{ id: 1, name: "", gender: "", relationship: "" }],
-        });
+  //       // Map backend data to component state
+  //       setProfileData({
+  //         firstName: userData.firstName || "",
+  //         lastName: userData.lastName || "",
+  //         aboutYou: userData.aboutYou || "", // Consistent naming
+  //         streetNumber: userData.paymentMethod?.streetNumber || "", // Changed from street to streetNumber
+  //         dateOfBirth: userData.dateOfBirth || "",
+  //         nationality: userData.nationality || "",
+  //         gender: userData.gender || "",
+  //         isProvider: userData.isProvider || false, // Now mapping from the backend
+  //         profilePicture: null,
+  //         customerNumber: userData.customerNumber || "",
+  //         dogs: userData.dogs?.map((dog) => ({
+  //           id: Math.random().toString(36).substr(2, 9), // Generate a unique ID for frontend
+  //           name: dog.name || "",
+  //           gender: dog.gender || "",
+  //         })) || [{ id: 1, name: "", gender: "" }],
+  //         // Initialize travellers array even if it doesn't exist in backend data
+  //         travellers: userData.travellers?.map((traveller) => ({
+  //           id: Math.random().toString(36).substr(2, 9),
+  //           name: traveller.name || "",
+  //           gender: traveller.gender || "",
+  //           relationship: traveller.relationship || "",
+  //         })) || [{ id: 1, name: "", gender: "", relationship: "" }],
+  //       });
 
-        // Set profile picture if available
-        if (userData.profilePicture && userData.profilePicture !== "N/A") {
-          setPreviewImage(userData.profilePicture);
-        }
-      } catch (error) {
-        console.error("Failed to fetch profile:", error);
-        setError("Failed to load profile data. Please try again.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  //       // Set profile picture if available
+  //       if (userData.profilePicture && userData.profilePicture !== "N/A") {
+  //         setPreviewImage(userData.profilePicture);
+  //       }
+  //     } catch (error) {
+  //       console.error("Failed to fetch profile:", error);
+  //       setError("Failed to load profile data. Please try again.");
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
 
-    fetchUserProfile();
-  }, []);
+  //   fetchUserProfile();
+  // }, []);
+console.log(state?.data);
 
 
   return (
@@ -214,9 +226,17 @@ const ProviderPublicProfile = () => {
             <div className="flex flex-col items-center space-y-4">
               <div className="relative">
                 <div className="w-32 h-32 rounded-full border-4 border-brand/20 overflow-hidden bg-gray-50 flex items-center justify-center">
-                  {state?.data?.profilePicture && (
+                  {state?.data?.profilePicture  && (
                     <img
-                      src={state?.data?.profilePicture}
+                      src={state?.data?.profilePicture }
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                     
+                    />
+                  ) }
+                  {!state?.data?.profilePicture && logo  && (
+                    <img
+                      src={logo }
                       alt="Profile"
                       className="w-full h-full object-cover"
                      
@@ -231,24 +251,24 @@ const ProviderPublicProfile = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">
-                  {t("first_name")}
+                  {state?.data?.role != "admin" ? t("first_name") : t("user_name")}
                 </label>
                 <input
                   type="text"
                   name="firstName"
-                  value={state?.data?.firstName}
+                  value={state?.data?.role != "admin" ? state?.data?.firstName : state?.data?.username}
                   disabled={!isEditing}
                   className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-brand/20 focus:border-brand disabled:bg-gray-50 disabled:text-gray-500"
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">
-                  {t("last_name")}
+                  {state?.data?.role != "admin" ? t("last_name") : t("email")}
                 </label>
                 <input
                   type="text"
                   name="lastName"
-                  value={state?.data?.lastName}
+                  value={state?.data?.role != "admin" ? state?.data?.lastName : state?.data?.email}
                 
                   disabled={!isEditing}
                   className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-brand/20 focus:border-brand disabled:bg-gray-50 disabled:text-gray-500"
@@ -257,13 +277,14 @@ const ProviderPublicProfile = () => {
             </div>
 
             {/* Bio Section */}
+            {state?.data?.role !== "admin" && 
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">
                 {t("about_you")}
               </label>
               <textarea
                 name="aboutYou" // Changed from bio to aboutYou
-                value={state?.data?.aboutYou} // Changed from bio to aboutYou
+                value={state?.data?.bio} // Changed from bio to aboutYou
                 
                 disabled={!isEditing}
                 placeholder={t("bio_placeholder")}
@@ -271,6 +292,7 @@ const ProviderPublicProfile = () => {
               />
               <p className="text-sm text-gray-500">{t("relationship_text")}</p>
             </div>
+            }
 
             {listings?.length > 0 &&
             <RecommendationsSection

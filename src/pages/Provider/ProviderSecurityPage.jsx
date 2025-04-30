@@ -320,7 +320,7 @@ const ProviderSecurityPage = () => {
         </div>
       </main>
 
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 };

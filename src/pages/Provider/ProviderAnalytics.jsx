@@ -413,7 +413,7 @@ const ProviderAnalytics = () => {
         </div> */}
       </main>
       
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 };

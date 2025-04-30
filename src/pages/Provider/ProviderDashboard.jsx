@@ -298,7 +298,7 @@ navigate(`/provider/bookings?id=${bookingId}`);
           </div>
         </main>
         
-        <Footer />
+        {/* <Footer /> */}
       </div>
     );
   }
@@ -333,7 +333,7 @@ navigate(`/provider/bookings?id=${bookingId}`);
           </div>
         </main>
         
-        <Footer />
+        {/* <Footer /> */}
       </div>
     );
   }
@@ -567,7 +567,7 @@ navigate(`/provider/bookings?id=${bookingId}`);
             </div>
       </main>
       
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 };

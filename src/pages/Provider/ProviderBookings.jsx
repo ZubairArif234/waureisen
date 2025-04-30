@@ -659,7 +659,7 @@ return (
       )}
     </main>
 
-    <Footer />
+    {/* <Footer /> */}
   </div>
 );
 };

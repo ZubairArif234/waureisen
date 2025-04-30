@@ -6,6 +6,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import { createPaymentIntent } from "../../api/paymentAPI";
 import { useLocation } from "react-router-dom";
 import moment from "moment";
+import logo from "../../assets/logo.png";
 const stripePromise = loadStripe(
   "pk_test_51QPmjyRuFURKkwuQO9cccKtZGjlFh5ULmjUIxPWlpCj3zKdUk3MAnKnntIB5hIzNUOp6qHJHbxjRCosLzQW0TNKG00Z6iVynXH"
 );
@@ -60,14 +61,42 @@ const Payment = () => {
   return (
     <div className="grid grid-cols-2 gap-4  items-start h-screen py-10 px-20">
       <div>
+      <img src={logo} alt="Wau Logo" className="h-16 mb-6" />
         <p className="text-xl font-medium  mb-2 ">
           {data?.title}{" "}
           <span className="text-slate-400 font-light text-sm">
             {data?.Code}
           </span>
         </p>
+        <p className="text-slate-400 font-light text-sm ">
+          {data?.description?.general}{" "}
+          
+        </p>
+       
         {data?.provider != "Interhome" && (
-          <div className="mb-4">
+          <div className="my-4">
+            <div className="flex justify-between items-center">
+              <p className="text-sm text-gray-700">
+                No of guests
+              </p>
+              <p>
+                {details?.guests?.people 
+                  || 0}
+              </p>
+            </div>
+
+            <div className="flex justify-between items-center">
+              <p className="text-sm text-gray-700">
+                No of dogs
+              </p>
+              <p>
+                {details?.guests?.dogs || 0}
+              </p>
+            </div>
+
+            <div className="border-t border-gray-200 my-4"></div>
+
+
             <div className="flex justify-between items-center">
               <p className="text-sm text-gray-700">
                 {data?.pricePerNight?.price} x{" "}

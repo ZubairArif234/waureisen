@@ -664,7 +664,7 @@ const ProviderMessages = () => {
         </div>
       </div>
       
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 };

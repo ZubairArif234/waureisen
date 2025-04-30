@@ -622,7 +622,7 @@ const ProviderProfilePage = () => {
         </div>
       </main>
 
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 };

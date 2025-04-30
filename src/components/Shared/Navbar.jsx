@@ -251,7 +251,7 @@ const Navbar = () => {
 
   // Check if we should show the menu icon (not for admin users)
   const shouldShowMenuIcon = isLoggedIn && userType !== "admin";
-
+console.log(userType)
   return (
     <nav className="fixed w-full top-0 z-50 px-6 py-4 bg-white/20 backdrop-blur-sm rounded-b-2xl shadow-sm">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -263,7 +263,8 @@ const Navbar = () => {
         </div>
 
         {/* Desktop & Tablet Navigation Links */}
-        <div className="hidden md:flex items-center space-x-4 lg:space-x-8 lg:ml-[410px] md:ml-auto">
+        {userType != "provider" && 
+       ( <div className="hidden md:flex items-center space-x-4 lg:space-x-8 lg:ml-[410px] md:ml-auto">
           <Link
             to="#"
             onClick={(e) => {
@@ -292,7 +293,8 @@ const Navbar = () => {
           >
             {t("book_appointment")}
           </a>
-        </div>
+        </div>)
+        }
 
         {/* Right Side Icons */}
         <div className="flex items-center gap-2 sm:gap-4 mr-2 sm:mr-4 md:mr-8">

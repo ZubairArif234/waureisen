@@ -918,7 +918,7 @@ const ProviderCalendar = () => {
         onUnblock={handleUnblockDates}
       />
       
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 };

@@ -498,7 +498,7 @@ const ProviderEarnings = () => {
         )}
       </main>
       
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 };

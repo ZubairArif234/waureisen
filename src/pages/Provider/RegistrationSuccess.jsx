@@ -125,7 +125,7 @@ const RegistrationSuccess = () => {
         </div>
       </main>
       
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 };

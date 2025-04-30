@@ -149,7 +149,7 @@ const ProviderAccountPage = () => {
         </div>
       </main>
 
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 };

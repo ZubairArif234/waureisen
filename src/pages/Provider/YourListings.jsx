@@ -386,7 +386,7 @@ const YourListings = () => {
         listingTitle={deleteModal.listing?.title || ""}
       />
 
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 };

@@ -537,6 +537,7 @@ const AccommodationPage = () => {
             noOfDays: days,
             startDate: dateRange?.start,
             endDate: dateRange?.end,
+            guests:guests
           },
         },
       });

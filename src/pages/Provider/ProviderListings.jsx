@@ -94,7 +94,7 @@ const ProviderListings = () => {
         </div>
       </main>
   
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 };

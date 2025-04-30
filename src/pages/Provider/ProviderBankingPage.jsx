@@ -268,7 +268,7 @@ const ProviderBankingPage = () => {
         </div>
       </main>
 
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 };
