@@ -14,23 +14,28 @@ const BasicInfoForm = ({ formData, handleInputChange, handleNestedInputChange })
   const handleRangeSelect = (range) => {
     console.log("Date range selected:", range); // Debug log
     setSelectedRange(range);
+    
+    // Always update checkInDates with the current state
     if (range.start && range.end) {
       // Format dates for display and storage
-      const formattedStart = range.start.toLocaleDateString();
-      const formattedEnd = range.end.toLocaleDateString();
+      const formattedStart = range.start.toISOString().split('T')[0];
+      const formattedEnd = range.end.toISOString().split('T')[0];
       const dateRangeString = `${formattedStart} - ${formattedEnd}`;
       
       // Update all necessary date fields
-      handleNestedInputChange('availability', 'checkInDate', range.start.toISOString());
-      handleNestedInputChange('availability', 'checkOutDate', range.end.toISOString());
+      handleNestedInputChange('availability', 'checkInDate', formattedStart);
+      handleNestedInputChange('availability', 'checkOutDate', formattedEnd);
       handleNestedInputChange('availability', 'checkInDates', dateRangeString);
       
       setIsDatePickerOpen(false);
     } else if (range.start) {
-      handleNestedInputChange('availability', 'checkInDate', range.start.toISOString());
+      // If only start date is selected, still update checkInDates
+      const formattedStart = range.start.toISOString().split('T')[0];
+      handleNestedInputChange('availability', 'checkInDate', formattedStart);
       handleNestedInputChange('availability', 'checkOutDate', '');
-      handleNestedInputChange('availability', 'checkInDates', '');
+      handleNestedInputChange('availability', 'checkInDates', formattedStart);
     } else {
+      // Clear all date fields if no dates are selected
       handleNestedInputChange('availability', 'checkInDate', '');
       handleNestedInputChange('availability', 'checkOutDate', '');
       handleNestedInputChange('availability', 'checkInDates', '');

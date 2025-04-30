@@ -3,122 +3,113 @@ import { MapPin, FileText, X, Upload } from 'lucide-react';
 import { loadGoogleMapsScript, initAutocomplete, createMap } from '../../utils/googleMapsUtils';
 
 const PoliciesLocationForm = ({ formData, handleInputChange, handleNestedInputChange }) => {
-
   const fullAddressRef = useRef(null);
-const mapRef = useRef(null);
-const [mapInstance, setMapInstance] = useState(null);
-const [marker, setMarker] = useState(null);
-const [inputAddress, setInputAddress] = useState('');
-const [selectedAddress, setSelectedAddress] = useState(formData.location?.fullAddress || '');
+  const mapRef = useRef(null);
+  const [mapInstance, setMapInstance] = useState(null);
+  const [marker, setMarker] = useState(null);
+  const [inputAddress, setInputAddress] = useState('');
+  const [selectedAddress, setSelectedAddress] = useState(formData.location?.address || '');
+  const [mapLocation, setMapLocation] = useState(formData.location?.mapLocation || null);
+  const [uploadedFile, setUploadedFile] = useState(null);
 
-// Load Google Maps script and initialize autocomplete
-useEffect(() => {
-  let mapInstanceRef = null;
-  let markerRef = null;
+  // Load Google Maps script and initialize autocomplete
+  useEffect(() => {
+    let mapInstanceRef = null;
+    let markerRef = null;
 
-  const initializeMap = () => {
-    console.log("Initializing map...");
-    // Check if refs are available
-    if (!mapRef.current || !fullAddressRef.current) {
-      console.warn("Map or address input refs not available yet");
-      return;
-    }
-    
-    try {
-      // Initialize map with default center or existing location
-      const initialCenter = formData.location?.mapLocation || { lat: 46.818188, lng: 8.227512 };
-      
-      mapInstanceRef = new window.google.maps.Map(mapRef.current, {
-        center: initialCenter,
-        zoom: formData.location?.mapLocation ? 15 : 8,
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: true,
-      });
-      
-      setMapInstance(mapInstanceRef);
-      
-      // If we have an existing location, add a marker
-      if (formData.location?.mapLocation) {
-        markerRef = new window.google.maps.Marker({
-          position: formData.location.mapLocation,
-          map: mapInstanceRef,
-          animation: window.google.maps.Animation.DROP
-        });
-        setMarker(markerRef);
+    const initializeMap = () => {
+      console.log("Initializing map...");
+      if (!mapRef.current || !fullAddressRef.current) {
+        console.warn("Map or address input refs not available yet");
+        return;
       }
       
-      // Initialize autocomplete
-      const autocomplete = new window.google.maps.places.Autocomplete(fullAddressRef.current, {
-        fields: ['formatted_address', 'geometry', 'name'],
-      });
-      
-      // Add listener for place selection
-      autocomplete.addListener('place_changed', () => {
-        const place = autocomplete.getPlace();
-        if (place && place.formatted_address && place.geometry) {
-          console.log("Place selected:", place);
-          
-          // Update the selected address state ONLY when a place is selected
-          setSelectedAddress(place.formatted_address);
-          
-          // Update the form with the selected address
-          handleLocationChange('fullAddress', place.formatted_address);
-          handleLocationChange('address', place.formatted_address);
-          
-          // Get position
-          const position = {
-            lat: place.geometry.location.lat(),
-            lng: place.geometry.location.lng()
-          };
-          
-          // Update form data with location coordinates
-          handleLocationChange('mapLocation', position);
-          
-          // Center map on selected location
-          mapInstanceRef.setCenter(position);
-          mapInstanceRef.setZoom(15);
-          
-          // Remove previous marker if exists
-          if (markerRef) markerRef.setMap(null);
-          
-          // Add new marker
+      try {
+        const initialCenter = mapLocation || { lat: 46.818188, lng: 8.227512 };
+        
+        mapInstanceRef = new window.google.maps.Map(mapRef.current, {
+          center: initialCenter,
+          zoom: mapLocation ? 15 : 8,
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: true,
+        });
+        
+        setMapInstance(mapInstanceRef);
+        
+        if (mapLocation) {
           markerRef = new window.google.maps.Marker({
-            position,
+            position: mapLocation,
             map: mapInstanceRef,
             animation: window.google.maps.Animation.DROP
           });
-          
           setMarker(markerRef);
         }
-      });
-    } catch (error) {
-      console.error("Error initializing Google Maps:", error);
+        
+        const autocomplete = new window.google.maps.places.Autocomplete(fullAddressRef.current, {
+          fields: ['formatted_address', 'geometry', 'name'],
+        });
+        
+        autocomplete.addListener('place_changed', () => {
+          const place = autocomplete.getPlace();
+          if (place && place.formatted_address && place.geometry) {
+            console.log("Place selected:", place);
+            
+            const newPosition = {
+              lat: place.geometry.location.lat(),
+              lng: place.geometry.location.lng()
+            };
+            
+            // Update map location state
+            setMapLocation(newPosition);
+            
+            // Update selected address state
+            setSelectedAddress(place.formatted_address);
+            
+            // Update form data
+            handleLocationChange('fullAddress', place.formatted_address);
+            handleLocationChange('address', place.formatted_address);
+            handleLocationChange('mapLocation', newPosition);
+            
+            // Update map
+            mapInstanceRef.setCenter(newPosition);
+            mapInstanceRef.setZoom(15);
+            
+            if (markerRef) markerRef.setMap(null);
+            
+            markerRef = new window.google.maps.Marker({
+              position: newPosition,
+              map: mapInstanceRef,
+              animation: window.google.maps.Animation.DROP
+            });
+            
+            setMarker(markerRef);
+          }
+        });
+      } catch (error) {
+        console.error("Error initializing Google Maps:", error);
+      }
+    };
+
+    loadGoogleMapsScript(() => {
+      if (window.google && window.google.maps) {
+        setTimeout(initializeMap, 100);
+      }
+    });
+
+    return () => {
+      if (mapInstanceRef) {
+        // Clean up resources if needed
+      }
+    };
+  }, []); // Only run once on mount
+
+  // Update form data when selected address changes
+  useEffect(() => {
+    if (selectedAddress) {
+      handleLocationChange('address', selectedAddress);
     }
-  };
-
-  loadGoogleMapsScript(() => {
-    console.log("Google Maps script loaded");
-    if (window.google && window.google.maps) {
-      // Make sure the DOM is fully rendered before initializing the map
-      setTimeout(initializeMap, 100);
-    } else {
-      console.error("Google Maps failed to load properly");
-    }
-  });
-
-  // Cleanup function
-  return () => {
-    if (mapInstanceRef) {
-      // Clean up resources if needed
-    }
-  };
-}, []); // Remove formData.location?.mapLocation dependency
-
-
-
-
-  const [uploadedFile, setUploadedFile] = useState(null);
+  }, [selectedAddress]);
 
   const handleLocationChange = (field, value) => {
     handleNestedInputChange('location', field, value);

@@ -161,13 +161,13 @@ const AddAccommodation = () => {
 
   // For nested objects in the form data
   const handleNestedInputChange = (section, field, value) => {
-    setFormData({
-      ...formData,
+    setFormData(prevFormData => ({
+      ...prevFormData,
       [section]: {
-        ...formData[section],
+        ...prevFormData[section],
         [field]: value,
       },
-    });
+    }));
   };
 
   const handleSubmit = async () => {
@@ -188,11 +188,17 @@ const AddAccommodation = () => {
       if (!formData.pricing.currency) validationErrors.push("Currency is required");
 
       // Availability validation
-      if (!formData.availability.checkInDates) validationErrors.push("Check-in dates are required");
-      if (!formData.availability.checkInTime.hour || !formData.availability.checkInTime.period) {
+      if (!formData.availability?.checkInDates || 
+          !formData.availability?.checkInDate || 
+          !formData.availability?.checkOutDate) {
+        console.log('Form Data:', formData);
+        console.log('Availability:', formData.availability);
+        validationErrors.push("Check-in dates are required");
+      }
+      if (!formData.availability?.checkInTime?.hour || !formData.availability?.checkInTime?.period) {
         validationErrors.push("Check-in time is required");
       }
-      if (!formData.availability.checkOutTime.hour || !formData.availability.checkOutTime.period) {
+      if (!formData.availability?.checkOutTime?.hour || !formData.availability?.checkOutTime?.period) {
         validationErrors.push("Check-out time is required");
       }
 
@@ -268,6 +274,7 @@ const AddAccommodation = () => {
         checkOutTime: formData.availability?.checkOutTime
           ? new Date(`1970-01-01T${formData.availability.checkOutTime.hour}:00${formData.availability.checkOutTime.period === 'PM' ? '+12:00' : ':00'}`)
           : null,
+        checkInDates: formData.availability?.checkInDates || '',
         location: {
           address: formData.location.fullAddress,
           optional: formData.location.city || "",
