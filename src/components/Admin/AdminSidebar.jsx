@@ -71,11 +71,11 @@ const AdminSidebar = () => {
       label: "Travel Magazine",
       path: "/admin/magazine",
     },
-    {
-      icon: MessageCircle,
-      label: "Messages",
-      path: "/admin/messages",
-    },
+    // {
+    //   icon: MessageCircle,
+    //   label: "Messages",
+    //   path: "/admin/messages",
+    // },
     {
       icon: CaravanIcon,
       label: "Campers",

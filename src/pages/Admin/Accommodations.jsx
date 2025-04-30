@@ -566,10 +566,10 @@ const Accommodations = () => {
         setError("Failed to load accommodations. Please try again.");
       }
 
-      // Clear error after 5 seconds
+      // Clear error after 8 seconds
       setTimeout(() => {
         setError("");
-      }, 5000);
+      }, 8000);
     } finally {
       setLoading(false);
       setLoadingOperation("");
@@ -654,10 +654,10 @@ const Accommodations = () => {
             skipped.reason
           }`
         );
-        // Clear the error after 5 seconds
+        // Clear the error after 8 seconds
         setTimeout(() => {
           setError("");
-        }, 5000);
+        }, 8000);
 
         setSuccessMessage(""); // Clear the processing message
         setLoading(false);
@@ -705,10 +705,10 @@ const Accommodations = () => {
         );
       }
 
-      // Clear error after 5 seconds
+      // Clear error after 8 seconds
       setTimeout(() => {
         setError("");
-      }, 5000);
+      }, 8000);
     } finally {
       setLoading(false);
       setAddToFeaturedModalOpen(false);
@@ -781,10 +781,10 @@ const Accommodations = () => {
         );
       }
 
-      // Clear error after 5 seconds
+      // Clear error after 8 seconds
       setTimeout(() => {
         setError("");
-      }, 5000);
+      }, 8000);
     } finally {
       setLoading(false);
       setRemoveFromFeaturedModalOpen(false);
@@ -825,7 +825,11 @@ const Accommodations = () => {
 
   // Handler for editing an accommodation
   const handleEdit = (id) => {
-    navigate(`/admin/accommodations/edit/${id}`);
+    setError("Edit functionality is currently disabled");
+    // Clear error after 8 seconds
+    setTimeout(() => {
+      setError("");
+    }, 8000);
   };
 
   // Handler for toggling status (activate/deactivate)
@@ -843,7 +847,7 @@ const Accommodations = () => {
             acc._id === id ? { ...acc, status: "closed" } : acc
           )
         );
-      } else {
+      
         // For now, we'll just update the UI without an API call
         // In a real app, you would make an API call to reactivate
         setAccommodations((prevAccommodations) =>
@@ -855,6 +859,10 @@ const Accommodations = () => {
     } catch (err) {
       console.error("Error toggling accommodation status:", err);
       setError("Failed to update accommodation status. Please try again.");
+      // Clear error after 8 seconds
+      setTimeout(() => {
+        setError("");
+      }, 8000);
     } finally {
       setLoading(false);
     }
@@ -881,6 +889,10 @@ const Accommodations = () => {
     } catch (err) {
       console.error("Error deleting accommodation:", err);
       setError("Failed to delete accommodation. Please try again.");
+      // Clear error after 8 seconds
+      setTimeout(() => {
+        setError("");
+      }, 8000);
     } finally {
       setLoading(false);
       setConfirmDeleteOpen(false);
@@ -932,7 +944,7 @@ const Accommodations = () => {
       {/* Toast notifications for errors and success messages */}
       {error && (
         <div
-          className="fixed top-4 right-4 z-50 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded shadow-md flex items-center max-w-md animate-fade-in"
+          className="fixed bottom-4 right-4 z-50 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded shadow-md flex items-center max-w-md animate-fade-in"
           role="alert"
         >
           <AlertTriangle className="w-5 h-5 mr-2" />
@@ -948,7 +960,7 @@ const Accommodations = () => {
 
       {successMessage && (
         <div
-          className="fixed top-4 right-4 z-50 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded shadow-md flex items-center max-w-md animate-fade-in"
+          className="fixed bottom-4 right-4 z-50 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded shadow-md flex items-center max-w-md animate-fade-in"
           role="alert"
         >
           {loadingOperation ? (

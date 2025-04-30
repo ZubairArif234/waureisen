@@ -72,9 +72,17 @@ const AddToFeaturedModal = ({
         )
       : defaultSections;
 
+  // Function to set error with auto-clear
+  const setErrorWithTimeout = (message) => {
+    setErrorMessage(message);
+    setTimeout(() => {
+      setErrorMessage("");
+    }, 8000);
+  };
+
   const handleConfirm = () => {
     if (!selectedSection) {
-      setErrorMessage("Please select a section");
+      setErrorWithTimeout("Please select a section");
       return;
     }
 
@@ -82,7 +90,7 @@ const AddToFeaturedModal = ({
     if (!isRemoveMode) {
       const currentCount = currentCounts[selectedSection] || 0;
       if (currentCount >= maxAllowed) {
-        setErrorMessage(
+        setErrorWithTimeout(
           `Cannot add more than ${maxAllowed} accommodations to ${
             defaultSections.find((s) => s.id === selectedSection).name
           }`

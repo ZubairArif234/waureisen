@@ -225,26 +225,8 @@ useEffect(() => {
             <option value="flexible">Flexible (Full refund 1 day prior to arrival)</option>
             <option value="moderate">Moderate (Full refund 5 days prior to arrival)</option>
             <option value="strict">Strict (50% refund up to 1 week prior to arrival)</option>
-            <option value="custom">Custom Policy</option>
           </select>
         </div>
-
-        {/* Custom Policy Details */}
-        {formData.policies.cancellationPolicy === 'custom' && (
-          <div className="space-y-2 mb-6">
-            <label htmlFor="customPolicyDetails" className="block text-sm font-medium text-gray-700">
-              Custom Policy Details
-            </label>
-            <textarea
-              id="customPolicyDetails"
-              value={formData.policies.customPolicyDetails}
-              onChange={(e) => handlePolicyChange('customPolicyDetails', e.target.value)}
-              placeholder="Describe your custom cancellation policy..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
-              rows={3}
-            ></textarea>
-          </div>
-        )}
 
         {/* House Rules */}
         <div className="space-y-3">

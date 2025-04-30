@@ -83,16 +83,13 @@ const BasicInfoForm = ({ formData, handleInputChange, handleNestedInputChange })
           <label htmlFor="listingSource" className="block text-sm font-medium text-gray-700">
             Listing Source
           </label>
-          <select
+          <input
+            type="text"
             id="listingSource"
             value={formData.listingSource}
-            onChange={(e) => handleInputChange('listingSource', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
-          >
-            <option value="Admin">Admin</option>
-            <option value="Provider">Provider</option>
-            <option value="Interhome">Interhome</option>
-          </select>
+            readOnly
+            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500"
+          />
         </div>
       </div>
 

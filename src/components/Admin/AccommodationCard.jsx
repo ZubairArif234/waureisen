@@ -21,6 +21,7 @@ const AccommodationCard = ({
   const buttonRef = useRef(null);
   const [fetchingFeatured, setFetchingFeatured] = useState(false);
   const [featuredError, setFeaturedError] = useState(false);
+  const [error, setError] = useState(null);
 
   const statusColors = {
     active: "bg-green-100 text-green-800",
@@ -28,6 +29,14 @@ const AccommodationCard = ({
     pending: "bg-blue-100 text-blue-800",
     rejected: "bg-red-100 text-red-800",
     deleted: "bg-gray-100 text-gray-800",
+  };
+
+  // Function to set error with auto-clear
+  const setErrorWithTimeout = (message) => {
+    setError(message);
+    setTimeout(() => {
+      setError(null);
+    }, 8000);
   };
 
   // Check if this accommodation is in any featured section
@@ -73,6 +82,7 @@ const AccommodationCard = ({
         // Don't show any featured status badges on error
         setFeaturedSections([]);
         setFeaturedError(true);
+        setErrorWithTimeout("Failed to load featured status");
       } finally {
         setFetchingFeatured(false);
       }
@@ -118,10 +128,11 @@ const AccommodationCard = ({
     {
       label: "Edit",
       onClick: () => {
-        onEdit(accommodation._id);
+        setErrorWithTimeout("Edit functionality is currently disabled");
         setShowMenu(false);
       },
-      className: "text-gray-700 hover:bg-gray-100",
+      className: "text-gray-400 hover:bg-gray-100 cursor-not-allowed",
+      disabled: true
     },
     {
       label: accommodation.status === "active" ? "Deactivate" : "Activate",
@@ -183,6 +194,13 @@ const AccommodationCard = ({
 
   return (
     <div className="bg-white rounded-lg overflow-hidden shadow border border-gray-200 transition-all duration-300 hover:shadow-md relative">
+      {/* Error message */}
+      {error && (
+        <div className="absolute top-0 left-0 right-0 bg-red-100 text-red-800 text-sm p-2 text-center">
+          {error}
+        </div>
+      )}
+      
       {/* Featured badges */}
       <div className="absolute top-2 left-2 z-10 flex flex-wrap gap-1 max-w-[calc(100%-60px)]">
         {fetchingFeatured ? (
