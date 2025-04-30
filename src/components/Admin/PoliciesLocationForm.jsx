@@ -8,6 +8,7 @@ const PoliciesLocationForm = ({ formData, handleInputChange, handleNestedInputCh
 const mapRef = useRef(null);
 const [mapInstance, setMapInstance] = useState(null);
 const [marker, setMarker] = useState(null);
+const [selectedAddress, setSelectedAddress] = useState('');
 
 // Load Google Maps script and initialize autocomplete
 useEffect(() => {
@@ -44,6 +45,9 @@ useEffect(() => {
         const place = autocomplete.getPlace();
         if (place && place.formatted_address && place.geometry) {
           console.log("Place selected:", place);
+          
+          // Update the selected address state
+          setSelectedAddress(place.formatted_address);
           
           // Update the form with the selected address
           handleLocationChange('fullAddress', place.formatted_address);
@@ -178,8 +182,6 @@ useEffect(() => {
             type="text"
             id="fullAddress"
             ref={fullAddressRef}
-            value={formData.location.fullAddress}
-            onChange={(e) => handleLocationChange('fullAddress', e.target.value)}
             placeholder="e.g. 7082 Vaz/Obervaz, Switzerland"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
             onKeyDown={(e) => {
@@ -188,6 +190,18 @@ useEffect(() => {
               }
             }}
           />
+          {/* Display selected address */}
+          <div className="mt-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Selected Address
+            </label>
+            <input
+              type="text"
+              readOnly
+              value={selectedAddress || 'No address selected'}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500"
+            />
+          </div>
         </div>
         </div>
 
