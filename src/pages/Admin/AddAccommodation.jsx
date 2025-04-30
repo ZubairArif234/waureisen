@@ -172,6 +172,54 @@ const AddAccommodation = () => {
 
   const handleSubmit = async () => {
     try {
+      // Validate all required fields
+      const validationErrors = [];
+
+      // Basic Info validation
+      if (!formData.title) validationErrors.push("Listing title is required");
+      if (!formData.propertyType) validationErrors.push("Property type is required");
+      if (!formData.listingSource) validationErrors.push("Listing source is required");
+      if (!formData.capacity.people) validationErrors.push("Number of people is required");
+      if (!formData.capacity.dogs) validationErrors.push("Number of dogs is required");
+      if (!formData.capacity.bedrooms) validationErrors.push("Number of bedrooms is required");
+      if (!formData.capacity.rooms) validationErrors.push("Number of rooms is required");
+      if (!formData.capacity.washrooms) validationErrors.push("Number of washrooms is required");
+      if (!formData.pricing.regularPrice) validationErrors.push("Regular price is required");
+      if (!formData.pricing.currency) validationErrors.push("Currency is required");
+
+      // Availability validation
+      if (!formData.availability.checkInDates) validationErrors.push("Check-in dates are required");
+      if (!formData.availability.checkInTime.hour || !formData.availability.checkInTime.period) {
+        validationErrors.push("Check-in time is required");
+      }
+      if (!formData.availability.checkOutTime.hour || !formData.availability.checkOutTime.period) {
+        validationErrors.push("Check-out time is required");
+      }
+
+      // Photos validation
+      if (!formData.mainImage) validationErrors.push("Main image is required");
+      if (!formData.galleryImages || formData.galleryImages.length < 4) {
+        validationErrors.push("At least 4 gallery images are required");
+      }
+
+      // Description validation
+      if (!formData.shortDescription) validationErrors.push("Short description is required");
+      if (!formData.fullDescription) validationErrors.push("Full description is required");
+
+      // Policies & Location validation
+      if (!formData.location.fullAddress) validationErrors.push("Full address is required");
+      if (!formData.location.mapLocation) validationErrors.push("Map location is required");
+      if (!formData.policies.cancellationPolicy) validationErrors.push("Cancellation policy is required");
+      if (formData.policies.cancellationPolicy === 'custom' && !formData.policies.customPolicyDetails) {
+        validationErrors.push("Custom policy details are required when using custom cancellation policy");
+      }
+
+      // If there are validation errors, show them and return
+      if (validationErrors.length > 0) {
+        alert("Please fix the following errors before publishing:\n\n" + validationErrors.join("\n"));
+        return;
+      }
+
       setIsLoading(true);
 
       // Generate a unique code for the listing
@@ -208,11 +256,12 @@ const AddAccommodation = () => {
       // Map form data to Listing model structure
       const listingData = {
         Code: uniqueCode,
-        title: formData.title || "New Listing",
+        title: formData.title,
         listingType: "waureisen", // Hardcoded to waureisen for admin-created listings
-        propertyType: formData.propertyType || "Studio", // Add propertyType field
+        propertyType: formData.propertyType,
         description: {
-          general: formData.fullDescription || formData.shortDescription || "",
+          general: formData.fullDescription,
+          short: formData.shortDescription,
         },
         checkInTime: formData.availability?.checkInTime 
           ? new Date(`1970-01-01T${formData.availability.checkInTime.hour}:00${formData.availability.checkInTime.period === 'PM' ? '+12:00' : ':00'}`)
@@ -221,22 +270,22 @@ const AddAccommodation = () => {
           ? new Date(`1970-01-01T${formData.availability.checkOutTime.hour}:00${formData.availability.checkOutTime.period === 'PM' ? '+12:00' : ':00'}`)
           : null,
         location: {
-          address: formData.location?.fullAddress || "Default Address",
-          optional: formData.location?.city || "",
+          address: formData.location.fullAddress,
+          optional: formData.location.city || "",
           type: 'Point',
           coordinates: coordinates,
         },
         pricePerNight: {
-          price: formData.pricing?.regularPrice || 0,
-          currency: formData.pricing?.currency || "CHF",
+          price: formData.pricing.regularPrice,
+          currency: formData.pricing.currency,
         },
-        maxDogs: formData.capacity?.dogs || 0,
-        maxGuests: formData.capacity?.people || 6,
-        bedRooms: formData.capacity?.bedrooms || 0,
+        maxDogs: formData.capacity.dogs,
+        maxGuests: formData.capacity.people,
+        bedRooms: formData.capacity.bedrooms,
         rooms: {
-          number: formData.capacity?.rooms || 0,
+          number: formData.capacity.rooms,
         },
-        washrooms: formData.capacity?.washrooms || 0,
+        washrooms: formData.capacity.washrooms,
         status: formData.availability?.active ? "active" : "pending approval",
         source: {
           name: "waureisen", // Always set to waureisen for admin-created listings
@@ -244,7 +293,8 @@ const AddAccommodation = () => {
         },
         images: photos,
         legal: {
-          cancellationPolicy: formData.policies?.cancellationPolicy || "flexible",
+          cancellationPolicy: formData.policies.cancellationPolicy,
+          customPolicyDetails: formData.policies.customPolicyDetails,
         },
       };
 
