@@ -390,8 +390,8 @@ const AddAccommodation = () => {
         // Show success message
         alert("Listing created successfully!");
 
-        // Redirect to the detail view
-        navigate(`/accommodation/${listingResponse._id}`);
+        // Redirect to the detail view with state indicating we came from admin
+        navigate(`/accommodation/${listingResponse._id}`, { state: { from: 'admin' } });
       }
     } catch (error) {
       console.error("Error saving listing:", error);

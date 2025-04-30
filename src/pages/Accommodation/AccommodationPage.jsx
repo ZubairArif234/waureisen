@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../components/Shared/Navbar";
 import DateRangePicker from "../../components/HomeComponents/DateRangePicker";
 import GuestSelector from "../../components/HomeComponents/GuestSelector";
-import { Check, ChevronDown, AlertTriangle } from "lucide-react";
+import { Check, ChevronDown, AlertTriangle, ArrowLeft } from "lucide-react";
 import {
   Users,
   Home,
@@ -145,6 +145,9 @@ const AccommodationPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [availableDates, setAvailableDates] = useState([]); // Add state for available dates
+
+  // Check if we came from admin panel
+  const isFromAdmin = location.state?.from === 'admin' || location.pathname.includes('/admin/');
 
   // Add function to fetch price for new dates with optional pax parameter
   const fetchPriceForDates = async (startDate, paxValue = null) => {
@@ -544,16 +547,27 @@ const AccommodationPage = () => {
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 mt-20">
-        {/* Title with Code */}
-        <h1 className="text-[#4D484D] md:text-2xl text-xl font-semibold mb-6">
-          {accommodation?.title ||
-            "Modern and Luxury 1BHK Studio/Self Check-in/Eiffle (default)"}
-          {accommodation?.Code && (
-            <span className="text-gray-500 text-base ml-2">
-              ({accommodation.Code})
-            </span>
+        {/* Title section with back button */}
+        <div className="flex flex-col gap-4 mb-6">
+          {isFromAdmin && (
+            <button
+              onClick={() => navigate('/admin/accommodations')}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors w-fit"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span>Back to Admin Panel</span>
+            </button>
           )}
-        </h1>
+          <h1 className="text-[#4D484D] md:text-2xl text-xl font-semibold">
+            {accommodation?.title ||
+              "Modern and Luxury 1BHK Studio/Self Check-in/Eiffle (default)"}
+            {accommodation?.Code && (
+              <span className="text-gray-500 text-base ml-2">
+                ({accommodation.Code})
+              </span>
+            )}
+          </h1>
+        </div>
 
         <ImageGrid images={accommodation?.images || []} />
 
