@@ -2,9 +2,11 @@ import React from 'react';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import moment from 'moment'; // Import moment for date comparison
 
-const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates }) => { // Add availableDates prop
+const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates }) => {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDayOfMonth = new Date(year, month, 1).getDay();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
   
   // Parse availableDates strings into moment objects for comparison
   const availableMoments = availableDates?.map(dateStr => moment(dateStr, 'YYYY-MM-DD'));
@@ -52,14 +54,17 @@ const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates }) 
   };
 
   const isDateAvailable = (day) => {
-    if (!availableMoments || availableMoments.length === 0) return true; // If no availability data, all dates are considered available
-    const currentDate = moment({ year, month, day });
+    // If no availability data, all future dates are available
+    if (!availableMoments || availableMoments.length === 0) {
+      const date = new Date(year, month, day);
+      return date >= today;
+    }
     
-    // Check if the current date falls within 7 days (inclusive) of any available start date
-    return availableMoments.some(availableMoment => {
+    const currentDate = moment({ year, month, day });
+    return currentDate.isSameOrAfter(moment(), 'day') && availableMoments.some(availableMoment => {
       const startDate = availableMoment;
-      const endDate = availableMoment.clone().add(7, 'days'); // 7 days inclusive means adding 6 days
-      return currentDate.isBetween(startDate, endDate, 'day', '[]'); // '[]' includes start and end dates
+      const endDate = availableMoment.clone().add(7, 'days');
+      return currentDate.isBetween(startDate, endDate, 'day', '[]');
     });
   };
 
@@ -75,30 +80,36 @@ const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates }) 
         ))}
         
         {weeks.map((week, weekIndex) => (
-          week.map((day, dayIndex) => (
-            <button
-              key={`${weekIndex}-${dayIndex}`}
-              disabled={!day || !isDateAvailable(day)} // Disable if day is null OR not available
-              onClick={() => day && isDateAvailable(day) && onDateSelect(new Date(year, month, day))} // Only allow selection if available
-              className={`
-                p-2 text-center text-sm rounded-full
-                ${!day ? 'invisible' : ''}
-                ${!isDateAvailable(day) ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-gray-100'} // Style disabled dates
-                ${isDateInRange(day) && isDateAvailable(day) ? 'bg-brand/20' : ''}
-                ${isStartDate(day) && isDateAvailable(day) ? 'bg-brand text-white hover:bg-brand' : ''}
-                ${isEndDate(day) && isDateAvailable(day) ? 'bg-brand text-white hover:bg-brand' : ''}
-              `}
-            >
-              {day}
-            </button>
-          ))
+          week.map((day, dayIndex) => {
+            const isAvailable = day && isDateAvailable(day);
+            const isInRange = isDateInRange(day);
+            const isStart = isStartDate(day);
+            const isEnd = isEndDate(day);
+            
+            return (
+              <button
+                key={`${weekIndex}-${dayIndex}`}
+                disabled={!day || !isAvailable}
+                onClick={() => day && isAvailable && onDateSelect(new Date(year, month, day))}
+                className={`
+                  p-2 text-center text-sm rounded-full transition-colors
+                  ${!day ? 'invisible' : ''}
+                  ${!isAvailable ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-gray-100 cursor-pointer'}
+                  ${isInRange && isAvailable ? 'bg-brand/20' : ''}
+                  ${(isStart || isEnd) && isAvailable ? 'bg-brand text-white hover:bg-brand' : ''}
+                `}
+              >
+                {day}
+              </button>
+            );
+          })
         ))}
       </div>
     </div>
   );
 };
 
-const DateRangePicker = ({ isOpen, onClose, selectedRange, onRangeSelect, availableDates }) => { // Add availableDates prop
+const DateRangePicker = ({ isOpen, onClose, selectedRange, onRangeSelect, availableDates }) => {
   if (!isOpen) return null;
 
   const today = new Date();
@@ -106,15 +117,24 @@ const DateRangePicker = ({ isOpen, onClose, selectedRange, onRangeSelect, availa
   const [leftYear, setLeftYear] = React.useState(today.getFullYear());
 
   const handleDateSelect = (date) => {
-    if (!selectedRange.start || (selectedRange.start && selectedRange.end)) {
+    // If we have both dates selected, clicking any new date should start a new selection
+    if (selectedRange.start && selectedRange.end) {
       onRangeSelect({ start: date, end: null });
-    } else {
-      if (date < selectedRange.start) {
-        onRangeSelect({ start: date, end: selectedRange.start });
-      } else {
-        onRangeSelect({ start: selectedRange.start, end: date });
-      }
+      return;
     }
+
+    // If we only have a start date, clicking a date before it should start a new selection
+    if (selectedRange.start && !selectedRange.end) {
+      if (date < selectedRange.start) {
+        onRangeSelect({ start: date, end: null });
+        return;
+      }
+      onRangeSelect({ start: selectedRange.start, end: date });
+      return;
+    }
+
+    // If we have no dates selected, start a new selection
+    onRangeSelect({ start: date, end: null });
   };
 
   return (

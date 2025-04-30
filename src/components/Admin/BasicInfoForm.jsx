@@ -6,6 +6,26 @@ import DateRangePicker from '../HomeComponents/DateRangePicker';
 
 const BasicInfoForm = ({ formData, handleInputChange, handleNestedInputChange }) => {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [selectedRange, setSelectedRange] = useState({
+    start: formData.availability.checkInDate ? new Date(formData.availability.checkInDate) : null,
+    end: formData.availability.checkOutDate ? new Date(formData.availability.checkOutDate) : null
+  });
+
+  const handleRangeSelect = (range) => {
+    setSelectedRange(range);
+    if (range.start && range.end) {
+      handleNestedInputChange('availability', 'checkInDate', range.start.toISOString());
+      handleNestedInputChange('availability', 'checkOutDate', range.end.toISOString());
+      setIsDatePickerOpen(false);
+    } else if (range.start) {
+      handleNestedInputChange('availability', 'checkInDate', range.start.toISOString());
+      handleNestedInputChange('availability', 'checkOutDate', '');
+    } else {
+      handleNestedInputChange('availability', 'checkInDate', '');
+      handleNestedInputChange('availability', 'checkOutDate', '');
+    }
+  };
+
   return (
     <div className="space-y-8">
       <div>
@@ -246,7 +266,13 @@ const BasicInfoForm = ({ formData, handleInputChange, handleNestedInputChange })
       >
         <Calendar className="w-5 h-5 text-gray-400 mr-2" />
         <span className="text-sm text-gray-700">
-          {formData.availability.checkInDates || "Select check-in and check-out dates"}
+          {selectedRange.start && selectedRange.end ? (
+            `${selectedRange.start.toLocaleDateString()} - ${selectedRange.end.toLocaleDateString()}`
+          ) : selectedRange.start ? (
+            `${selectedRange.start.toLocaleDateString()} - Select check-out date`
+          ) : (
+            'Select check-in and check-out dates'
+          )}
         </span>
       </div>
     </div>
@@ -366,28 +392,9 @@ const BasicInfoForm = ({ formData, handleInputChange, handleNestedInputChange })
 <DateRangePicker
   isOpen={isDatePickerOpen}
   onClose={() => setIsDatePickerOpen(false)}
-  selectedRange={{
-    start: formData.availability.checkInDate ? new Date(formData.availability.checkInDate) : null,
-    end: formData.availability.checkOutDate ? new Date(formData.availability.checkOutDate) : null
-  }}
-  onRangeSelect={(range) => {
-    if (range.start && range.end) {
-      // Format dates for display
-      const startDate = range.start.toLocaleDateString();
-      const endDate = range.end.toLocaleDateString();
-      const dateString = `${startDate} - ${endDate}`;
-      
-      // Update form data with the formatted string
-      handleNestedInputChange('availability', 'checkInDates', dateString);
-      
-      // Also store the actual date objects
-      handleNestedInputChange('availability', 'checkInDate', range.start);
-      handleNestedInputChange('availability', 'checkOutDate', range.end);
-      
-      // Close the picker
-      setIsDatePickerOpen(false);
-    }
-  }}
+  selectedRange={selectedRange}
+  onRangeSelect={handleRangeSelect}
+  availableDates={[]}
 />
     </div>
 
