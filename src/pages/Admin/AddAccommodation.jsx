@@ -207,7 +207,6 @@ const AddAccommodation = () => {
       if (!formData.fullDescription) validationErrors.push("Full description is required");
 
       // Policies & Location validation
-      if (!formData.location.fullAddress) validationErrors.push("Full address is required");
       if (!formData.location.mapLocation) validationErrors.push("Map location is required");
       if (!formData.policies.cancellationPolicy) validationErrors.push("Cancellation policy is required");
       if (formData.policies.cancellationPolicy === 'custom' && !formData.policies.customPolicyDetails) {

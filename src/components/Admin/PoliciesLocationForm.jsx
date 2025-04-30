@@ -8,7 +8,8 @@ const PoliciesLocationForm = ({ formData, handleInputChange, handleNestedInputCh
 const mapRef = useRef(null);
 const [mapInstance, setMapInstance] = useState(null);
 const [marker, setMarker] = useState(null);
-const [selectedAddress, setSelectedAddress] = useState('');
+const [inputAddress, setInputAddress] = useState('');
+const [selectedAddress, setSelectedAddress] = useState(formData.location?.fullAddress || '');
 
 // Load Google Maps script and initialize autocomplete
 useEffect(() => {
@@ -24,16 +25,28 @@ useEffect(() => {
     }
     
     try {
-      // Initialize map with default center
+      // Initialize map with default center or existing location
+      const initialCenter = formData.location?.mapLocation || { lat: 46.818188, lng: 8.227512 };
+      
       mapInstanceRef = new window.google.maps.Map(mapRef.current, {
-        center: { lat: 46.818188, lng: 8.227512 }, // Switzerland
-        zoom: 8,
+        center: initialCenter,
+        zoom: formData.location?.mapLocation ? 15 : 8,
         mapTypeControl: false,
         streetViewControl: false,
         fullscreenControl: true,
       });
       
       setMapInstance(mapInstanceRef);
+      
+      // If we have an existing location, add a marker
+      if (formData.location?.mapLocation) {
+        markerRef = new window.google.maps.Marker({
+          position: formData.location.mapLocation,
+          map: mapInstanceRef,
+          animation: window.google.maps.Animation.DROP
+        });
+        setMarker(markerRef);
+      }
       
       // Initialize autocomplete
       const autocomplete = new window.google.maps.places.Autocomplete(fullAddressRef.current, {
@@ -46,7 +59,7 @@ useEffect(() => {
         if (place && place.formatted_address && place.geometry) {
           console.log("Place selected:", place);
           
-          // Update the selected address state
+          // Update the selected address state ONLY when a place is selected
           setSelectedAddress(place.formatted_address);
           
           // Update the form with the selected address
@@ -99,7 +112,7 @@ useEffect(() => {
       // Clean up resources if needed
     }
   };
-}, []);
+}, []); // Remove formData.location?.mapLocation dependency
 
 
 
@@ -182,13 +195,10 @@ useEffect(() => {
             type="text"
             id="fullAddress"
             ref={fullAddressRef}
+            value={inputAddress}
+            onChange={(e) => setInputAddress(e.target.value)}
             placeholder="e.g. 7082 Vaz/Obervaz, Switzerland"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-              }
-            }}
           />
           {/* Display selected address */}
           <div className="mt-2">

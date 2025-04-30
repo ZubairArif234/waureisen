@@ -506,12 +506,8 @@ const AccommodationPage = () => {
 
   const handleReserved = () => {
     console.log("Reserved button clicked : ", accommodation?.provider);
-    if (!dateRange?.start) {
-      alert("Please select a check-in date before reserving.");
-      return;
-    }
-    if (!dateRange?.start) {
-      alert("Please select a check-in date before reserving.");
+    if (!dateRange?.start || !dateRange?.end) {
+      alert("Please select both check-in and check-out dates before reserving.");
       return;
     }
     if (accommodation?.provider === "Interhome") {
