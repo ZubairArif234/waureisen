@@ -64,6 +64,7 @@ useEffect(() => {
           
           // Update the form with the selected address
           handleLocationChange('fullAddress', place.formatted_address);
+          handleLocationChange('address', place.formatted_address);
           
           // Get position
           const position = {
