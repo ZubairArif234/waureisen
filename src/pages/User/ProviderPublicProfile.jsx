@@ -256,7 +256,9 @@ console.log(state?.data);
                 <input
                   type="text"
                   name="firstName"
-                  value={state?.data?.role != "admin" ? state?.data?.firstName : state?.data?.username}
+                  value={state?.data?.role != "admin" ? state?.data?.firstName : state?.data?.username 
+                    || "admin"
+                  }
                   disabled={!isEditing}
                   className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-brand/20 focus:border-brand disabled:bg-gray-50 disabled:text-gray-500"
                 />
