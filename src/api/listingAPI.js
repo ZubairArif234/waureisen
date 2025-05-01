@@ -30,8 +30,7 @@ export const getListingById = async (id) => {
 export const searchListings = async (params) => {
   try {
     const { lat, lng, page, pageSize, filters, moreFilters, radius } = params;
-    
-    // Build query parameters
+
     const queryParams = new URLSearchParams({
       lat,
       lng,
@@ -39,29 +38,26 @@ export const searchListings = async (params) => {
       pageSize,
     });
 
-    // Add radius parameter if provided (in km)
     if (radius) {
       queryParams.append('radius', radius);
     }
 
-    // Add filters if provided - encode as a single JSON string
     if (filters && filters.length > 0) {
       queryParams.append('filters', JSON.stringify(filters));
     }
 
-    // Add more filters if provided
     if (moreFilters) {
       queryParams.append('moreFilters', JSON.stringify(moreFilters));
     }
 
-    const response = await axios.get(`${API_URL}/api/listings/search?${queryParams.toString()}`);
+    // ✅ Use shared API instance (which includes the baseURL from env)
+    const response = await API.get(`/listings/search?${queryParams.toString()}`);
     return response.data;
   } catch (error) {
     console.error('Error searching listings:', error);
     throw error;
   }
 };
-
 // For provider to add listings
 export const createListing = async (listingData) => {
   try {
