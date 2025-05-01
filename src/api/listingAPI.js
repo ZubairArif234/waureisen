@@ -155,26 +155,30 @@ export const getProviderDashboardStats = async (timeFrame = 'month') => {
 export const fetchListingsByMapBounds = async (params) => {
   try {
     const { lat, lng, radius, bounds, page = 1, limit = 20, filters = {} } = params;
-    
-    // Build query parameters
+
     const queryParams = new URLSearchParams({
       lat,
       lng,
-      radius: radius || 1000, // Default 1000km radius
+      radius: radius || 1000,
       page,
       limit,
-      ...filters
     });
-    
-    // Add bounds if available
+
+    // Add filters to query (assumes flat key-value structure)
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        queryParams.append(key, value);
+      }
+    });
+
     if (bounds) {
       queryParams.append('neLat', bounds.ne.lat);
       queryParams.append('neLng', bounds.ne.lng);
       queryParams.append('swLat', bounds.sw.lat);
       queryParams.append('swLng', bounds.sw.lng);
     }
-    
-    const response = await axios.get(`${API_URL}/api/listings/map?${queryParams.toString()}`);
+
+    const response = await API.get(`/listings/map?${queryParams.toString()}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching listings by map bounds:', error);
