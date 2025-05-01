@@ -251,10 +251,23 @@ export const getListingById = async (id) => {
 
 export const createListing = async (listingData) => {
   try {
-    const response = await API.post("/admins/add-listing", listingData);
+    console.log("Creating listing through admin API with data:", listingData);
+    
+    // Make a copy of the data to avoid modifying the original
+    const dataToSend = { ...listingData };
+
+    // Set ownerType to 'Admin' explicitly (with capital A to match route check)
+    dataToSend.ownerType = 'Admin';
+    
+    // API call
+    const response = await API.post("/admins/add-listing", dataToSend);
+    console.log("Admin listing creation response:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error creating listing:", error);
+    if (error.response?.data) {
+      console.error("API Error Response:", error.response.data);
+    }
     throw error;
   }
 };

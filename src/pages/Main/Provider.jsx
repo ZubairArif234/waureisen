@@ -2,7 +2,7 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import ProviderListings from "../Provider/ProviderListings";
 import YourListings from "../Provider/YourListings";
-import CreateListing from "../Provider/CreateListing";
+import AddAccommodation from "../Admin/AddAccommodation"; // Using the shared component
 import ProviderBookings from "../Provider/ProviderBookings";
 import ProviderDashboard from "../Provider/ProviderDashboard";
 import ProviderEarnings from "../Provider/ProviderEarnings";
@@ -18,28 +18,25 @@ import ProviderSecurityPage from "../Provider/ProviderSecurityPage";
 import { isAuthenticated, isUserType } from "../../utils/authService";
 
 const ProviderLayout = () => {
-  // Public registration routes don't need authentication
   const isRegistrationRoute =
     window.location.pathname.includes("/provider/registration") ||
     window.location.pathname.includes("/provider/registration-success");
 
-  // Allow access to registration routes without authentication
   if (!isRegistrationRoute && (!isAuthenticated() || !isUserType("provider"))) {
-    // If not authenticated as provider and not on registration routes, redirect to login
     return <Navigate to="/login" replace />;
   }
 
   return (
     <div className="min-h-screen bg-white">
       <Routes>
-        <Route
-          path="/"
-          element={<Navigate to="/provider/dashboard" replace />}
-        />
+        <Route path="/" element={<Navigate to="/provider/dashboard" replace />} />
         <Route path="/dashboard" element={<ProviderDashboard />} />
         <Route path="/your-listings" element={<YourListings />} />
-        <Route path="/create-listing" element={<CreateListing />} />
-        <Route path="/edit-listing/:id" element={<CreateListing />} />
+        
+        {/* Use the shared AddAccommodation component with isProviderMode=true */}
+        <Route path="/create-listing" element={<AddAccommodation isProviderMode={true} />} />
+        <Route path="/edit-listing/:id" element={<AddAccommodation isProviderMode={true} />} />
+        
         <Route path="/bookings" element={<ProviderBookings />} />
         <Route path="/earnings" element={<ProviderEarnings />} />
         <Route path="/messages" element={<ProviderMessages />} />
@@ -52,11 +49,7 @@ const ProviderLayout = () => {
         <Route path="/account/profile" element={<ProviderProfilePage />} />
         <Route path="/account/banking" element={<ProviderBankingPage />} />
         <Route path="/account/security" element={<ProviderSecurityPage />} />
-        {/* Redirect old listings path to dashboard */}
-        <Route
-          path="/listings"
-          element={<Navigate to="/provider/dashboard" replace />}
-        />
+        <Route path="/listings" element={<Navigate to="/provider/dashboard" replace />} />
       </Routes>
     </div>
   );

@@ -158,17 +158,28 @@ export const getListingDetails = async (listingId) => {
   }
 };
 
+
 export const createListing = async (listingData) => {
   try {
+    // Make sure to set auth header
     setAuthHeader();
-    const response = await API.post("/providers/add-listing", listingData);
+    
+    // Create a copy of the data to avoid modifying the original
+    const dataToSend = { ...listingData };
+    
+    // Remove the source field which causes validation errors
+    if (dataToSend.source) {
+      delete dataToSend.source;
+    }
+    
+    // Make the API call
+    const response = await API.post("/providers/add-listing", dataToSend);
     return response.data;
   } catch (error) {
     console.error("Error creating listing:", error);
     throw error;
   }
 };
-
 export const updateListing = async (id, listingData) => {
   try {
     setAuthHeader();

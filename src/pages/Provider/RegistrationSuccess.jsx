@@ -103,26 +103,7 @@ const RegistrationSuccess = () => {
         </div>
         
         {/* Support section */}
-        <div className="bg-gray-50 rounded-lg p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-3">{t('need_help')}</h2>
-          <p className="text-gray-600 mb-4">
-          {t('support_available')}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <button
-              onClick={() => navigate('/support')}
-              className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              {t('help_center')}
-            </button>
-            <button
-              onClick={() => navigate('/contact')}
-              className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              {t('contact_support')}
-            </button>
-          </div>
-        </div>
+        
       </main>
       
       {/* <Footer /> */}

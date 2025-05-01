@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { updateListing } from "../../api/adminAPI";
 import { useNavigate } from "react-router-dom";
 import {
   Search,
@@ -836,22 +837,20 @@ const Accommodations = () => {
   const handleToggleStatus = async (id, currentStatus) => {
     try {
       setLoading(true);
-
-      // If listing is active, close it; otherwise no direct API to reactivate
+  
       if (currentStatus === "active") {
+        // Call closeListing API to deactivate it
         await closeListing(id);
-
-        // Update state to reflect the change
-        setAccommodations((prevAccommodations) =>
-          prevAccommodations.map((acc) =>
+        setAccommodations((prev) =>
+          prev.map((acc) =>
             acc._id === id ? { ...acc, status: "closed" } : acc
           )
         );
-      
-        // For now, we'll just update the UI without an API call
-        // In a real app, you would make an API call to reactivate
-        setAccommodations((prevAccommodations) =>
-          prevAccommodations.map((acc) =>
+      } else {
+        // Call updateListing to activate it
+        await updateListing(id, { status: "active" });
+        setAccommodations((prev) =>
+          prev.map((acc) =>
             acc._id === id ? { ...acc, status: "active" } : acc
           )
         );
@@ -859,14 +858,12 @@ const Accommodations = () => {
     } catch (err) {
       console.error("Error toggling accommodation status:", err);
       setError("Failed to update accommodation status. Please try again.");
-      // Clear error after 8 seconds
-      setTimeout(() => {
-        setError("");
-      }, 8000);
+      setTimeout(() => setError(""), 8000);
     } finally {
       setLoading(false);
     }
   };
+  
 
   // Handler for deleting an accommodation
   const handleDelete = (id, title) => {

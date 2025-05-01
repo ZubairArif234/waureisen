@@ -7,18 +7,24 @@ import AmenitiesForm from "../../components/Admin/AmenitiesForm";
 import DescriptionForm from "../../components/Admin/DescriptionForm";
 import PoliciesLocationForm from "../../components/Admin/PoliciesLocationForm";
 import {
-  createListing,
-  updateListing,
+  createListing as adminCreateListing,
+  updateListing as adminUpdateListing,
   getListingById,
   getTemplateFilter,
   createListingFilter,
 } from "../../api/adminAPI";
+import {
+  createListing as providerCreateListing,
+  updateListing as providerUpdateListing,
+  getListingDetails as getProviderListingDetails,
+} from "../../api/providerAPI";
 import { generateUniqueListingCode } from "../../utils/uniqueCodeGenerator";
 
-const AddAccommodation = () => {
+const AddAccommodation = (props) => {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEditMode = !!id;
+  const isProviderMode = props?.isProviderMode || false;
   const [isLoading, setIsLoading] = useState(isEditMode);
   const [activeTab, setActiveTab] = useState(null); // Changed to null initially
   const [template, setTemplate] = useState(null);
@@ -26,7 +32,7 @@ const AddAccommodation = () => {
     // Basic Info
     title: "",
     propertyType: "Studio",
-    listingSource: "Admin",
+    listingSource: isProviderMode ? "Provider" : "Admin",
     capacity: {
       people: 6,
       dogs: 1,
@@ -73,6 +79,15 @@ const AddAccommodation = () => {
       },
     },
   });
+
+  useEffect(() => {
+    if (isProviderMode) {
+      setFormData(prev => ({
+        ...prev,
+        listingSource: "Provider"
+      }));
+    }
+  }, [isProviderMode]);
 
   // Define all possible tabs with their corresponding section names in template
   const allTabs = [
@@ -135,8 +150,15 @@ const AddAccommodation = () => {
       const fetchListing = async () => {
         try {
           setIsLoading(true);
-          // Fetch actual listing data using the API
-          const listingData = await getListingById(id);
+          
+          // Use the appropriate API based on provider mode
+          let listingData;
+          if (isProviderMode) {
+            listingData = await getProviderListingDetails(id);
+          } else {
+            listingData = await getListingById(id);
+          }
+          
           setFormData(listingData);
           setIsLoading(false);
         } catch (error) {
@@ -144,13 +166,13 @@ const AddAccommodation = () => {
           alert("Failed to load listing data. Please try again.");
           setIsLoading(false);
           // Navigate back to listings on error
-          navigate("/admin/accommodations");
+          navigate(isProviderMode ? "/provider/your-listings" : "/admin/accommodations");
         }
       };
 
       fetchListing();
     }
-  }, [isEditMode, id, navigate]);
+  }, [isEditMode, id, navigate, isProviderMode]);
 
   const handleInputChange = (field, value) => {
     setFormData({
@@ -172,13 +194,11 @@ const AddAccommodation = () => {
 
   const handleSubmit = async () => {
     try {
-      // Validate all required fields
       const validationErrors = [];
-
-      // Basic Info validation
+  
+      // ===== Validation =====
       if (!formData.title) validationErrors.push("Listing title is required");
       if (!formData.propertyType) validationErrors.push("Property type is required");
-      if (!formData.listingSource) validationErrors.push("Listing source is required");
       if (!formData.capacity.people) validationErrors.push("Number of people is required");
       if (!formData.capacity.dogs) validationErrors.push("Number of dogs is required");
       if (!formData.capacity.bedrooms) validationErrors.push("Number of bedrooms is required");
@@ -186,13 +206,8 @@ const AddAccommodation = () => {
       if (!formData.capacity.washrooms) validationErrors.push("Number of washrooms is required");
       if (!formData.pricing.regularPrice) validationErrors.push("Regular price is required");
       if (!formData.pricing.currency) validationErrors.push("Currency is required");
-
-      // Availability validation
-      if (!formData.availability?.checkInDates || 
-          !formData.availability?.checkInDate || 
-          !formData.availability?.checkOutDate) {
-        console.log('Form Data:', formData);
-        console.log('Availability:', formData.availability);
+  
+      if (!formData.availability?.checkInDates || !formData.availability?.checkInDate || !formData.availability?.checkOutDate) {
         validationErrors.push("Check-in dates are required");
       }
       if (!formData.availability?.checkInTime?.hour || !formData.availability?.checkInTime?.period) {
@@ -201,74 +216,56 @@ const AddAccommodation = () => {
       if (!formData.availability?.checkOutTime?.hour || !formData.availability?.checkOutTime?.period) {
         validationErrors.push("Check-out time is required");
       }
-
-      // Photos validation
+  
       if (!formData.mainImage) validationErrors.push("Main image is required");
       if (!formData.galleryImages || formData.galleryImages.length < 4) {
         validationErrors.push("At least 4 gallery images are required");
       }
-
-      // Description validation
+  
       if (!formData.shortDescription) validationErrors.push("Short description is required");
       if (!formData.fullDescription) validationErrors.push("Full description is required");
-
-      // Policies & Location validation
+  
       if (!formData.location.mapLocation) validationErrors.push("Map location is required");
       if (!formData.policies.cancellationPolicy) validationErrors.push("Cancellation policy is required");
       if (formData.policies.cancellationPolicy === 'custom' && !formData.policies.customPolicyDetails) {
         validationErrors.push("Custom policy details are required when using custom cancellation policy");
       }
-
-      // If there are validation errors, show them and return
+  
       if (validationErrors.length > 0) {
         alert("Please fix the following errors before publishing:\n\n" + validationErrors.join("\n"));
         return;
       }
-
+  
       setIsLoading(true);
-
-      // Generate a unique code for the listing
+  
+      // ===== Prepare Data =====
       const uniqueCode = generateUniqueListingCode();
-
-      // Process the images array
-      const photos = [];
-      if (formData.mainImage) {
-        photos.push(formData.mainImage);
-      }
-      if (formData.galleryImages && formData.galleryImages.length > 0) {
-        const galleryUrls = formData.galleryImages.filter(
-          (img) => typeof img === "string"
-        );
-        photos.push(...galleryUrls);
-      }
-
-      // Format coordinates correctly - transform from {lat, lng} to [longitude, latitude]
+      const photos = [formData.mainImage, ...formData.galleryImages?.filter(img => typeof img === "string")];
+  
       let coordinates = [0, 0];
-      if (formData.location?.mapLocation) {
-        const location = formData.location.mapLocation;
-        if (typeof location === 'string') {
+      const location = formData.location?.mapLocation;
+      if (location) {
+        if (typeof location === "string") {
           try {
             const parsed = JSON.parse(location);
             coordinates = [parsed.lng, parsed.lat];
           } catch (e) {
-            console.warn('Could not parse location coordinates:', e);
+            console.warn("Could not parse coordinates:", e);
           }
         } else if (location.lat && location.lng) {
           coordinates = [location.lng, location.lat];
         }
       }
-
-      // Map form data to Listing model structure
+  
       const listingData = {
         Code: uniqueCode,
         title: formData.title,
-        listingType: "waureisen", // Hardcoded to waureisen for admin-created listings
-        propertyType: formData.propertyType,
+        listingType: formData.propertyType,
         description: {
           general: formData.fullDescription,
           short: formData.shortDescription,
         },
-        checkInTime: formData.availability?.checkInTime 
+        checkInTime: formData.availability?.checkInTime
           ? new Date(`1970-01-01T${formData.availability.checkInTime.hour}:00${formData.availability.checkInTime.period === 'PM' ? '+12:00' : ':00'}`)
           : null,
         checkOutTime: formData.availability?.checkOutTime
@@ -279,7 +276,7 @@ const AddAccommodation = () => {
           address: formData.location.fullAddress,
           optional: formData.location.city || "",
           type: 'Point',
-          coordinates: coordinates,
+          coordinates,
         },
         pricePerNight: {
           price: formData.pricing.regularPrice,
@@ -292,23 +289,15 @@ const AddAccommodation = () => {
           number: formData.capacity.rooms,
         },
         washrooms: formData.capacity.washrooms,
-        status: formData.availability?.active ? "active" : "pending approval",
-        source: {
-          name: "waureisen", // Always set to waureisen for admin-created listings
-          redirectLink: null,
-        },
+        status: isProviderMode ? "pending approval" : (formData.availability?.active ? "active" : "pending approval"),
         images: photos,
         legal: {
           cancellationPolicy: formData.policies.cancellationPolicy,
           customPolicyDetails: formData.policies.customPolicyDetails,
         },
       };
-
-      // Create Filter document structure based on template
-      const filterData = {
-        subsections: []
-      };
-
+  
+      const filterData = { subsections: [] };
       if (template?.subsections) {
         template.subsections.forEach(section => {
           const newSection = {
@@ -316,92 +305,116 @@ const AddAccommodation = () => {
             description: section.description,
             hasSubsections: section.hasSubsections,
             subsubsections: [],
-            filters: []
+            filters: [],
           };
-
-          // Handle direct filters in the section
+  
           if (section.filters) {
             section.filters.forEach(filter => {
               const value = formData[`${section.name.toLowerCase()}_${filter.name.toLowerCase()}`];
               if (value !== undefined) {
-                newSection.filters.push({
-                  name: filter.name,
-                  type: filter.type,
-                  value: value
-                });
+                newSection.filters.push({ name: filter.name, type: filter.type, value });
               }
             });
           }
-
-          // Handle subsubsections and their filters
+  
           if (section.subsubsections) {
             section.subsubsections.forEach(subsub => {
+              const subData = formData[`amenities_${subsub.name.toLowerCase().replace(/\s+/g, '_')}`] || {};
               const newSubsub = {
                 name: subsub.name,
                 description: subsub.description,
-                filters: []
+                filters: subsub.filters
+                  .filter(filter => subData[filter.name])
+                  .map(filter => ({ name: filter.name, type: filter.type, value: true })),
               };
-
-              // Get the form data key for this subsubsection
-              const formDataKey = `amenities_${subsub.name.toLowerCase().replace(/\s+/g, '_')}`;
-              const subsectionData = formData[formDataKey] || {};
-
-              // Add filters that are selected (true)
-              subsub.filters.forEach(filter => {
-                if (subsectionData[filter.name]) {
-                  newSubsub.filters.push({
-                    name: filter.name,
-                    type: filter.type,
-                    value: true
-                  });
-                }
-              });
-
-              if (newSubsub.filters.length > 0) {
-                newSection.subsubsections.push(newSubsub);
-              }
+              if (newSubsub.filters.length > 0) newSection.subsubsections.push(newSubsub);
             });
           }
-
+  
           filterData.subsections.push(newSection);
         });
       }
-
-      // Create the listing first
-      const listingResponse = await createListing(listingData);
-      console.log("Created new listing:", listingResponse);
-
-      // Create the filter document and link it to the listing
-      if (listingResponse._id) {
-        // Add the listing reference to the filter data
-        filterData.listing = listingResponse._id;
-        const filterResponse = await createListingFilter(filterData);
-        console.log("Created filters:", filterResponse);
-
-        // Update the listing with the filter reference
-        if (filterResponse._id) {
-          const updatedListingData = {
-            ...listingData,
-            filters: filterResponse._id
-          };
-          await updateListing(listingResponse._id, updatedListingData);
+  
+      let listingResponse;
+      const token = localStorage.getItem("token");
+      const apiUrl = import.meta.env.VITE_BE_BASE_URL || "http://localhost:5000";
+  
+      if (isProviderMode) {
+        console.log("Creating listing as provider");
+        listingData.filterData = filterData;
+        listingResponse = await providerCreateListing(listingData);
+  
+        if (listingResponse?._id) {
+          alert("Listing created successfully and submitted for approval!");
+          navigate("/provider/your-listings");
         }
-
-        // Show success message
-        alert("Listing created successfully!");
-
-        // Redirect to the detail view with state indicating we came from admin
-        navigate(`/accommodation/${listingResponse._id}`, { state: { from: 'admin' } });
+      } else {
+        console.log("Creating listing as admin");
+        if (!token) throw new Error("Authentication token not found. Please log in again.");
+  
+        const response = await fetch(`${apiUrl}/api/admins/add-listing`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            ...listingData,
+            owner: localStorage.getItem("adminId") || localStorage.getItem("userId"),
+            ownerType: "Admin",
+          }),
+        });
+  
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(`Failed to create listing: ${errorData.message || response.statusText}`);
+        }
+  
+        listingResponse = await response.json();
+  
+        if (listingResponse?._id) {
+          try {
+            filterData.listing = listingResponse._id;
+  
+            const filterResponse = await fetch(`${apiUrl}/api/filters`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify(filterData),
+            });
+  
+            if (filterResponse.ok) {
+              const filterRes = await filterResponse.json();
+              if (filterRes?._id) {
+                await fetch(`${apiUrl}/api/listings/${listingResponse._id}`, {
+                  method: "PUT",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                  },
+                  body: JSON.stringify({ filters: filterRes._id }),
+                });
+              }
+            }
+          } catch (err) {
+            console.error("Error with filter creation:", err);
+          }
+  
+          alert("Listing created successfully!");
+          navigate(`/accommodation/${listingResponse._id}`, { state: { from: "admin" } });
+        }
       }
     } catch (error) {
       console.error("Error saving listing:", error);
-      alert(
-        `Failed to ${isEditMode ? "update" : "create"} listing. Please try again. Error: ${error.message}`
-      );
+      alert(`Failed to ${isEditMode ? "update" : "create"} listing. Please try again. Error: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
   };
+  
+  
 
   const renderForm = () => {
     if (!template) return <div>Loading template...</div>;
@@ -422,6 +435,7 @@ const AddAccommodation = () => {
             handleInputChange={handleInputChange}
             handleNestedInputChange={handleNestedInputChange}
             subsection={subsection}
+            isProviderMode={isProviderMode}
           />
         );
       case "photos":
@@ -467,7 +481,7 @@ const AddAccommodation = () => {
       {/* Header */}
       <div className="mb-6 flex items-center gap-4">
         <button
-          onClick={() => navigate("/admin/accommodations")}
+          onClick={() => navigate(isProviderMode ? "/provider/your-listings" : "/admin/accommodations")}
           className="p-2 hover:bg-gray-100 rounded-full transition-colors"
         >
           <ArrowLeft className="w-5 h-5 text-gray-600" />
@@ -514,7 +528,7 @@ const AddAccommodation = () => {
         <div className="p-4 border-t bg-gray-50 flex justify-end gap-4">
           <button
             type="button"
-            onClick={() => navigate("/admin/accommodations")}
+            onClick={() => navigate(isProviderMode ? "/provider/your-listings" : "/admin/accommodations")}
             className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
             Cancel
@@ -525,7 +539,7 @@ const AddAccommodation = () => {
             className="px-4 py-2 bg-black text-white rounded-lg hover:bg-black/80 transition-colors flex items-center gap-2"
           >
             <Save className="w-4 h-4" />
-            Publish Listing
+            {isProviderMode ? "Submit Listing for Approval" : "Publish Listing"}
           </button>
         </div>
       </div>
