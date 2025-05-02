@@ -41,26 +41,38 @@ const TestimonialCard = ({ review, author, date }) => {
 
 const Travellers = () => {
   const [currentPage, setCurrentPage] = useState(0);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   
   const testimonials = [
     {
-      review: "Booking through Waureisen was incredibly easy and stress-free. We were well advised from start to finish and were able to plan our trip exactly as we wanted. All details were perfectly organized, making our vacation especially enjoyable. It was a great experience that we will definitely repeat!",
+      review: {
+        en: "Booking through Waureisen was incredibly easy and stress-free. We were well advised from start to finish and were able to plan our trip exactly as we wanted. All details were perfectly organized, making our vacation especially enjoyable. It was a great experience that we will definitely repeat!",
+        de: "Die Buchung über Waureisen war unglaublich einfach und stressfrei. Wir wurden von Anfang bis Ende gut beraten und konnten unsere Reise genau nach unseren Wünschen planen. Alle Details waren perfekt organisiert, was unseren Urlaub besonders angenehm machte. Es war eine großartige Erfahrung, die wir definitiv wiederholen werden!"
+      },
       author: "Claudia Meier",
       date: "January 2025"
     },
     {
-      review: "Our stay was absolutely perfect! The cottage was cozy, well-equipped, and surrounded by beautiful nature. Our dog loved the spacious, fenced garden, giving us peace of mind while we relaxed. The quiet location was exactly what we needed for a stress-free getaway. We can't wait to return!",
+      review: {
+        en: "Our stay was absolutely perfect! The cottage was cozy, well-equipped, and surrounded by beautiful nature. Our dog loved the spacious, fenced garden, giving us peace of mind while we relaxed. The quiet location was exactly what we needed for a stress-free getaway. We can't wait to return!",
+        de: "Unser Aufenthalt war absolut perfekt! Das Ferienhaus war gemütlich, gut ausgestattet und von wunderschöner Natur umgeben. Unser Hund liebte den geräumigen, eingezäunten Garten, was uns die nötige Ruhe gab, während wir uns entspannten. Die ruhige Lage war genau das, was wir für einen stressfreien Urlaub brauchten. Wir können es kaum erwarten, wiederzukommen!"
+      },
       author: "Peter Fässler",
       date: "December 2024"
     },
     {
-      review: "What sets Waureisen apart is their attention to pet-friendly details. They found us a beautiful chalet with secure outdoor space for our dog. The local recommendations for dog-friendly restaurants and hiking trails were invaluable. It's refreshing to find a service that truly understands pet owners' needs.",
+      review: {
+        en: "What sets Waureisen apart is their attention to pet-friendly details. They found us a beautiful chalet with secure outdoor space for our dog. The local recommendations for dog-friendly restaurants and hiking trails were invaluable. It's refreshing to find a service that truly understands pet owners' needs.",
+        de: "Was Waureisen auszeichnet, ist ihre Aufmerksamkeit für hundefreundliche Details. Sie fanden uns ein wunderschönes Chalet mit sicherem Außenbereich für unseren Hund. Die lokalen Empfehlungen für hundefreundliche Restaurants und Wanderwege waren unschätzbar. Es ist erfrischend, einen Service zu finden, der die Bedürfnisse von Haustierbesitzern wirklich versteht."
+      },
       author: "Sarah Schmidt",
       date: "March 2025"
     },
     {
-      review: "An exceptional experience from start to finish. The accommodation exceeded our expectations with its perfect blend of comfort and luxury. The dedicated dog areas and thoughtful pet amenities made our furry friend feel just as welcome as we did. We've already booked our next stay!",
+      review: {
+        en: "An exceptional experience from start to finish. The accommodation exceeded our expectations with its perfect blend of comfort and luxury. The dedicated dog areas and thoughtful pet amenities made our furry friend feel just as welcome as we did. We've already booked our next stay!",
+        de: "Eine außergewöhnliche Erfahrung von Anfang bis Ende. Die Unterkunft übertraf unsere Erwartungen mit ihrer perfekten Mischung aus Komfort und Luxus. Die speziellen Hundezonen und die durchdachten Haustier-Ausstattungen ließen unseren vierbeinigen Freund sich genauso willkommen fühlen wie uns. Wir haben bereits unseren nächsten Aufenthalt gebucht!"
+      },
       author: "Michael Weber",
       date: "February 2025"
     }
@@ -117,7 +129,7 @@ const Travellers = () => {
                 className="transition-all duration-300 transform"
               >
                 <TestimonialCard
-                  review={testimonial.review}
+                  review={testimonial.review[language]}
                   author={testimonial.author}
                   date={testimonial.date}
                 />

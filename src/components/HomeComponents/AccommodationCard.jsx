@@ -2,6 +2,7 @@ import React, { useState, memo, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Heart } from "lucide-react";
 import API from "../../api/config";
+import { useLanguage } from "../../utils/LanguageContext";
 
 const AccommodationCard = ({
   id = "1",
@@ -19,6 +20,7 @@ const AccommodationCard = ({
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const checkInDate = searchParams.get("dates")?.split(" - ")[0] || "";
+  const { t } = useLanguage();
 
   // Update local state when prop changes
   useEffect(() => {
@@ -108,10 +110,9 @@ const AccommodationCard = ({
         </div>
       </div>
       <div className="space-y-1 cursor-pointer" onClick={handleClick}>
-        {/* Maaz removed 2 prices from here as price per night was displayed 2 times */}
         <p className="text-brand text-sm">
           {pricePerNight?.currency || "CHF"}{" "}
-          {(pricePerNight?.price || price).toFixed(2)} per night
+          {(pricePerNight?.price || price).toFixed(2)} {t("per_night")}
         </p>
         <h3 className="font-medium text-gray-900">{propertyLocation}</h3>
       </div>
