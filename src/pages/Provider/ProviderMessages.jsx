@@ -54,7 +54,7 @@ const ContactCard = ({ contact, isActive, onClick }) => {
 };
 
 // Message bubble component
-const MessageBubble = ({ message, isOwn }) => {
+const MessageBubble = ({ message, isOwn ,user}) => {
   const messageTime = new Date(message.createdAt).toLocaleTimeString('en-US', {
     hour: 'numeric',
     minute: '2-digit'
@@ -64,7 +64,7 @@ const MessageBubble = ({ message, isOwn }) => {
     <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-4`}>
       {!isOwn && (
         <img 
-          src={defaultAvatar} 
+          src={user?.profilePicture} 
           alt="Sender" 
           className="w-8 h-8 rounded-full mr-2 self-end"
         />
@@ -615,6 +615,7 @@ const ProviderMessages = () => {
                             key={message._id}
                             message={message}
                             isOwn={message.sender === 'me' || message.senderType === 'Provider'}
+                            user={currentConversation?.customer}
                           />
                         ))
                       )}
