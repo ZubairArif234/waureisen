@@ -27,9 +27,22 @@ const StatusBadge = ({ status }) => {
     }
   };
 
+  const getStatusText = () => {
+    switch (status) {
+      case 'confirmed':
+        return t('booking_status_confirmed');
+      case 'pending':
+        return t('booking_status_pending');
+      case 'canceled':
+        return t('booking_status_canceled');
+      default:
+        return status.charAt(0).toUpperCase() + status.slice(1);
+    }
+  };
+
   return (
     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor()}`}>
-      {status.charAt(0).toUpperCase() + status.slice(1)}
+      {getStatusText()}
     </span>
   );
 };
@@ -339,8 +352,12 @@ const ProviderBookings = () => {
 
   // Format date for display
   const formatDate = (dateString) => {
-    const options = { month: 'short', day: 'numeric', year: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-US', options);
+    const options = { 
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    };
+    return new Date(dateString).toLocaleDateString('de-DE', options);
   };
 
   // Render loading state

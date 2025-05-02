@@ -264,6 +264,8 @@ const translations = {
     your_favorites: "Your Favorites",
     days_ago: "days ago",
     saved: "saved",
+    no_favorites_yet: "No favorites yet",
+    explore_accommodations: "Explore accommodations",
 
     // Profile Page
 
@@ -298,13 +300,12 @@ const translations = {
     // Accounts page, Login & Security and Payments page
 
     account: "Account",
-    login_as: "Login as",
-    personal_info: "Personal info",
+    personal_info: "Personal Info",
     personal_info_desc: "Provide personal details and how we can reach you",
     login_security: "Login & security",
     login_security_desc: "Update your password and secure your account",
     payments_payouts: "Payments & payouts",
-    payments_payouts_desc: "Review payments, payouts, coupons, and gift cards",
+    payments_payouts_desc: "Check your account details",
     email_address: "Email address",
     email_access_tip: "Use an email you'll always have access to",
     current_password: "Current password",
@@ -440,7 +441,7 @@ const translations = {
 
     // FAQ Page
 
-    frequently_asked_questions: "Frequently Asked Questions",
+    frequently_asked_questions: "FAQ",
     faq_title: "FAQ",
     faq1_question:
       "How can I find dog-friendly accommodations in Europe through Waureisen?",
@@ -863,8 +864,6 @@ const translations = {
     update_listing: "Update Listing",
     night: "Night",
 
-    start_conversation: "Start a conversation with our support team",
-
     invalid_credentials: "Invalid email or password",
 
     magazine_not_found: "Magazine not found",
@@ -1193,7 +1192,7 @@ account_actions: "Kontoaktionen",
       "Verwalte deine persönlichen Daten und dein Profil",
     supported_formats: "Unterstützte Formate: JPEG, PNG (max. 5 MB)",
     bio_description:
-      "Erzähle Gästen etwas über dich und was dich zu einem großartigen Gastgeber macht",
+      "Erzähle Gästen etwas über dich und was dich zu einem grossartigen Gastgeber macht",
     bio_placeholder:
       "Erzähle etwas über dich, deine Erfahrungen und was du am Gastgebersein liebst...",
     image_uploaded_successfully: "Profilbild wurde erfolgreich hochgeladen",
@@ -1228,7 +1227,7 @@ account_actions: "Kontoaktionen",
     password_requirements:
       "Muss mindestens 8 Zeichen enthalten, darunter Groß- und Kleinbuchstaben sowie eine Zahl",
     password_requirements_not_met:
-      "Passwort muss mindestens 8 Zeichen enthalten, einschließlich Groß- und Kleinbuchstaben und einer Zahl",
+      "Passwort muss mindestens 8 Zeichen enthalten, einschliesslich Groß- und Kleinbuchstaben und einer Zahl",
     current_password: "Aktuelles Passwort",
     new_password: "Neues Passwort",
     confirm_password: "Passwort bestätigen",
@@ -1449,7 +1448,7 @@ account_actions: "Kontoaktionen",
 
     // Footer
     about_us: "Über uns",
-    faq: "Häufige Fragen",
+    faq: "FAQ",
     imprint: "Impressum",
     data_policy: "Datenschutz",
     partners: "Partner",
@@ -1458,7 +1457,7 @@ account_actions: "Kontoaktionen",
     dog_friendly_platform:
       "Die erste Schweizer Buchungsplattform für hundefreundliches Reisen – Europa mit Ihrem Hund entdecken! 🐶 🌍",
     legal: "Rechtliches",
-    terms_of_service: "Nutzungsbedingungen",
+    terms_of_service: "AGB",
     sitemap: "Seitenübersicht",
     specials: "Besonderheiten",
     more: "Mehr",
@@ -1593,6 +1592,8 @@ account_actions: "Kontoaktionen",
     your_favorites: "Ihre Favoriten",
     days_ago: "Tage zuvor",
     saved: "gespeichert",
+    no_favorites_yet: "Noch keine Favoriten",
+    explore_accommodations: "Unterkünfte entdecken",
 
     // Profile Page
 
@@ -1606,7 +1607,7 @@ account_actions: "Kontoaktionen",
     bio_placeholder: "Erzählen Sie uns ein wenig über sich...",
     relationship_text:
       "Waureisen basiert auf Beziehungen. Helfen Sie anderen, Sie kennenzulernen.",
-    street_number: "Straße, Hausnummer",
+    street_number: "Strasse, Hausnummer",
     date_of_birth: "Geburtsdatum",
     nationality: "Nationalität",
     gender: "Geschlecht",
@@ -1634,8 +1635,7 @@ account_actions: "Kontoaktionen",
     login_security_desc:
       "Aktualisieren Sie Ihr Passwort und sichern Sie Ihr Konto",
     payments_payouts: "Zahlungen & Auszahlungen",
-    payments_payouts_desc:
-      "Überprüfen Sie Zahlungen, Auszahlungen, Gutscheine und Geschenkkarten",
+    payments_payouts_desc: "Überprüfen Sie Ihre Kontodaten",
     email_address: "E-Mail-Adresse",
     email_access_tip:
       "Verwenden Sie eine E-Mail, auf die Sie immer Zugriff haben werden",
@@ -1648,11 +1648,11 @@ account_actions: "Kontoaktionen",
     card_number: "Kartennummer",
     autofill: "Automatisch ausfüllen",
     payment_authorization:
-      "Ich ermächtige Waureisen, Anweisungen an das Finanzinstitut zu senden, das meine Karte ausgestellt hat, um Zahlungen von meinem Kartenkonto gemäß den Bedingungen meiner Vereinbarung mit Ihnen vorzunehmen.",
+      "Ich ermächtige Waureisen, Anweisungen an das Finanzinstitut zu senden, das meine Karte ausgestellt hat, um Zahlungen von meinem Kartenkonto gemäss den Bedingungen meiner Vereinbarung mit Ihnen vorzunehmen.",
     card_holders_name: "Name des Karteninhabers",
     name_on_card: "Name auf der Karte",
-    street_address: "Straßenadresse",
-    enter_street_address: "Straßenadresse eingeben",
+    street_address: "Strassenadresse",
+    enter_street_address: "Strassenadresse eingeben",
     apt: "Wohnung #",
     enter_apartment_number: "Wohnungsnummer eingeben",
     optional: "optional",
@@ -1709,8 +1709,7 @@ account_actions: "Kontoaktionen",
 
     become_a_host: "Werden Sie Gastgeber",
     back_to_home: "Zurück zur Startseite",
-    host_intro:
-      "Schließen Sie sich unserer Gemeinschaft von hundefreundlichen Unterkunftsanbietern an und erzielen Sie ein Einkommen, während Sie wunderbare Erlebnisse für Gäste und ihre pelzigen Begleiter schaffen.",
+    host_intro: "Schliessen Sie sich unserer Gemeinschaft von hundefreundlichen Unterkunftsanbietern an und erzielen Sie ein Einkommen, während Sie wunderbare Erlebnisse für Gäste und ihre pelzigen Begleiter schaffen.",
     benefits_hosting: "Vorteile als Gastgeber bei Waureisen",
     benefit_1:
       "Erreichen Sie eine gezielte Zielgruppe von Hundebesitzern, die nach haustierfreundlichen Unterkünften suchen",
@@ -1724,13 +1723,11 @@ account_actions: "Kontoaktionen",
     how_it_works: "Wie es funktioniert",
     how_it_works_1:
       "Erstellen Sie Ihr Angebot - Fügen Sie Fotos und Beschreibungen hinzu und legen Sie Ihren Preis fest",
-    how_it_works_2:
-      "Begrüßen Sie Gäste und ihre Hunde - Bieten Sie ein unvergessliches Aufenthaltserlebnis",
+    how_it_works_2: "Begrüssen Sie Gäste und ihre Hunde - Bieten Sie ein unvergessliches Aufenthaltserlebnis",
     how_it_works_3:
       "Erhalten Sie Zahlungen - Sichere Zahlungen für jede Buchung",
     ready_to_start: "Bereit loszulegen?",
-    start_hosting_text:
-      "Schließen Sie unseren einfachen Registrierungsprozess ab und beginnen Sie in nur 24 Stunden mit dem Hosten.",
+    start_hosting_text: "Schliessen Sie unseren einfachen Registrierungsprozess ab und beginnen Sie in nur 24 Stunden mit dem Hosten.",
     register_as_host: "Als Gastgeber registrieren",
 
     // Partners page
@@ -1774,7 +1771,7 @@ account_actions: "Kontoaktionen",
 
     // FAQ Page
 
-    frequently_asked_questions: "Häufig gestellte Fragen",
+    frequently_asked_questions: "FAQ",
     faq_title: "FAQ",
     faq1_question:
       "Wie kann ich hundefreundliche Unterkünfte in Europa über Waureisen finden?",
@@ -1782,7 +1779,7 @@ account_actions: "Kontoaktionen",
       "Sie können ganz einfach hundefreundliche Unterkünfte mit unseren spezialisierten Suchfiltern finden. Geben Sie einfach Ihr Reiseziel, die Daten ein und wählen Sie 'Reisen mit Hund' in den Suchoptionen. Unsere Plattform bietet über 30 hundespezifische Filter, um Ihnen zu helfen, den perfekten Aufenthalt zu finden, der sowohl Ihren als auch den Bedürfnissen Ihres Hundes entspricht.",
     faq2_question: "Benötige ich eine Reiseversicherung für meinen Hund?",
     faq2_answer:
-      "Obwohl es nicht immer obligatorisch ist, empfehlen wir dringend eine Haustier-Reiseversicherung abzuschließen. Sie kann tierärztliche Notfälle, Reisestornierungen aufgrund von Haustiererkrankungen und andere unerwartete Situationen abdecken. Erkundigen Sie sich bei Ihrem regulären Haustierversicherer nach internationaler Deckung oder erwägen Sie eine spezialisierte Haustier-Reiseversicherung.",
+      "Obwohl es nicht immer obligatorisch ist, empfehlen wir dringend eine Haustier-Reiseversicherung abzuschliessen. Sie kann tierärztliche Notfälle, Reisestornierungen aufgrund von Haustiererkrankungen und andere unerwartete Situationen abdecken. Erkundigen Sie sich bei Ihrem regulären Haustierversicherer nach internationaler Deckung oder erwägen Sie eine spezialisierte Haustier-Reiseversicherung.",
     faq3_question:
       "Welche Einreisebestimmungen gelten für Hunde in den Niederlanden?",
     faq3_answer:
@@ -1790,18 +1787,18 @@ account_actions: "Kontoaktionen",
     faq4_question:
       "Welches Zubehör sollte ich für meine Reise mit meinem Hund mitbringen?",
     faq4_answer:
-      "Wesentliche Gegenstände sind: Leine und Halsband mit ID-Tags, Futter- und Wassernäpfe, vertraute Bettwäsche, Kotbeutel, Pflegeprodukte, regelmäßige Medikamente, Kopien der Gesundheitsdokumente und Lieblingsspielzeuge. Für längere Reisen sollten Sie eine tragbare Wasserflasche und zusammenklappbare Näpfe in Betracht ziehen.",
+      "Wesentliche Gegenstände sind: Leine und Halsband mit ID-Tags, Futter- und Wassernäpfe, vertraute Bettwäsche, Kotbeutel, Pflegeprodukte, regelmässige Medikamente, Kopien der Gesundheitsdokumente und Lieblingsspielzeuge. Für längere Reisen sollten Sie eine tragbare Wasserflasche und zusammenklappbare Näpfe in Betracht ziehen.",
     faq5_question: "Sollte ich vor der Reise einen Tierarzt aufsuchen?",
     faq5_answer:
       "Ja, es wird empfohlen, Ihren Tierarzt 2-4 Wochen vor der Reise zu besuchen. Er kann sicherstellen, dass die Impfungen aktuell sind, notwendige Gesundheitszeugnisse ausstellen, die Reisetauglichkeit Ihres Hundes überprüfen und spezifische Ratschläge basierend auf Ihrem Reiseziel und dem Gesundheitszustand Ihres Hundes geben.",
     faq6_question:
       "Wie kann ich meinen Hund auf eine lange Autofahrt vorbereiten?",
     faq6_answer:
-      "Beginnen Sie mit kurzen Autofahrten, um positive Assoziationen aufzubauen. Stellen Sie sicher, dass Ihr Hund einen komfortablen, sicheren Platz mit vertrauter Bettwäsche hat. Planen Sie regelmäßige Pausen alle 2-3 Stunden für Wasser, Toilette und Bewegung ein. Erwägen Sie die Verwendung eines crash-getesteten Auto-Geschirrs oder einer Transportbox für die Sicherheit.",
+      "Beginnen Sie mit kurzen Autofahrten, um positive Assoziationen aufzubauen. Stellen Sie sicher, dass Ihr Hund einen komfortablen, sicheren Platz mit vertrauter Bettwäsche hat. Planen Sie regelmässige Pausen alle 2-3 Stunden für Wasser, Toilette und Bewegung ein. Erwägen Sie die Verwendung eines crash-getesteten Auto-Geschirrs oder einer Transportbox für die Sicherheit.",
     faq7_question:
       "Kann ich mit meinem Hund in Spanien öffentliche Verkehrsmittel nutzen?",
     faq7_answer:
-      "Die meisten öffentlichen Verkehrsmittel in Spanien erlauben Hunde, aber die Regeln variieren je nach Region und Transportart. Generell sind kleine Hunde in Transportboxen in den meisten Zügen und U-Bahnen erlaubt. Größere Hunde müssen möglicherweise angeleint und mit Maulkorb versehen sein, und Sie müssen eventuell eine zusätzliche Gebühr zahlen. Überprüfen Sie immer die spezifischen Richtlinien des Transportunternehmens vor der Reise.",
+      "Die meisten öffentlichen Verkehrsmittel in Spanien erlauben Hunde, aber die Regeln variieren je nach Region und Transportart. Generell sind kleine Hunde in Transportboxen in den meisten Zügen und U-Bahnen erlaubt. Grössere Hunde müssen möglicherweise angeleint und mit Maulkorb versehen sein, und Sie müssen eventuell eine zusätzliche Gebühr zahlen. Überprüfen Sie immer die spezifischen Richtlinien des Transportunternehmens vor der Reise.",
     faq8_question:
       "Werden in allen Unterkünften Futter- und Wassernäpfe für meinen Hund bereitgestellt?",
     faq8_answer:
@@ -1836,8 +1833,8 @@ account_actions: "Kontoaktionen",
     amount: "Betrag",
     actions: "Aktionen",
     quick_actions: "Schnellaktionen",
-    create_listing: "Inserat erstellen",
-    view_listings: "Inserate anzeigen",
+    create_listing: "Unterkunft erstellen",
+    view_listings: "Unterkünfte anzeigen",
     manage_bookings: "Buchungen verwalten",
     view_earnings: "Einnahmen anzeigen",
     analytics: "Analysen",
@@ -1851,12 +1848,12 @@ account_actions: "Kontoaktionen",
     all_property_types: "Alle Immobilientypen",
     all_listings: "Alle Inserate",
     active: "Aktiv",
-    pending: "Ausstehend",
+    pending: "Bearbeitung",
+    no_pending_listings: "Sie haben keine Inserate in Bearbeitung.",
     drafts: "Entwürfe",
     no_listings_found: "Keine Inserate gefunden",
     no_listings_created_yet: "Sie haben noch keine Inserate erstellt.",
     no_active_listings: "Sie haben keine aktiven Inserate.",
-    no_pending_listings: "Sie haben keine ausstehenden Inserate.",
     no_draft_listings: "Sie haben keine Entwurfsinserate.",
     create_your_first_listing: "Erstellen Sie Ihr erstes Inserat",
     view: "Ansehen",
@@ -1867,7 +1864,7 @@ account_actions: "Kontoaktionen",
       'Sind Sie sicher, dass Sie "{title}" löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.',
     cancel: "Abbrechen",
     active_status: "Aktiv",
-    pending_status: "Ausstehend",
+    pending_status: "Bearbeitung",
     draft_status: "Entwurf",
     provider_listings: "Anbieterinserate",
 
@@ -1882,7 +1879,7 @@ account_actions: "Kontoaktionen",
     earnings_only: "Nur Einnahmen",
     payouts_only: "Nur Auszahlungen",
     total_earnings: "Gesamteinnahmen",
-    pending_balance: "Ausstehender Betrag",
+    pending_balance: "Betrag in Bearbeitung",
     to_be_paid_out: "Zur Auszahlung",
     next_payout: "Nächste Auszahlung",
     scheduled_for: "Geplant für",
@@ -1932,12 +1929,12 @@ account_actions: "Kontoaktionen",
 
     // Provider Bookings
 
+    loading_bookings: "Buchungen laden",
     bookings: "Buchungen",
-    search_bookings_placeholder:
-      "Buchungen nach Inserat, Gast oder ID durchsuchen...",
+    search_bookings_placeholder: "Buchungen nach Inserat, Gast oder ID durchsuchen...",
     all_bookings: "Alle Buchungen",
-    confirmed: "Bestätigt",
-    pending: "Ausstehend",
+    confirmed: "Akzeptiert",
+    pending: "Bearbeitung",
     canceled: "Storniert",
     sort_by_checkin: "Nach Check-in-Datum sortieren",
     sort_by_booking_date: "Nach Buchungsdatum sortieren",
@@ -1967,11 +1964,11 @@ account_actions: "Kontoaktionen",
     // Provider Calendar
 
     calendar: "Kalender",
-    all_properties: "Alle Immobilien",
+    all_properties: "Alle Unterkünfte",
     block_dates: "Termine blockieren",
     today: "Heute",
     confirmed: "Bestätigt",
-    pending: "Ausstehend",
+    pending: "Bearbeitung",
     unavailable: "Nicht verfügbar",
     upcoming_bookings: "Kommende Buchungen",
     property: "Immobilie",
@@ -1981,7 +1978,7 @@ account_actions: "Kontoaktionen",
     no_bookings_found: "Keine Buchungen gefunden",
     no_bookings_yet: "Sie haben noch keine Buchungen.",
     no_bookings_for_property: "Sie haben keine Buchungen für diese Immobilie.",
-    select_property: "Wählen Sie eine Immobilie",
+    select_property: "Wählen Sie eine Unterkunft",
     start_date: "Startdatum",
     end_date: "Enddatum",
     reason: "Grund",
@@ -2090,7 +2087,7 @@ account_actions: "Kontoaktionen",
     what_happens_next: "Was passiert als Nächstes?",
     application_review: "Wir prüfen Ihre Bewerbung innerhalb von 1-2 Werktagen",
     create_listings_when_approved:
-      "Nach der Genehmigung können Sie mit der Erstellung von Inseraten für Ihre Immobilien beginnen",
+      "Sobald Ihr Konto genehmigt wurde, können Sie Unterkünfte erstellen und verwalten.",
     optimize_listings:
       "Unser Team hilft Ihnen, Ihre Inserate zu optimieren, um mehr Gäste anzuziehen",
     previous: "Zurück",
@@ -2122,9 +2119,8 @@ account_actions: "Kontoaktionen",
       "Fügen Sie ein Profilfoto hinzu und verifizieren Sie Ihre Identität, um Vertrauen bei den Gästen aufzubauen.",
     complete_profile_action: "Profil vervollständigen",
     create_first_listing: "Erstellen Sie Ihr erstes Inserat",
-    create_listing_desc:
-      "Fügen Sie Details, Fotos und Preisinformationen für Ihre Immobilie hinzu.",
-    create_listing_action: "Inserat erstellen",
+    create_listing_desc: "Erstellen Sie Ihre erste Unterkunft und starten Sie mit dem Verwalten Ihrer Buchungen.",
+    create_listing_action: "Unterkunft erstellen",
     set_up_calendar: "Richten Sie Ihren Kalender ein",
     calendar_desc:
       "Markieren Sie Ihre Verfügbarkeit und blockieren Sie Termine, wenn Ihre Immobilie nicht verfügbar ist.",
@@ -2141,7 +2137,7 @@ account_actions: "Kontoaktionen",
 
     // Create Listing Provider Side
 
-    create_new_listing: "Neues Inserat erstellen",
+    create_new_listing: "Neue Unterkunft erstellen",
     edit_listing: "Inserat bearbeiten",
     basic_info: "Grundinformationen",
     details_amenities: "Details & Ausstattung",
@@ -2198,7 +2194,7 @@ account_actions: "Kontoaktionen",
     strict: "Streng (50% Rückerstattung bis zu 1 Woche vor Ankunft)",
     previous: "Zurück",
     next: "Weiter",
-    create_listing: "Inserat erstellen",
+    create_listing: "Unterkunft erstellen",
     update_listing: "Inserat aktualisieren",
     night: "Nacht",
 
@@ -2232,6 +2228,11 @@ account_actions: "Kontoaktionen",
     select_dates: "Daten auswählen",
 
     price_per_person_per_night: "Preis pro Person pro Nacht",
+
+    // Booking status translations
+    booking_status_confirmed: "Akzeptiert",
+    booking_status_pending: "Bearbeitung",
+    booking_status_canceled: "Storniert",
   },
 };
 
