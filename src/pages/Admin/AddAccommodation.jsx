@@ -70,7 +70,7 @@ const AddAccommodation = (props) => {
       mapLocation: null,
     },
     policies: {
-      cancellationPolicy: "flexible",
+      cancellationPolicy: "Flexible (Full refund 1 day prior to arrival)",
       customPolicyDetails: "",
       houseRules: {
         noSmoking: false,
@@ -194,6 +194,10 @@ const AddAccommodation = (props) => {
 
   const handleSubmit = async () => {
     try {
+      // Log cancellation policy and location data
+      console.log('Cancellation Policy:', formData.policies.cancellationPolicy);
+      console.log('Location:', formData.location);
+
       const validationErrors = [];
   
       // ===== Validation =====
