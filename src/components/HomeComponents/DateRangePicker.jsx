@@ -1,8 +1,10 @@
 import React from 'react';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import moment from 'moment'; // Import moment for date comparison
+import { useLanguage } from '../../utils/LanguageContext';
 
 const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates }) => {
+  const { t } = useLanguage();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDayOfMonth = new Date(year, month, 1).getDay();
   const today = new Date();
@@ -31,9 +33,12 @@ const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates }) 
     }
   });
 
-  const monthNames = ["January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
+  const monthNames = [
+    t('January'), t('February'), t('March'), t('April'), t('May'), t('June'),
+    t('July'), t('August'), t('September'), t('October'), t('November'), t('December')
   ];
+
+  const dayNames = [t('Mo'), t('Tu'), t('We'), t('Th'), t('Fr'), t('Sa'), t('Su')];
 
   const isDateInRange = (day) => {
     if (!selectedRange.start || !selectedRange.end) return false;
@@ -69,47 +74,59 @@ const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates }) 
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">{monthNames[month]} {year}</h2>
+    <div className="bg-white rounded-xl p-6 max-w-sm w-full">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold">
+          {monthNames[month]} {year}
+        </h2>
+      </div>
+      
+      <div className="grid grid-cols-7 gap-1 mb-2">
+        {dayNames.map((day, i) => (
+          <div key={i} className="text-center text-sm font-medium text-gray-500">
+            {day}
+          </div>
+        ))}
       </div>
       
       <div className="grid grid-cols-7 gap-1">
-        {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
-          <div key={day} className="text-center text-sm text-gray-500 py-1">{day}</div>
-        ))}
-        
-        {weeks.map((week, weekIndex) => (
+        {weeks.map((week, weekIndex) =>
           week.map((day, dayIndex) => {
-            const isAvailable = day && isDateAvailable(day);
-            const isInRange = isDateInRange(day);
+            if (day === null) return <div key={`${weekIndex}-${dayIndex}`} />;
+            
+            const date = new Date(year, month, day);
+            const isToday = date.getTime() === today.getTime();
+            const isSelected = isDateInRange(day);
             const isStart = isStartDate(day);
             const isEnd = isEndDate(day);
+            const isPast = date < today;
             
             return (
               <button
                 key={`${weekIndex}-${dayIndex}`}
-                disabled={!day || !isAvailable}
-                onClick={() => day && isAvailable && onDateSelect(new Date(year, month, day))}
+                onClick={() => !isPast && onDateSelect(new Date(year, month, day))}
+                disabled={isPast}
                 className={`
-                  p-2 text-center text-sm rounded-full transition-colors
-                  ${!day ? 'invisible' : ''}
-                  ${!isAvailable ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-gray-100 cursor-pointer'}
-                  ${isInRange && isAvailable ? 'bg-brand/20' : ''}
-                  ${(isStart || isEnd) && isAvailable ? 'bg-brand text-white hover:bg-brand' : ''}
+                  w-full aspect-square flex items-center justify-center rounded-lg text-sm
+                  ${isPast ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-gray-100 cursor-pointer'}
+                  ${isSelected ? 'bg-brand/10 text-brand' : ''}
+                  ${isStart ? 'bg-brand text-white hover:bg-brand' : ''}
+                  ${isEnd ? 'bg-brand text-white hover:bg-brand' : ''}
+                  ${isToday ? 'border border-brand' : ''}
                 `}
               >
                 {day}
               </button>
             );
           })
-        ))}
+        )}
       </div>
     </div>
   );
 };
 
 const DateRangePicker = ({ isOpen, onClose, selectedRange, onRangeSelect, availableDates }) => {
+  const { t } = useLanguage();
   if (!isOpen) return null;
 
   const today = new Date();
@@ -141,7 +158,7 @@ const DateRangePicker = ({ isOpen, onClose, selectedRange, onRangeSelect, availa
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-xl p-6 max-w-2xl w-full mx-4">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Select dates</h2>
+          <h2 className="text-xl font-semibold">{t('select_dates')}</h2>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
             ✕
           </button>

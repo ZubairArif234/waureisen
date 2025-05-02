@@ -1343,6 +1343,15 @@ account_actions: "Kontoaktionen",
 
     // Hero
     holiday_with_dog: "Urlaub mit Hund",
+    find_suitable_accommodation: "Finden Sie die passende Unterkunft",
+    where: "Wo",
+    when: "Wann",
+    person: "Person",
+    people: "Personen",
+    dog: "Hund",
+    dogs: "Hunde",
+    search: "Suchen",
+    done: "Fertig",
 
     // Recommendations page
     featured_accommodations: "Empfohlene Unterkünfte",
@@ -2204,6 +2213,31 @@ account_actions: "Kontoaktionen",
     invalid_credentials: "Ungültige E-Mail oder Passwort",
 
     login_as: "Anmelden als",
+    customer: "Kunde",
+    provider: "Anbieter",
+    admin: "Admin",
+
+    // Calendar translations
+    Su: "So",
+    Mo: "Mo",
+    Tu: "Di",
+    We: "Mi",
+    Th: "Do",
+    Fr: "Fr",
+    Sa: "Sa",
+    January: "Januar",
+    February: "Februar",
+    March: "März",
+    April: "April",
+    May: "Mai",
+    June: "Juni",
+    July: "Juli",
+    August: "August",
+    September: "September",
+    October: "Oktober",
+    November: "November",
+    December: "Dezember",
+    select_dates: "Daten auswählen",
   },
 };
 
