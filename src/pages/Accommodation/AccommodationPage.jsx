@@ -753,7 +753,7 @@ console.log(dateRange , "jkikkl");
                   </span>
                 </div>
                 <div className="text-sm text-gray-600 mt-2">
-                  Price per person per night:{" "}
+                  {t("price_per_person_per_night")}:{" "}
                   {(accommodation?.pricePerNight?.price || 0) /
                     (guests?.people || 1)}{" "}
                   ${accommodation?.pricePerNight?.currency || "CHF"}

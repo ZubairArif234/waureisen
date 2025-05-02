@@ -85,7 +85,7 @@ const translations = {
     exclusive_finds: "Exclusive Finds",
 
     // Travelers
-    travelers_love: "Travelers love Waureisen",
+    travelers_love: "Travellers love Waureisen",
     testimonials: "Read what our customers say about their experiences",
 
     // Calendly
@@ -1005,86 +1005,78 @@ const translations = {
     update_failed: "Update failed",
     save_changes: "Save Changes",
     try_again: "Try Again",
-// Button states
-saving: "Saving...",
-update_failed: "Update failed",
-save_changes: "Save Changes",
-try_again: "Try Again",
 
-contact_us: "Contact Us",
-we_are_here_to_help: "We are here to help",
-our_founder: "Our Founder",
-ready_to_assist: "Ready to assist with your pet-friendly travel needs",
-call_us: "Call Us",
-schedule_callback: "Schedule a Callback",
+    contact_us: "Contact Us",
+    we_are_here_to_help: "We are here to help",
+    our_founder: "Our Founder",
+    ready_to_assist: "Ready to assist with your pet-friendly travel needs",
+    call_us: "Call Us",
+    schedule_callback: "Schedule a Callback",
 
+    // Chat-related translations
+    messages: "Messages",
+    all: "All",
+    unread: "Unread",
+    search_messages: "Search messages...",
+    no_messages_found: "No messages found",
+    adjust_search: "Try adjusting your search",
+    no_conversations_yet: "No conversations yet",
+    no_messages_yet: "No messages yet",
+    start_conversation: "Start typing to begin a conversation",
+    type_a_message: "Type a message...",
+    type_message: "Type a message...",
+    send: "Send",
+    select_conversation: "Select a conversation",
+    choose_conversation: "Choose a conversation from the list",
+    choose_contact_to_chat: "Choose a contact to start chatting",
 
+    // User roles
+    provider: "Provider",
+    guest: "Guest",
 
- // Chat-related translations
- messages: "Messages",
- all: "All",
- unread: "Unread",
- search_messages: "Search messages...",
- no_messages_found: "No messages found",
- adjust_search: "Try adjusting your search",
- no_conversations_yet: "No conversations yet",
- no_messages_yet: "No messages yet",
- start_conversation: "Start typing to begin a conversation",
- type_a_message: "Type a message...",
- type_message: "Type a message...",
- send: "Send",
- select_conversation: "Select a conversation",
- choose_conversation: "Choose a conversation from the list",
- choose_contact_to_chat: "Choose a contact to start chatting",
- 
- // User roles
- provider: "Provider",
- guest: "Guest",
- 
- // Message-related actions
- show_more_details: "Show more details",
- show_less: "Show less",
- 
- // Booking details in chat
- booking_details: "Booking Details",
- night: "night",
- nights: "nights",
- dog: "dog",
- dogs: "dogs",
- guests: "guests",
- guest: "guest",
- booking_id: "Booking ID",
- total_amount: "Total Amount",
- 
- // Chat statuses
- loading_messages: "Loading messages...",
+    // Message-related actions
+    show_more_details: "Show more details",
+    show_less: "Show less",
 
+    // Booking details in chat
+    booking_details: "Booking Details",
+    night: "night",
+    nights: "nights",
+    dog: "dog",
+    dogs: "dogs",
+    guests: "guests",
+    guest: "guest",
+    booking_id: "Booking ID",
+    total_amount: "Total Amount",
 
- verify: "Verify",
-  sending: "Sending...",
-  verified: "Verified",
-  verification_code: "Verification Code",
-  enter_verification_code: "Enter 6-digit code",
-  verification_code_info: "Please check your email for the verification code. It will expire in 10 minutes.",
-  verifying: "Verifying...",
-  submit: "Submit",
-  please_verify_email: "Please verify your email before signing up",
+    // Chat statuses
+    loading_messages: "Loading messages...",
 
-  unblock_dates: "Unblock Dates",
-  select_property_to_view_dates: "Select a property to view blocked dates",
-  no_blocked_dates_for_property: "No blocked dates found for this property",
-  blocked_date: "blocked date",
-  blocked_dates: "blocked dates",
-  deselect_all: "Deselect All",
-  select_all: "Select All",
-  reason: "Reason",
-  unblocking: "Unblocking...",
-  unblock_selected: "Unblock Selected",
-  dates_unblocked_successfully: "Dates have been unblocked successfully",
-  error_unblocking_dates: "Error unblocking dates. Please try again",
-  no_dates_were_unblocked: "No dates were unblocked. They might already be available.",
+    verify: "Verify",
+    sending: "Sending...",
+    verified: "Verified",
+    verification_code: "Verification Code",
+    enter_verification_code: "Enter 6-digit code",
+    verification_code_info: "Please check your email for the verification code. It will expire in 10 minutes.",
+    verifying: "Verifying...",
+    submit: "Submit",
+    please_verify_email: "Please verify your email before signing up",
 
+    unblock_dates: "Unblock Dates",
+    select_property_to_view_dates: "Select a property to view blocked dates",
+    no_blocked_dates_for_property: "No blocked dates found for this property",
+    blocked_date: "blocked date",
+    blocked_dates: "blocked dates",
+    deselect_all: "Deselect All",
+    select_all: "Select All",
+    reason: "Reason",
+    unblocking: "Unblocking...",
+    unblock_selected: "Unblock Selected",
+    dates_unblocked_successfully: "Dates have been unblocked successfully",
+    error_unblocking_dates: "Error unblocking dates. Please try again",
+    no_dates_were_unblocked: "No dates were unblocked. They might already be available.",
 
+    price_per_person_per_night: "Price per person per night",
   },
 
   de: {
@@ -1175,8 +1167,8 @@ schedule_callback: "Schedule a Callback",
 
     contact_us: "Kontaktiere uns",
     we_are_here_to_help: "Wir sind hier, um zu helfen",
-    our_founder: "Unser Gründer",
-    ready_to_assist: "Bereit, bei Ihren haustierfreundlichen Reisebedürfnissen zu helfen",
+    our_founder: "Unsere Gründerin",
+    ready_to_assist: "Unterstützt Sie mit Leidenschaft bei der Planung Ihrer hundefreundlichen Reise",
     call_us: "Rufen Sie uns an",
     schedule_callback: "Rückruf vereinbaren",
 
@@ -1343,6 +1335,15 @@ account_actions: "Kontoaktionen",
 
     // Hero
     holiday_with_dog: "Urlaub mit Hund",
+    find_suitable_accommodation: "Finden Sie die passende Unterkunft",
+    where: "Wo",
+    when: "Wann",
+    person: "Person",
+    people: "Personen",
+    dog: "Hund",
+    dogs: "Hunde",
+    search: "Suchen",
+    done: "Fertig",
 
     // Recommendations page
     featured_accommodations: "Empfohlene Unterkünfte",
@@ -2204,6 +2205,33 @@ account_actions: "Kontoaktionen",
     invalid_credentials: "Ungültige E-Mail oder Passwort",
 
     login_as: "Anmelden als",
+    customer: "Kunde",
+    provider: "Anbieter",
+    admin: "Admin",
+
+    // Calendar translations
+    Su: "So",
+    Mo: "Mo",
+    Tu: "Di",
+    We: "Mi",
+    Th: "Do",
+    Fr: "Fr",
+    Sa: "Sa",
+    January: "Januar",
+    February: "Februar",
+    March: "März",
+    April: "April",
+    May: "Mai",
+    June: "Juni",
+    July: "Juli",
+    August: "August",
+    September: "September",
+    October: "Oktober",
+    November: "November",
+    December: "Dezember",
+    select_dates: "Daten auswählen",
+
+    price_per_person_per_night: "Preis pro Person pro Nacht",
   },
 };
 

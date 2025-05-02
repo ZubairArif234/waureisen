@@ -95,8 +95,8 @@ const Calendar = ({ currentDate, bookings, listings, unavailableDates, selectedL
   const calendarDays = generateCalendarDays(year, month);
   
   const monthNames = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    t('January'), t('February'), t('March'), t('April'), t('May'), t('June'),
+    t('July'), t('August'), t('September'), t('October'), t('November'), t('December')
   ];
   
   const filteredBookings = selectedListing === 'all' 
@@ -254,7 +254,7 @@ const renderCellContent = (day) => {
       
       {/* Day headers */}
       <div className="grid grid-cols-7 border-b">
-        {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => (
+        {[t('Mo'), t('Tu'), t('We'), t('Th'), t('Fr'), t('Sa'), t('Su')].map((day, i) => (
           <div key={i} className="py-2 text-center text-sm font-medium text-gray-500">
             {day}
           </div>

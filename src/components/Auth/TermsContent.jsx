@@ -4,7 +4,7 @@ const TermsContent = () => {
   return (
     <div className="prose prose-sm max-w-none">
       <h1 className="text-2xl font-bold mb-6">
-        Allgemeine Reise- und Vertragsbedingungen (ARVB) der Waureisen GmbH
+        Terms and Conditions
       </h1>
       
       <p className="mb-6">

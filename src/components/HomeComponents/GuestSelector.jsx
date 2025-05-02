@@ -20,8 +20,8 @@ const GuestSelector = ({
   guests, 
   onChange, 
   onClose,
-  maxGuests = 6, // Default max guests if not specified
-  maxDogs = 2    // Default max dogs if not specified
+  maxGuests = 20, // Changed default max guests to 20
+  maxDogs = 20    // Changed default max dogs to 20
 }) => {
   const { t } = useLanguage();
 
@@ -46,8 +46,7 @@ const GuestSelector = ({
       <div className="mb-4">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="font-medium text-gray-900">{t('guests')}</h3>
-            <p className="text-sm text-gray-500">{t('max')} {maxGuests} {t('guests')}</p>
+            <h3 className="font-medium text-gray-900">{t('guests').charAt(0).toUpperCase() + t('guests').slice(1)}</h3>
           </div>
           <div className="flex items-center gap-2">
             <CounterButton 
@@ -65,8 +64,7 @@ const GuestSelector = ({
         </div>
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-medium text-gray-900">{t('dogs')}</h3>
-            <p className="text-sm text-gray-500">{t('max')} {maxDogs} {t('dogs')}</p>
+            <h3 className="font-medium text-gray-900">{t('dogs').charAt(0).toUpperCase() + t('dogs').slice(1)}</h3>
           </div>
           <div className="flex items-center gap-2">
             <CounterButton 

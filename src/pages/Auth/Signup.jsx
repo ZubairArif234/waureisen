@@ -490,7 +490,7 @@ const Signup = () => {
                       onClick={() => setIsTermsOpen(true)}
                       className="text-[#B4A481] hover:underline"
                     >
-                      {t("terms_of_service")}
+                      {t("terms_and_conditions")}
                     </button>{" "}
                     {t("and_the")}{" "}
                     <button
@@ -507,7 +507,7 @@ const Signup = () => {
                 <Modal
                   isOpen={isTermsOpen}
                   onClose={() => setIsTermsOpen(false)}
-                  title={t("terms_of_service")}
+                  title={t("terms_and_conditions")}
                 >
                   <TermsContent />
                 </Modal>

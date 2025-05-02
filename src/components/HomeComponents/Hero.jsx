@@ -18,7 +18,7 @@ const Hero = () => {
   const [dateRange, setDateRange] = useState({ start: null, end: null });
   const [guests, setGuests] = useState({
     people: 1,
-    dogs: 1
+    dogs: 0
   });
   const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
   const locationInputRef = useRef(null);
@@ -167,10 +167,11 @@ const Hero = () => {
                 </div>
                 {isGuestSelectorOpen && (
                   <GuestSelector
-                    isOpen={isGuestSelectorOpen}
-                    onClose={() => setIsGuestSelectorOpen(false)}
                     guests={guests}
-                    onGuestsChange={setGuests}
+                    onChange={setGuests}
+                    onClose={() => setIsGuestSelectorOpen(false)}
+                    maxGuests={20}
+                    maxDogs={20}
                   />
                 )}
               </div>

@@ -15,14 +15,14 @@ const FooterSection = ({ title, links, onTermsClick, onDataPolicyClick, t }) => 
     <h3 className="text-[#4D484D] font-semibold">{title}</h3>
     <div className="flex flex-col space-y-2">
       {links.map((link, index) => {
-        if (link.label === 'Terms of Service') {
+        if (link.label === 'Terms and Conditions') {
           return (
             <button
               key={index}
               onClick={onTermsClick}
               className="text-left text-gray-600 hover:text-gray-800 transition-colors text-sm"
             >
-              {t('terms_of_service')}
+              {t('terms_and_conditions')}
             </button>
           );
         }
