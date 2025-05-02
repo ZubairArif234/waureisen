@@ -19,6 +19,7 @@ import {
   getListingDetails as getProviderListingDetails,
 } from "../../api/providerAPI";
 import { generateUniqueListingCode } from "../../utils/uniqueCodeGenerator";
+import toast from "react-hot-toast";
 
 const AddAccommodation = (props) => {
   const navigate = useNavigate();
@@ -70,7 +71,7 @@ const AddAccommodation = (props) => {
       mapLocation: null,
     },
     policies: {
-      cancellationPolicy: "flexible",
+      cancellationPolicy: "Flexible (Full refund 1 day prior to arrival)",
       customPolicyDetails: "",
       houseRules: {
         noSmoking: false,
@@ -194,6 +195,10 @@ const AddAccommodation = (props) => {
 
   const handleSubmit = async () => {
     try {
+      // Log cancellation policy and location data
+      console.log('Cancellation Policy:', formData.policies.cancellationPolicy);
+      console.log('Location:', formData.location);
+
       const validationErrors = [];
   
       // ===== Validation =====
@@ -232,7 +237,36 @@ const AddAccommodation = (props) => {
       }
   
       if (validationErrors.length > 0) {
-        alert("Please fix the following errors before publishing:\n\n" + validationErrors.join("\n"));
+        toast.error(
+          <div className="space-y-2">
+            <div className="flex justify-between items-start">
+              <p className="font-medium">Please fix the following errors:</p>
+              <button 
+                onClick={() => toast.dismiss()}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ×
+              </button>
+            </div>
+            <ul className="list-disc list-inside text-sm">
+              {validationErrors.map((error, index) => (
+                <li key={index}>{error}</li>
+              ))}
+            </ul>
+          </div>,
+          {
+            duration: 5000,
+            style: {
+              background: '#FEF2F2',
+              color: '#991B1B',
+              border: '1px solid #FECACA',
+              borderRadius: '0.5rem',
+              padding: '1rem',
+              maxWidth: '32rem',
+            },
+            className: '!pl-4'
+          }
+        );
         return;
       }
   
@@ -345,7 +379,28 @@ const AddAccommodation = (props) => {
         listingResponse = await providerCreateListing(listingData);
   
         if (listingResponse?._id) {
-          alert("Listing created successfully and submitted for approval!");
+          toast.success(
+            <div className="flex justify-between items-center">
+              <span>Listing created successfully and submitted for approval!</span>
+              <button 
+                onClick={() => toast.dismiss()}
+                className="text-gray-500 hover:text-gray-700 ml-4"
+              >
+                ×
+              </button>
+            </div>,
+            {
+              duration: 3000,
+              style: {
+                background: '#ECFDF5',
+                color: '#065F46',
+                border: '1px solid #A7F3D0',
+                borderRadius: '0.5rem',
+                padding: '1rem',
+              },
+              className: '!pl-4'
+            }
+          );
           navigate("/provider/your-listings");
         }
       } else {
@@ -402,13 +457,55 @@ const AddAccommodation = (props) => {
             console.error("Error with filter creation:", err);
           }
   
-          alert("Listing created successfully!");
+          toast.success(
+            <div className="flex justify-between items-center">
+              <span>Listing created successfully!</span>
+              <button 
+                onClick={() => toast.dismiss()}
+                className="text-gray-500 hover:text-gray-700 ml-4"
+              >
+                ×
+              </button>
+            </div>,
+            {
+              duration: 3000,
+              style: {
+                background: '#ECFDF5',
+                color: '#065F46',
+                border: '1px solid #A7F3D0',
+                borderRadius: '0.5rem',
+                padding: '1rem',
+              },
+              className: '!pl-4'
+            }
+          );
           navigate(`/accommodation/${listingResponse._id}`, { state: { from: "admin" } });
         }
       }
     } catch (error) {
       console.error("Error saving listing:", error);
-      alert(`Failed to ${isEditMode ? "update" : "create"} listing. Please try again. Error: ${error.message}`);
+      toast.error(
+        <div className="flex justify-between items-center">
+          <span>{`Failed to ${isEditMode ? "update" : "create"} listing. Please try again. Error: ${error.message}`}</span>
+          <button 
+            onClick={() => toast.dismiss()}
+            className="text-gray-500 hover:text-gray-700 ml-4"
+          >
+            ×
+          </button>
+        </div>,
+        {
+          duration: 5000,
+          style: {
+            background: '#FEF2F2',
+            color: '#991B1B',
+            border: '1px solid #FECACA',
+            borderRadius: '0.5rem',
+            padding: '1rem',
+          },
+          className: '!pl-4'
+        }
+      );
     } finally {
       setIsLoading(false);
     }
