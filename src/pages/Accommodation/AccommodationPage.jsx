@@ -35,6 +35,7 @@ import {
 import moment from "moment";
 import AccommodationDetails from "../../components/AccommodationDetails";
 import API from "../../api/config";
+import toast from "react-hot-toast";
 
 const PlaceOffer = ({ icon: Icon, text, value }) => (
   <div className="flex-1 flex flex-col items-center text-center p-4 border-r border-[#767676] last:border-r-0 md:p-4 p-2">
@@ -136,6 +137,7 @@ const AccommodationPage = () => {
     people: 1,
     dogs: 1,
   });
+console.log(dateRange , "jkikkl");
 
   // Add maxGuests state to track the maximum allowed guests
   const [maxGuests, setMaxGuests] = useState(6); // Default to 6 if not specified
@@ -510,7 +512,8 @@ const AccommodationPage = () => {
   const handleReserved = () => {
     console.log("Reserved button clicked : ", accommodation?.provider);
     if (!dateRange?.start || !dateRange?.end) {
-      alert("Please select both check-in and check-out dates before reserving.");
+      // alert("Please select both check-in and check-out dates before reserving.");
+    toast.error("Please select both check-in and check-out dates before reserving.")
       return;
     }
     if (accommodation?.provider === "Interhome") {
@@ -697,9 +700,10 @@ const AccommodationPage = () => {
                     className="w-12 md:w-16 h-12 md:h-16 rounded-full object-cover"
                   />
                   <div>
-                    <h3 className="font-semibold md:text-base text-sm">
+                    <h3 className="font-semibold md:text-base text-sm capitalize">
                       Hello, I'm{" "}
                       {accommodation?.owner?.displayName ||
+                        accommodation?.owner?.username ||
                         accommodation?.listingSource ||
                         accommodation?.source?.name ||
                         "Provider"}

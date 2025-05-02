@@ -4,7 +4,7 @@ import { isAccountNotFoundError, redirectToSignup } from "../utils/authService";
 
 // Create an axios instance with default configs
 const API = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/api",
+  baseURL:  "http://localhost:5000/api",
   headers: {
     "Content-Type": "application/json",
   },

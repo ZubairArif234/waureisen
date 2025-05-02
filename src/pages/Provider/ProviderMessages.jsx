@@ -578,7 +578,7 @@ const ProviderMessages = () => {
                         }`}>
                           {currentConversation.booking?.status.charAt(0).toUpperCase() + currentConversation.booking?.status.slice(1)}
                         </span>
-                        <button 
+                        {/* <button 
                           className="p-2 text-gray-500 hover:bg-gray-100 rounded-full"
                           onClick={() => setShowBookingInfo(!showBookingInfo)}
                         >
@@ -588,7 +588,7 @@ const ProviderMessages = () => {
                           <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full">
                             <MoreHorizontal className="w-5 h-5" />
                           </button>
-                        </div>
+                        </div> */}
                       </div>
                     </div>
                     

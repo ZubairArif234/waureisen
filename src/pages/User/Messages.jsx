@@ -6,9 +6,10 @@ import { useLanguage } from '../../utils/LanguageContext';
 import { getUserConversations, getConversationMessages, sendMessage, markConversationAsRead } from '../../api/conversationAPI';
 import { useSocket } from '../../utils/SocketContext';
 import defaultAvatar from '../../assets/avatar.png';
+import logo from "../../assets/logo.png";
 
 // Message bubble component
-const MessageBubble = ({ message, isOwn }) => {
+const MessageBubble = ({ message, isOwn ,provider}) => {
   const messageTime = new Date(message.createdAt).toLocaleTimeString('en-US', {
     hour: 'numeric',
     minute: '2-digit'
@@ -18,7 +19,7 @@ const MessageBubble = ({ message, isOwn }) => {
     <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-4`}>
       {!isOwn && (
         <img 
-          src={defaultAvatar} 
+          src={provider?.profilePicture || logo} 
           alt="Sender" 
           className="w-8 h-8 rounded-full mr-2 self-end"
         />
@@ -55,13 +56,13 @@ const ConversationItem = ({ conversation, isSelected, onClick, unreadCount }) =>
       } ${unreadCount > 0 ? 'font-medium' : ''}`}
     >
       <img 
-        src={provider.profilePicture || defaultAvatar} 
+        src={provider.profilePicture || logo} 
         alt={providerName} 
         className="w-10 h-10 rounded-full object-cover"
       />
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-baseline">
-          <h3 className="text-sm text-gray-900 truncate">{providerName}</h3>
+          <h3 className="text-sm text-gray-900 truncate capitalize">{providerName}</h3>
           <span className="text-xs text-gray-500">{timestamp}</span>
         </div>
         <p className="text-sm text-gray-500 truncate">{conversation.lastMessage || 'Start chatting...'}</p>
@@ -431,12 +432,12 @@ const Messages = () => {
                     <ArrowLeft className="w-6 h-6" />
                   </button>
                   <img 
-                    src={selectedChat.provider?.profilePicture || defaultAvatar} 
+                    src={selectedChat.provider?.profilePicture || logo} 
                     alt={selectedChat.provider?.username || 'Provider'} 
                     className="w-10 h-10 rounded-full object-cover"
                   />
                   <div>
-                    <h2 className="font-medium">
+                    <h2 className="font-medium capitalize">
                       {selectedChat.provider?.firstName && selectedChat.provider?.lastName 
                         ? `${selectedChat.provider.firstName} ${selectedChat.provider.lastName}`
                         : selectedChat.provider?.username || 'Provider'}
@@ -463,6 +464,7 @@ const Messages = () => {
                         key={message._id}
                         message={message}
                         isOwn={message.sender === 'me' || message.senderType === 'User'}
+                        provider={selectedChat?.provider}
                       />
                     ))
                   )}

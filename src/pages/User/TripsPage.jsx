@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Calendar, MapPin, Dog, Edit, X, AlertTriangle } from "lucide-react";
+import { Calendar, MapPin, Dog, Edit, X, AlertTriangle, ArrowLeft } from "lucide-react";
 import Navbar from "../../components/Shared/Navbar";
 import Footer from "../../components/Shared/Footer";
 import DateRangePicker from "../../components/HomeComponents/DateRangePicker";
@@ -471,11 +471,14 @@ const TripsPage = () => {
   const [selectedTrip, setSelectedTrip] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [trips, setTrips] = useState();
+  const [tripsLoading, setTripsLoading] = useState();
 
   const handleGetMyBooking = async () => {
+    setTripsLoading(true)
     const res = await getMyBooking();
-
+    
     setTrips(res);
+    setTripsLoading(false)
   };
 
   useEffect(() => {
@@ -555,6 +558,25 @@ const TripsPage = () => {
         ?.slice(startCanceled, endCanceled)
     );
   }, [currentCanceledPage, currentConfirmedPage, currentUpcomingPage, trips]);
+
+ // Render loading state
+  if (tripsLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 mt-20">
+          
+          
+          <div className="flex justify-center items-center mt-20 py-16">
+            <div className="w-12 h-12 border-4 border-gray-200 border-t-brand rounded-full animate-spin mb-4"></div>
+            </div>
+        </main>
+        
+      
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#FEFCF5]">

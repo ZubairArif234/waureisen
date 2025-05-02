@@ -8,6 +8,7 @@ import { useLanguage } from '../../utils/LanguageContext';
 import API from '../../api/config';
 import { getProviderBookings, acceptBooking, cancelBooking } from '../../api/providerAPI';
 import Pagination from '../../components/Shared/Pagination';
+import toast from 'react-hot-toast';
 
 // Status Badge Component
 const StatusBadge = ({ status }) => {
@@ -263,14 +264,14 @@ const ProviderBookings = () => {
       );
       
       // Show a success message
-      alert(`Booking ${bookingId} has been accepted.`);
+      toast.success(`Booking ${bookingId} has been accepted.`)
       
       // Redirect to messages page with booking ID as a parameter
       navigate(`/provider/messages?booking=${bookingId}`);
       
     } catch (error) {
       console.error("Error accepting booking:", error);
-      alert("Failed to accept booking. Please try again.");
+      toast.error("Failed to accept booking. Please try again.")
     } finally {
       setIsLoading(false);
     }
@@ -613,13 +614,14 @@ return (
                       )}
                       
                       {booking.status === 'confirmed' && (
-                        <button
-                          onClick={() => handleCancelBooking(booking.id || booking._id)}
-                          className="flex items-center gap-1 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors"
-                        >
-                          <X className="w-4 h-4" />
-                          <span>{t('cancel')}</span>
-                        </button>
+                        <p className='flex justify-center items-center'>-</p>
+                        // <button
+                        //   onClick={() => handleCancelBooking(booking.id || booking._id)}
+                        //   className="flex items-center gap-1 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors"
+                        // >
+                        //   <X className="w-4 h-4" />
+                        //   <span>{t('cancel')}</span>
+                        // </button>
                       )}
                     </div>
                   </td>

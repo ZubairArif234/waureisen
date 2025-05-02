@@ -36,8 +36,8 @@ const Payment = () => {
       amount: Math.round(amount),
       currency: data?.pricePerNight?.currency,
       listingId: data?._id,
-      checkInDate: new Date(details?.startDate),
-      checkOutDate: new Date(details?.endDate),
+      checkInDate: moment(details.startDate).startOf("day").utc().toDate(),
+      checkOutDate: moment(details.endDate).endOf("day").utc().toDate(),
       providerAccountId: "809jujj9ehfhjf99g",
       paymentDelayDays: diffDays,
       
@@ -53,7 +53,7 @@ const Payment = () => {
     getPaymentIntent();
   }, []);
 
-  console.log(location, details?.pricePerNight?.currency);
+  console.log(location);
 
   const options = {
     clientSecret: paymentIntent.clientSecret,
