@@ -78,7 +78,7 @@ const Hero = () => {
       // Use ISO format for dates to ensure year is included
       const startDate = `${dateRange.start.toLocaleString('default', { month: 'short' })} ${String(dateRange.start.getDate()).padStart(2, '0')} ${dateRange.start.getFullYear()}`;
       const endDate = `${dateRange.end.toLocaleString('default', { month: 'short' })} ${String(dateRange.end.getDate()).padStart(2, '0')} ${dateRange.end.getFullYear()}`;
-      dateParam = `&dates=${encodeURIComponent(startDate)} - ${encodeURIComponent(endDate)}`;
+      dateParam = `&dates=${dateRange.start} - ${dateRange.end}`;
       
       // Log the formatted dates for debugging
       console.log('Formatted date range for URL:', startDate, '-', endDate);

@@ -60,7 +60,7 @@ const AccountPage = () => {
     },
     {
       icon: CreditCard,
-      title: t("payments_payouts"),
+      title: t("payment_details"),
       description: t("payments_payouts_desc"),
       onClick: () => navigate("/account/payments"),
     },

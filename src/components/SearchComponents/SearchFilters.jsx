@@ -5,6 +5,8 @@ import { accommodationTypes, mainFilters, dogFilters } from './filterData';
 import MoreFiltersModal from './MoreFiltersModal';
 import { useLanguage } from '../../utils/LanguageContext';
 import { useLocation, useNavigate } from 'react-router-dom';
+import DateRangePicker from '../HomeComponents/DateRangePicker';
+import moment from 'moment';
 
 const FilterButton = ({ icon: Icon, label, active, onClick }) => (
   <button
@@ -52,8 +54,11 @@ const SearchFilters = ({ dateRange }) => {
   const [selectedAccommodations, setSelectedAccommodations] = useState([]);
   const [selectedMainFilters, setSelectedMainFilters] = useState([]);
   const [selectedDogFilters, setSelectedDogFilters] = useState([]);
-
+ const [dateRange2, setDateRange2] = useState({ start: null, end: null });
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   // Initialize selected filters from URL
+  console.log(dateRange);
+  
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const filtersParam = searchParams.get('filters');
@@ -112,15 +117,41 @@ const SearchFilters = ({ dateRange }) => {
     setActiveModal({ isOpen: false });
   };
 
+  useEffect(()=>{
+    if (dateRange){
+
+      let startDate = dateRange?.split("-")[0]
+      let endDate = dateRange?.split("-")[1]
+      
+      setDateRange2({start:new Date(startDate) , end:new Date(endDate)})
+    }
+  },[dateRange])
+console.log(isDatePickerOpen);
+
   return (
     <div className="relative mt-24 bg-white border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex flex-wrap gap-3 items-center">
+        <div className="flex flex-wrap gap-3 items-center relative">
           <FilterButton
             icon={Calendar}
-            label={dateRange}
+            label={`${moment(dateRange2?.start).format("MMM DD , YYYY")} - ${moment(dateRange2?.end).format("MMM DD , YYYY")}`}
             active={true}
+            onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
           />
+           
+         
+          <DateRangePicker
+        isOpen={isDatePickerOpen}
+        onClose={() => setIsDatePickerOpen(false)}
+        selectedRange={dateRange2}
+        onRangeSelect={(range) => {
+          dateRange = range
+          setDateRange2(range);
+          if (range.start && range.end) {
+            setIsDatePickerOpen(false);
+          }
+        }}
+      />
           {filters.map((filter, index) => (
             <FilterButton
               key={index}

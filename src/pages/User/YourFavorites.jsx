@@ -52,7 +52,7 @@ const YourFavorites = () => {
       <div className="relative">
         <div className="flex">
           {/* Main Content */}
-          <main className="w-full px-4 sm:px-6 lg:px-8 py-12 mt-20">
+          <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 mt-20">
             {/* Header with Back Button */}
             <div className="flex items-center gap-4 mb-8">
               <button

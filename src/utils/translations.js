@@ -123,6 +123,7 @@ const translations = {
 
     // Footer
     about_us: "About Us",
+    view_invoice:"View Invoice",
     faq: "FAQ",
     imprint: "Imprint",
     data_policy: "Data Policy",
@@ -305,6 +306,7 @@ const translations = {
     login_security: "Login & security",
     login_security_desc: "Update your password and secure your account",
     payments_payouts: "Payments & payouts",
+    payment_details: "Payment Details",
     payments_payouts_desc: "Check your account details",
     email_address: "Email address",
     email_access_tip: "Use an email you'll always have access to",
@@ -1081,8 +1083,8 @@ const translations = {
   de: {
 
     no_dates_were_unblocked: "Es wurden keine Termine freigegeben. Möglicherweise sind sie bereits verfügbar.",
-
-
+    payment_details:"Zahlungsdetails",
+    per_night:"Pro nacht",
 
 
     unblock_dates: "Termine freigeben",

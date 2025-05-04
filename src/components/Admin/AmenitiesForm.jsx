@@ -38,7 +38,7 @@ const AmenityItem = ({ name, checked, onChange }) => {
         className="w-4 h-4 rounded border-[#B4A481] accent-[#B4A481] checked:bg-[#B4A481] checked:border-[#B4A481] focus:ring-[#B4A481] focus:ring-2 focus:ring-offset-0"
       />
       <div className="flex items-center gap-3">
-        <Icon className="w-5 h-5 text-[#767676]" />
+        {/* <Icon className="w-5 h-5 text-[#767676]" /> */}
         <span className="text-gray-700">{name}</span>
       </div>
     </label>

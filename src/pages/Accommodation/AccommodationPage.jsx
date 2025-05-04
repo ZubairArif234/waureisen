@@ -668,9 +668,9 @@ console.log(dateRange , "jkikkl");
                   <h3 className="text-[#4D484D] text-base font-medium mb-2">
                     {t("terms_and_conditions")}
                   </h3>
-                  <p className="text-gray-600 text-sm whitespace-pre-line">
-                    {accommodation.legal.termsAndConditions}
-                  </p>
+                  <Link to={"https://www.interhome.de/kundenservice/agb/"} className="text-gray-600 text-sm whitespace-pre-line">
+                  https://www.interhome.de/kundenservice/agb/
+                  </Link>
                 </div>
               )}
             </section>

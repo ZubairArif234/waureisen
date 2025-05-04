@@ -36,6 +36,7 @@ const Payment = () => {
       amount: Math.round(amount),
       currency: data?.pricePerNight?.currency,
       listingId: data?._id,
+      providerId: data?.owner?._id,
       checkInDate: moment(details.startDate).startOf("day").utc().toDate(),
       checkOutDate: moment(details.endDate).endOf("day").utc().toDate(),
       providerAccountId: "809jujj9ehfhjf99g",

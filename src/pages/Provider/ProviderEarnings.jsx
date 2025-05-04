@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Download, Filter, Calendar, CreditCard, DollarSign, Building2, ChevronsUpDown } from 'lucide-react';
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
 import { useLanguage } from '../../utils/LanguageContext';
 import { getProviderEarnings, getProviderTransactions } from '../../api/providerAPI';
+import { getMyProviderBooking } from '../../api/bookingApi';
+import moment from 'moment';
 
 // EarningsSummaryCard Component
 const EarningsSummaryCard = ({ title, amount, subtitle, icon: Icon, color }) => {
@@ -23,7 +25,7 @@ const EarningsSummaryCard = ({ title, amount, subtitle, icon: Icon, color }) => 
 };
 
 // Transactions table component
-const TransactionsTable = ({ transactions, onDownloadInvoice }) => {
+const TransactionsTable = ({booking, transactions, onDownloadInvoice }) => {
   const { t } = useLanguage();
   const [sortConfig, setSortConfig] = useState({ key: 'date', direction: 'desc' });
 
@@ -52,6 +54,7 @@ const TransactionsTable = ({ transactions, onDownloadInvoice }) => {
   };
 
   const sortedTransactions = getSortedTransactions();
+console.log(booking);
 
   return (
     <div className="overflow-x-auto bg-white border rounded-lg">
@@ -112,34 +115,36 @@ const TransactionsTable = ({ transactions, onDownloadInvoice }) => {
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {sortedTransactions.map((transaction) => (
-            <tr key={transaction.id} className="hover:bg-gray-50">
+          {booking?.map((transaction,i) => (
+            <tr key={i} className="hover:bg-gray-50">
               <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                {transaction.date}
+                {moment(transaction?.createdAt).format("MMM DD , YY")}
               </td>
               <td className="px-4 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-900">{transaction.description}</div>
+                <div className="text-sm text-gray-900">{transaction?.listing?.title}</div>
                 <div className="text-xs text-gray-500">{transaction.type}</div>
               </td>
               <td className="px-4 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-900">#{transaction.booking}</div>
+                <div className="text-sm text-gray-900">#{transaction.bookingId}</div>
               </td>
               <td className="px-4 py-4 whitespace-nowrap">
                 <div className={`text-sm font-medium ${
                   transaction.type === 'payout' ? 'text-green-600' : 'text-brand'
                 }`}>
-                  {transaction.type === 'payout' ? '-' : '+'}{transaction.amount} CHF
+                  {transaction.type === 'payout' ? '-' : '+'}{transaction?.totalPrice + " " + transaction?.currency}
                 </div>
               </td>
               <td className="px-4 py-4 whitespace-nowrap text-sm">
-                {transaction.hasInvoice && (
-                  <button
-                    onClick={() => onDownloadInvoice(transaction.id)}
+                {transaction?.reciept && (
+                  <Link
+                  to={transaction?.reciept}
+                  
+                    // onClick={() => onDownloadInvoice(transaction.id)}
                     className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
                   >
-                    <Download className="w-4 h-4" />
-                    <span>{t('invoice')}</span>
-                  </button>
+                    {/* <Download className="w-4 h-4" /> */}
+                    <span>{t('view_invoice')}</span>
+                  </Link>
                 )}
               </td>
             </tr>
@@ -231,6 +236,8 @@ const ProviderEarnings = () => {
   const { t } = useLanguage();
   const [timeRange, setTimeRange] = useState('all');
   const [transactionType, setTransactionType] = useState('all');
+  const [billings , setBillings] = useState([])
+  const [billingsLoading , setBillingsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState('transactions');
   
   // Mock data
@@ -312,6 +319,18 @@ const ProviderEarnings = () => {
       isDefault: false
     }
   ]);
+  const handleGetMyBookings = async () => {
+    setBillingsLoading(true)
+   const res = await getMyProviderBooking()
+   console.log(res , "kuch hai");
+   setBillings(res)
+   setBillingsLoading(false)
+   
+  }
+
+  useEffect(()=>{
+    handleGetMyBookings()
+  },[])
 
   
   useEffect(() => {
@@ -419,22 +438,13 @@ const ProviderEarnings = () => {
           >
             {t('transactions')}
           </button>
-          <button
-            onClick={() => setActiveTab('payment-methods')}
-            className={`px-4 py-2 font-medium ${
-              activeTab === 'payment-methods'
-                ? 'text-brand border-b-2 border-brand'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            {t('payment_methods')}
-          </button>
+         
         </div>
         
         {activeTab === 'transactions' && (
           <>
             {/* Filters for Transactions */}
-            <div className="flex flex-col md:flex-row gap-4 mb-6">
+            {/* <div className="flex flex-col md:flex-row gap-4 mb-6">
               <div className="flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-gray-400" />
                 <select
@@ -461,10 +471,11 @@ const ProviderEarnings = () => {
               <option value="payout">{t('payouts_only')}</option>
                 </select>
               </div>
-            </div>
+            </div> */}
             
             
             <TransactionsTable 
+            booking={billings}
               transactions={filteredTransactions} 
               onDownloadInvoice={handleDownloadInvoice}
             />

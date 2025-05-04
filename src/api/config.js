@@ -6,6 +6,7 @@ import { isAccountNotFoundError, redirectToSignup } from "../utils/authService";
 const API = axios.create({
 
   baseURL: import.meta.env.VITE_BACKEND_URL || "https://waureisen-backend.onrender.com/api",
+  // baseURL:"http://localhost:5000/api",
 
   headers: {
     "Content-Type": "application/json",

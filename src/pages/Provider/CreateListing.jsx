@@ -11,6 +11,7 @@ import PhotosForm from "../../components/Admin/PhotosForm";
 import AmenitiesForm from "../../components/Admin/AmenitiesForm";
 import DescriptionForm from "../../components/Admin/DescriptionForm";
 import PoliciesLocationForm from "../../components/Admin/PoliciesLocationForm";
+import toast from "react-hot-toast";
 
 const CreateListing = () => {
   const { t } = useLanguage();
@@ -206,7 +207,7 @@ const CreateListing = () => {
     console.log("Submitting listing for approval:", submissionData);
 
     // Show success message
-    alert(
+    toast?.success(
       isEditMode
         ? "Your listing has been updated and is awaiting approval."
         : "Your listing has been created and is awaiting approval."

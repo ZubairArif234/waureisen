@@ -57,7 +57,7 @@ const BasicInfoForm = ({ formData, handleInputChange, handleNestedInputChange })
         <input
           type="text"
           id="title"
-          value={formData.title}
+          value={formData?.title}
           onChange={(e) => handleInputChange('title', e.target.value)}
           placeholder="e.g. Modern and Luxury 1BHK Studio/Self Check-in/Eiffle"
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"

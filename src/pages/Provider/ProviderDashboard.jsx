@@ -370,12 +370,12 @@ navigate(`/provider/bookings?id=${bookingId}`);
         {/* Header with Back Button */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
-            <button
+            {/* <button
               onClick={() => navigate('/')}
               className="p-2 hover:bg-gray-100 rounded-full transition-colors"
             >
               <ArrowLeft className="w-6 h-6 text-gray-600" />
-            </button>
+            </button> */}
             <h1 className="text-3xl font-semibold text-gray-900">{t('provider_dashboard')}</h1>
           </div>
           

@@ -695,12 +695,12 @@ const TripsPage = () => {
         )}
 
         {/* Help Center Link */}
-        <div className="mt-8 text-gray-600">
+        {/* <div className="mt-8 text-gray-600">
           {t("cant_find_reservation")}{" "}
           <button className="text-brand hover:underline">
             {t("help_center")}
           </button>
-        </div>
+        </div> */}
       </main>
 
       {/* Edit Trip Modal */}

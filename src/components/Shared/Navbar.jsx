@@ -209,7 +209,7 @@ const Navbar = () => {
     {
       icon: <Home className="h-4 w-4" />,
       label: t("your_listings"),
-      path: "/provider/listings",
+      path: "/provider/your-listings",
     },
     {
       icon: <Calendar className="h-4 w-4" />,

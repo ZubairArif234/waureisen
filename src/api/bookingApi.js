@@ -9,3 +9,13 @@ export const getMyBooking = async (data) => {
     throw error;
   }
 };
+
+export const getMyProviderBooking = async (data) => {
+  try {
+    const response = await API.get('/booking/provider');
+    return response.data;
+  } catch (error) {
+    console.error('Error getting my booking:', error);
+    throw error;
+  }
+};

@@ -76,7 +76,7 @@ const Footer = () => {
     sitemap: [
       { label: 'Camper rental', path: '/camper-rental', translationKey: 'camper_rental' },
       { label: 'Travel shop', path: '/travelshop', translationKey: 'travel_shop' },
-      { label: 'Book an appointment', path: 'https://meet.brevo.com/waureisen', external: true, translationKey: 'book_appointment' },
+      { label: 'Book an appointment', path: 'https://calendly.com/hallo-waureisen/austausch?month=2025-05', external: true, translationKey: 'book_appointment' },
       { label: 'Become a host', path: '/host', translationKey: 'become_host' }
     ],
     specials: [

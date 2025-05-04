@@ -678,7 +678,7 @@ const Profile = () => {
                     </button>
                   )}
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-gray-700">
                         {t("name")}
@@ -722,7 +722,7 @@ const Profile = () => {
                       </select>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-2 col-span-2">
                       <label className="text-sm font-medium text-gray-700">
                         {t("gender")}
                       </label>
@@ -785,6 +785,36 @@ const Profile = () => {
                             )}
                           </div>
                           <span>{t("female")}</span>
+                        </label>
+
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name={`traveller-gender-${traveller.id}`}
+                            value="others"
+                            checked={traveller.gender === "others"}
+                            onChange={() =>
+                              handleTravellerInputChange(
+                                traveller.id,
+                                "gender",
+                                "others"
+                              )
+                            }
+                            disabled={!isEditing}
+                            className="hidden"
+                          />
+                          <div
+                            className={`w-6 h-6 rounded-full border flex items-center justify-center ${
+                              traveller.gender === "others"
+                                ? "border-brand bg-brand/10"
+                                : "border-gray-300"
+                            }`}
+                          >
+                            {traveller.gender === "others" && (
+                              <div className="w-3 h-3 rounded-full bg-brand" />
+                            )}
+                          </div>
+                          <span>{t("others")}</span>
                         </label>
                       </div>
                     </div>

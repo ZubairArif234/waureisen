@@ -17,9 +17,11 @@ import {
   createListing as providerCreateListing,
   updateListing as providerUpdateListing,
   getListingDetails as getProviderListingDetails,
+
 } from "../../api/providerAPI";
 import { generateUniqueListingCode } from "../../utils/uniqueCodeGenerator";
 import toast from "react-hot-toast";
+import { updateListing } from "../../api/listingAPI";
 
 const AddAccommodation = (props) => {
   const navigate = useNavigate();
@@ -147,7 +149,7 @@ const AddAccommodation = (props) => {
 
   // Load data if in edit mode
   useEffect(() => {
-    if (isEditMode) {
+    if (id||isEditMode) {
       const fetchListing = async () => {
         try {
           setIsLoading(true);
@@ -159,12 +161,66 @@ const AddAccommodation = (props) => {
           } else {
             listingData = await getListingById(id);
           }
+          console.log(listingData , "jkk");
           
-          setFormData(listingData);
+          if(listingData){
+
+            setFormData({
+              // Basic Info
+              title: listingData?.title,
+              propertyType: listingData?.listingType,
+              listingSource: isProviderMode ? "Provider" : "Admin",
+              capacity: {
+                people: listingData?.maxGuests,
+                dogs: listingData?.maxDogs,
+                bedrooms: listingData?.bedRooms,
+                rooms: listingData?.rooms?.number,
+                washrooms: listingData?.washrooms,
+              },
+              pricing: {
+                currency: listingData?.pricePerNight?.currency,
+                regularPrice: listingData?.pricePerNight?.price,
+                discountedPrice: 0,
+              },
+              availability: {
+                checkInDates: "",
+                checkInDate: null,
+                checkOutDate: null,
+                checkInTime: { hour: "", period: "" },
+                checkOutTime: { hour: "", period: "" },
+                allowInstantBooking: false,
+                active: false,
+              },
+          
+              // Photos
+              mainImage: listingData?.images[0],
+              galleryImages: listingData?.images?.slice(1,listingData?.images?.length),
+          
+              // Description
+              shortDescription: listingData?.description?.general,
+              fullDescription: "",
+          
+              // Policies & Location
+              location: {
+                city: "",
+                fullAddress: listingData?.location?.address,
+                mapLocation: listingData?.location?.coordinates,
+              },
+              policies: {
+                cancellationPolicy: listingData?.legal?.cancellationPolicy,
+                customPolicyDetails: "",
+                houseRules: {
+                  noSmoking: false,
+                  noParties: false,
+                  quietHours: false,
+                },
+              },
+            });
+          }
+          
           setIsLoading(false);
         } catch (error) {
           console.error("Error fetching accommodation data:", error);
-          alert("Failed to load listing data. Please try again.");
           setIsLoading(false);
           // Navigate back to listings on error
           navigate(isProviderMode ? "/provider/your-listings" : "/admin/accommodations");
@@ -174,6 +230,8 @@ const AddAccommodation = (props) => {
       fetchListing();
     }
   }, [isEditMode, id, navigate, isProviderMode]);
+  console.log(formData , "form data");
+  
 
   const handleInputChange = (field, value) => {
     setFormData({
@@ -202,37 +260,37 @@ const AddAccommodation = (props) => {
       const validationErrors = [];
   
       // ===== Validation =====
-      if (!formData.title) validationErrors.push("Listing title is required");
-      if (!formData.propertyType) validationErrors.push("Property type is required");
-      if (!formData.capacity.people) validationErrors.push("Number of people is required");
-      if (!formData.capacity.dogs) validationErrors.push("Number of dogs is required");
-      if (!formData.capacity.bedrooms) validationErrors.push("Number of bedrooms is required");
-      if (!formData.capacity.rooms) validationErrors.push("Number of rooms is required");
-      if (!formData.capacity.washrooms) validationErrors.push("Number of washrooms is required");
-      if (!formData.pricing.regularPrice) validationErrors.push("Regular price is required");
-      if (!formData.pricing.currency) validationErrors.push("Currency is required");
+      if (!formData?.title) validationErrors.push("Listing title is required");
+      if (!formData?.propertyType) validationErrors.push("Property type is required");
+      if (!formData?.capacity.people) validationErrors.push("Number of people is required");
+      if (!formData?.capacity.dogs) validationErrors.push("Number of dogs is required");
+      if (!formData?.capacity.bedrooms) validationErrors.push("Number of bedrooms is required");
+      if (!formData?.capacity.rooms) validationErrors.push("Number of rooms is required");
+      if (!formData?.capacity.washrooms) validationErrors.push("Number of washrooms is required");
+      if (!formData?.pricing.regularPrice) validationErrors.push("Regular price is required");
+      if (!formData?.pricing.currency) validationErrors.push("Currency is required");
   
-      if (!formData.availability?.checkInDates || !formData.availability?.checkInDate || !formData.availability?.checkOutDate) {
+      if (!formData?.availability?.checkInDates || !formData?.availability?.checkInDate || !formData?.availability?.checkOutDate) {
         validationErrors.push("Check-in dates are required");
       }
-      if (!formData.availability?.checkInTime?.hour || !formData.availability?.checkInTime?.period) {
+      if (!formData?.availability?.checkInTime?.hour || !formData?.availability?.checkInTime?.period) {
         validationErrors.push("Check-in time is required");
       }
-      if (!formData.availability?.checkOutTime?.hour || !formData.availability?.checkOutTime?.period) {
+      if (!formData?.availability?.checkOutTime?.hour || !formData?.availability?.checkOutTime?.period) {
         validationErrors.push("Check-out time is required");
       }
   
-      if (!formData.mainImage) validationErrors.push("Main image is required");
-      if (!formData.galleryImages || formData.galleryImages.length < 4) {
+      if (!formData?.mainImage) validationErrors.push("Main image is required");
+      if (!formData?.galleryImages || formData?.galleryImages.length < 4) {
         validationErrors.push("At least 4 gallery images are required");
       }
   
-      if (!formData.shortDescription) validationErrors.push("Short description is required");
-      if (!formData.fullDescription) validationErrors.push("Full description is required");
+      if (!formData?.shortDescription) validationErrors.push("Short description is required");
+      if (!formData?.fullDescription) validationErrors.push("Full description is required");
   
-      if (!formData.location.mapLocation) validationErrors.push("Map location is required");
-      if (!formData.policies.cancellationPolicy) validationErrors.push("Cancellation policy is required");
-      if (formData.policies.cancellationPolicy === 'custom' && !formData.policies.customPolicyDetails) {
+      if (!formData?.location.mapLocation) validationErrors.push("Map location is required");
+      if (!formData?.policies.cancellationPolicy) validationErrors.push("Cancellation policy is required");
+      if (formData?.policies.cancellationPolicy === 'custom' && !formData.policies?.customPolicyDetails) {
         validationErrors.push("Custom policy details are required when using custom cancellation policy");
       }
   
@@ -274,7 +332,7 @@ const AddAccommodation = (props) => {
   
       // ===== Prepare Data =====
       const uniqueCode = generateUniqueListingCode();
-      const photos = [formData.mainImage, ...formData.galleryImages?.filter(img => typeof img === "string")];
+      const photos = [formData?.mainImage, ...formData?.galleryImages?.filter(img => typeof img === "string")];
   
       let coordinates = [0, 0];
       const location = formData.location?.mapLocation;
@@ -293,41 +351,41 @@ const AddAccommodation = (props) => {
   
       const listingData = {
         Code: uniqueCode,
-        title: formData.title,
-        listingType: formData.propertyType,
+        title: formData?.title,
+        listingType: formData?.propertyType,
         description: {
-          general: formData.fullDescription,
-          short: formData.shortDescription,
+          general: formData?.fullDescription,
+          short: formData?.shortDescription,
         },
-        checkInTime: formData.availability?.checkInTime
-          ? new Date(`1970-01-01T${formData.availability.checkInTime.hour}:00${formData.availability.checkInTime.period === 'PM' ? '+12:00' : ':00'}`)
+        checkInTime: formData?.availability?.checkInTime
+          ? new Date(`1970-01-01T${formData?.availability?.checkInTime?.hour}:00${formData?.availability.checkInTime.period === 'PM' ? '+12:00' : ':00'}`)
           : null,
         checkOutTime: formData.availability?.checkOutTime
-          ? new Date(`1970-01-01T${formData.availability.checkOutTime.hour}:00${formData.availability.checkOutTime.period === 'PM' ? '+12:00' : ':00'}`)
+          ? new Date(`1970-01-01T${formData?.availability?.checkOutTime?.hour}:00${formData?.availability.checkOutTime.period === 'PM' ? '+12:00' : ':00'}`)
           : null,
-        checkInDates: formData.availability?.checkInDates || '',
+        checkInDates: formData?.availability?.checkInDates || '',
         location: {
-          address: formData.location.fullAddress,
-          optional: formData.location.city || "",
+          address: formData?.location?.fullAddress,
+          optional: formData?.location?.city || "",
           type: 'Point',
           coordinates,
         },
         pricePerNight: {
-          price: formData.pricing.regularPrice,
-          currency: formData.pricing.currency,
+          price: formData?.pricing?.regularPrice,
+          currency: formData?.pricing?.currency,
         },
-        maxDogs: formData.capacity.dogs,
-        maxGuests: formData.capacity.people,
-        bedRooms: formData.capacity.bedrooms,
+        maxDogs: formData?.capacity?.dogs,
+        maxGuests: formData?.capacity?.people,
+        bedRooms: formData?.capacity?.bedrooms,
         rooms: {
-          number: formData.capacity.rooms,
+          number: formData?.capacity?.rooms,
         },
-        washrooms: formData.capacity.washrooms,
-        status: isProviderMode ? "pending approval" : (formData.availability?.active ? "active" : "pending approval"),
+        washrooms: formData?.capacity?.washrooms,
+        status: isProviderMode ? "pending approval" : (formData?.availability?.active ? "active" : "pending approval"),
         images: photos,
         legal: {
-          cancellationPolicy: formData.policies.cancellationPolicy,
-          customPolicyDetails: formData.policies.customPolicyDetails,
+          cancellationPolicy: formData?.policies?.cancellationPolicy,
+          customPolicyDetails: formData?.policies?.customPolicyDetails,
         },
       };
   
@@ -376,7 +434,14 @@ const AddAccommodation = (props) => {
       if (isProviderMode) {
         console.log("Creating listing as provider");
         listingData.filterData = filterData;
-        listingResponse = await providerCreateListing(listingData);
+        if(id){
+          listingResponse = await updateListing(id,listingData);
+
+
+        }else{
+
+          listingResponse = await providerCreateListing(listingData);
+        }
   
         if (listingResponse?._id) {
           toast.success(
