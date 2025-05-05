@@ -13,7 +13,8 @@ import { isAuthenticated, getCurrentProvider, setAuthHeader } from '../../utils/
 import { 
   getProviderDashboardStats, 
   getProviderBookings,
-  getProviderListings 
+  getProviderListings ,
+  getProviderTotalBookingsCount
 } from '../../api/providerAPI';
 import AnalyticsChart from '../../components/Provider/AnalyticsChart';
 
@@ -153,7 +154,6 @@ useEffect(() => {
   // Force set the authorization header before making any requests
   setAuthHeader();
 
-  // Fetch dashboard data
   const fetchDashboardData = async () => {
     setIsLoading(true);
     setError(null);
@@ -161,27 +161,44 @@ useEffect(() => {
     try {
       console.log('Fetching dashboard data with timeRange:', timeRange);
       
-      
+      // Force set the authorization header before making any requests
       setAuthHeader();
       
-      
+      // Fetch dashboard stats based on time range
       const stats = await getProviderDashboardStats(timeRange);
       console.log('Dashboard stats received:', stats);
-      setDashboardStats(stats);
+      
+      // Fetch total bookings count (regardless of time range)
+      const totalBookingsCount = await getProviderTotalBookingsCount();
+      console.log('Total bookings count:', totalBookingsCount);
+      
+      // Update the stats with the accurate total bookings
+      const updatedStats = {
+        ...stats,
+        performance: {
+          ...stats.performance,
+          totalBookings: {
+            ...stats.performance?.totalBookings,
+            current: totalBookingsCount
+          }
+        }
+      };
+      
+      setDashboardStats(updatedStats);
       
       // Process chart data if available
-      if (stats && stats.charts) {
+      if (updatedStats && updatedStats.charts) {
         // Create data for revenue chart
-        const revenueData = Array.isArray(stats.charts.revenue) 
-          ? stats.charts.revenue.map((value, index) => ({
+        const revenueData = Array.isArray(updatedStats.charts.revenue) 
+          ? updatedStats.charts.revenue.map((value, index) => ({
               date: `Day ${index + 1}`,
               revenue: value
             }))
           : [];
           
         // Create data for bookings chart
-        const bookingData = Array.isArray(stats.charts.bookings)
-          ? stats.charts.bookings.map((value, index) => ({
+        const bookingData = Array.isArray(updatedStats.charts.bookings)
+          ? updatedStats.charts.bookings.map((value, index) => ({
               date: `Day ${index + 1}`,
               bookings: value
             }))

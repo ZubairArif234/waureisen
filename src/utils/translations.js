@@ -1078,10 +1078,28 @@ const translations = {
     no_dates_were_unblocked: "No dates were unblocked. They might already be available.",
 
     price_per_person_per_night: "Price per person per night",
+    login_as : "Login as",
+    loading_bookings: "Loading bookings...",
+    booking_status_confirmed: "Booking confirmed",
+    booking_status_canceled: "Booking canceled",
+    booking_status_pending: "Booking pending",
+    loading_calendar: "Loading calendar...",
+    loading_listings: "Loading listings...",
   },
 
   de: {
 
+    loading_listings: "Immobilien werden geladen...",
+
+    loading_calendar: "Kalender wird geladen...",
+    booking_status_canceled: "Buchung storniert",
+    booking_status_pending: "Buchung ausstehend",
+
+    booking_status_confirmed: "Buchung bestätigt",
+
+    loading_bookings: "Buchungen werden geladen...",
+
+    login_as : "Einloggen als",
     no_dates_were_unblocked: "Es wurden keine Termine freigegeben. Möglicherweise sind sie bereits verfügbar.",
     payment_details:"Zahlungsdetails",
     per_night:"Pro nacht",

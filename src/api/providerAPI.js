@@ -493,3 +493,17 @@ export const getProviderCalendarBookings = async (params = {}) => {
     return [];
   }
 };
+
+
+
+export const getProviderTotalBookingsCount = async () => {
+  try {
+    setAuthHeader();
+    // Changed the endpoint to avoid conflict with parametrized routes
+    const response = await API.get("/providers/bookings-total-count");
+    return response.data.totalCount || 0;
+  } catch (error) {
+    console.error("Error fetching total bookings count:", error);
+    return 0;
+  }
+};
