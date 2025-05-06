@@ -28,6 +28,7 @@ const getAmenityIcon = (amenityName) => {
 
 const AmenityItem = ({ name, checked, onChange }) => {
   const Icon = getAmenityIcon(name);
+
   
   return (
     <label className="flex items-center space-x-3 cursor-pointer p-3 border rounded-lg hover:bg-gray-50 transition-colors">
@@ -57,7 +58,7 @@ const CheckboxGroup = ({ title, description, filters, selected, onChange }) => {
           <AmenityItem
             key={filter.name}
             name={filter.name}
-            checked={selected[filter.name] || false}
+            checked={selected[filter.name] || filter?.predefined ||false}
             onChange={() => onChange(filter.name, !selected[filter.name])}
           />
         ))}

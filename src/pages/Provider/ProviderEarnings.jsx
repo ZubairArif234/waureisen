@@ -138,7 +138,7 @@ console.log(booking);
                 {transaction?.reciept && (
                   <Link
                   to={transaction?.reciept}
-                  
+                  target="_blank"
                     // onClick={() => onDownloadInvoice(transaction.id)}
                     className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
                   >

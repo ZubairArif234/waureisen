@@ -10,6 +10,8 @@ import {
   Waves,
   Tv,
 } from "lucide-react";
+import API from "../api/config";
+import AccomodarionFilters from "./HomeComponents/AccomodarionFilters";
 
 const getAmenityIcon = (amenityName) => {
   const iconMap = {
@@ -27,24 +29,50 @@ const getAmenityIcon = (amenityName) => {
 };
 
 const AccommodationDetails = ({ accommodation }) => {
+  
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
   const { t } = useLanguage();
   const [filterData, setFilterData] = useState(null);
+  const [allFilters, setAllFilters] = useState([]);
 
-  useEffect(() => {
-    const fetchFilters = async () => {
-      try {
-        if (accommodation?.filters) {
-          const response = await fetch(`/api/filters/${accommodation.filters}`);
-          const data = await response.json();
-          setFilterData(data);
-        }
-      } catch (error) {
-        console.error("Error fetching filters:", error);
+  console.log(accommodation);
+
+  const fetchFilters = async () => {
+    try {
+      if (accommodation?.filters) {
+        const response = await API.get(`/filters/${accommodation.filters}`);
+        console.log(response);
+
+        // const data = await response.json();
+        setFilterData(response?.data);
       }
-    };
-
+    } catch (error) {
+      console.error("Error fetching filters:", error);
+    }
+  };
+  useEffect(() => {
     fetchFilters();
   }, [accommodation?.filters]);
+
+  useEffect(() => {
+    if (filterData) {
+      // const filters = [];
+  
+      const amenityNames =
+  filterData?.subsections
+    ?.filter((sub) => sub.name === "Amenities")
+    ?.flatMap((sub) =>
+      sub.subsubsections?.flatMap((subsub) =>
+        subsub.filters?.map((filter) => filter.name) || []
+      ) || []
+    ) || [];
+  
+      setAllFilters(amenityNames);
+    }
+  }, [filterData]);
+  
+console.log(allFilters , "jkl");
+
 
   const description = accommodation?.description;
 
@@ -65,8 +93,7 @@ const AccommodationDetails = ({ accommodation }) => {
       <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4 mt-6">
         {t("details")}
       </h2>
-
-
+{/* 
       {filterData &&
         filterData.subsections &&
         filterData.subsections.map(
@@ -124,9 +151,25 @@ const AccommodationDetails = ({ accommodation }) => {
                 })}
                 <span className="text-gray-700 text-sm">{attr.name}</span>
               </div>
-
             ))}
           </div>
+        )} */}
+        { allFilters?.slice(0,6)?.map((item,i)=>{
+          return(
+            <p className="text-gray-700 text-md py-2 " key={i}>{item}</p>
+          )
+        })}
+        <button onClick={() => setIsFilterOpen(true)} className="bg-brand text-white px-8 py-2 rounded-lg font-medium hover:bg-brand-dark transition-colors">See All</button>
+       {filterData && (
+  <div className="absolute z-10 mt-2 w-full">
+
+         <AccomodarionFilters
+         isOpen={isFilterOpen}
+         onClose={() => setIsFilterOpen(false)}
+         
+         filterData={filterData || []} // Pass available dates
+         />
+         </div>
         )}
     </section>
   );

@@ -268,30 +268,7 @@ const BasicInfoForm = ({ formData, handleInputChange, handleNestedInputChange })
   <h3 className="text-lg font-medium text-gray-900">Availability</h3>
   
   <div className="space-y-6">
-    <div className="space-y-2">
-      <label className="block text-sm font-medium text-gray-700">
-        Check-in/Check-out Dates
-      </label>
-      <div 
-        className="relative border border-gray-300 rounded-md px-3 py-2 cursor-pointer flex items-center"
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          setIsDatePickerOpen(true);
-        }}
-      >
-        <Calendar className="w-5 h-5 text-gray-400 mr-2" />
-        <span className="text-sm text-gray-700">
-          {selectedRange.start && selectedRange.end ? (
-            `${selectedRange.start.toLocaleDateString()} - ${selectedRange.end.toLocaleDateString()}`
-          ) : selectedRange.start ? (
-            `${selectedRange.start.toLocaleDateString()} - Select check-out date`
-          ) : (
-            'Select check-in and check-out dates'
-          )}
-        </span>
-      </div>
-    </div>
+ 
 
     {/* Check-in and Check-out Times */}
     <div className="grid grid-cols-2 gap-4">
@@ -362,7 +339,7 @@ const BasicInfoForm = ({ formData, handleInputChange, handleNestedInputChange })
       </div>
     </div>
 
-    <div className="flex items-center justify-between gap-4">
+    {/* <div className="flex items-center justify-between gap-4">
       <div className="flex items-center gap-2">
         <label htmlFor="instantBooking" className="text-sm font-medium text-gray-700">
           Allow Instant Booking
@@ -400,7 +377,7 @@ const BasicInfoForm = ({ formData, handleInputChange, handleNestedInputChange })
           ></label>
         </div>
       </div>
-    </div>
+    </div> */}
   </div>
 </div>
 

@@ -10,7 +10,7 @@ const DescriptionForm = ({ formData, handleInputChange }) => {
       </div>
 
       {/* Short Description */}
-      <div className="space-y-2">
+      {/* <div className="space-y-2">
         <label htmlFor="shortDescription" className="block text-sm font-medium text-gray-700">
           Short Description
         </label>
@@ -25,7 +25,7 @@ const DescriptionForm = ({ formData, handleInputChange }) => {
         <p className="text-xs text-gray-500">
           A brief description that appears in search results. Keep it concise but informative.
         </p>
-      </div>
+      </div> */}
 
       {/* Full Description */}
       <div className="space-y-2">
@@ -35,15 +35,16 @@ const DescriptionForm = ({ formData, handleInputChange }) => {
         <div className="border border-gray-300 rounded-md overflow-hidden">
           <textarea
             id="fullDescription"
-            value={formData.fullDescription}
-            onChange={(e) => handleInputChange('fullDescription', e.target.value)}
+            value={formData.shortDescription}
+            onChange={(e) => handleInputChange('shortDescription', e.target.value)}
+        
             placeholder="Provide a detailed description of your property, including special features, nearby attractions, and anything else that makes it unique."
             className="w-full px-3 py-2 border-0 focus:outline-none focus:ring-0"
             rows={10}
           ></textarea>
           
           {/* Text Editor Toolbar */}
-          <div className="border-t p-2 bg-gray-50 flex gap-2">
+          {/* <div className="border-t p-2 bg-gray-50 flex gap-2">
             <button
               type="button"
               className="p-1.5 hover:bg-gray-200 rounded"
@@ -65,11 +66,11 @@ const DescriptionForm = ({ formData, handleInputChange }) => {
             >
               <Heading className="w-4 h-4 text-gray-600" />
             </button>
-          </div>
+          </div> */}
         </div>
-        <p className="text-xs text-gray-500">
+        {/* <p className="text-xs text-gray-500">
           Use formatting to make your description easier to read. You can use bullet points, paragraphs, and headings.
-        </p>
+        </p> */}
       </div>
 
       {/* What this place offers

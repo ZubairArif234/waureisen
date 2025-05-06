@@ -22,6 +22,7 @@ import {
 import { generateUniqueListingCode } from "../../utils/uniqueCodeGenerator";
 import toast from "react-hot-toast";
 import { updateListing } from "../../api/listingAPI";
+import moment from "moment";
 
 const AddAccommodation = (props) => {
   const navigate = useNavigate();
@@ -107,7 +108,7 @@ const AddAccommodation = (props) => {
         template.subsections?.some(section => section.name === tab.templateName)
       )
     : [];
-
+  
   // Set initial active tab when template loads
   useEffect(() => {
     if (template && availableTabs.length > 0 && !activeTab) {
@@ -161,7 +162,6 @@ const AddAccommodation = (props) => {
           } else {
             listingData = await getListingById(id);
           }
-          console.log(listingData , "jkk");
           
           if(listingData){
 
@@ -186,8 +186,8 @@ const AddAccommodation = (props) => {
                 checkInDates: "",
                 checkInDate: null,
                 checkOutDate: null,
-                checkInTime: { hour: "", period: "" },
-                checkOutTime: { hour: "", period: "" },
+                checkInTime: { hour:listingData?.checkInTime ? moment(listingData?.checkInTime).format("h") : "", period: listingData?.checkInTime ? moment(listingData?.checkInTime).format("A") : "" },
+                checkOutTime: { hour:listingData?.checkOutTime ? moment(listingData?.checkOutTime).format("h") : "", period: listingData?.checkOutTime ? moment(listingData?.checkOutTime).format("A") : "" },
                 allowInstantBooking: false,
                 active: false,
               },
@@ -230,7 +230,7 @@ const AddAccommodation = (props) => {
       fetchListing();
     }
   }, [isEditMode, id, navigate, isProviderMode]);
-  console.log(formData , "form data");
+
   
 
   const handleInputChange = (field, value) => {
@@ -254,8 +254,6 @@ const AddAccommodation = (props) => {
   const handleSubmit = async () => {
     try {
       // Log cancellation policy and location data
-      console.log('Cancellation Policy:', formData.policies.cancellationPolicy);
-      console.log('Location:', formData.location);
 
       const validationErrors = [];
   
@@ -270,9 +268,9 @@ const AddAccommodation = (props) => {
       if (!formData?.pricing.regularPrice) validationErrors.push("Regular price is required");
       if (!formData?.pricing.currency) validationErrors.push("Currency is required");
   
-      if (!formData?.availability?.checkInDates || !formData?.availability?.checkInDate || !formData?.availability?.checkOutDate) {
-        validationErrors.push("Check-in dates are required");
-      }
+      // if (!formData?.availability?.checkInDates || !formData?.availability?.checkInDate || !formData?.availability?.checkOutDate) {
+      //   validationErrors.push("Check-in dates are required");
+      // }
       if (!formData?.availability?.checkInTime?.hour || !formData?.availability?.checkInTime?.period) {
         validationErrors.push("Check-in time is required");
       }
@@ -285,8 +283,8 @@ const AddAccommodation = (props) => {
         validationErrors.push("At least 4 gallery images are required");
       }
   
-      if (!formData?.shortDescription) validationErrors.push("Short description is required");
-      if (!formData?.fullDescription) validationErrors.push("Full description is required");
+      // if (!formData?.shortDescription) validationErrors.push("Short description is required");
+      // if (!formData?.fullDescription) validationErrors.push("Full description is required");
   
       if (!formData?.location.mapLocation) validationErrors.push("Map location is required");
       if (!formData?.policies.cancellationPolicy) validationErrors.push("Cancellation policy is required");
@@ -349,20 +347,34 @@ const AddAccommodation = (props) => {
         }
       }
   
+
+      const convertTo24Hour = (hour, period) => {
+        const h = parseInt(hour);
+        if (period?.toLowerCase() === 'pm' && h !== 12) return h + 12;
+        if (period?.toLowerCase() === 'am' && h === 12) return 0;
+        return h;
+      };
+      
+      const getTimeFromForm = (timeObj) => {
+        if (!timeObj?.hour || !timeObj?.period) return null;
+      
+        const hour24 = String(convertTo24Hour(timeObj.hour, timeObj.period)).padStart(2, '0');
+        const timeStr = `1970-01-01T${hour24}:00:00Z`;
+        const date = new Date(timeStr);
+        return isNaN(date.getTime()) ? null : date;
+      };
+
+
       const listingData = {
         Code: uniqueCode,
         title: formData?.title,
         listingType: formData?.propertyType,
         description: {
-          general: formData?.fullDescription,
+          general: formData?.shortDescription,
           short: formData?.shortDescription,
         },
-        checkInTime: formData?.availability?.checkInTime
-          ? new Date(`1970-01-01T${formData?.availability?.checkInTime?.hour}:00${formData?.availability.checkInTime.period === 'PM' ? '+12:00' : ':00'}`)
-          : null,
-        checkOutTime: formData.availability?.checkOutTime
-          ? new Date(`1970-01-01T${formData?.availability?.checkOutTime?.hour}:00${formData?.availability.checkOutTime.period === 'PM' ? '+12:00' : ':00'}`)
-          : null,
+        checkInTime: getTimeFromForm(formData.availability.checkInTime),
+        checkOutTime: getTimeFromForm(formData.availability.checkOutTime),
         checkInDates: formData?.availability?.checkInDates || '',
         location: {
           address: formData?.location?.fullAddress,
@@ -432,8 +444,9 @@ const AddAccommodation = (props) => {
       const apiUrl = import.meta.env.VITE_BE_BASE_URL || "http://localhost:5000";
   
       if (isProviderMode) {
-        console.log("Creating listing as provider");
         listingData.filterData = filterData;
+        console.log(listingData , formData);
+        
         if(id){
           listingResponse = await updateListing(id,listingData);
 
@@ -576,7 +589,7 @@ const AddAccommodation = (props) => {
     }
   };
   
-  
+
 
   const renderForm = () => {
     if (!template) return <div>Loading template...</div>;
@@ -588,6 +601,7 @@ const AddAccommodation = (props) => {
 
     // Only render if we have both the tab configuration and corresponding subsection
     if (!subsection) return null;
+console.log(subsection , "kln");
 
     switch (activeTab) {
       case "basicInfo":

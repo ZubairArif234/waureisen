@@ -222,12 +222,14 @@ export const getAllListings = async () => {
 export const getPaginatedListings = async (
   page = 1,
   limit = 9,
-  search = ""
+  search = "",
+  selectedSource = "all"
 ) => {
   try {
     const queryParams = new URLSearchParams({
       page,
       limit,
+      filter:selectedSource,
       ...(search && { search }),
     });
 

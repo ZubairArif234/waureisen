@@ -28,7 +28,6 @@ import AddToFeaturedModal from "../../components/Admin/AddToFeaturedModal";
 // Default sources to use while loading or if API doesn't return any
 const DEFAULT_SOURCES = [
   { id: "all", name: "All Sources" },
-  { id: "waureisen", name: "Waureisen" },
   { id: "interhome", name: "Interhome" },
   { id: "provider", name: "Provider" },
   { id: "admin", name: "Admin" },
@@ -490,10 +489,7 @@ const Accommodations = () => {
     }
   };
 
-  useEffect(() => {
-    fetchAccommodations();
-    fetchFeaturedCounts();
-  }, [page, search]); // Refetch when page or search changes
+ 
 
   // Add debug effect to log when accommodations change
   useEffect(() => {
@@ -526,9 +522,10 @@ const Accommodations = () => {
       // Fetch listings with pagination and filters
       console.log("Fetching accommodations with params:", queryParams);
       const response = await getPaginatedListings(
-        queryParams.page,
+        page || queryParams.page,
         9, // Fixed page size
-        queryParams.search
+        search || queryParams.search,
+        selectedSource
       );
 
       console.log("Received accommodations:", response.listings?.length || 0);
@@ -540,7 +537,7 @@ const Accommodations = () => {
       if (response.listings?.length > 0) {
         const uniqueSources = extractUniqueSources(response.listings);
         console.log("Extracted sources:", uniqueSources);
-        setSources(uniqueSources);
+        // setSources(uniqueSources);
       }
 
       setError("");
@@ -716,6 +713,10 @@ const Accommodations = () => {
       setSelectedForFeatured(null);
     }
   };
+  useEffect(() => {
+    fetchAccommodations(1);
+    fetchFeaturedCounts();
+  }, [page, search ,selectedSource]); // Refetch when page or search changes
 
   // Handler for removing from featured section (displays modal)
   const handleRemoveFromFeatured = (id, featuredSections) => {
@@ -1046,7 +1047,7 @@ const Accommodations = () => {
       {/* Accommodations Grid */}
       {!loading && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredAccommodations.map((accommodation) => (
+          {accommodations.map((accommodation) => (
             <AccommodationCard
               key={accommodation._id}
               accommodation={accommodation}

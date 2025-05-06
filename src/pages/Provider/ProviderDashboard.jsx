@@ -299,12 +299,7 @@ navigate(`/provider/bookings?id=${bookingId}`);
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 mt-20">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
             <div className="flex items-center gap-4">
-              <button
-                onClick={() => navigate('/')}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <ArrowLeft className="w-6 h-6 text-gray-600" />
-              </button>
+             
               <h1 className="text-3xl font-semibold text-gray-900">{t('provider_dashboard')}</h1>
             </div>
           </div>
@@ -329,12 +324,7 @@ navigate(`/provider/bookings?id=${bookingId}`);
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 mt-20">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
             <div className="flex items-center gap-4">
-              <button
-                onClick={() => navigate('/')}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <ArrowLeft className="w-6 h-6 text-gray-600" />
-              </button>
+             
               <h1 className="text-3xl font-semibold text-gray-900">{t('provider_dashboard')}</h1>
             </div>
           </div>
