@@ -9,6 +9,7 @@ import API from '../../api/config';
 import { getProviderBookings, acceptBooking, cancelBooking } from '../../api/providerAPI';
 import Pagination from '../../components/Shared/Pagination';
 import toast from 'react-hot-toast';
+import moment from 'moment';
 
 // Status Badge Component
 const StatusBadge = ({ status }) => {
@@ -594,10 +595,10 @@ return (
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
-                      {formatDate(booking.checkInDate)} - {formatDate(booking.checkOutDate)}
+                      {moment(booking.checkInDate).format("DD, MMM YYYY")} - {moment(booking.checkOutDate).format("DD, MMM YYYY")}
                     </div>
                     <div className="text-xs text-gray-500">
-                      {t('booked_on')} {formatDate(booking.createdAt)}
+                      {t('booked_on')} {moment(booking.createdAt).format("DD, MMM YYYY")}
                     </div>
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">

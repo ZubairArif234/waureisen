@@ -11,12 +11,12 @@ const [marker, setMarker] = useState(null);
   const [selectedAddress, setSelectedAddress] = useState(formData.location?.address || '');
   const [mapLocation, setMapLocation] = useState(formData.location?.mapLocation || null);
   const [uploadedFile, setUploadedFile] = useState(null);
+console.log(selectedAddress , mapLocation , "klj");
 
 // Load Google Maps script and initialize autocomplete
 useEffect(() => {
   let mapInstanceRef = null;
   let markerRef = null;
-
   const initializeMap = () => {
     console.log("Initializing map...");
     if (!mapRef.current || !fullAddressRef.current) {
@@ -90,6 +90,7 @@ useEffect(() => {
       console.error("Error initializing Google Maps:", error);
     }
   };
+
 
   loadGoogleMapsScript(() => {
     if (window.google && window.google.maps) {

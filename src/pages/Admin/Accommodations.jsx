@@ -827,7 +827,8 @@ const Accommodations = () => {
 
   // Handler for editing an accommodation
   const handleEdit = (id) => {
-    setError("Edit functionality is currently disabled");
+    navigate(`/admin/accommodations/edit/${id}`)
+    // setError("Edit functionality is currently disabled");
     // Clear error after 8 seconds
     setTimeout(() => {
       setError("");
@@ -1051,7 +1052,7 @@ const Accommodations = () => {
             <AccommodationCard
               key={accommodation._id}
               accommodation={accommodation}
-              onEdit={handleEdit}
+              onEdit={()=>handleEdit(accommodation?._id)}
               onToggleStatus={handleToggleStatus}
               onDelete={handleDelete}
               onAddToFeatured={handleAddToFeatured}

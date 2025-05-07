@@ -1,5 +1,10 @@
 const translations = {
   en: {
+    no_of_rooms:"No. of rooms",
+    no_of_bathroom:"No. of bathrooms",
+    max_dog:"Max. dog",
+    max_people:"Max. People",
+    price_night:"Price per person/night in CHF from",
     // Navbar
     register_accommodation: "Register Accommodation",
     camper_rental: "Camper Rental",
@@ -60,6 +65,8 @@ const translations = {
     accept_terms: "I accept the",
     and_the: "and the",
     privacy_policy: "Privacy Policy",
+
+    accommodations_found:"Accommodations Found",
 
     // Features
     features: "Features",
@@ -1088,7 +1095,13 @@ const translations = {
   },
 
   de: {
+    no_of_rooms:"Anzahl der Zimmer",
+    no_of_bathroom:"Anzahl der Badezimmer",
+    max_dog:"Max. Hund",
+    max_people:"Max. Menschen",
+    price_night:"Preis pro Person/Nacht in CHF ab",
 
+    accommodations_found:"Unterkünfte gefunden",
     loading_listings: "Immobilien werden geladen...",
 
     loading_calendar: "Kalender wird geladen...",

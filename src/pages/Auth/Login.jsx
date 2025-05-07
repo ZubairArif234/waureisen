@@ -222,16 +222,7 @@ const Login = () => {
                 </button>
 
                 {/* Login Credentials Help */}
-                <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-lg">
-                  <p className="text-xs text-blue-700 mb-1 font-medium">
-                    {t("demo_credentials")}
-                  </p>
-                  <ul className="text-xs text-blue-600 space-y-1">
-                    <li>{t("provider_credentials")}</li>
-                    <li>{t("admin_credentials")}</li>
-                    <li>{t("user_credentials")}</li>
-                  </ul>
-                </div>
+               
               </div>
             </form>
 

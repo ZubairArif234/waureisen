@@ -89,9 +89,13 @@ const CamperCard = ({ camper, onEdit, onDelete }) => {
           <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusStyle(camper.status)}`}>
             {camper.status}
           </span>
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryStyle(camper.category)}`}>
-            {camper.category}
+          {camper.category?.map((item,i)=>(
+
+            <span key={i} className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryStyle(item)}`}>
+         {item}
           </span>
+          ))}
+            
         </div>
         
         {/* Title and Menu */}

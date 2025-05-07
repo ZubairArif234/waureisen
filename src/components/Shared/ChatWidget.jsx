@@ -61,13 +61,13 @@ const ContactWidget = () => {
               <p className="text-gray-600 mb-4">{t('ready_to_assist') || 'Ready to assist with your pet-friendly travel needs'}</p>
             </div>
             
-            <div className="bg-gray-50 rounded-lg p-4 mb-4 text-center">
+            {/* <div className="bg-gray-50 rounded-lg p-4 mb-4 text-center">
               <h4 className="font-medium text-gray-800 mb-2">{t('call_us') || 'Call Us'}</h4>
               <div className="text-brand text-lg font-bold flex items-center justify-center gap-2">
                 <Phone className="w-5 h-5" />
                 0041 76 474 34 34
               </div>
-            </div>
+            </div> */}
           </div>
           
           {/* Footer with action button */}

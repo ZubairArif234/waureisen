@@ -3,7 +3,7 @@ import { Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import logo from '../../assets/together.png';
 import { useLanguage } from '../../utils/LanguageContext';
 
-const TestimonialCard = ({ review, author, date }) => {
+const TestimonialCard = ({ review, author, date,image }) => {
   return (
     <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-300">
       {/* Star Rating */}
@@ -22,11 +22,11 @@ const TestimonialCard = ({ review, author, date }) => {
 
       {/* Author Info */}
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+        <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
           <img 
-            src={logo} 
+            src={image} 
             alt="Profile" 
-            className="w-10 h-10 rounded-full object-cover"
+            className="w-10 h-10 rounded-full object-contain bg-slate-300"
           />
         </div>
         <div className="flex items-center">
@@ -50,7 +50,8 @@ const Travellers = () => {
         de: "Die Buchung über Waureisen war unglaublich einfach und stressfrei. Wir wurden von Anfang bis Ende gut beraten und konnten unsere Reise genau nach unseren Wünschen planen. Alle Details waren perfekt organisiert, was unseren Urlaub besonders angenehm machte. Es war eine großartige Erfahrung, die wir definitiv wiederholen werden!"
       },
       author: "Claudia Meier",
-      date: "January 2025"
+      date: "January 2025",
+      image:"https://img.freepik.com/free-photo/outdoor-portrait-curly-european-tanned-woman-holds-happy-pet-dog-pomeranian-spitz_343596-1381.jpg"
     },
     {
       review: {
@@ -58,7 +59,8 @@ const Travellers = () => {
         de: "Unser Aufenthalt war absolut perfekt! Das Ferienhaus war gemütlich, gut ausgestattet und von wunderschöner Natur umgeben. Unser Hund liebte den geräumigen, eingezäunten Garten, was uns die nötige Ruhe gab, während wir uns entspannten. Die ruhige Lage war genau das, was wir für einen stressfreien Urlaub brauchten. Wir können es kaum erwarten, wiederzukommen!"
       },
       author: "Peter Fässler",
-      date: "December 2024"
+      date: "December 2024",
+      image:"https://img.freepik.com/free-photo/portrait-man-hugging-dog_23-2150771027.jpg?ga=GA1.1.2038776791.1724095678&semt=ais_hybrid&w=740"
     },
     {
       review: {
@@ -66,7 +68,8 @@ const Travellers = () => {
         de: "Was Waureisen auszeichnet, ist ihre Aufmerksamkeit für hundefreundliche Details. Sie fanden uns ein wunderschönes Chalet mit sicherem Außenbereich für unseren Hund. Die lokalen Empfehlungen für hundefreundliche Restaurants und Wanderwege waren unschätzbar. Es ist erfrischend, einen Service zu finden, der die Bedürfnisse von Haustierbesitzern wirklich versteht."
       },
       author: "Sarah Schmidt",
-      date: "March 2025"
+      date: "March 2025",
+      image:"https://img.freepik.com/premium-photo/woman-sitting-stone-staircase-cuddling-with-happy-american-pitbull-terrier_73872-4107.jpg?ga=GA1.1.2038776791.1724095678&semt=ais_hybrid&w=740"
     },
     {
       review: {
@@ -74,7 +77,8 @@ const Travellers = () => {
         de: "Eine außergewöhnliche Erfahrung von Anfang bis Ende. Die Unterkunft übertraf unsere Erwartungen mit ihrer perfekten Mischung aus Komfort und Luxus. Die speziellen Hundezonen und die durchdachten Haustier-Ausstattungen ließen unseren vierbeinigen Freund sich genauso willkommen fühlen wie uns. Wir haben bereits unseren nächsten Aufenthalt gebucht!"
       },
       author: "Michael Weber",
-      date: "February 2025"
+      date: "February 2025",
+      image:"https://img.freepik.com/premium-photo/young-man-sitting-with-dog-german-spitz-park-he-cleans-him_600776-2494.jpg?ga=GA1.1.2038776791.1724095678&semt=ais_hybrid&w=740"
     }
   ];
 
@@ -132,6 +136,7 @@ const Travellers = () => {
                   review={testimonial.review[language]}
                   author={testimonial.author}
                   date={testimonial.date}
+                  image={testimonial.image}
                 />
               </div>
             ))}

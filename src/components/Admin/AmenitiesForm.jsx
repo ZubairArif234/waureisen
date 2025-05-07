@@ -58,7 +58,7 @@ const CheckboxGroup = ({ title, description, filters, selected, onChange }) => {
           <AmenityItem
             key={filter.name}
             name={filter.name}
-            checked={selected[filter.name] || filter?.predefined ||false}
+            checked={selected[filter.name] ||false}
             onChange={() => onChange(filter.name, !selected[filter.name])}
           />
         ))}

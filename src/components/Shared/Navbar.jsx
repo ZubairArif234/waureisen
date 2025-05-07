@@ -286,7 +286,7 @@ console.log(userType)
             {t("camper_rental")}
           </Link>
           <a
-            href="https://meet.brevo.com/waureisen"
+            href="https://calendly.com/hallo-waureisen/austausch"
             target="_blank"
             rel="noopener noreferrer"
             className="text-gray-700 hover:text-gray-100 text-sm font-medium whitespace-nowrap"

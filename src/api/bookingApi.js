@@ -19,3 +19,13 @@ export const getMyProviderBooking = async (data) => {
     throw error;
   }
 };
+
+export const getBookingByListing = async (id) => {
+  try {
+    const response = await API.get(`/booking/listing/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error booking by listing:', error);
+    throw error;
+  }
+};

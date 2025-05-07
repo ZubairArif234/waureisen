@@ -12,6 +12,7 @@ import AmenitiesForm from "../../components/Admin/AmenitiesForm";
 import DescriptionForm from "../../components/Admin/DescriptionForm";
 import PoliciesLocationForm from "../../components/Admin/PoliciesLocationForm";
 import toast from "react-hot-toast";
+import { getProviderTemplateFilter } from "../../api/providerAPI";
 
 const CreateListing = () => {
   const { t } = useLanguage();
@@ -20,6 +21,7 @@ const CreateListing = () => {
   const isEditMode = !!id;
   const [isLoading, setIsLoading] = useState(isEditMode);
   const [activeStep, setActiveStep] = useState(1);
+  const [tempFilters, setTempFilters] = useState();
   const [formData, setFormData] = useState({
     title: "",
     propertyType: "Studio",
@@ -85,6 +87,7 @@ const CreateListing = () => {
       },
     },
   });
+
 
   // Load data if in edit mode
   useEffect(() => {

@@ -191,6 +191,26 @@ export const updateListing = async (id, listingData) => {
   }
 };
 
+export const getProviderTemplateFilter = async (id) => {
+  try {
+    const response = await API.get(`/filters/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching template filter:', error);
+    throw error;
+  }
+};
+
+export const updateProviderTemplateFilter = async (id) => {
+  try {
+    const response = await API.put(`/filters/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching template filter:', error);
+    throw error;
+  }
+};
+
 export const deleteListing = async (id) => {
   try {
     setAuthHeader();

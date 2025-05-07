@@ -185,7 +185,7 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
           {/* Range Sliders */}
           <RangeSlider
             icon={<Users className="w-5 h-5 text-gray-400" />}
-            label="Max. people"
+            label={t("max_people")}
             min={1}
             max={25}
             value={ranges.people}
@@ -193,7 +193,7 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
           />
           <RangeSlider
             icon={<Dog className="w-5 h-5 text-gray-400" />}
-            label="Max. dogs"
+            label={t("max_dog")}
             min={0}
             max={25}
             value={ranges.dogs}
@@ -201,7 +201,7 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
           />
           <RangeSlider
             icon={<Lock className="w-5 h-5 text-gray-400" />}
-            label="No. of rooms"
+            label={t("no_of_rooms")}
             min={1}
             max={25}
             value={ranges.rooms}
@@ -209,7 +209,7 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
           />
           <RangeSlider
             icon={<Bath className="w-5 h-5 text-gray-400" />}
-            label="No. of bathrooms"
+            label={t("no_of_bathroom")}
             min={1}
             max={25}
             value={ranges.bathrooms}
@@ -217,7 +217,7 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
           />
           <RangeSlider
             icon={<DollarSign className="w-5 h-5 text-gray-400" />}
-            label="Price per person/night in CHF from"
+            label={t("price_night")}
             min={0}
             max={10000}
             value={ranges.price}

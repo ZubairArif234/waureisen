@@ -3,7 +3,7 @@ import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-reac
 import moment from 'moment'; // Import moment for date comparison
 import { useLanguage } from '../../utils/LanguageContext';
 
-const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates }) => {
+const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates,bookedDates }) => {
   const { t } = useLanguage();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDayOfMonth = new Date(year, month, 1).getDay();
@@ -73,6 +73,9 @@ const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates }) 
     });
   };
 
+  console.log(weeks , "weeks");
+  
+
   return (
     <div className="bg-white rounded-xl p-6 max-w-sm w-full">
       <div className="flex items-center justify-between mb-4">
@@ -92,9 +95,18 @@ const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates }) 
       <div className="grid grid-cols-7 gap-1">
         {weeks.map((week, weekIndex) =>
           week.map((day, dayIndex) => {
-            if (day === null) return <div key={`${weekIndex}-${dayIndex}`} />;
+            // console.log(today?.getMonth(), day  "cheezain");
             
-            const date = new Date(year, month, day);
+            if (day === null) return <div key={`${weekIndex}-${dayIndex}`} />;
+            const isBooked = bookedDates?.some(item => {
+              const m = moment(item, "YYYY-MM-DD");
+              console.log(m.month(),today?.getMonth(),m.date(), day ,"hain");
+              
+              return monthNames[m.month()]  == monthNames[month]  && m.date() == day;
+            });
+            console.log(isBooked);
+            
+             const date = new Date(year, month, day);
             const isToday = date.getTime() === today.getTime();
             const isSelected = isDateInRange(day);
             const isStart = isStartDate(day);
@@ -104,11 +116,11 @@ const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates }) 
             return (
               <button
                 key={`${weekIndex}-${dayIndex}`}
-                onClick={() => !isPast && onDateSelect(new Date(year, month, day))}
-                disabled={isPast}
+                onClick={() => !isPast  && !isBooked && onDateSelect(new Date(year, month, day))}
+                disabled={isPast || isBooked}
                 className={`
                   w-full aspect-square flex items-center justify-center rounded-lg text-sm
-                  ${isPast ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-gray-100 cursor-pointer'}
+                  ${isPast || isBooked ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-gray-100 cursor-pointer'}
                   ${isSelected ? 'bg-brand/10 text-brand' : ''}
                   ${isStart ? 'bg-brand text-white hover:bg-brand' : ''}
                   ${isEnd ? 'bg-brand text-white hover:bg-brand' : ''}
@@ -125,7 +137,7 @@ const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates }) 
   );
 };
 
-const DateRangePicker = ({ isOpen, onClose, selectedRange, onRangeSelect, availableDates }) => {
+const DateRangePicker = ({ isOpen, onClose, selectedRange, onRangeSelect, availableDates,bookedDates }) => {
   const { t } = useLanguage();
   if (!isOpen) return null;
 
@@ -153,6 +165,7 @@ const DateRangePicker = ({ isOpen, onClose, selectedRange, onRangeSelect, availa
     // If we have no dates selected, start a new selection
     onRangeSelect({ start: date, end: null });
   };
+console.log(bookedDates , "booked");
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -171,6 +184,7 @@ const DateRangePicker = ({ isOpen, onClose, selectedRange, onRangeSelect, availa
             selectedRange={selectedRange}
             onDateSelect={handleDateSelect}
             availableDates={availableDates} // Pass availableDates down
+            bookedDates={bookedDates}
           />
           <Calendar
             month={(leftMonth + 1) % 12}
@@ -178,6 +192,7 @@ const DateRangePicker = ({ isOpen, onClose, selectedRange, onRangeSelect, availa
             selectedRange={selectedRange}
             onDateSelect={handleDateSelect}
             availableDates={availableDates} // Pass availableDates down
+            bookedDates={bookedDates}
           />
         </div>
 

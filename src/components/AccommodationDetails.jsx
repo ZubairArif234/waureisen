@@ -71,7 +71,6 @@ const AccommodationDetails = ({ accommodation }) => {
     }
   }, [filterData]);
   
-console.log(allFilters , "jkl");
 
 
   const description = accommodation?.description;
@@ -154,12 +153,17 @@ console.log(allFilters , "jkl");
             ))}
           </div>
         )} */}
+        <div className="grid grid-cols-2 gap-4">
+
         { allFilters?.slice(0,6)?.map((item,i)=>{
           return(
             <p className="text-gray-700 text-md py-2 " key={i}>{item}</p>
           )
         })}
+        </div>
+        {allFilters?.length > 6 && 
         <button onClick={() => setIsFilterOpen(true)} className="bg-brand text-white px-8 py-2 rounded-lg font-medium hover:bg-brand-dark transition-colors">See All</button>
+        }
        {filterData && (
   <div className="absolute z-10 mt-2 w-full">
 

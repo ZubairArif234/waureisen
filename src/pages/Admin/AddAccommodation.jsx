@@ -84,6 +84,18 @@ const AddAccommodation = (props) => {
     },
   });
 
+
+  console.log(formData);
+  
+    // const handleGetTempFilters = async () => {
+    //   const res = await getProviderTemplateFilter()
+    //   console.log(res);
+      
+    // }
+  
+    // useEffect(()=>{
+  
+    // },[])
   useEffect(() => {
     if (isProviderMode) {
       setFormData(prev => ({
@@ -162,11 +174,13 @@ const AddAccommodation = (props) => {
           } else {
             listingData = await getListingById(id);
           }
+          console.log(listingData , " data hai");
           
-          if(listingData){
+          if(listingData?.title){
 
             setFormData({
               // Basic Info
+              filter:listingData?.filter,
               title: listingData?.title,
               propertyType: listingData?.listingType,
               listingSource: isProviderMode ? "Provider" : "Admin",
@@ -204,7 +218,9 @@ const AddAccommodation = (props) => {
               location: {
                 city: "",
                 fullAddress: listingData?.location?.address,
-                mapLocation: listingData?.location?.coordinates,
+                // mapLocation: listingData?.location?.coordinates,
+                mapLocation: { lat:listingData?.location?.coordinates[0] , lng: listingData?.location?.coordinates[1] },
+                address:listingData?.location?.address,
               },
               policies: {
                 cancellationPolicy: listingData?.legal?.cancellationPolicy,

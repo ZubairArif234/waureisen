@@ -571,7 +571,7 @@ const SearchResults = () => {
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-semibold text-gray-900">
                     {listings && listings.length ? listings.length : 0}{" "}
-                    accommodations found
+                    {t("accommodations_found")}
                     {areaName && (
                       <span className="font-normal text-gray-600 text-base ml-2">
                         in {areaName}

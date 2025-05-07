@@ -36,13 +36,14 @@ import moment from "moment";
 import AccommodationDetails from "../../components/AccommodationDetails";
 import API from "../../api/config";
 import toast from "react-hot-toast";
+import { getBookingByListing } from "../../api/bookingApi";
 
 const PlaceOffer = ({ icon: Icon, text, value }) => (
   <div className="flex-1 flex flex-col items-center text-center p-4 border-r border-[#767676] last:border-r-0 md:p-4 p-2">
     <Icon className="w-6 h-6 md:w-6 md:h-6 w-5 h-5 text-[#767676] mb-2" />
     <div className="text-[#767676] text-sm">
       <p className="font-medium md:text-sm text-xs">{text}</p>
-      {value && <p className="md:text-sm text-xs">Up to {value}</p>}
+      {value && <p className="md:text-sm text-xs"> {value}</p>}
     </div>
   </div>
 );
@@ -130,6 +131,7 @@ const AccommodationPage = () => {
   const location = useLocation();
   const { id } = useParams(); // Get the accommodation ID from URL
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [bookedDates, setBookedDates] = useState([]);
   const [isGuestSelectorOpen, setIsGuestSelectorOpen] = useState(false);
   const { t } = useLanguage();
   const [dateRange, setDateRange] = useState({ start: null, end: null });
@@ -137,7 +139,42 @@ const AccommodationPage = () => {
     people: 1,
     dogs: 1,
   });
-console.log(dateRange , "jkikkl");
+// console.log(dateRange , "jkikkl");
+
+
+const getAllDates = (startDate, endDate) => {
+  const start = moment(startDate).startOf('day');
+  const end = moment(endDate).startOf('day');
+  const dates = [];
+
+  while (start.isSameOrBefore(end)) {
+    dates.push(start.format("YYYY-MM-DD"));
+    start.add(1, 'day');
+  }
+
+  return dates;
+};
+console.log(bookedDates , "state dates");
+
+const handleGetBooking = async() =>{
+ const res = await getBookingByListing(id)
+
+ res.map((item)=>{
+  const result = getAllDates(item?.checkInDate, item?.checkOutDate);
+  console.log(result , "result");
+  
+  setBookedDates(prev => {
+    const combined = [...prev, ...result];
+    const uniqueDates = Array.from(new Set(combined));
+    return uniqueDates;
+  });
+  
+ })
+}
+
+useEffect(()=>{
+handleGetBooking()
+},[])
 
   // Add maxGuests state to track the maximum allowed guests
   const [maxGuests, setMaxGuests] = useState(6); // Default to 6 if not specified
@@ -759,7 +796,8 @@ console.log(dateRange , "jkikkl");
                   ${accommodation?.pricePerNight?.currency || "CHF"}
                 </div>
               </div>
-
+{console.log(availableDates , " available dates")
+}
               {/* Date Picker */}
               <div className="mb-4 relative">
                 <button
@@ -780,6 +818,7 @@ console.log(dateRange , "jkikkl");
                       onRangeChange={setDateRange}
                       onClose={() => setIsDatePickerOpen(false)}
                       availableDates={availableDates} // Pass available dates
+                      bookedDates={bookedDates}
                     />
                   </div>
                 )}
@@ -910,6 +949,7 @@ console.log(dateRange , "jkikkl");
             setIsDatePickerOpen(false);
           }
         }}
+        bookedDates={bookedDates}
         availableDates={availableDates} // Pass available dates
       />
 
