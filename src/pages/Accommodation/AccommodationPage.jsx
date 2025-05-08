@@ -444,6 +444,7 @@ handleGetBooking()
       icon: Users,
       text: t("people"),
       value:
+      "Up to " +
         accommodation?.pricePerNight?.paxUpTo ||
         accommodation?.maxGuests?.toString() ||
         "6 ", // Default
@@ -451,7 +452,7 @@ handleGetBooking()
     {
       icon: Dog,
       text: t("dog"),
-      value: accommodation?.maxDogs?.toString() || "1",
+      value: "Up to " + accommodation?.maxDogs?.toString() || "1",
     },
     {
       icon: Home,
