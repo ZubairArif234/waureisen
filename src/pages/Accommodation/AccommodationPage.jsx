@@ -445,7 +445,7 @@ handleGetBooking()
       text: t("people"),
       value:
       "Up to " +
-        accommodation?.pricePerNight?.paxUpTo ||
+       
         accommodation?.maxGuests?.toString() ||
         "6 ", // Default
     },

@@ -82,7 +82,7 @@ const FAQContent = () => {
       </div>
 
         {/* FAQ Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 items-start gap-6">
           {faqItems.map((item, index) => (
             <AccordionItem
               key={index}

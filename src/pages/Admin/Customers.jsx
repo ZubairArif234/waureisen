@@ -114,7 +114,7 @@ const CustomerDetailModal = ({ customer, isOpen, onClose, onBanUnban }) => {
       />
 
       {/* Modal */}
-      <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl z-50 w-full max-w-2xl">
+      <div className="h-[80vh] overflow-auto fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl z-50 w-full max-w-2xl">
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-xl font-semibold text-gray-900">
@@ -660,7 +660,7 @@ const CustomerCard = ({ customer, onAction }) => {
             />
           </div>
           <div>
-            <div className="font-medium text-gray-900">
+            <div className="font-medium text-gray-900 capitalize">
               {customer.firstName} {customer.lastName}
             </div>
             <div className="text-xs text-gray-500">
@@ -669,14 +669,7 @@ const CustomerCard = ({ customer, onAction }) => {
             <div className="text-sm text-gray-500">{customer.email}</div>
           </div>
         </div>
-        <div className="relative">
-          <button
-            className="p-2 hover:bg-gray-100 rounded-full"
-            onClick={() => onAction("view", customer)}
-          >
-            <MoreHorizontal className="w-5 h-5 text-gray-500" />
-          </button>
-        </div>
+       
       </div>
 
       <div className="mt-3 flex justify-between items-center">

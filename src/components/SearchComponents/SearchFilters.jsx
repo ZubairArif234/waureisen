@@ -134,7 +134,7 @@ console.log(isDatePickerOpen);
         <div className="flex flex-wrap gap-3 items-center relative">
           <FilterButton
             icon={Calendar}
-            label={`${moment(dateRange2?.start).format("MMM DD , YYYY")} - ${moment(dateRange2?.end).format("MMM DD , YYYY")}`}
+            label={dateRange2?.start && dateRange?.end ? `${ moment(dateRange2?.start).format("MMM DD , YYYY") } - ${moment(dateRange2?.end).format("MMM DD , YYYY")}` : "Select Dates"}
             active={true}
             onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
           />

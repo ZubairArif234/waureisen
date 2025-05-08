@@ -15,7 +15,7 @@ const FooterSection = ({ title, links, onTermsClick, onDataPolicyClick, t }) => 
     <h3 className="text-[#4D484D] font-semibold">{title}</h3>
     <div className="flex flex-col space-y-2">
       {links.map((link, index) => {
-        if (link.label === 'Terms and Conditions') {
+        if (link.label === 'Terms of Service') {
           return (
             <button
               key={index}

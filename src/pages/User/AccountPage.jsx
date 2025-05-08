@@ -58,12 +58,12 @@ const AccountPage = () => {
       description: t("login_security_desc"),
       onClick: () => navigate("/account/security"),
     },
-    {
-      icon: CreditCard,
-      title: t("payment_details"),
-      description: t("payments_payouts_desc"),
-      onClick: () => navigate("/account/payments"),
-    },
+    // {
+    //   icon: CreditCard,
+    //   title: t("payment_details"),
+    //   description: t("payments_payouts_desc"),
+    //   onClick: () => navigate("/account/payments"),
+    // },
   ];
 
   // Generate display name

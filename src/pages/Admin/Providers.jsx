@@ -117,8 +117,10 @@ const ProviderDetailModal = ({ provider, isOpen, onClose, onBanUnban }) => {
       />
 
       {/* Modal */}
-      <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl z-50 w-full max-w-2xl">
-        <div className="p-6">
+      <div className=" h-[80vh] overflow-auto fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl z-50 w-full max-w-2xl">
+        <div className="p-6 flex flex-col justify-between h-full">
+          <div >
+
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-xl font-semibold text-gray-900">
               Provider Details
@@ -272,6 +274,7 @@ const ProviderDetailModal = ({ provider, isOpen, onClose, onBanUnban }) => {
               </div>
             </div>
           )}
+          </div>
 
           {/* Actions */}
           <div className="flex justify-end gap-3">
@@ -649,21 +652,21 @@ const ProviderCard = ({ provider, onAction }) => {
             />
           </div>
           <div>
-            <div className="font-medium text-gray-900">
+            <div className="font-medium text-gray-900 capitalize">
               {provider.displayName ||
                 `${provider.firstName || ""} ${provider.lastName || ""}`}
             </div>
             <div className="text-sm text-gray-500">{provider.email}</div>
           </div>
         </div>
-        <div className="relative">
+        {/* <div className="relative">
           <button
             className="p-2 hover:bg-gray-100 rounded-full"
             onClick={() => onAction("view", provider)}
           >
             <MoreHorizontal className="w-5 h-5 text-gray-500" />
           </button>
-        </div>
+        </div> */}
       </div>
 
       <div className="mt-3 flex justify-between items-center">

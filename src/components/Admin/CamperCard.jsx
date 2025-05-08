@@ -87,14 +87,25 @@ const CamperCard = ({ camper, onEdit, onDelete }) => {
         {/* Category Tag */}
         <div className="mb-3 flex flex-wrap gap-2">
           <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusStyle(camper.status)}`}>
-            {camper.status}
+            {camper?.status}
           </span>
-          {camper.category?.map((item,i)=>(
+          {Array.isArray(camper?.category) && camper.category.length > 0 ? (
+  camper.category.map((item, i) => (
+    <span
+      key={i}
+      className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryStyle(item)}`}
+    >
+      {item}
+    </span>
+  ))
+) : camper?.category ? (
+  <span
+    className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryStyle(camper.category)}`}
+  >
+    {camper.category}
+  </span>
+) : null}
 
-            <span key={i} className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryStyle(item)}`}>
-         {item}
-          </span>
-          ))}
             
         </div>
         
