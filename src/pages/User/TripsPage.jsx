@@ -14,6 +14,7 @@ import moment from "moment";
 import { refundPayment } from "../../api/paymentAPI";
 import CancelBookingModal from "../../components/SearchComponents/CancelBookingModal";
 import Pagination from "../../components/HomeComponents/Pagination";
+import toast from "react-hot-toast";
 
 // Edit Trip Modal Component
 const EditTripModal = ({ isOpen, onClose, trip, onSave, onCancel }) => {
@@ -302,8 +303,14 @@ const TripCard = ({ trip, onEdit }) => {
   const formattedDate = `${start.format("MMM D")}-${end.format("D, YYYY")}`;
 
   const handleCancelBooking = async () => {
-    const res = await refundPayment(trip?._id);
-    console.log(res);
+    try{
+
+      const res = await refundPayment(trip?._id);
+      console.log(res);
+      toast.success(t("cancel_success"))
+    }catch(err){
+      toast.error(t("cancel_failed"))
+    }
   };
 
   const handleOpenModal = () => {
@@ -399,8 +406,7 @@ const TripCard = ({ trip, onEdit }) => {
         onConfirm={handleCancelBooking}
       >
         <p className="text-center">
-          Are you sure , you want to cancel your booking? This action can't be
-          undone!
+         {t("are_you_sure")}
         </p>
       </CancelBookingModal>
     </div>
@@ -612,9 +618,9 @@ const TripsPage = () => {
                   {t("upcoming_trips")}
                 </h2>
                 <div className="space-y-4">
-                  {upcomingTrips.map((trip) => (
+                  {upcomingTrips.map((trip ,i) => (
                     <TripCard
-                      key={trip.id}
+                      key={i}
                       trip={trip}
                       onEdit={handleEditTrip}
                     />

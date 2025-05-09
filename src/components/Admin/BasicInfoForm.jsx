@@ -246,11 +246,14 @@ const BasicInfoForm = ({ formData, handleInputChange, handleNestedInputChange })
             <label className="block text-sm font-medium text-gray-700">Discounted Price per Night</label>
             <div className="flex">
               <select
+              defaultValue={formData.pricing.currency}
                 value={formData.pricing.currency}
                 disabled
                 className="w-auto px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
               >
                 <option value="CHF">CHF</option>
+                <option value="EUR">EUR</option>
+                <option value="USD">USD</option>
               </select>
               <input
                 type="number"

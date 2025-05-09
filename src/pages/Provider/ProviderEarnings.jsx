@@ -408,22 +408,24 @@ const ProviderEarnings = () => {
         <EarningsSummaryCard
         icon={DollarSign}
         title={t('total_earnings')}
-        amount={earningsSummary.totalEarnings}
+        amount={billings?.reduce((acc, item) => acc + (item?.totalPrice || 0), 0)}
         subtitle={t('all_time')}
       />
       <EarningsSummaryCard
         icon={CreditCard}
         title={t('pending_balance')}
-        amount={earningsSummary.pendingPayouts}
-        subtitle={t('to_be_paid_out')}
+        amount={billings
+          ?.filter(item => new Date(item?.checkInDate) > new Date())
+          ?.reduce((acc, item) => acc + (item?.totalPrice || 0), 0)}
+         subtitle={t('to_be_paid_out')}
       />
-      <EarningsSummaryCard
+      {/* <EarningsSummaryCard
         icon={Building2}
         title={t('next_payout')}
         amount={earningsSummary.nextPayout}
         subtitle={`${t('scheduled_for')} ${earningsSummary.nextPayoutDate}`}
         color="bg-brand text-white"
-      />
+      /> */}
         </div>
         
         {/* Tabs */}

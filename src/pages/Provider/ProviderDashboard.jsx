@@ -276,7 +276,7 @@ useEffect(() => {
 const yourListings = {
 images: [i1, i2, s1, s2],
 title: t('your_listings'),
-subtitle: listings.length > 0 ? `${listings.length} ${t('properties')}` : t('properties_count'),
+subtitle: listings.length > 0 ? `${listings.length} ${t('properties')}` :"0 " + t('properties'),
 link: "/provider/your-listings"
 };
 

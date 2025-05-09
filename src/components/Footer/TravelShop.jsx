@@ -27,6 +27,8 @@ import tb7 from '../../assets/tb7.avif';
 import tb8 from '../../assets/tb8.avif';
 import tb9 from '../../assets/tb9.avif';
 import tb10 from '../../assets/tb10.avif';
+import tb12 from '../../assets/tb11.webp';
+import tb11 from '../../assets/tb12.webp';
 import db1 from '../../assets/db1.avif';
 import db2 from '../../assets/db2.avif';
 import db3 from '../../assets/db3.avif';
@@ -115,46 +117,48 @@ const TravelShop = () => {
     {
       title: t("car_seats"),
       products: [
-        { id: 1, image: cs1, url: "https://petandco.ch/collections/reisezubehor-fur-hunde/products/harry-car-seat-cord-teddy-khaki?ref=waureisen" },
-        { id: 2, image: cs2, url: "https://petandco.ch/collections/orthopaedische-hundebetten/products/harry-faux-leather-beige?ref=waureisen" },
-        { id: 3, image: cs3, url: "https://petandco.ch/products/harry-faux-leather-black?ref=waureisen" },
-        { id: 4, image: cs4, url: "https://kitsuneandjo.ch/products/the-cosy-car-seat/?ref=waureisen" },
-        { id: 5, image: cs5, url: "https://petandco.ch/collections/reisezubehor-fur-hunde/products/harry-car-seat-cord-teddy-gray?ref=waureisen" }
+        { id: 1, image: cs1, url: "https://petandco.ch/products/harry-cord-teddy-luxury-car-seat-with-orthoptic-visco-foam-in-khaki?_pos=1&_sid=b9b9a11f8&_ss=r&ref=waureisen" },
+        { id: 2, image: cs2, url: "https://petandco.ch/collections/hundebetten/products/harry-faux-leather-luxury-car-seat-with-orthoptic-visco-foam-in-beige?ref=waureisen " },
+        // { id: 3, image: cs3, url: "https://petandco.ch/collections/orthopaedische-hundebetten/products/harry-faux-leather-black?ref=waureisen " },
+        { id: 4, image: cs4, url: "https://kitsuneandjo.ch/de/products/schleifen-leit-mittnacht-1?ref=waureisen " },
+        { id: 5, image: cs5, url: "https://petandco.ch/products/harry-cord-luxury-car-seat-with-orthoptic-visco-foam-in-gray?_pos=3&_sid=b9b9a11f8&_ss=r&ref=waureisen " }
       ]
     },
     {
       title: t("travel_mats"),
       products: [
-        { id: 1, image: tm1, url: "https://petandco.ch/collections/reisezubehor-fur-hunde/products/garry?ref=waureisen" },
-        { id: 2, image: tm2, url: "https://kitsuneandjo.ch/products/nomad-bed-pink?ref=waureisen" },
-        { id: 3, image: tm3, url: "https://petandco.ch/collections/reisezubehor-fur-hunde/products/gino-hundematte?ref=waureisen" },
-        { id: 4, image: tm4, url: "https://petandco.ch/collections/reisezubehor-fur-hunde/products/aventura-travel-mat-cool-gray?ref=waureisen" },
-        { id: 5, image: tm5, url: "https://kitsuneandjo.ch/de/products/nomad-bed?ref=waureisen" },
-        { id: 6, image: tm6, url: "https://petandco.ch/collections/reisezubehor-fur-hunde/products/aventura-travel-mat-graphite?ref=waureisen" },
-        { id: 7, image: tm7, url: "https://petandco.ch/collections/reisezubehor-fur-hunde/products/charly-canvas-hundematte?ref=waureisen" },
-        { id: 8, image: tm8, url: "https://petandco.ch/collections/reisezubehor-fur-hunde/products/charly-cord-hundematte?ref=waureisen" }
+        { id: 1, image: tm1, url: "https://petandco.ch/products/garry-luxury-dog-mat?_pos=1&_sid=004f875c1&_ss=r&ref=waureisen " },
+        { id: 2, image: tm2, url: "https://kitsuneandjo.ch/de/products/nomad-bed-pink?ref=waureisen " },
+        { id: 3, image: tm3, url: "https://petandco.ch/products/gino-luxury-dog-mat?_pos=1&_sid=dc347bff1&_ss=r&ref=waureisen " },
+        { id: 4, image: tm4, url: "https://petandco.ch/products/aventura-luxury-dog-travel-mat-in-cool-gray?_pos=5&_sid=dc347bff1&_ss=r&ref=waureisen " },
+        { id: 5, image: tm5, url: "https://kitsuneandjo.ch/de/products/nomad-bed?ref=waureisen " },
+        { id: 6, image: tm6, url: "https://petandco.ch/products/aventura-luxury-dog-travel-mat-graphite?ref=waureisen " },
+        { id: 7, image: tm7, url: "https://petandco.ch/products/charly-luxury-dog-travel-mat-bag?_pos=2&_sid=d0fe0e9f4&_ss=r&ref=waureisen " },
+        { id: 8, image: tm8, url: "https://petandco.ch/products/charly-cord-luxury-dog-travel-mat-bag-in-khaki?_pos=7&_sid=d0fe0e9f4&_ss=r&ref=waureisen " }
       ]
     },
     {
       title:  t("travel_bags"),
       products: [
-        { id: 1, image: tb1, url: "https://petandco.ch/collections/reisezubehor-fur-hunde/products/lucky-canvas-cool-gray?ref=waureisen" },
+        { id: 1, image: tb1, url: "https://petandco.ch/products/lucky-canvas-luxury-dog-bag-in-gray?_pos=7&_sid=d80c23648&_ss=r&ref=waureisen " },
         { id: 2, image: tb2, url: "https://kitsuneandjo.ch/products/olla-petite-dog-carrier?ref=waureisen" },
         { id: 3, image: tb3, url: "https://hundelicious.ch/product/the-canvas-bag-tragetasche-fuer-kleine-hunde/?ref=waureisen" },
         { id: 4, image: tb4, url: "https://petandco.ch/products/lucky-canvas-dark-olive?ref=waureisen" },
-        { id: 5, image: tb5, url: "https://petandco.ch/collections/reisezubehor-fur-hunde/products/lucky-dog-bag-brown?ref=waureisen" },
-        { id: 6, image: tb6, url: "https://petandco.ch/collections/reisezubehor-fur-hunde/products/lucky-bag-paper-silver?ref=waureisen" },
+        { id: 5, image: tb5, url: "https://petandco.ch/products/lucky-luxury-dog-bag-in-brown?ref=waureisen " },
+        { id: 6, image: tb6, url: "https://petandco.ch/products/lucky-paper-luxury-dog-bag-in-silver?_pos=12&_sid=d80c23648&_ss=r&ref=waureisen " },
         { id: 7, image: tb7, url: "https://petandco.ch/products/lucky-canvas-graphite?ref=waureisen" },
         { id: 8, image: tb8, url: "https://petandco.ch/products/lucky-dog-bag-khaki?ref=waureisen" },
         { id: 9, image: tb9, url: "https://kitsuneandjo.ch/de/products/eco-packable-sling-dog-carrier?ref=waureisen" },
-        { id: 10, image: tb10, url: "https://petandco.ch/collections/reisezubehor-fur-hunde/products/lucky-bag-paper-black?ref=waureisen" }
+        { id: 10, image: tb10, url: "https://petandco.ch/products/lucky-paper-luxury-dog-bag-in-black?ref=waureisen " },
+        { id: 11, image: tb11, url: "https://kitsuneandjo.ch/de/products/schleifen-leit-mittnacht-2?ref=waureisen " },
+        { id: 12, image: tb12, url: "https://kitsuneandjo.ch/de/products/schleifen-leit-mittnacht-3?ref=waureisen" }
       ]
     },
     {
       title: t("dog_beds"),
       products: [
         { id: 1, image: db1, url: "https://petandco.ch/products/kingston-cord-double-face-khaki?ref=waureisen" },
-        { id: 2, image: db2, url: "https://petandco.ch/products/cordi-hundebett-charcocal?ref=waureisen" },
+        // { id: 2, image: db2, url: "https://petandco.ch/products/cordi-hundebett-charcocal?ref=waureisen" },
         { id: 3, image: db3, url: "https://petandco.ch/products/goofy?ref=waureisen" },
         { id: 4, image: db4, url: "https://petandco.ch/products/ronny-cord-hundebett-dusky-pink?ref=waureisen" },
         { id: 5, image: db5, url: "https://petandco.ch/products/cordi-sand?ref=waureisen" },
@@ -215,7 +219,7 @@ const TravelShop = () => {
         { id: 14, image: clh14, url: "https://kitsuneandjo.ch/de/products/braided-rope-leash-terracotta?ref=waureisen" },
         { id: 15, image: clh15, url: "https://kitsuneandjo.ch/de/products/festival-crochet-harness?ref=waureisen" },
         { id: 16, image: clh16, url: "https://kitsuneandjo.ch/de/products/9m-waterpoof-dog-leash-pistachio?ref=waureisen" },
-        { id: 17, image: clh17, url: "https://kitsuneandjo.ch/de/products/le-luxe-dog-collar-neo?ref=waureisen" },
+        // { id: 17, image: clh17, url: "https://kitsuneandjo.ch/de/products/le-luxe-dog-collar-neo?ref=waureisen" },
         { id: 18, image: clh18, url: "https://kitsuneandjo.ch/de/products/braided-rope-leash-teal?ref=waureisen" },
         { id: 19, image: clh19, url: "https://kitsuneandjo.ch/de/products/lake-day-harness?ref=waureisen" }
       ]
@@ -234,14 +238,14 @@ const TravelShop = () => {
     {
       title: t("wellness"),
       products: [
-        { id: 1, image: well1, url: "https://kitsuneandjo.ch/de/products/dog-towel-tan?ref=waureisen" },
+        // { id: 1, image: well1, url: "https://kitsuneandjo.ch/de/products/dog-towel-tan?ref=waureisen" },
         { id: 2, image: well2, url: "https://kitsuneandjo.ch/de/products/amino-acid-pet-shampoo?ref=waureisen" },
-        { id: 3, image: well3, url: "https://kitsuneandjo.ch/de/products/crystal-infused-luxury-pet-shampoo?ref=waureisen" },
+        // { id: 3, image: well3, url: "https://kitsuneandjo.ch/de/products/crystal-infused-luxury-pet-shampoo?ref=waureisen" },
         { id: 4, image: well4, url: "https://kitsuneandjo.ch/de/products/kiss-me-dental-spray?ref=waureisen" },
         { id: 5, image: well5, url: "https://hundelicious.ch/product/lucky-pup-reiseset/?ref=waureisen" },
         { id: 6, image: well6, url: "https://kitsuneandjo.ch/de/products/dream-cream?ref=waureisen" },
         { id: 7, image: well7, url: "https://kitsuneandjo.ch/de/products/certified-organic-dry-shampoo?ref=waureisen" },
-        { id: 8, image: well8, url: "https://kitsuneandjo.ch/de/products/calm-balm?ref=waureisen" }
+        // { id: 8, image: well8, url: "https://kitsuneandjo.ch/de/products/calm-balm?ref=waureisen" }
       ]
     },
     {

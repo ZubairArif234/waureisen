@@ -1,5 +1,11 @@
 const translations = {
   en: {
+    cancel_success:"Booking cancelled successfully",
+    cancel_failed:"Booking cancelation failed",
+    no_recently_viewed:"No Recently Viewed",
+    modify_search:"Modify Search",
+    are_you_sure:"Are you sure , you want to cancel your booking? This action can't be undone!",
+    no_accommodations_found:"No Accommodations Found",
     no_of_rooms:"No. of rooms",
     no_of_bathroom:"No. of bathrooms",
     max_dog:"Max. dog",
@@ -1095,6 +1101,12 @@ const translations = {
   },
 
   de: {
+    cancel_success:"Buchung erfolgreich storniert",
+    cancel_failed:"Die Stornierung der Buchung ist fehlgeschlagen",
+    no_recently_viewed:"Nein, kürzlich angesehen",
+    no_accommodations_found:"Keine Unterkünfte gefunden",
+    are_you_sure:"Sind Sie sicher, dass Sie Ihre Buchung stornieren möchten? Dieser Vorgang kann nicht rückgängig gemacht werden!",
+    modify_search:"Suche ändern",
     no_of_rooms:"Anzahl der Zimmer",
     no_of_bathroom:"Anzahl der Badezimmer",
     max_dog:"Max. Hund",

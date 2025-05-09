@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useLanguage } from '../../utils/LanguageContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-const MockMap = ({ center, listings, locationName, onMapChange, radius = 5500 }) => {
+const MockMap = ({ center, listings, locationName, onMapChange, radius = 5500*2 }) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
@@ -57,7 +57,7 @@ const MockMap = ({ center, listings, locationName, onMapChange, radius = 5500 })
 
       const map = new window.google.maps.Map(mapRef.current, {
         center: center,
-        zoom: 8, // More appropriate zoom level
+        zoom: 5, // More appropriate zoom level
         mapTypeControl: false,
         streetViewControl: false,
         fullscreenControl: false,

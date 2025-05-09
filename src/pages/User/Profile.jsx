@@ -8,6 +8,7 @@ import { updateProviderProfile } from "../../api/providerAPI";
 import { getProviderProfile } from "../../api/providerAPI";
 import { getUserType, isUserType } from "../../utils/authService";
 import { toast } from "react-hot-toast";
+import { myCardDetails } from "../../api/paymentAPI";
 
 const Profile = () => {
   const { t } = useLanguage();
@@ -292,7 +293,21 @@ const Profile = () => {
       setIsLoading(false);
     }
   };
+  const handleGetMyCardDetails =async () => {
+    const res  = await myCardDetails()
+    
+    if(res?.success) {
 
+      setProfileData({...profileData,
+        cardNumber: "**** **** **** "+res?.card?.last4 || '',
+
+      })
+    }
+  }
+
+  useEffect(() => {
+    handleGetMyCardDetails()
+  },[])
   return (
     <div className="min-h-screen bg-[#FEFCF5]">
       <Navbar />
@@ -821,6 +836,19 @@ const Profile = () => {
                   </div>
                 </div>
               ))}
+
+<div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">
+                  {t("card_number")}
+                </label>
+                <input
+                  type="text"
+                  name="cardNumber"
+                  value={profileData?.cardNumber}
+                  disabled={true}
+                  className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-brand/20 focus:border-brand disabled:bg-gray-50 disabled:text-gray-500"
+                />
+              </div>
             </div>
 
             {/* Submit Button */}
