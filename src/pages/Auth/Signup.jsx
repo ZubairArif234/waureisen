@@ -270,8 +270,8 @@ const Signup = () => {
             </div>
 
             {/* Signup Form */}
-            <form onSubmit={handleSubmit} className="p-8">
-              <div className="space-y-8">
+            <form onSubmit={handleSubmit} className="p-4 sm:p-8">
+              <div className="space-y-6 sm:space-y-8">
                 {error && (
                   <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
                     {error}
@@ -318,14 +318,15 @@ const Signup = () => {
                       <label className="block text-sm font-medium text-gray-700">
                         {t("email")}
                       </label>
-                      <div className="flex items-center gap-2">
+                      {/* Email input and verification button - RESPONSIVE FIX */}
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                         <input
                           type="email"
                           name="email"
                           value={formData.email}
                           onChange={handleInputChange}
                           placeholder={t("email_placeholder")}
-                          className={`flex-1 px-4 py-3 rounded-lg border ${
+                          className={`w-full px-4 py-3 rounded-lg border ${
                             isEmailVerified 
                               ? "border-green-300 bg-green-50" 
                               : "border-gray-300"
@@ -338,47 +339,47 @@ const Signup = () => {
                             type="button"
                             onClick={handleSendVerification}
                             disabled={verificationLoading || !formData.email || !userType}
-                            className={`px-4 py-3 rounded-lg text-sm font-medium ${
+                            className={`mt-2 sm:mt-0 px-4 py-3 rounded-lg text-sm font-medium w-full sm:w-auto ${
                               verificationLoading || !formData.email || !userType
                                 ? "bg-gray-200 text-gray-500 cursor-not-allowed"
                                 : "bg-[#B4A481] text-white hover:bg-[#a3927b]"
-                            } transition-colors`}
+                            } transition-colors whitespace-nowrap`}
                           >
                             {verificationLoading ? t("sending") : t("verify")}
                           </button>
                         )}
                         {isEmailVerified && (
-                          <div className="px-3 py-2 bg-green-100 text-green-800 rounded-lg text-sm font-medium">
+                          <div className="mt-2 sm:mt-0 px-3 py-2 bg-green-100 text-green-800 rounded-lg text-sm font-medium text-center sm:text-left">
                             {t("verified")}
                           </div>
                         )}
                       </div>
                     </div>
 
-                    {/* Verification code input field */}
+                    {/* Verification code input field - RESPONSIVE FIX */}
                     {showVerificationField && !isEmailVerified && (
                       <div className="space-y-3">
                         <label className="block text-sm font-medium text-gray-700">
                           {t("verification_code")}
                         </label>
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                           <input
                             type="text"
                             value={enteredCode}
                             onChange={(e) => setEnteredCode(e.target.value)}
                             placeholder={t("enter_verification_code")}
-                            className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
+                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
                             required
                           />
                           <button
                             type="button"
                             onClick={handleVerifyCode}
                             disabled={verificationLoading || !enteredCode}
-                            className={`px-4 py-3 rounded-lg text-sm font-medium ${
+                            className={`mt-2 sm:mt-0 px-4 py-3 rounded-lg text-sm font-medium w-full sm:w-auto ${
                               verificationLoading || !enteredCode
                                 ? "bg-gray-200 text-gray-500 cursor-not-allowed"
                                 : "bg-[#B4A481] text-white hover:bg-[#a3927b]"
-                            } transition-colors`}
+                            } transition-colors whitespace-nowrap`}
                           >
                             {verificationLoading ? t("verifying") : t("submit")}
                           </button>
@@ -389,7 +390,7 @@ const Signup = () => {
                       </div>
                     )}
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-3">
                         <label className="block text-sm font-medium text-gray-700">
                           {t("first_name")}
@@ -475,13 +476,13 @@ const Signup = () => {
                 )}
 
                 {/* Terms Acceptance */}
-                <div className="flex items-center space-x-2">
+                <div className="flex items-start sm:items-center space-x-2">
                   <input
                     type="checkbox"
                     id="terms"
                     checked={acceptTerms}
                     onChange={(e) => setAcceptTerms(e.target.checked)}
-                    className="rounded border-gray-300 text-[#B4A481] focus:ring-[#B4A481]"
+                    className="mt-1 sm:mt-0 rounded border-gray-300 text-[#B4A481] focus:ring-[#B4A481]"
                   />
                   <label htmlFor="terms" className="text-sm text-gray-600">
                     {t("accept_terms")}{" "}

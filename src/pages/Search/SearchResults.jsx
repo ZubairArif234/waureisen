@@ -247,7 +247,7 @@ const SearchResults = () => {
           lat,
           lng,
           page: pageNum,
-          pageSize: 10,
+          pageSize: 20,
           filters: selectedFilters,
           moreFilters: moreFilters,
           radius: SEARCH_RADIUS // Always use fixed radius

@@ -2,7 +2,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useLanguage } from '../../utils/LanguageContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-const MockMap = ({ center, listings, locationName, onMapChange, radius = 5500*2 }) => {
+// Global function to preserve map state even through component re-mounts
+// This will persist even when the component is unmounted and remounted
+if (!window.mapZoomState) {
+  window.mapZoomState = {
+    zoom: 5, // Default zoom level
+    lastCenter: null
+  };
+}
+
+const MockMap = ({ center, listings, locationName, onMapChange, radius = 550000 }) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
@@ -14,6 +23,8 @@ const MockMap = ({ center, listings, locationName, onMapChange, radius = 5500*2 
   const mapChangeTimeoutRef = useRef(null);
   const activeInfoWindowRef = useRef(null);
   const userInitiatedMoveRef = useRef(false);
+  // Use globally persisted zoom if available
+  const userZoomLevelRef = useRef(window.mapZoomState.zoom || 5);
   
   // Get check-in date from URL params
   const searchParams = new URLSearchParams(location.search);
@@ -34,6 +45,22 @@ const MockMap = ({ center, listings, locationName, onMapChange, radius = 5500*2 
 
   const formattedStartDate = formatDate(checkInDate);
 
+  // This function handles map updates from parent component
+  const updateMapFromProps = () => {
+    if (mapInstance.current) {
+      // Update the map center if needed
+      mapInstance.current.setCenter(center);
+      
+      // Update the circle's center
+      if (circleRef.current) {
+        circleRef.current.setCenter(center);
+        circleRef.current.setRadius(radius * 1000);
+      }
+      
+      // Don't change the zoom level here - preserve user's zoom
+    }
+  };
+  
   // Initialize map
   useEffect(() => {
     // Load Google Maps script
@@ -55,9 +82,12 @@ const MockMap = ({ center, listings, locationName, onMapChange, radius = 5500*2 
     const initMap = () => {
       if (!mapRef.current) return;
 
+      // Use stored zoom level if available, otherwise use default
+      const initialZoom = window.mapZoomState.zoom || userZoomLevelRef.current || 5;
+
       const map = new window.google.maps.Map(mapRef.current, {
         center: center,
-        zoom: 5, // More appropriate zoom level
+        zoom: initialZoom, // Use stored or default zoom level
         mapTypeControl: false,
         streetViewControl: false,
         fullscreenControl: false,
@@ -121,8 +151,55 @@ const MockMap = ({ center, listings, locationName, onMapChange, radius = 5500*2 
       
       map.addListener('dragend', () => {
         if (userInitiatedMoveRef.current) {
+          // Store the current zoom level before triggering the callback
+          const currentZoom = map.getZoom();
+          userZoomLevelRef.current = currentZoom;
+          
           handleMapChange(map);
           userInitiatedMoveRef.current = false;
+          
+          // Double-check zoom level preservation after a short delay
+          setTimeout(() => {
+            if (map && map.getZoom() !== currentZoom) {
+              map.setZoom(currentZoom);
+            }
+          }, 200);
+        }
+      });
+      
+      // Add listener for center_changed (fires when map is panned)
+      map.addListener('center_changed', () => {
+        if (userInitiatedMoveRef.current) {
+          // Only update the center marker position during user-initiated moves
+          if (circleRef.current) {
+            const newCenter = map.getCenter();
+            circleRef.current.setCenter({
+              lat: newCenter.lat(),
+              lng: newCenter.lng()
+            });
+          }
+        }
+      });
+      
+      // Add listener for zoom_changed
+      map.addListener('zoom_changed', () => {
+        // Update our zoom level reference AND persist it globally
+        const newZoom = map.getZoom();
+        userZoomLevelRef.current = newZoom;
+        window.mapZoomState.zoom = newZoom;
+      });
+      
+      // Add listener for idle (fires when all map operations have completed)
+      map.addListener('idle', () => {
+        // Store the zoom level whenever the map becomes idle
+        if (map) {
+          const currentZoom = map.getZoom();
+          userZoomLevelRef.current = currentZoom;
+          window.mapZoomState.zoom = currentZoom;
+          window.mapZoomState.lastCenter = {
+            lat: map.getCenter().lat(),
+            lng: map.getCenter().lng()
+          };
         }
       });
 
@@ -249,7 +326,7 @@ const MockMap = ({ center, listings, locationName, onMapChange, radius = 5500*2 
       mapChangeTimeoutRef.current = setTimeout(() => {
         const center = map.getCenter();
         const bounds = map.getBounds();
-        const zoom = map.getZoom();
+        const currentZoom = map.getZoom(); // Get the actual current zoom level directly from the map
   
         if (center && bounds) {
           // Update the radius circle on the map without changing its size
@@ -262,6 +339,9 @@ const MockMap = ({ center, listings, locationName, onMapChange, radius = 5500*2 
             circleRef.current.setRadius(radius * 1000); // Convert km to meters
           }
           
+          // Store current zoom level for future reference
+          userZoomLevelRef.current = currentZoom;
+          
           // Always trigger the callback when map movement ends with manual user interaction
           onMapChange({
             center: { lat: center.lat(), lng: center.lng() },
@@ -269,8 +349,16 @@ const MockMap = ({ center, listings, locationName, onMapChange, radius = 5500*2 
               ne: { lat: bounds.getNorthEast().lat(), lng: bounds.getNorthEast().lng() },
               sw: { lat: bounds.getSouthWest().lat(), lng: bounds.getSouthWest().lng() }
             },
-            zoom
+            zoom: currentZoom // Pass the current zoom level directly from the map
           });
+          
+          // CRITICAL FIX: Ensure map maintains zoom level after callback execution
+          // This is needed because the parent component might reset the zoom
+          setTimeout(() => {
+            if (map && map.getZoom() !== currentZoom) {
+              map.setZoom(currentZoom);
+            }
+          }, 100); // Small delay to ensure this happens after any parent component changes
         }
       }, 600); // Moderate debounce time
     };
@@ -301,6 +389,9 @@ const MockMap = ({ center, listings, locationName, onMapChange, radius = 5500*2 
   // Update markers when listings change
   useEffect(() => {
     if (mapInstance.current && listings && listings.length > 0) {
+      // Store current zoom level before updating markers
+      const currentZoom = mapInstance.current.getZoom();
+      
       // Close any open info windows
       if (activeInfoWindowRef.current) {
         activeInfoWindowRef.current.close();
@@ -398,15 +489,48 @@ const MockMap = ({ center, listings, locationName, onMapChange, radius = 5500*2 
 
         markersRef.current.push(marker);
       });
+      
+      // CRITICAL: Restore zoom level after markers are added and after any map fitting operations
+      // Use a sequence of delays to ensure this works even if other operations are scheduled
+      setTimeout(() => {
+        if (mapInstance.current && mapInstance.current.getZoom() !== currentZoom) {
+          mapInstance.current.setZoom(currentZoom);
+          
+          // Double check after another short delay
+          setTimeout(() => {
+            if (mapInstance.current && mapInstance.current.getZoom() !== currentZoom) {
+              mapInstance.current.setZoom(currentZoom);
+            }
+          }, 100);
+        }
+      }, 50);
     }
   }, [listings, navigate, formattedStartDate]);
 
-  // Update the circle radius when radius prop changes
+  // Update the map when center or radius props change
   useEffect(() => {
-    if (circleRef.current && radius) {
-      circleRef.current.setRadius(radius * 1000); // Convert km to meters
+    if (mapInstance.current) {
+      // Don't reset the zoom level - use the stored user zoom level or current map zoom
+      const currentZoom = userZoomLevelRef.current || mapInstance.current.getZoom();
+      
+      // Update map center
+      mapInstance.current.setCenter(center);
+      
+      // Update circle center and radius
+      if (circleRef.current) {
+        circleRef.current.setCenter(center);
+        circleRef.current.setRadius(radius * 1000); // Convert km to meters
+      }
+      
+      // Ensure the zoom level is preserved after updating center
+      // Use requestAnimationFrame to ensure this happens after any rendering
+      requestAnimationFrame(() => {
+        if (mapInstance.current) {
+          mapInstance.current.setZoom(currentZoom);
+        }
+      });
     }
-  }, [radius]);
+  }, [center, radius]);
 
   return (
     <div className="h-full relative">
