@@ -104,7 +104,7 @@ const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates,boo
               
               return monthNames[m.month()]  == monthNames[month]  && m.date() == day;
             });
-            console.log(isBooked);
+            
             
              const date = new Date(year, month, day);
             const isToday = date.getTime() === today.getTime();
@@ -112,19 +112,21 @@ const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates,boo
             const isStart = isStartDate(day);
             const isEnd = isEndDate(day);
             const isPast = date < today;
+            const isAvailable = isDateAvailable(day)
             
             return (
               <button
                 key={`${weekIndex}-${dayIndex}`}
-                onClick={() => !isPast  && !isBooked && onDateSelect(new Date(year, month, day))}
-                disabled={isPast || isBooked}
+                onClick={() => !isPast  && !isBooked && isAvailable && onDateSelect(new Date(year, month, day))}
+                disabled={isPast || isBooked || !isAvailable}
                 className={`
                   w-full aspect-square flex items-center justify-center rounded-lg text-sm
-                  ${isPast || isBooked ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-gray-100 cursor-pointer'}
-                  ${isSelected ? 'bg-brand/10 text-brand' : ''}
-                  ${isStart ? 'bg-brand text-white hover:bg-brand' : ''}
-                  ${isEnd ? 'bg-brand text-white hover:bg-brand' : ''}
-                  ${isToday ? 'border border-brand' : ''}
+                   ${!isAvailable ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-gray-100'} // Style disabled dates
+                  ${isPast || isBooked  ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-gray-100 cursor-pointer'}
+                  ${isSelected && isAvailable ? 'bg-brand/10 text-brand' : ''}
+                  ${isStart && isAvailable ? 'bg-brand text-white hover:bg-brand' : ''}
+                  ${isEnd && isAvailable ? 'bg-brand text-white hover:bg-brand' : ''}
+                  ${isToday  && isAvailable? 'border border-brand' : ''}
                 `}
               >
                 {day}

@@ -411,6 +411,7 @@ handleGetBooking()
             );
           }
         }
+console.log(availableDates , maxGuests , "ye hai na");
 
         setAccommodation(data);
 
