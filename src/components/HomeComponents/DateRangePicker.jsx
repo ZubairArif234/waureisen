@@ -65,15 +65,13 @@ const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates,boo
       return date >= today;
     }
     
-    const currentDate = moment({ year, month, day });
+    const currentDate = moment({ year, month:month-1, day });
     return currentDate.isSameOrAfter(moment(), 'day') && availableMoments.some(availableMoment => {
       const startDate = availableMoment;
-      const endDate = availableMoment.clone().add(7, 'days');
+      const endDate = availableMoment;
       return currentDate.isBetween(startDate, endDate, 'day', '[]');
     });
   };
-
-  console.log(weeks , "weeks");
   
 
   return (

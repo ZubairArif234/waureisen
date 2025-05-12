@@ -1,5 +1,8 @@
 const translations = {
   en: {
+    name:"Name",
+       customer_number:"Customer number",
+    customer_number_desc:"Customer number desc",
     cancel_success:"Booking cancelled successfully",
     cancel_failed:"Booking cancelation failed",
     no_recently_viewed:"No Recently Viewed",
@@ -1101,6 +1104,9 @@ const translations = {
   },
 
   de: {
+     name:"Name",
+    customer_number:"Kundennummer",
+    customer_number_desc:"Kundennummer bez",
     cancel_success:"Buchung erfolgreich storniert",
     cancel_failed:"Die Stornierung der Buchung ist fehlgeschlagen",
     no_recently_viewed:"Nein, kürzlich angesehen",

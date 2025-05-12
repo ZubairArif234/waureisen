@@ -32,72 +32,109 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const user = localStorage.getItem("user_data");
 
   // Fetch user profile data when component mounts
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        setIsLoading(true);
-        // Get user ID from localStorage or context
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("No authentication token found");
-        }
+  const fetchUserProfile = async () => {
+    try {
+      setIsLoading(true);
+      // Get user ID from localStorage or context
+      if (!user) {
+        throw new Error("No authentication token found");
+      }
 
-        // Decode token to get user ID
-        const tokenData = JSON.parse(atob(token.split(".")[1]));
-        const userId = tokenData.id;
+      // Decode token to get user ID
+      // const tokenData = JSON.parse(atob(token.split(".")[1]));
+      // const userId = tokenData.id;
 
-        // Determine whether to use user or provider API based on user type
-        const userType = getUserType();
-        let userData;
+      // Determine whether to use user or provider API based on user type
+      const userType = getUserType();
+      let userData;
 
-        if (userType === "provider") {
-          userData = await getProviderProfile();
-        } else {
-          userData = await getUserProfile(userId);
-        }
+      if (userType === "provider") {
+        userData = await getProviderProfile();
+      } else {
+        userData = await getUserProfile(user?._id);
+      }
+console.log(userData ,"user ka data");
 
-        // Map backend data to component state
+      // Map backend data to component state
+      if (userData?._id ){
+
         setProfileData({
-          firstName: userData.firstName || "",
-          lastName: userData.lastName || "",
-          aboutYou: userData.aboutYou || "", // Consistent naming
-          streetNumber: userData.paymentMethod?.streetNumber || "", // Changed from street to streetNumber
-          dateOfBirth: userData.dateOfBirth || "",
-          nationality: userData.nationality || "",
-          gender: userData.gender || "",
-          isProvider: userData.isProvider || false, // Now mapping from the backend
+          firstName: userData?.firstName ,
+          lastName: userData?.lastName ,
+          aboutYou: userData?.aboutYou , // Consistent naming
+          streetNumber: userData?.paymentMethod?.streetNumber , // Changed from street to streetNumber
+          dateOfBirth: userData?.dateOfBirth ,
+          nationality: userData?.nationality ,
+          gender: userData?.gender ,
+          isProvider: userData?.isProvider || false, // Now mapping from the backend
           profilePicture: null,
-          customerNumber: userData.customerNumber || "",
-          dogs: userData.dogs?.map((dog) => ({
+          customerNumber: userData?.customerNumber ,
+          dogs: userData?.dogs?.map((dog) => ({
             id: Math.random().toString(36).substr(2, 9), // Generate a unique ID for frontend
-            name: dog.name || "",
-            gender: dog.gender || "",
+            name: dog?.name ,
+            gender: dog?.gender ,
           })) || [{ id: 1, name: "", gender: "" }],
           // Initialize travellers array even if it doesn't exist in backend data
-          travellers: userData.travellers?.map((traveller) => ({
+          travellers: userData?.travellers?.map((traveller) => ({
             id: Math.random().toString(36).substr(2, 9),
-            name: traveller.name || "",
-            gender: traveller.gender || "",
-            relationship: traveller.relationship || "",
+            name: traveller?.name ,
+            gender: traveller?.gender ,
+            relationship: traveller?.relationship ,
           })) || [{ id: 1, name: "", gender: "", relationship: "" }],
         });
-
-        // Set profile picture if available
-        if (userData.profilePicture && userData.profilePicture !== "N/A") {
-          setPreviewImage(userData.profilePicture);
-        }
-      } catch (error) {
-        console.error("Failed to fetch profile:", error);
-        setError("Failed to load profile data. Please try again.");
-      } finally {
-        setIsLoading(false);
       }
-    };
+
+      // Set profile picture if available
+      if (userData?.profilePicture && userData?.profilePicture !== "N/A") {
+        setPreviewImage(userData?.profilePicture);
+      }
+    } catch (error) {
+      console.error("Failed to fetch profile:", error);
+      setError("Failed to load profile data. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  console.log(profileData ,"profileData");
+  
+  useEffect(() => {
 
     fetchUserProfile();
-  }, []);
+  }, [user?._id]);
+
+  
+  // useEffect(() => {
+
+  //    setProfileData({
+  //         firstName: user?.firstName || "",
+  //         lastName: user?.lastName || "",
+  //         aboutYou: user?.aboutYou || "", // Consistent naming
+  //         streetNumber: user?.paymentMethod?.streetNumber || "", // Changed from street to streetNumber
+  //         dateOfBirth: user?.dateOfBirth || "",
+  //         nationality: user?.nationality || "",
+  //         gender: user?.gender || "",
+  //         isProvider: user?.isProvider || false, // Now mapping from the backend
+  //         profilePicture: null,
+  //         customerNumber: user?.customerNumber || "",
+  //         dogs: user?.dogs?.map((dog) => ({
+  //           id: Math.random().toString(36).substr(2, 9), // Generate a unique ID for frontend
+  //           name: dog?.name || "",
+  //           gender: dog?.gender || "",
+  //         })) || [{ id: 1, name: "", gender: "" }],
+  //         // Initialize travellers array even if it doesn't exist in backend data
+  //         travellers: user?.travellers?.map((traveller) => ({
+  //           id: Math.random().toString(36).substr(2, 9),
+  //           name: traveller?.name || "",
+  //           gender: traveller?.gender || "",
+  //           relationship: traveller?.relationship || "",
+  //         })) || [{ id: 1, name: "", gender: "", relationship: "" }],
+  //       });
+  // }, [user?._id]);
+
+  
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -298,10 +335,10 @@ const Profile = () => {
     
     if(res?.success) {
 
-      setProfileData({...profileData,
-        cardNumber: "**** **** **** "+res?.card?.last4 || '',
-
-      })
+     setProfileData((prev) => ({
+  ...prev,
+  cardNumber: res?.card?.last4 ? "**** **** **** " + res.card.last4 : '',
+}));
     }
   }
 
@@ -380,7 +417,7 @@ const Profile = () => {
                 <input
                   type="text"
                   name="firstName"
-                  value={profileData.firstName}
+                  value={profileData?.firstName}
                   onChange={handleInputChange}
                   disabled={!isEditing}
                   className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-brand/20 focus:border-brand disabled:bg-gray-50 disabled:text-gray-500"
@@ -393,7 +430,7 @@ const Profile = () => {
                 <input
                   type="text"
                   name="lastName"
-                  value={profileData.lastName}
+                  value={profileData?.lastName}
                   onChange={handleInputChange}
                   disabled={!isEditing}
                   className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-brand/20 focus:border-brand disabled:bg-gray-50 disabled:text-gray-500"
