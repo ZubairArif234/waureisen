@@ -11,7 +11,7 @@ if (!window.mapZoomState) {
   };
 }
 
-const MockMap = ({ center, listings, locationName, onMapChange, radius = 550000 }) => {
+const MockMap = ({ center, listings, locationName, onMapChange, radius = 5500 }) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();

@@ -150,7 +150,7 @@ export const getProviderDashboardStats = async (timeFrame = 'month') => {
 // Fetch listings by map bounds
 export const fetchListingsByMapBounds = async (params) => {
   try {
-    const { lat, lng, radius, bounds, page = 1, limit = 20, filters = {} } = params;
+    const { lat, lng, radius, bounds, page = 1, limit = 200, filters = {} } = params;
 
     const queryParams = new URLSearchParams({
       lat,
