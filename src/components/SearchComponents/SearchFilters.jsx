@@ -7,6 +7,7 @@ import { useLanguage } from '../../utils/LanguageContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import DateRangePicker from '../HomeComponents/DateRangePicker';
 import moment from 'moment';
+import API from '../../api/config';
 
 const FilterButton = ({ icon: Icon, label, active, onClick }) => (
   <button
@@ -75,8 +76,8 @@ const SearchFilters = ({ dateRange }) => {
   useEffect(() => {
     const fetchFilters = async () => {
       try {
-        const response = await fetch('/api/filters/template');
-        const data = await response.json();
+        const response = await API.get('/filters/template');
+        const data = response.data;
         const amenities = data.subsections.find(sub => sub.name === 'Amenities');
         setFilters(amenities.subsubsections.slice(0, 3));
       } catch (error) {

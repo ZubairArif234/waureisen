@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useLanguage } from '../../utils/LanguageContext';
+import API from '../../api/config';
 
 const FilterModal = ({ 
   isOpen, 
@@ -19,8 +20,8 @@ const FilterModal = ({
   useEffect(() => {
     if (isOpen && title) {
       setLoading(true);
-      fetch(`/api/filters/template?title=${encodeURIComponent(title)}`)
-        .then(response => response.json())
+      API.get(`/filters/template?title=${encodeURIComponent(title)}`)
+        .then(response => response.data)
         .then(data => {
           const filters = data.subsections
             .flatMap(section => section.subsubsections)
