@@ -855,7 +855,7 @@ const Providers = () => {
       case "ban":
         try {
           setLoading(true);
-          console.log("Attempting to ban provider:", provider._id);
+          // console.log("Attempting to ban provider:", provider._id);
 
           // Set error to null before attempting the action
           setError(null);
@@ -894,7 +894,7 @@ const Providers = () => {
       case "unban":
         try {
           setLoading(true);
-          console.log("Attempting to unban provider:", provider._id);
+          // console.log("Attempting to unban provider:", provider._id);
 
           // Set error to null before attempting the action
           setError(null);

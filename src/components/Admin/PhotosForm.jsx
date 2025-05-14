@@ -84,7 +84,7 @@ const PhotosForm = ({ formData, handleInputChange }) => {
 
         // Update the form data with the Cloudinary URL
         handleInputChange("mainImage", validatedUrl);
-        console.log("Main image uploaded:", validatedUrl);
+        // console.log("Main image uploaded:", validatedUrl);
 
         // Update preview with the validated URL
         setMainImagePreview(validatedUrl);
@@ -160,7 +160,7 @@ const PhotosForm = ({ formData, handleInputChange }) => {
       // Update the form data with all successfully uploaded URLs
       const updatedGallery = [...currentGalleryImages, ...uploadedUrls];
       handleInputChange("galleryImages", updatedGallery);
-      console.log("Gallery images uploaded:", uploadedUrls);
+      // console.log("Gallery images uploaded:", uploadedUrls);
 
       setUploading(false);
     }

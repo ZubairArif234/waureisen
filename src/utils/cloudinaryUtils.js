@@ -31,9 +31,9 @@ export const uploadImageToCloudinary = async (imageFile, onProgress) => {
   formData.append("upload_preset", uploadPreset);
 
   try {
-    console.log(
-      `Uploading to Cloudinary cloud: ${cloudName}, preset: ${uploadPreset}`
-    );
+    // console.log(
+    //  `Uploading to Cloudinary cloud: ${cloudName}, preset: ${uploadPreset}`
+    //);
 
     // Make the API request to Cloudinary
     const response = await fetch(

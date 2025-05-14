@@ -30,7 +30,7 @@ export const SocketProvider = ({ children }) => {
 
     // Set up event handlers
     socketInstance.on('connect', () => {
-      console.log('Socket connected');
+      // console.log('Socket connected');
       setIsConnected(true);
       
       // Join user's conversations
@@ -38,12 +38,12 @@ export const SocketProvider = ({ children }) => {
     });
 
     socketInstance.on('disconnect', () => {
-      console.log('Socket disconnected');
+      // console.log('Socket disconnected');
       setIsConnected(false);
     });
 
     socketInstance.on('error', (error) => {
-      console.error('Socket error:', error);
+      // console.error('Socket error:', error);
     });
 
     // Set the socket in state

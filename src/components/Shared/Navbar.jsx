@@ -57,7 +57,7 @@ const Navbar = () => {
         setUnreadMessageCount(count);
       }
     } catch (error) {
-      console.error("Failed to fetch unread messages:", error);
+      //console.error("Failed to fetch unread messages:", error);
     }
   };
 
@@ -76,11 +76,11 @@ const Navbar = () => {
   useEffect(() => {
     if (!socket || !isLoggedIn) return;
     
-    console.log("Setting up socket listeners in Navbar");
+    // console.log("Setting up socket listeners in Navbar");
     
     // Listen for new messages
     const handleNewMessage = (message) => {
-      console.log("New message received in Navbar:", message);
+      //console.log("New message received in Navbar:", message);
       
       // Increment count immediately when receiving a message meant for this user
       const shouldIncrement = 
@@ -88,7 +88,7 @@ const Navbar = () => {
         (userType === 'provider' && message.senderType === 'User');
         
       if (shouldIncrement) {
-        console.log("Incrementing unread count");
+        //console.log("Incrementing unread count");
         setUnreadMessageCount(prev => prev + 1);
       }
     };
@@ -96,7 +96,7 @@ const Navbar = () => {
     socket.on('new_message', handleNewMessage);
     
     return () => {
-      console.log("Cleaning up socket listeners in Navbar");
+      //console.log("Cleaning up socket listeners in Navbar");
       socket.off('new_message', handleNewMessage);
     };
   }, [socket, isLoggedIn, userType]);
@@ -104,7 +104,7 @@ const Navbar = () => {
   // Check authentication status when component mounts or when dependencies change
   useEffect(() => {
     const checkAuth = () => {
-      console.log("Checking auth status in Navbar");
+      //console.log("Checking auth status in Navbar");
       const authStatus = isAuthenticated();
       setIsLoggedIn(authStatus);
 
@@ -114,7 +114,7 @@ const Navbar = () => {
 
         // Get current user from localStorage first (for immediate display)
         const user = getCurrentUser();
-        console.log("Current user data:", user);
+        //console.log("Current user data:", user);
 
         if (user) {
           setCurrentUser(user);
@@ -122,26 +122,26 @@ const Navbar = () => {
 
           // Verify the profile picture URL by preloading it
           if (user.profilePicture) {
-            console.log("Found profile picture:", user.profilePicture);
+            //console.log("Found profile picture:", user.profilePicture);
 
             // Create a test image element to verify the URL works
             const testImg = new Image();
             testImg.onload = () => {
-              console.log("Profile image loaded successfully");
+              //console.log("Profile image loaded successfully");
               setProfileImageError(false);
             };
             testImg.onerror = () => {
-              console.error(
-                "Failed to load profile image:",
-                user.profilePicture
-              );
+              //console.error(
+              //  "Failed to load profile image:",
+              //  user.profilePicture
+              //);
               setProfileImageError(true);
             };
             testImg.src = user.profilePicture;
           }
         }
       } else {
-        console.log("User not authenticated");
+        //console.log("User not authenticated");
         setCurrentUser(null);
         setUserType(null);
       }
@@ -153,7 +153,7 @@ const Navbar = () => {
     // Add an event listener for storage events to detect changes to localStorage
     // This helps with synchronizing login/logout across tabs
     const handleStorageChange = (event) => {
-      console.log("Storage changed, rechecking auth");
+      //console.log("Storage changed, rechecking auth");
       checkAuth();
     };
 
@@ -251,7 +251,7 @@ const Navbar = () => {
 
   // Check if we should show the menu icon (not for admin users)
   const shouldShowMenuIcon = isLoggedIn && userType !== "admin";
-console.log(userType)
+//console.log(userType)
   return (
     <nav className="fixed w-full top-0 z-50 px-6 py-4 bg-white/20 backdrop-blur-sm rounded-b-2xl shadow-sm">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -503,10 +503,10 @@ console.log(userType)
                                   alt="Profile"
                                   className="w-full h-full object-cover"
                                   onError={(e) => {
-                                    console.error(
-                                      "Profile image load error:",
-                                      e
-                                    );
+                                    //console.error(
+                                    //  "Profile image load error:",
+                                    //  e
+                                    //);
                                     setProfileImageError(true);
                                   }}
                                 />

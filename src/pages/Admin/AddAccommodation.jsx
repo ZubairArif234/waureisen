@@ -85,7 +85,7 @@ const AddAccommodation = (props) => {
   });
 
 
-  console.log(formData);
+  // console.log(formData);
   
     // const handleGetTempFilters = async () => {
     //   const res = await getProviderTemplateFilter()

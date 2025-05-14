@@ -12,7 +12,7 @@ const BasicInfoForm = ({ formData, handleInputChange, handleNestedInputChange })
   });
 
   const handleRangeSelect = (range) => {
-    console.log("Date range selected:", range); // Debug log
+    // console.log("Date range selected:", range); // Debug log
     setSelectedRange(range);
     
     // Always update checkInDates with the current state

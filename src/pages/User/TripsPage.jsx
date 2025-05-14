@@ -306,7 +306,7 @@ const TripCard = ({ trip, onEdit }) => {
     try{
 
       const res = await refundPayment(trip?._id);
-      console.log(res);
+      // console.log(res);
       toast.success(t("cancel_success"))
     }catch(err){
       toast.error(t("cancel_failed"))

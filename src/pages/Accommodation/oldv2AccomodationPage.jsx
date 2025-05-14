@@ -189,8 +189,8 @@ const AccommodationPage = () => {
         const priceFromSearch = searchState.pricePerNight;
         const dateFromSearch = searchState.checkInDate || searchDateParam;
         
-        console.log('Search state:', searchState);
-        console.log('Date from search:', dateFromSearch);
+        // console.log('Search state:', searchState);
+        // console.log('Date from search:', dateFromSearch);
         
         const data = await getListingById(id);
         

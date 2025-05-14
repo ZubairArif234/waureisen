@@ -36,7 +36,7 @@ const SearchResults = () => {
   
   // Fix the date formatting
   const [startDate] = dateRange.split(" - ");
-  console.log(dateRange , startDate , "dates");
+  // console.log(dateRange , startDate , "dates");
 
   const formatDate = (dateStr) => {
     if (!dateStr) return null;

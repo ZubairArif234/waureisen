@@ -69,9 +69,9 @@ const AccommodationCard = ({
 
         // Retry on network errors
         if (!error.response && retryCount < 2) {
-          console.log(
-            `Retrying featured status fetch (attempt ${retryCount + 1})...`
-          );
+          // console.log(
+          //  `Retrying featured status fetch (attempt ${retryCount + 1})...`
+          //);
           const delay = Math.pow(2, retryCount) * 800;
           setTimeout(() => {
             fetchFeaturedStatus(retryCount + 1);

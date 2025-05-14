@@ -139,7 +139,7 @@ const AccommodationPage = () => {
     people: 1,
     dogs: 1,
   });
-// console.log(dateRange , "jkikkl");
+// // console.log(dateRange , "jkikkl");
 
 
 const getAllDates = (startDate, endDate) => {

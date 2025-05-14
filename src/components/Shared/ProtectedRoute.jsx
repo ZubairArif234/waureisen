@@ -17,7 +17,7 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
 
   useEffect(() => {
     if (!isAuth) {
-      console.log("User not authenticated, redirecting to login");
+      // console.log("User not authenticated, redirecting to login");
     } else if (!hasAccess) {
       console.log(`User role ${userType} not authorized for this route`);
     }

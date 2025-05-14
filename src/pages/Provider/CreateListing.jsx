@@ -207,7 +207,7 @@ const CreateListing = () => {
     };
 
     // In a real app, make API call here
-    console.log("Submitting listing for approval:", submissionData);
+    // console.log("Submitting listing for approval:", submissionData);
 
     // Show success message
     toast?.success(
@@ -234,7 +234,7 @@ const CreateListing = () => {
     };
 
     // In a real app, make API call here
-    console.log("Saving as draft:", draftData);
+    // console.log("Saving as draft:", draftData);
 
     // Show success message
     alert("Listing saved as draft!");

@@ -58,7 +58,7 @@ const SearchFilters = ({ dateRange }) => {
  const [dateRange2, setDateRange2] = useState({ start: null, end: null });
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   // Initialize selected filters from URL
-  console.log(dateRange);
+  // console.log(dateRange);
   
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -127,7 +127,7 @@ const SearchFilters = ({ dateRange }) => {
       setDateRange2({start:new Date(startDate) , end:new Date(endDate)})
     }
   },[dateRange])
-console.log(isDatePickerOpen);
+// console.log(isDatePickerOpen);
 
   return (
     <div className="relative mt-24 bg-white border-b border-gray-200">

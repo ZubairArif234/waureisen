@@ -14,7 +14,7 @@ const ProviderRegistration = () => {
   
   const searchParams = new URLSearchParams(location.search);
   const accountId = searchParams.get("account") ;
-  console.log(location , accountId);
+  // console.log(location , accountId);
 
   const savedCurrentStep = localStorage.getItem("currentStep");
   const [stripeLoading, setStripeLoading] = useState(false);

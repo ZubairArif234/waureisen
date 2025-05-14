@@ -54,7 +54,7 @@ const TransactionsTable = ({booking, transactions, onDownloadInvoice }) => {
   };
 
   const sortedTransactions = getSortedTransactions();
-console.log(booking);
+// console.log(booking);
 
   return (
     <div className="overflow-x-auto bg-white border rounded-lg">

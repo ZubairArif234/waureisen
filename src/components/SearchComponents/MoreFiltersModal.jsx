@@ -117,10 +117,10 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
       selected
     };
 
-    console.log('Applying filters with price:', {
-      priceRange: ranges.price,
-      filterObject
-    });
+    // console.log('Applying filters with price:', {
+    //  priceRange: ranges.price,
+    //  filterObject
+    //});
 
     // Update URL with filters
     const searchParams = new URLSearchParams(window.location.search);

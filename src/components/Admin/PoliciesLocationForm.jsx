@@ -11,7 +11,7 @@ const [marker, setMarker] = useState(null);
   const [selectedAddress, setSelectedAddress] = useState(formData.location?.address || '');
   const [mapLocation, setMapLocation] = useState(formData.location?.mapLocation || null);
   const [uploadedFile, setUploadedFile] = useState(null);
-console.log(selectedAddress , mapLocation , "klj");
+// console.log(selectedAddress , mapLocation , "klj");
 
 // Load Google Maps script and initialize autocomplete
 useEffect(() => {

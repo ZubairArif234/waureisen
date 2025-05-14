@@ -56,7 +56,7 @@ const Profile = () => {
       } else {
         userData = await getUserProfile(user?._id);
       }
-console.log(userData ,"user ka data");
+// console.log(userData ,"user ka data");
 
       // Map backend data to component state
       if (userData?._id ){
@@ -98,7 +98,7 @@ console.log(userData ,"user ka data");
       setIsLoading(false);
     }
   };
-  console.log(profileData ,"profileData");
+  // console.log(profileData ,"profileData");
   
   useEffect(() => {
 
@@ -266,7 +266,7 @@ console.log(userData ,"user ka data");
         updateData.profilePicture = profileData.profilePicture;
       }
 
-      console.log("Sending update data:", updateData);
+      // console.log("Sending update data:", updateData);
 
       // Determine whether to use user or provider update API based on user type
       let result;
@@ -278,7 +278,7 @@ console.log(userData ,"user ka data");
         result = await updateUserProfile(updateData);
       }
 
-      console.log("Update result:", result);
+      // console.log("Update result:", result);
 
       // Update the user data in localStorage to reflect changes in Navbar
       if (result) {

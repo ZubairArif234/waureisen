@@ -93,7 +93,7 @@ const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates,boo
       <div className="grid grid-cols-7 gap-1">
         {weeks.map((week, weekIndex) =>
           week.map((day, dayIndex) => {
-            // console.log(today?.getMonth(), day  "cheezain");
+            // // console.log(today?.getMonth(), day  "cheezain");
             
             if (day === null) return <div key={`${weekIndex}-${dayIndex}`} />;
             const isBooked = bookedDates?.some(item => {
@@ -165,7 +165,7 @@ const DateRangePicker = ({ isOpen, onClose, selectedRange, onRangeSelect, availa
     // If we have no dates selected, start a new selection
     onRangeSelect({ start: date, end: null });
   };
-console.log(bookedDates , "booked");
+// console.log(bookedDates , "booked");
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

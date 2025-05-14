@@ -27,7 +27,7 @@ const CheckoutForm = () => {
       },
       redirect: "if_required",
     });
-    console.log(result);
+    // console.log(result);
 
     if (result.error) {
       console.error("Payment Failed:", result.error.message);

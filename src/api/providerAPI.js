@@ -41,10 +41,10 @@ export const updateProviderProfile = async (profileData) => {
         );
         updateUserProfilePicture(imageUrl);
 
-        console.log(
-          "Provider profile picture uploaded to Cloudinary:",
-          imageUrl
-        );
+        // console.log(
+        //  "Provider profile picture uploaded to Cloudinary:",
+        //  imageUrl
+        //);
       } catch (uploadError) {
         console.error("Error uploading profile picture:", uploadError);
         // Remove the profile picture if upload fails

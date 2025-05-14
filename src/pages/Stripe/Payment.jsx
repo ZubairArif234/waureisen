@@ -54,7 +54,7 @@ const Payment = () => {
     getPaymentIntent();
   }, []);
 
-  console.log(location);
+  // console.log(location);
 
   const options = {
     clientSecret: paymentIntent.clientSecret,

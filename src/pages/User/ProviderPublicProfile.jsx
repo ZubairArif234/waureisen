@@ -84,7 +84,7 @@ const ProviderPublicProfile = () => {
   const { t } = useLanguage();
   const {state} = useLocation()
   const userType = localStorage?.getItem("userType")
-  console.log(state);
+  // console.log(state);
   const [listings, setListings] = useState([]);
 
   const fetchListings = async () => {

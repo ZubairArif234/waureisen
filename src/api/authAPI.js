@@ -4,9 +4,9 @@ import API from "./config";
 // User authentication
 export const userLogin = async (credentials) => {
   try {
-    console.log("Attempting user login with:", credentials);
+    // console.log("Attempting user login with:", credentials);
     const response = await API.post("/users/login", credentials);
-    console.log("User login response:", response.data);
+    // console.log("User login response:", response.data);
     return response.data;
   } catch (error) {
     console.error("Login error:", error);
@@ -16,9 +16,9 @@ export const userLogin = async (credentials) => {
 
 export const userSignup = async (userData) => {
   try {
-    console.log("Attempting user signup with:", userData);
+    // console.log("Attempting user signup with:", userData);
     const response = await API.post("/users/signup", userData);
-    console.log("User signup response:", response.data);
+    // console.log("User signup response:", response.data);
     return response.data;
   } catch (error) {
     console.error("User signup error:", error);
@@ -29,9 +29,9 @@ export const userSignup = async (userData) => {
 // Provider authentication
 export const providerLogin = async (credentials) => {
   try {
-    console.log("Attempting provider login with:", credentials);
+    // console.log("Attempting provider login with:", credentials);
     const response = await API.post("/providers/login", credentials);
-    console.log("Provider login response:", response.data);
+    // console.log("Provider login response:", response.data);
 
     // Set auth header immediately if token is received
     if (response.data.token) {
@@ -49,9 +49,9 @@ export const providerLogin = async (credentials) => {
 
 export const providerSignup = async (providerData) => {
   try {
-    console.log("Attempting provider signup with:", providerData);
+    // console.log("Attempting provider signup with:", providerData);
     const response = await API.post("/providers/signup", providerData);
-    console.log("Provider signup response:", response.data);
+    // console.log("Provider signup response:", response.data);
 
     // Set auth header immediately if token is received
     if (response.data.token) {
@@ -69,12 +69,12 @@ export const providerSignup = async (providerData) => {
 
 export const completeProviderRegistration = async (registrationData) => {
   try {
-    console.log("Completing provider registration with:", registrationData);
+    // console.log("Completing provider registration with:", registrationData);
     const response = await API.post(
       "/providers/complete-registration",
       registrationData
     );
-    console.log("Registration completion response:", response.data);
+    // console.log("Registration completion response:", response.data);
 
     // Update the stored provider data with the completed registration
     if (response.data.provider) {
@@ -95,9 +95,9 @@ export const completeProviderRegistration = async (registrationData) => {
 // Admin authentication
 export const adminLogin = async (credentials) => {
   try {
-    console.log("Attempting admin login with:", credentials);
+    // console.log("Attempting admin login with:", credentials);
     const response = await API.post("/admins/login", credentials);
-    console.log("Admin login response:", response.data);
+    // console.log("Admin login response:", response.data);
 
     // Set auth header immediately if token is received
     if (response.data.token) {

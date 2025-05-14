@@ -130,7 +130,7 @@ const StatCard = ({ icon: Icon, title, value }) => {
 useEffect(() => {
   // Check if authenticated
   if (!isAuthenticated()) {
-    console.log('Not authenticated, redirecting to login');
+    // console.log('Not authenticated, redirecting to login');
     navigate('/login');
     return;
   }
@@ -138,13 +138,13 @@ useEffect(() => {
   // Get provider details to verify further
   const provider = getCurrentProvider();
   if (!provider) {
-    console.log('Provider data not found, redirecting to login');
+    // console.log('Provider data not found, redirecting to login');
     navigate('/login');
     return;
   }
 
   if (provider.registrationStatus === 'incomplete') {
-    console.log('Provider registration incomplete, redirecting to registration');
+    // console.log('Provider registration incomplete, redirecting to registration');
     navigate('/provider/registration');
     return;
   }

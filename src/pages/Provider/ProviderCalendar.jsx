@@ -456,12 +456,12 @@ const BlockDateModal = ({ isOpen, onClose, listings, selectedDate, onSave, booki
       return;
     }
     
-    console.log('Blocking dates:', {
-      listingId: selectedListing,
-      startDate,
-      endDate,
-      reason: reason === 'custom' ? customReason : reason
-    });
+    // console.log('Blocking dates:', {
+    //  listingId: selectedListing,
+    //      startDate,
+    //    endDate,
+    //  reason: reason === 'custom' ? customReason : reason
+    // });
     
     const reasonText = reason === 'custom' ? customReason : reason;
     onSave({

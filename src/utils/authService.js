@@ -29,7 +29,7 @@ export const login = async (credentials, userType) => {
     }
 
     // For debugging, check the response structure
-    console.log(`${userType} login response:`, response);
+    // console.log(`${userType} login response:`, response);
 
     // Store authentication data in localStorage
     if (response.token) {
@@ -38,25 +38,25 @@ export const login = async (credentials, userType) => {
 
       // Set the authorization header immediately for subsequent requests
       API.defaults.headers.common["Authorization"] = `Bearer ${response.token}`;
-      console.log("Token saved and auth header set");
+      //consolelog("Token saved and auth header set");
 
       // Get full profile data with profile picture
       try {
         if (userType === "provider") {
           const { getProviderProfile } = await import("../api/providerAPI");
           const profileData = await getProviderProfile();
-          console.log("Provider profile data fetched:", profileData);
+          //consolelog("Provider profile data fetched:", profileData);
           localStorage.setItem(PROVIDER_USER_KEY, JSON.stringify(profileData));
         } else if (userType === "user") {
           const { getUserProfile } = await import("../api/authAPI");
           const profileData = await getUserProfile();
-          console.log("User profile data fetched:", profileData);
+          //consolelog("User profile data fetched:", profileData);
           localStorage.setItem(USER_DATA_KEY, JSON.stringify(profileData));
         } else if (userType === "admin" && response.admin) {
           localStorage.setItem(ADMIN_DATA_KEY, JSON.stringify(response.admin));
         }
       } catch (profileError) {
-        console.error("Error fetching full profile after login:", profileError);
+        //consoleerror("Error fetching full profile after login:", profileError);
 
         // Still store basic user data if profile fetch fails
         if (userType === "provider" && response.provider) {
@@ -74,12 +74,12 @@ export const login = async (credentials, userType) => {
       // Dispatch storage event to notify all components of auth change
       window.dispatchEvent(new Event("storage"));
     } else {
-      console.error("No token returned in login response");
+      //consoleerror("No token returned in login response");
     }
 
     return response;
   } catch (error) {
-    console.error("Login error in authService:", error);
+    //consoleerror("Login error in authService:", error);
     throw error;
   }
 };
@@ -182,8 +182,8 @@ export const isAuthenticated = () => {
   const token = localStorage.getItem(TOKEN_KEY);
   const userType = localStorage.getItem(USER_TYPE_KEY);
 
-  console.log("Auth check - token exists:", !!token);
-  console.log("Auth check - user type:", userType);
+  //consolelog("Auth check - token exists:", !!token);
+  //consolelog("Auth check - user type:", userType);
 
   return !!token && !!userType;
 };
@@ -246,11 +246,11 @@ export const setAuthHeader = () => {
   const token = getToken();
   if (token) {
     API.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    console.log("Authorization header set explicitly");
+    //consolelog("Authorization header set explicitly");
     return true;
   } else {
     delete API.defaults.headers.common["Authorization"];
-    console.log("Authorization header removed - no token found");
+    //consolelog("Authorization header removed - no token found");
     return false;
   }
 };
@@ -314,6 +314,6 @@ export const updateUserProfilePicture = (profilePictureUrl) => {
   // Dispatch storage event to notify all components including Navbar
   window.dispatchEvent(new Event("storage"));
 
-  console.log("Profile picture updated:", profilePictureUrl);
+  //consolelog("Profile picture updated:", profilePictureUrl);
   return userData;
 };

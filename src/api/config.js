@@ -32,22 +32,22 @@ API.interceptors.request.use(
     if (token) {
       // Ensure we're using the correct Bearer format
       config.headers["Authorization"] = `Bearer ${token}`;
-      console.log(`Setting Authorization header for ${config.url}`);
+      // console.log(`Setting Authorization header for ${config.url}`);
     }
 
     // Log the request for debugging
-    console.log(`API Request to ${config.url}:`, {
-      method: config.method,
-      headers: config.headers,
-      params: config.params,
-      // Don't log password or sensitive data
-      data: config.data ? sanitizeRequestData(config.data) : undefined,
-    });
+    // console.log(`API Request to ${config.url}:`, {
+    //   method: config.method,
+    //   headers: config.headers,
+    //   params: config.params,
+    //   // Don't log password or sensitive data
+    //   data: config.data ? sanitizeRequestData(config.data) : undefined,
+    // });
 
     return config;
   },
   (error) => {
-    console.error("Request interceptor error:", error);
+    //console.error("Request interceptor error:", error);
     return Promise.reject(error);
   }
 );
@@ -56,10 +56,10 @@ API.interceptors.request.use(
 API.interceptors.response.use(
   (response) => {
     // Log successful responses for debugging
-    console.log(`API Response from ${response.config.url}:`, {
-      status: response.status,
-      data: response.data,
-    });
+    // console.log(`API Response from ${response.config.url}:`, {
+    //   status: response.status,
+    //   data: response.data,
+    // });
     return response;
   },
   async (error) => {

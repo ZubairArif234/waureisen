@@ -81,7 +81,7 @@ const Hero = () => {
       dateParam = `&dates=${dateRange.start} - ${dateRange.end}`;
       
       // Log the formatted dates for debugging
-      console.log('Formatted date range for URL:', startDate, '-', endDate);
+      // console.log('Formatted date range for URL:', startDate, '-', endDate);
     }
 
     // Build the search URL with coordinates if available

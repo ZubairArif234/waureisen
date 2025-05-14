@@ -39,7 +39,7 @@ const Login = () => {
       // Use the centralized login function from authService
       const response = await login({ email, password }, userType);
 
-      console.log("Login successful:", response);
+      // console.log("Login successful:", response);
 
       // Navigate based on user type
       if (userType === "admin") {

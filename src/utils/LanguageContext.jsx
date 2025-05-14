@@ -22,13 +22,13 @@ export const LanguageProvider = ({ children }) => {
   const t = (key, params = {}) => {
     const dict = translations[language];
     if (!dict) {
-      console.warn(`No translations found for language: ${language}`);
+      //console.warn(`No translations found for language: ${language}`);
       return key;
     }
 
     let str = dict[key];
     if (typeof str !== 'string') {
-      console.warn(`No translation found for key: ${key} in language: ${language}`);
+      //console.warn(`No translation found for key: ${key} in language: ${language}`);
       return key;
     }
 
@@ -41,7 +41,7 @@ export const LanguageProvider = ({ children }) => {
   // Language switcher
   const switchLanguage = (lang) => {
     if (lang !== 'en' && lang !== 'de') {
-      console.warn(`Unsupported language: ${lang}`);
+      //console.warn(`Unsupported language: ${lang}`);
       return;
     }
     setLanguage(lang);

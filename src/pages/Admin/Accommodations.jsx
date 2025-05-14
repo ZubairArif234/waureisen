@@ -50,7 +50,7 @@ const normalizeSource = (source) => {
 
 // Utility function to inspect source values in accommodations
 const inspectAccommodationSources = (accommodations) => {
-  console.log("Inspecting accommodation sources:");
+  // console.log("Inspecting accommodation sources:");
   const sourceInfo = accommodations.map(acc => ({
     id: acc._id,
     title: acc.title,

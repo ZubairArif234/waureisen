@@ -169,9 +169,9 @@ const Signup = () => {
   
       // Different API call based on user type
       if (userType === "customer") {
-        console.log("Attempting customer signup with:", userData);
+        // console.log("Attempting customer signup with:", userData);
         response = await userSignup(userData);
-        console.log("Customer signup response:", response);
+        // console.log("Customer signup response:", response);
   
         if (response && response.token) {
           localStorage.setItem("token", response.token);
@@ -186,9 +186,9 @@ const Signup = () => {
           throw new Error("Invalid response from server - no token received");
         }
       } else if (userType === "provider") {
-        console.log("Attempting provider signup with:", userData);
+        // console.log("Attempting provider signup with:", userData);
         response = await providerSignup(userData);
-        console.log("Provider signup response:", response);
+        // console.log("Provider signup response:", response);
   
         // Store the token and provider data
         if (response && response.token) {

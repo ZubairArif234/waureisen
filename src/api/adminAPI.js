@@ -66,6 +66,7 @@ export const addToFeaturedSection = async (id, section) => {
 
     // First verify this listing ID exists
     try {
+      // console.log(
       console.log(`Verifying listing ID ${id} exists...`);
       const listingCheck = await API.get(`/listings/${id}`);
       if (!listingCheck.data || !listingCheck.data._id) {

@@ -35,13 +35,13 @@ const AccommodationDetails = ({ accommodation }) => {
   const [filterData, setFilterData] = useState(null);
   const [allFilters, setAllFilters] = useState([]);
 
-  console.log(accommodation);
+  // console.log(accommodation);
 
   const fetchFilters = async () => {
     try {
       if (accommodation?.filters) {
         const response = await API.get(`/filters/${accommodation.filters}`);
-        console.log(response);
+        // console.log(response);
 
         // const data = await response.json();
         setFilterData(response?.data);
