@@ -6,7 +6,6 @@ import { useLanguage } from '../../utils/LanguageContext';
 const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates,bookedDates }) => {
   const { t } = useLanguage();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const firstDayOfMonth = new Date(year, month, 1).getDay();
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   
@@ -16,6 +15,10 @@ const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates,boo
   const days = Array(daysInMonth).fill().map((_, i) => i + 1);
   const weeks = [];
   let week = Array(7).fill(null);
+  
+  // Get the weekday of the first day of the month (0=Sunday, 1=Monday, ...)
+  let firstDayOfMonth = new Date(year, month, 1).getDay();
+  firstDayOfMonth = (firstDayOfMonth + 6) % 7; // Shift so Monday=0, Sunday=6
   
   // Fill in the blank days at the start
   for (let i = 0; i < firstDayOfMonth; i++) {

@@ -129,6 +129,12 @@ const SearchFilters = ({ dateRange }) => {
   },[dateRange])
 // console.log(isDatePickerOpen);
 
+  const filterNameToTranslationKey = {
+    "Dog Facilities": "dog_facilities",
+    "Facilities Parking": "facilities_parking",
+    "Facilities Wellness": "facilities_wellness",
+  };
+
   return (
     <div className="relative mt-24 bg-white border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -157,7 +163,7 @@ const SearchFilters = ({ dateRange }) => {
             <FilterButton
               key={index}
               icon={Filter}
-              label={filter.name}
+              label={t(filterNameToTranslationKey[filter.name] || filter.name)}
               active={selectedFilters.some(f => f === filter.name)}
               onClick={() => {
                 const selectedFilter = filters.find(f => f.name === filter.name);
