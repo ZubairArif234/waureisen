@@ -32,7 +32,7 @@ const StarMembership = () => {
         {t('our_membership')}
         </h2>
         
-        <p className="text-gray-700 mb-10">
+        <p className="text-gray-700 mb-10 text-center">
         {t('star_description')}
         </p>
         

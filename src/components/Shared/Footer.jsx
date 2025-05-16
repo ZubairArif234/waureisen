@@ -148,7 +148,7 @@ const Footer = () => {
       <Modal
         isOpen={isTermsOpen}
         onClose={() => setIsTermsOpen(false)}
-        title={t('terms_of_service')}
+        title={t('terms_and_conditions')}
       >
         <TermsContent />
       </Modal>
