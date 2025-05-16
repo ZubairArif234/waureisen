@@ -181,7 +181,7 @@ const Signup = () => {
             localStorage.setItem("user_data", JSON.stringify(response.user));
           }
   
-          navigate("/login");
+          navigate("/");
         } else {
           throw new Error("Invalid response from server - no token received");
         }
