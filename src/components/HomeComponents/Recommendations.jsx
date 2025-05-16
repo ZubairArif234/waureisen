@@ -66,11 +66,8 @@ const RecommendationsSection = memo(({ title, listings, isLoading }) => {
             <AccommodationCard
               key={listing._id}
               id={listing._id}
-              image={
-                listing.images && listing.images.length > 0
-                  ? listing.images[0]
-                  : "https://via.placeholder.com/300x200?text=No+Image"
-              }
+              image={null}
+              images={listing.images || []}
               price={listing.dynamicPrice || listing.pricePerNight?.price || 0}
               location={listing.title || "Unnamed Accommodation"}
               provider={listing.provider || "Unknown"}

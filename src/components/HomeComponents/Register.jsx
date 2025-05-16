@@ -39,32 +39,32 @@ const Register = () => {
     {
       id: 1,
       title: t('increased_visibility'),
-      description: `🐾 ${t('increased_visibility_desc')}`
+      description: t('increased_visibility_desc')
     },
     {
       id: 2,
       title: t('easy_booking'),
-      description: `🐾 ${t('easy_booking_desc')}`
+      description: t('easy_booking_desc')
     },
     {
       id: 3,
       title: t('targeted_marketing'),
-      description: `🐾 ${t('targeted_marketing_desc')}`
+      description: t('targeted_marketing_desc')
     },
     {
       id: 4,
       title: t('trust_security'),
-      description: `🐾 ${t('trust_security_desc')}`
+      description: t('trust_security_desc')
     },
     {
       id: 5,
       title: t('direct_communication'),
-      description: `🐾 ${t('direct_communication_desc')}`
+      description: t('direct_communication_desc')
     },
     {
       id: 6,
       title: t('commission'),
-      description: `🐾 ${t('commission_desc')}`
+      description: t('commission_desc')
     }
   ];
 

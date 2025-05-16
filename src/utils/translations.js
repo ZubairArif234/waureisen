@@ -1504,10 +1504,10 @@ account_actions: "Kontoaktionen",
       "Die erste Buchungsplattform mit über 30 Hundefiltern, um den perfekten Aufenthalt für Sie und Ihren Hund zu finden.",
     personal_contact: "Persönlicher Kontakt",
     personal_contact_desc:
-      "Buchen Sie einfach selbst oder wenden Sie sich jederzeit an uns - wir sind für Ihre Fragen und Wünsche da.",
+      "Buchen Sie in wenigen Schritten die passende Unterkunft oder vereinbaren Sie mit uns ein Gespräch. Wir sind gerne für Sie da.",
     all_in_one_place: "Alles an einem Ort",
     all_in_one_place_desc:
-      "Entdecken Sie unseren Reiseblog für Tipps zu hundefreundlichen Reisezielen und buchen Sie Reisezubehör bequem.",
+      "Entdecken Sie unseren Reisemagazin für Tipps zu hundefreundlichen Reisezielen und buchen Sie Reisezubehör bequem.",
     transparent_pricing: "Transparente Preise",
     transparent_pricing_desc:
       "Keine versteckten Gebühren - Sie zahlen das Gleiche wie bei einer direkten Buchung bei der Unterkunft.",
