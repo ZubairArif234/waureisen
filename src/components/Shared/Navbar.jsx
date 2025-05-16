@@ -266,6 +266,26 @@ const Navbar = () => {
         {userType != "provider" && 
        ( <div className="hidden md:flex items-center space-x-4 lg:space-x-8 lg:ml-[410px] md:ml-auto">
           <Link
+            to="/camper-rental"
+            className="text-gray-700 hover:text-gray-100 text-sm font-medium whitespace-nowrap"
+          >
+            {t("camper_rental")}
+          </Link>
+          <Link
+            to="/travelshop"
+            className="text-gray-700 hover:text-gray-100 text-sm font-medium whitespace-nowrap"
+          >
+            {t("Travelshop")}
+          </Link>
+          <a
+            href="https://calendly.com/hallo-waureisen/austausch"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gray-700 hover:text-gray-100 text-sm font-medium whitespace-nowrap"
+          >
+            {t("book_appointment")}
+          </a>
+          <Link
             to="#"
             onClick={(e) => {
               e.preventDefault();
@@ -279,20 +299,6 @@ const Navbar = () => {
           >
             {t("register_accommodation")}
           </Link>
-          <Link
-            to="/camper-rental"
-            className="text-gray-700 hover:text-gray-100 text-sm font-medium whitespace-nowrap"
-          >
-            {t("camper_rental")}
-          </Link>
-          <a
-            href="https://calendly.com/hallo-waureisen/austausch"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-gray-700 hover:text-gray-100 text-sm font-medium whitespace-nowrap"
-          >
-            {t("book_appointment")}
-          </a>
         </div>)
         }
 
@@ -383,16 +389,16 @@ const Navbar = () => {
                     {/* Mobile Navigation Links */}
                     <div className="md:hidden border-b border-gray-200 mb-1 pb-1">
                       <Link
-                        to="#"
-                        className="block px-3 py-1.5 text-gray-700 hover:bg-gray-50 text-sm"
-                      >
-                        {t("register_accommodation")}
-                      </Link>
-                      <Link
                         to="/camper-rental"
                         className="block px-3 py-1.5 text-gray-700 hover:bg-gray-50 text-sm"
                       >
                         {t("camper_rental")}
+                      </Link>
+                      <Link
+                        to="/travelshop"
+                        className="block px-3 py-1.5 text-gray-700 hover:bg-gray-50 text-sm"
+                      >
+                        {t("travelshop")}
                       </Link>
                       <a
                         href="https://meet.brevo.com/waureisen"
@@ -402,6 +408,20 @@ const Navbar = () => {
                       >
                         {t("book_appointment")}
                       </a>
+                      <Link
+                        to="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (isLoggedIn) {
+                            navigate("/provider/registration");
+                          } else {
+                            navigate("/signup?redirect=provider-registration");
+                          }
+                        }}
+                        className="block px-3 py-1.5 text-gray-700 hover:bg-gray-50 text-sm"
+                      >
+                        {t("register_accommodation")}
+                      </Link>
                     </div>
 
                     {/* Menu Items based on user type */}

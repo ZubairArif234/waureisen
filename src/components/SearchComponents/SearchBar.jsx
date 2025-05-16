@@ -63,7 +63,14 @@ const SearchBar = ({ initialLocation = '', initialDateRange = { start: null, end
 
   const handleSearch = () => {
     if (!location) {
-      return;
+      setLocation("Switzerland");
+      setPlaceData({
+        address: "Switzerland",
+        location: {
+          lat: 46.8182,
+          lng: 8.2275
+        }
+      });
     }
 
     // Format dates for URL with year included
@@ -76,7 +83,7 @@ const SearchBar = ({ initialLocation = '', initialDateRange = { start: null, end
     }
 
     // Build the search URL with coordinates if available
-    let searchUrl = `/search?location=${encodeURIComponent(location)}${dateParam}&people=${guests.people}&dogs=${guests.dogs}`;
+    let searchUrl = `/search?location=${encodeURIComponent(location || "Switzerland")}${dateParam}&people=${guests.people}&dogs=${guests.dogs}`;
     
     if (placeData && placeData.location) {
       searchUrl += `&lat=${placeData.location.lat}&lng=${placeData.location.lng}`;
@@ -138,8 +145,8 @@ const SearchBar = ({ initialLocation = '', initialDateRange = { start: null, end
             guests={guests}
             onChange={setGuests}
             onClose={() => setIsGuestSelectorOpen(false)}
-            maxGuests={20}
-            maxDogs={20}
+            maxGuests={25}
+            maxDogs={25}
           />
         )}
       </div>

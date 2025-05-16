@@ -17,6 +17,7 @@ const translations = {
     // Navbar
     register_accommodation: "Register Accommodation",
     camper_rental: "Camper Rental",
+    Travelshop: "Travelshop",
     book_appointment: "Book an appointment",
     language_region: "Language and region",
     translation: "Translation",
@@ -1426,6 +1427,8 @@ account_actions: "Kontoaktionen",
     // Navbar
     register_accommodation: "Unterkunft registrieren",
     camper_rental: "Wohnmobilvermietung",
+    
+    Travelshop: "Reiseshop",
     book_appointment: "Termin buchen",
     language_region: "Sprache und Region",
     translation: "Übersetzung",
