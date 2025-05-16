@@ -46,7 +46,7 @@ const translations = {
     parking_street: "parking Street",
     e_charge: "E Charge",
     thermal_bath: "Thermal Bath",
-    relaxation_zone: "Relaxation Zone"
+    relaxation_zone: "Relaxation Zone",
 
 
     // Auth
