@@ -291,9 +291,9 @@ const Navbar = () => {
             onClick={(e) => {
               e.preventDefault();
               if (isLoggedIn) {
-                navigate("/provider/registration");
+                navigate("/host");
               } else {
-                navigate("/signup?redirect=provider-registration");
+                navigate("/signup?redirect=host");
               }
             }}
             className="text-gray-700 hover:text-gray-100 text-sm font-medium whitespace-nowrap"
@@ -414,9 +414,9 @@ const Navbar = () => {
                         onClick={(e) => {
                           e.preventDefault();
                           if (isLoggedIn) {
-                            navigate("/provider/registration");
+                            navigate("/host");
                           } else {
-                            navigate("/signup?redirect=provider-registration");
+                            navigate("/signup?redirect=host");
                           }
                         }}
                         className="block px-3 py-1.5 text-gray-700 hover:bg-gray-50 text-sm"

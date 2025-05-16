@@ -107,10 +107,10 @@ const Register = () => {
                 const isUserLoggedIn = localStorage.getItem('user') || false;
                 
                 if (isUserLoggedIn) {
-                  navigate('/provider/registration');
+                  navigate('/host');
                 } else {
                   // Redirect to signup with a redirect parameter
-                  navigate('/signup?redirect=provider-registration');
+                  navigate('/signup?redirect=host');
                 }
               }}
               className="bg-[#B4A481] text-white px-6 py-3 rounded-lg hover:bg-[#a3927b] transition-colors"
