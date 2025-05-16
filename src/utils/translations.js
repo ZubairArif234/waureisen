@@ -42,6 +42,12 @@ const translations = {
     dogs: "dogs",
     search: "Search",
     done: "Done",
+    parking_at_the_accommodation: "Parking at the Accommodation",
+    parking_street: "parking Street",
+    e_charge: "E Charge",
+    thermal_bath: "Thermal Bath",
+    relaxation_zone: "Relaxation Zone"
+
 
     // Auth
     log_in: "Log in",

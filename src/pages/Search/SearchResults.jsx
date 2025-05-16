@@ -664,17 +664,14 @@ const SearchResults = () => {
             }`}
           >
             <div className="h-full pt-0">
-              {showMap ? (
-                mapView
-              ) : (
-                <MockMap
-                  center={mapViewport.center}
-                  listings={mapReadyListings}
-                  locationName={areaName}
-                  onMapChange={handleMapChange}
-                  radius={SEARCH_RADIUS}
-                />
-              )}
+              {/* ONLY CHANGED THIS LINE - Using MockMap for mobile view instead of mapView */}
+              <MockMap
+                center={mapViewport.center}
+                listings={mapReadyListings}
+                locationName={areaName}
+                onMapChange={handleMapChange}
+                radius={SEARCH_RADIUS}
+              />
             </div>
           </aside>
         </div>
