@@ -524,10 +524,10 @@ const Profile = () => {
                   <h3 className="text-md font-medium text-gray-800">
                     {t("customer_number") || "Customer Number"}
                   </h3>
-                  <p className="text-sm text-gray-500">
+                  {/* <p className="text-sm text-gray-500">
                     {t("customer_number_desc") ||
                       "Your unique customer identification number"}
-                  </p>
+                  </p> */}
                 </div>
                 <div className="text-lg font-semibold text-brand">
                   {profileData.customerNumber ? (
@@ -540,7 +540,7 @@ const Profile = () => {
             </div>
 
             {/* Customer - Provider Toggle */}
-            <div className="py-4 border-t border-b">
+            {/* <div className="py-4 border-t border-b">
               <div className="flex justify-between items-center">
                 <div>
                   <h3 className="text-lg font-medium text-gray-800">
@@ -583,7 +583,7 @@ const Profile = () => {
                   </span>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Dogs Section */}
             <div className="space-y-6">

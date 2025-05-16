@@ -1159,6 +1159,7 @@ const translations = {
     cage: "Cage",
     sign_dog_is_a_guest_here: "Sign for 'Dog is a guest here'",
     wellness_for_dogs: "Wellness for dogs",
+    profile_saved_successfully: "Profile saved successfully",
   },
 
   de: {
@@ -1838,7 +1839,7 @@ account_actions: "Kontoaktionen",
     how_it_works_3:
       "Erhalten Sie Zahlungen - Sichere Zahlungen für jede Buchung",
     ready_to_start: "Bereit loszulegen?",
-    start_hosting_text: "Schliessen Sie unseren einfachen Registrierungsprozess ab und beginnen Sie in nur 24 Stunden mit dem Hosten.",
+    start_hosting_text: "Schliessen Sie unseren einfachen Registrierungsprozess ab und beginnen Sie direkt mit der Vermietung Ihrer Unterkunft.",
     register_as_host: "Als Gastgeber registrieren",
 
     // Partners page
@@ -2409,6 +2410,7 @@ account_actions: "Kontoaktionen",
     massage: "Massage",
     relaxation_zone: "Ruhezone",
     aquafitt: "Aquafit",
+    profile_saved_successfully: "Profil erfolgreich gespeichert",
   },
 };
 
