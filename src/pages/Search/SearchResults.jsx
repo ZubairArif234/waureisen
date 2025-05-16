@@ -18,6 +18,7 @@ import {
   addMapMoveListener,
 } from "../../utils/googleMapsUtils";
 import { usePriceFilter } from "../../context/PriceFilterContext";
+import SearchBar from "../../components/SearchComponents/SearchBar";
 
 // Import dummy images for now
 import i1 from "../../assets/i1.png";
@@ -27,12 +28,12 @@ import i3 from "../../assets/i3.png";
 const SearchResults = () => {
   const location = useLocation();
   const { t } = useLanguage();
-  const searchParams = new URLSearchParams(location.search);
+  const urlSearchParams = new URLSearchParams(location.search);
   const { applyPriceFilter } = usePriceFilter();
 
   // Extract search parameters
-  const locationParam = searchParams.get("location") || "";
-  const dateRange = searchParams.get("dates") || "";
+  const locationParam = urlSearchParams.get("location") || "";
+  const dateRange = urlSearchParams.get("dates") || "";
   
   // Fix the date formatting
   const [startDate] = dateRange.split(" - ");
@@ -58,12 +59,12 @@ const SearchResults = () => {
   const formattedStartDate = formatDate(startDate);
 
   console.log("Formatted date:", formattedStartDate);
-  const people = searchParams.get("people") || 1;
-  const dogs = searchParams.get("dogs") || 1;
+  const people = urlSearchParams.get("people") || 1;
+  const dogs = urlSearchParams.get("dogs") || 1;
 
   // Get latitude and longitude from URL if available
-  const initialLat = parseFloat(searchParams.get("lat")) || 46.818188;
-  const initialLng = parseFloat(searchParams.get("lng")) || 8.227512;
+  const initialLat = parseFloat(urlSearchParams.get("lat")) || 46.818188;
+  const initialLng = parseFloat(urlSearchParams.get("lng")) || 8.227512;
   
   // Fixed search radius of 500km
   const SEARCH_RADIUS = 500;
@@ -545,10 +546,90 @@ const SearchResults = () => {
     </div>
   );
 
+  // Add new state for search parameters
+  const [searchState, setSearchState] = useState({
+    location: locationParam,
+    dateRange: dateRange ? {
+      start: new Date(dateRange.split(' - ')[0]),
+      end: new Date(dateRange.split(' - ')[1])
+    } : { start: null, end: null },
+    guests: {
+      people: parseInt(people),
+      dogs: parseInt(dogs)
+    }
+  });
+
+  // Add handler for search updates
+  const handleSearch = (searchUrl) => {
+    // Update the URL without full page reload
+    window.history.pushState({}, '', searchUrl);
+    
+    // Parse the new URL parameters
+    const newParams = new URLSearchParams(searchUrl.split('?')[1]);
+    const newLocation = newParams.get('location') || '';
+    const newDateRange = newParams.get('dates') || '';
+    const newPeople = parseInt(newParams.get('people')) || 1;
+    const newDogs = parseInt(newParams.get('dogs')) || 0;
+    const newLat = parseFloat(newParams.get('lat')) || initialLat;
+    const newLng = parseFloat(newParams.get('lng')) || initialLng;
+
+    // Update search parameters state
+    setSearchState({
+      location: newLocation,
+      dateRange: newDateRange ? {
+        start: new Date(newDateRange.split(' - ')[0]),
+        end: new Date(newDateRange.split(' - ')[1])
+      } : { start: null, end: null },
+      guests: {
+        people: newPeople,
+        dogs: newDogs
+      }
+    });
+
+    // Update map viewport
+    setMapViewport(prev => ({
+      ...prev,
+      center: { lat: newLat, lng: newLng },
+      zoom: 12 // Reset zoom level for new location
+    }));
+
+    // Clear existing markers
+    if (mapMarkers.length > 0) {
+      clearMarkers(mapMarkers);
+      setMapMarkers([]);
+    }
+
+    // Reset page and fetch new results
+    setPage(1);
+    setLoading(true);
+    fetchListings(newLat, newLng, 1, false).then(newListings => {
+      // Add new markers after fetching listings
+      if (mapInstance && newListings.length > 0) {
+        const markers = addListingMarkers(mapInstance, newListings);
+        setMapMarkers(markers);
+      }
+    });
+  };
+
   return (
     <div className="min-h-screen" style={pageContentStyle}>
       <Navbar />
-      <SearchFilters dateRange={dateRange} />
+      
+      {/* Add SearchBar component with adjusted positioning */}
+      <div className="w-full mt-16 px-4 md:px-6 py-2 bg-white border-b">
+        <div className="max-w-7xl mx-auto">
+          <SearchBar
+            initialLocation={searchState.location}
+            initialDateRange={searchState.dateRange}
+            initialGuests={searchState.guests}
+            onSearch={handleSearch}
+          />
+        </div>
+      </div>
+
+      <div className="-mt-20">
+        <SearchFilters dateRange={dateRange} />
+      </div>
 
       <div className="relative flex-grow">
         {/* Mobile Map Toggle */}

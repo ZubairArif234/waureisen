@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import moment from 'moment'; // Import moment for date comparison
 import { useLanguage } from '../../utils/LanguageContext';
@@ -170,7 +171,7 @@ const DateRangePicker = ({ isOpen, onClose, selectedRange, onRangeSelect, availa
   };
 // console.log(bookedDates , "booked");
 
-  return (
+  return ReactDOM.createPortal(
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-xl p-6 max-w-2xl w-full mx-4">
         <div className="flex justify-between items-center mb-4">
@@ -229,7 +230,8 @@ const DateRangePicker = ({ isOpen, onClose, selectedRange, onRangeSelect, availa
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
