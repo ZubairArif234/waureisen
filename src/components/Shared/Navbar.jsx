@@ -203,8 +203,9 @@ const Navbar = () => {
     },
     {
       icon: <LayoutDashboard className="h-4 w-4" />,
-      label: t("dashboard"),
+      label: t("Dashboard"),
       path: "/provider/dashboard",
+      onClick: () => navigate("/"),
     },
     {
       icon: <Home className="h-4 w-4" />,
@@ -425,19 +426,17 @@ const Navbar = () => {
                     </div>
 
                     {/* Menu Items based on user type */}
-                    {getMenuItems().map((item, index) => (
+                    {getMenuItems().map((item) => (
                       <Link
-                        key={index}
+                        key={item.path}
                         to={item.path}
-                        className="flex items-center justify-between px-3 py-1.5 text-gray-700 hover:bg-gray-50"
-                        onClick={() => setIsMenuOpen(false)}
+                        onClick={item.onClick}
+                        className="flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors"
                       >
-                        <div className="flex items-center">
-                          {item.icon}
-                          <span className="ml-2 text-sm">{item.label}</span>
-                        </div>
+                        {item.icon}
+                        <span className="text-gray-700">{item.label}</span>
                         {item.badge && (
-                          <span className="bg-[#B4A481] text-white text-xs font-medium px-2 py-0.5 rounded-full">
+                          <span className="ml-auto bg-brand text-white text-xs px-2 py-1 rounded-full">
                             {item.badge}
                           </span>
                         )}

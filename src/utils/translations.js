@@ -1160,6 +1160,8 @@ const translations = {
     sign_dog_is_a_guest_here: "Sign for 'Dog is a guest here'",
     wellness_for_dogs: "Wellness for dogs",
     profile_saved_successfully: "Profile saved successfully",
+    Dashboard: "Dashboard",
+    hosting_information: "Hosting Information",
   },
 
   de: {
@@ -1299,7 +1301,7 @@ account_actions: "Kontoaktionen",
     personal_info_desc:
       "Aktualisiere deine persönlichen Daten und dein Profilbild",
     personal_info_management:
-      "Verwalte deine persönlichen Daten und dein Profil",
+      "Verwalten Sie Ihre persönlichen Daten und Ihr Profil",
     supported_formats: "Unterstützte Formate: JPEG, PNG (max. 5 MB)",
     bio_description:
       "Erzähle Gästen etwas über dich und was dich zu einem grossartigen Gastgeber macht",
@@ -2167,7 +2169,7 @@ account_actions: "Kontoaktionen",
     vat_number: "Umsatzsteuer-ID",
     optional: "Optional",
     website: "Website",
-    properties_to_list: "Wie viele Immobilien planen Sie zu inserieren?",
+    properties_to_list: "Wie viele Unterkünfte planen Sie zu inserieren?",
     hosting_experience: "Haben Sie bereits Erfahrung als Gastgeber?",
     none: "Keine",
     other_platforms: "Auf anderen Plattformen",
@@ -2411,6 +2413,8 @@ account_actions: "Kontoaktionen",
     relaxation_zone: "Ruhezone",
     aquafitt: "Aquafit",
     profile_saved_successfully: "Profil erfolgreich gespeichert",
+    Dashboard: "Dashboard",
+    hosting_information: "Vermieter Informationen",
   },
 };
 
