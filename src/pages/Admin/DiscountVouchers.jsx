@@ -65,6 +65,10 @@ const VoucherModal = ({ isOpen, onClose, onSave, editVoucher = null }) => {
     validUntil: "",
     status: "active",
     voucherBy: "admin",
+    travelAmount: {
+      amount: "",
+      currency: "CHF"
+    }
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -107,6 +111,10 @@ const VoucherModal = ({ isOpen, onClose, onSave, editVoucher = null }) => {
           validUntil: formattedDate,
           status: editVoucher.status || "active",
           voucherBy: editVoucher.voucherBy || "admin",
+          travelAmount: {
+            amount: editVoucher.travelAmount?.amount || "",
+            currency: editVoucher.travelAmount?.currency || "CHF"
+          }
         });
       } else {
         // When creating new voucher
@@ -117,6 +125,10 @@ const VoucherModal = ({ isOpen, onClose, onSave, editVoucher = null }) => {
           validUntil: "",
           status: "active",
           voucherBy: "admin",
+          travelAmount: {
+            amount: "",
+            currency: "CHF"
+          }
         });
       }
       setError("");
@@ -148,6 +160,10 @@ const VoucherModal = ({ isOpen, onClose, onSave, editVoucher = null }) => {
         status: formData.status,
         validUntil: new Date(formData.validUntil),
         voucherBy: formData.voucherBy,
+        travelAmount: {
+          amount: parseFloat(formData.travelAmount.amount) || 0,
+          currency: formData.travelAmount.currency
+        }
       };
 
       // Set either discountPercentage or discountMoney based on discountType
@@ -267,6 +283,49 @@ const VoucherModal = ({ isOpen, onClose, onSave, editVoucher = null }) => {
               <option value="active">Active</option>
               <option value="expired">Expired</option>
             </select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Travel Amount (Minimum)
+              </label>
+              <input
+                type="number"
+                name="travelAmount.amount"
+                value={formData.travelAmount.amount}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  travelAmount: {
+                    ...formData.travelAmount,
+                    amount: e.target.value
+                  }
+                })}
+                className="w-full px-3 py-2 border rounded-lg"
+                min="0"
+                step="0.01"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Currency
+              </label>
+              <select
+                name="travelAmount.currency"
+                value={formData.travelAmount.currency}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  travelAmount: {
+                    ...formData.travelAmount,
+                    currency: e.target.value
+                  }
+                })}
+                className="w-full px-3 py-2 border rounded-lg"
+              >
+                <option value="CHF">CHF</option>
+                <option value="EUR">EUR</option>
+              </select>
+            </div>
           </div>
 
           <div>
