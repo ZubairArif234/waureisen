@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, X, ChevronDown, ChevronUp, Trash, AlertTriangle, ListFilter, Check, Edit, Lock } from 'lucide-react';
+import { Plus, X, ChevronDown, ChevronUp, Trash, AlertTriangle, ListFilter, Check, Edit, Lock, Dog, Car, Dumbbell, Home, Baby, Coffee, Filter, MapPin, Eye, Flame } from 'lucide-react';
 import { 
   getActiveFilters, 
   createSubsection, 
@@ -477,6 +477,31 @@ const FilterTypeIcon = ({ type }) => {
   }
 };
 
+// Icon mapping for subsections
+const getSubsectionIcon = (subsectionName) => {
+  const iconMap = {
+    'Dog Facilities': Dog,
+    'Facilities Parking': Car,
+    'Facilities Wellness': Dumbbell,
+    'Facilities Accommodation Features': Home,
+    'Facilities Kids': Baby,
+    'Facilities Kitchen': Coffee,
+    'Facilities Main Filters': Filter,
+    'Facilities Smoking': Flame,
+    'Facilities Sport': Dumbbell,
+    'Facilities To Do Nearby': MapPin,
+    'Facilities View': Eye,
+  };
+
+  return iconMap[subsectionName] || Lock; // Default to Lock if no match
+};
+
+// Subsection Icon component
+const SubsectionIcon = ({ name }) => {
+  const Icon = getSubsectionIcon(name);
+  return <Icon className="w-4 h-4 text-[#767676]" />;
+};
+
 const FiltersManagement = () => {
   // State for active filter document and UI state
   const [activeFilter, setActiveFilter] = useState(null);
@@ -785,6 +810,7 @@ const FiltersManagement = () => {
                       {subsection.predefined && (
                         <Lock className="w-4 h-4 text-brand" />
                       )}
+                      <SubsectionIcon name={subsection.name} />
                       <div>
                         <h3 className="text-lg font-medium text-gray-900">
                           {subsection.name}
@@ -932,6 +958,7 @@ const FiltersManagement = () => {
                                   {subsubsection.predefined && (
                                     <Lock className="w-4 h-4 text-brand" />
                                   )}
+                                  <SubsectionIcon name={subsubsection.name} />
                                   <div>
                                     <h4 className="text-md font-medium text-gray-900">
                                       {subsubsection.name}
