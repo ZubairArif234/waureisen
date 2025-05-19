@@ -684,6 +684,7 @@ const SearchResults = () => {
                               ? accommodation.images[0]
                               : null
                           }
+                          images={accommodation.images || []}
                           price={accommodation.pricePerNight?.price || 0}
                           currency={
                             accommodation.pricePerNight?.currency || "CHF"
@@ -699,7 +700,7 @@ const SearchResults = () => {
                               accommodation.source.name) ||
                             "Provider"
                           }
-                          pricePerNight={accommodation.pricePerNight} // Pass the full pricePerNight object
+                          pricePerNight={accommodation.pricePerNight}
                         />
                       ))
                     : null}

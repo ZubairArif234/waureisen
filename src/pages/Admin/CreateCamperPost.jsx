@@ -518,7 +518,6 @@ toast.error("Category already selected!")
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#B4A481]/20 focus:border-[#B4A481]"
                   >
                     <option value="">Select category</option>
-                    <option value="Electricity">Electricity</option>
                     <option value="Driver cabin">Driver cabin</option>
                     <option value="Living area & kitchen">
                       Living area & kitchen
