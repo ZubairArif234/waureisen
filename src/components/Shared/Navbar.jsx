@@ -26,7 +26,10 @@ import {
   getCurrentUser,
   getUserType,
 } from "../../utils/authService";
-import { getUserUnreadCount, getProviderUnreadCount } from "../../api/conversationAPI";
+import {
+  getUserUnreadCount,
+  getProviderUnreadCount,
+} from "../../api/conversationAPI";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -40,6 +43,27 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { language, switchLanguage, t } = useLanguage();
   const { socket } = useSocket(); // Get socket from context
+  const user2 = localStorage.getItem("provider_user");
+  const typeOfUser = localStorage.getItem("userType");
+
+ useEffect(() => {
+    const user = getCurrentUser();
+    console.log(user);
+    
+  if (typeOfUser === "provider") {
+    const isProfileCompleted = user?.profileCompleted;
+    const isOnRegistration = location.pathname === "/provider/registration";
+
+    if (!isProfileCompleted && !isOnRegistration) {
+      navigate("/provider/registration");
+    }
+
+    if (isProfileCompleted && isOnRegistration) {
+      navigate("/provider");
+    }
+  }
+}, [typeOfUser, user2, location.pathname, navigate]);
+
 
   // Extract fetchUnreadCount function outside of useEffect for reuse
   const fetchUnreadCount = async () => {
@@ -47,7 +71,7 @@ const Navbar = () => {
       setUnreadMessageCount(0);
       return;
     }
-    
+
     try {
       if (userType === "provider") {
         const count = await getProviderUnreadCount();
@@ -64,9 +88,9 @@ const Navbar = () => {
   // Fetch unread count on mount and periodically
   useEffect(() => {
     if (!isLoggedIn) return;
-    
+
     fetchUnreadCount();
-    
+
     // Set up interval to check periodically
     const intervalId = setInterval(fetchUnreadCount, 30000);
     return () => clearInterval(intervalId);
@@ -75,29 +99,29 @@ const Navbar = () => {
   // Socket integration for real-time updates
   useEffect(() => {
     if (!socket || !isLoggedIn) return;
-    
+
     // console.log("Setting up socket listeners in Navbar");
-    
+
     // Listen for new messages
     const handleNewMessage = (message) => {
       //console.log("New message received in Navbar:", message);
-      
+
       // Increment count immediately when receiving a message meant for this user
-      const shouldIncrement = 
-        (userType === 'user' && message.senderType === 'Provider') ||
-        (userType === 'provider' && message.senderType === 'User');
-        
+      const shouldIncrement =
+        (userType === "user" && message.senderType === "Provider") ||
+        (userType === "provider" && message.senderType === "User");
+
       if (shouldIncrement) {
         //console.log("Incrementing unread count");
-        setUnreadMessageCount(prev => prev + 1);
+        setUnreadMessageCount((prev) => prev + 1);
       }
     };
-    
-    socket.on('new_message', handleNewMessage);
-    
+
+    socket.on("new_message", handleNewMessage);
+
     return () => {
       //console.log("Cleaning up socket listeners in Navbar");
-      socket.off('new_message', handleNewMessage);
+      socket.off("new_message", handleNewMessage);
     };
   }, [socket, isLoggedIn, userType]);
 
@@ -252,7 +276,7 @@ const Navbar = () => {
 
   // Check if we should show the menu icon (not for admin users)
   const shouldShowMenuIcon = isLoggedIn && userType !== "admin";
-//console.log(userType)
+  //console.log(userType)
   return (
     <nav className="fixed w-full top-0 z-50 px-6 py-4 bg-white/20 backdrop-blur-sm rounded-b-2xl shadow-sm">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -264,44 +288,44 @@ const Navbar = () => {
         </div>
 
         {/* Desktop & Tablet Navigation Links */}
-        {userType != "provider" && 
-       ( <div className="hidden md:flex items-center space-x-4 lg:space-x-8 lg:ml-[410px] md:ml-auto">
-          <Link
-            to="/camper-rental"
-            className="text-gray-700 hover:text-gray-100 text-sm font-medium whitespace-nowrap"
-          >
-            {t("camper_rental")}
-          </Link>
-          <Link
-            to="/travelshop"
-            className="text-gray-700 hover:text-gray-100 text-sm font-medium whitespace-nowrap"
-          >
-            {t("Travelshop")}
-          </Link>
-          <a
-            href="https://calendly.com/hallo-waureisen/austausch"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-gray-700 hover:text-gray-100 text-sm font-medium whitespace-nowrap"
-          >
-            {t("book_appointment")}
-          </a>
-          <Link
-            to="#"
-            onClick={(e) => {
-              e.preventDefault();
-              if (isLoggedIn) {
-                navigate("/host");
-              } else {
-                navigate("/signup?redirect=host");
-              }
-            }}
-            className="text-gray-700 hover:text-gray-100 text-sm font-medium whitespace-nowrap"
-          >
-            {t("register_accommodation")}
-          </Link>
-        </div>)
-        }
+        {userType != "provider" && (
+          <div className="hidden md:flex items-center space-x-4 lg:space-x-8 lg:ml-[410px] md:ml-auto">
+            <Link
+              to="/camper-rental"
+              className="text-gray-700 hover:text-gray-100 text-sm font-medium whitespace-nowrap"
+            >
+              {t("camper_rental")}
+            </Link>
+            <Link
+              to="/travelshop"
+              className="text-gray-700 hover:text-gray-100 text-sm font-medium whitespace-nowrap"
+            >
+              {t("Travelshop")}
+            </Link>
+            <a
+              href="https://calendly.com/hallo-waureisen/austausch"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-700 hover:text-gray-100 text-sm font-medium whitespace-nowrap"
+            >
+              {t("book_appointment")}
+            </a>
+            <Link
+              to="#"
+              onClick={(e) => {
+                e.preventDefault();
+                if (isLoggedIn) {
+                  navigate("/host");
+                } else {
+                  navigate("/signup?redirect=host");
+                }
+              }}
+              className="text-gray-700 hover:text-gray-100 text-sm font-medium whitespace-nowrap"
+            >
+              {t("register_accommodation")}
+            </Link>
+          </div>
+        )}
 
         {/* Right Side Icons */}
         <div className="flex items-center gap-2 sm:gap-4 mr-2 sm:mr-4 md:mr-8">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import {  useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, Check, HelpCircle } from "lucide-react";
 import Navbar from "../../components/Shared/Navbar";
 import Footer from "../../components/Shared/Footer";
@@ -229,7 +229,19 @@ console.log(name , value);
       };
 
       // Call the API to complete registration
-      const response = await completeProviderRegistration(registrationData);
+    const response = await completeProviderRegistration(registrationData);
+
+const prevUserStr = localStorage.getItem("provider_user");
+
+if (prevUserStr) {
+  const prevUser = JSON.parse(prevUserStr);
+  const updatedUser = { ...prevUser, profileCompleted: true };
+  localStorage.setItem("provider_user", JSON.stringify(updatedUser));
+} else {
+  console.warn("No provider_user found in localStorage.");
+}
+
+console.log(response, "jffk");
 
       // Clear the sessionStorage data now that we're done with it
       sessionStorage.removeItem("providerSignupData");
@@ -754,7 +766,7 @@ console.log(name , value);
             <p className="text-sm text-gray-500 mb-4">
               {t("banking_details_required")}
             </p>
-            { !stripeAccount && (
+            { !stripeAccount && !stripeLoading && (
               <div className="flex justify-center">
                 <button
                   className="bg-brand text-white py-3 px-4 rounded-lg font-medium hover:bg-brand-dark transition-color"
@@ -764,7 +776,7 @@ console.log(name , value);
                 </button>
               </div>
             )}
-           {accountId  && !stripeAccount ? (
+           {accountId  && !stripeAccount && !stripeLoading ? (
   <p className="text-red-500 text-center">
     Failed to connect to stripe, Please try again!
   </p>
@@ -782,7 +794,7 @@ console.log(name , value);
   ) : (
     <p>Connecting...</p>
   )
-) : null}
+) :  null}
 
             {/* <div>
               <label htmlFor="bankName" className="block text-sm font-medium text-gray-700 mb-1">
