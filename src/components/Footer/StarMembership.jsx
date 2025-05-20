@@ -1,11 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
 import heroImage from '../../assets/starmembership.png'; // Make sure you have this image in your assets folder
 import { useLanguage } from '../../utils/LanguageContext';
+import { changeMetaData } from '../../utils/extra';
 
 const StarMembership = () => {
   const { t } = useLanguage();
+  useEffect(() => {
+        changeMetaData("Star Membership - Waureisen");
+      }, []);
   return (
     <div className="min-h-screen bg-white">
       <Navbar />

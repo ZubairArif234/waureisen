@@ -9,6 +9,7 @@ import {
   isAccountNotFoundError,
   redirectToSignup,
 } from "../../utils/authService";
+import WelcomeCustomerModal from "../../components/SearchComponents/WelcomeCustomerModal";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -19,6 +20,8 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useLanguage();
+  
+     const [activeModal, setActiveModal] = useState(false);
 
   // Check for session_expired param in URL
   useEffect(() => {
@@ -47,7 +50,8 @@ const Login = () => {
       } else if (userType === "provider") {
         navigate("/provider/dashboard");
       } else {
-        navigate("/");
+        setActiveModal(true)
+        // navigate("/");
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -231,6 +235,16 @@ const Login = () => {
           </div>
         </div>
       </div>
+      <WelcomeCustomerModal
+              isOpen={activeModal}
+              onClose={() =>{ setActiveModal(false);navigate("/")}}
+              title={t("welcome_back")}
+              onConfirm={()=>navigate("/")}
+            >
+              <p className="text-center">
+               {t("great_to_see_you_again")}
+              </p>
+            </WelcomeCustomerModal>
       <Footer />
     </div>
   );

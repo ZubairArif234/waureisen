@@ -1,5 +1,6 @@
 import React from 'react'
 import { useLanguage } from '../../utils/LanguageContext';
+import { Baby, Car, Coffee, Dog, Dumbbell, Eye, Filter, Flame, Home, MapPin } from 'lucide-react';
 
 const AccomodarionFilters = ({ isOpen, onClose, filterData }) => {
 
@@ -7,6 +8,35 @@ const AccomodarionFilters = ({ isOpen, onClose, filterData }) => {
        const { t } = useLanguage();
   if (!isOpen) return null;
 
+  const getSubsectionIcon = (subsectionName) => {
+  const iconMap = {
+    'Dog Facilities': Dog,
+    'Facilities Parking': Car,
+    'Facilities Wellness': Dumbbell,
+    'Facilities Accommodation Features': Home,
+    'Facilities Kids': Baby,
+    'Facilities Kitchen': Coffee,
+    'Facilities Main Filters': Filter,
+    'Facilities Smoking': Flame,
+    'Facilities Sport': Dumbbell,
+    'Facilities To Do Nearby': MapPin,
+    'Facilities View': Eye,
+  };
+
+  return iconMap[subsectionName]  || ""; // Default to Lock if no match
+};
+
+// Subsection Icon component
+const SubsectionIcon = ({ name }) => {
+  const Icon = getSubsectionIcon(name);
+  if (Icon !== ""){
+
+    return <Icon className="w-4 h-4 text-[#767676]" />;
+  }
+  else{
+    return;
+  }
+};
 
 
   return (
@@ -35,8 +65,8 @@ const AccomodarionFilters = ({ isOpen, onClose, filterData }) => {
                       subsubsection.filters &&
                       subsubsection.filters.length > 0 && (
                         <div key={subIndex} className='mb-4'>
-                          <h3 className="text-[#4D484D] md:text-lg text-md font-semibold mb-2">
-                            {subsubsection.name}
+                          <h3 className="text-[#4D484D] flex items-center gap-2 md:text-lg text-md font-semibold mb-2">
+                          <SubsectionIcon name={subsubsection.name} />  {subsubsection.name + "kll"}
                           </h3>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {subsubsection.filters.map(

@@ -89,7 +89,7 @@ const CamperCard = ({ camper, onEdit, onDelete }) => {
           <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusStyle(camper.status)}`}>
             {camper?.status}
           </span>
-          {Array.isArray(camper?.category) && camper.category.length > 0 ? (
+          {/* {Array.isArray(camper?.category) && camper.category.length > 0 ? (
   camper.category.map((item, i) => (
     <span
       key={i}
@@ -104,7 +104,7 @@ const CamperCard = ({ camper, onEdit, onDelete }) => {
   >
     {camper.category}
   </span>
-) : null}
+) : null} */}
 
             
         </div>

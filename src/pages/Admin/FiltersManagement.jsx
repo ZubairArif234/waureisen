@@ -493,13 +493,19 @@ const getSubsectionIcon = (subsectionName) => {
     'Facilities View': Eye,
   };
 
-  return iconMap[subsectionName] || Lock; // Default to Lock if no match
+  return iconMap[subsectionName]  || ""; // Default to Lock if no match
 };
 
 // Subsection Icon component
 const SubsectionIcon = ({ name }) => {
   const Icon = getSubsectionIcon(name);
-  return <Icon className="w-4 h-4 text-[#767676]" />;
+  if (Icon !== ""){
+
+    return <Icon className="w-4 h-4 text-[#767676]" />;
+  }
+  else{
+    return;
+  }
 };
 
 const FiltersManagement = () => {
@@ -807,10 +813,10 @@ const FiltersManagement = () => {
                       )}
                     </button>
                     <div className="flex items-center gap-2">
-                      {subsection.predefined && (
+                      {/* {subsection.predefined && (
                         <Lock className="w-4 h-4 text-brand" />
-                      )}
-                      <SubsectionIcon name={subsection.name} />
+                      )} */}
+                      {/* <SubsectionIcon name={subsection.name} /> */}
                       <div>
                         <h3 className="text-lg font-medium text-gray-900">
                           {subsection.name}
@@ -883,9 +889,9 @@ const FiltersManagement = () => {
                               <div>
                                 <h4 className="font-medium text-gray-900 flex items-center gap-2">
                                   {filter.name}
-                                  {filter.predefined && (
+                                  {/* {filter.predefined && (
                                     <Lock className="w-3 h-3 text-brand" />
-                                  )}
+                                  )} */}
                                 </h4>
                                 <p className="text-sm text-gray-500 capitalize">{filter.type}</p>
                                 
@@ -955,9 +961,9 @@ const FiltersManagement = () => {
                                   )}
                                 </button>
                                 <div className="flex items-center gap-2">
-                                  {subsubsection.predefined && (
+                                  {/* {subsubsection.predefined && (
                                     <Lock className="w-4 h-4 text-brand" />
-                                  )}
+                                  )} */}
                                   <SubsectionIcon name={subsubsection.name} />
                                   <div>
                                     <h4 className="text-md font-medium text-gray-900">
@@ -1033,9 +1039,9 @@ const FiltersManagement = () => {
                                           <div>
                                             <h4 className="font-medium text-gray-900 flex items-center gap-2">
                                               {filter.name}
-                                              {filter.predefined && (
+                                              {/* {filter.predefined && (
                                                 <Lock className="w-3 h-3 text-brand" />
-                                              )}
+                                              )} */}
                                             </h4>
                                             <p className="text-sm text-gray-500 capitalize">{filter.type}</p>
                                             

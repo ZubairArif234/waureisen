@@ -7,6 +7,7 @@ import Footer from "../../components/Shared/Footer";
 import { useLanguage } from "../../utils/LanguageContext";
 import { getCurrentUser } from "../../utils/authService";
 import API from "../../api/config";
+import { changeMetaData } from "../../utils/extra";
 
 // Custom eye toggle button component to ensure consistent styling
 const PasswordToggle = ({ show, toggle }) => {
@@ -41,6 +42,9 @@ const LoginSecurityPage = () => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  useEffect(() => {
+                changeMetaData("Security - Waureisen");
+              }, [])
   const [formData, setFormData] = useState({
     email: "",
     currentPassword: "",

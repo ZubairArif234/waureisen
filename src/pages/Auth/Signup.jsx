@@ -10,6 +10,7 @@ import { useLanguage } from "../../utils/LanguageContext";
 import { userSignup, providerSignup } from "../../api/authAPI";
 import { sendVerificationCode, verifyCode } from "../../api/verificationAPI";
 import toast from "react-hot-toast";
+import WelcomeCustomerModal from "../../components/SearchComponents/WelcomeCustomerModal";
 
 const Signup = () => {
   const [userType, setUserType] = useState("");
@@ -26,6 +27,7 @@ const Signup = () => {
     password: "",
   });
   
+   const [activeModal, setActiveModal] = useState(false);
   // Email verification states
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
@@ -138,10 +140,10 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
   
-    if (!isEmailVerified) {
-      setError("Please verify your email before signing up");
-      return;
-    }
+    // if (!isEmailVerified) {
+    //   setError("Please verify your email before signing up");
+    //   return;
+    // }
     
     if (!acceptTerms) {
       setError(
@@ -180,8 +182,8 @@ const Signup = () => {
           if (response.user) {
             localStorage.setItem("user_data", JSON.stringify(response.user));
           }
-  
-          navigate("/");
+  setActiveModal(true)
+          // navigate("/");
         } else {
           throw new Error("Invalid response from server - no token received");
         }
@@ -525,12 +527,12 @@ const Signup = () => {
                 {/* Signup Button */}
                 <button
                   type="submit"
-                  disabled={!acceptTerms || isLoading || !userType || !isEmailVerified}
-                  className={`w-full py-3 rounded-lg font-medium ${
-                    acceptTerms && !isLoading && userType && isEmailVerified
-                      ? "bg-gray-100 text-gray-800 hover:bg-gray-200"
-                      : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  }`}
+                  // disabled={!acceptTerms || isLoading || !userType || !isEmailVerified}
+                  // className={`w-full py-3 rounded-lg font-medium ${
+                  //   acceptTerms && !isLoading && userType && isEmailVerified
+                  //     ? "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                  //     : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  // }`}
                 >
                   {isLoading ? t("signing_up") : t("sign_up")}
                 </button>
@@ -542,6 +544,16 @@ const Signup = () => {
           </div>
         </div>
       </div>
+        <WelcomeCustomerModal
+              isOpen={activeModal}
+              onClose={() =>{ setActiveModal(false);navigate("/")}}
+              title={t("welcome_back")}
+              onConfirm={()=>navigate("/")}
+            >
+              <p className="text-center">
+               {t("account_created")}
+              </p>
+            </WelcomeCustomerModal>
       <Footer />
     </div>
   );

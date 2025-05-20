@@ -5,6 +5,7 @@ import Navbar from "../../components/Shared/Navbar";
 import Footer from "../../components/Shared/Footer";
 import { useLanguage } from "../../utils/LanguageContext";
 import { getCurrentUser } from "../../utils/authService";
+import { changeMetaData } from "../../utils/extra";
 
 const AccountCard = ({ icon: Icon, title, description, onClick }) => (
   <div
@@ -26,6 +27,9 @@ const AccountCard = ({ icon: Icon, title, description, onClick }) => (
 const AccountPage = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  useEffect(() => {
+                changeMetaData("Account - Waureisen");
+              }, [])
   const [userData, setUserData] = useState({
     firstName: "",
     lastName: "",

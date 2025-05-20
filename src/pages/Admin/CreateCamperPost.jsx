@@ -10,6 +10,7 @@ import {
   Check,
   Image as ImageIcon,
   MoreHorizontal,
+  Sparkles,
 } from "lucide-react";
 import { createCamper, getCamperById, updateCamper } from "../../api/camperAPI";
 import { uploadImageToCloudinary } from "../../utils/cloudinaryUtils";
@@ -22,14 +23,14 @@ import {
 const CreateCamperPost = () => {
   const navigate = useNavigate();
   const locationInputRef = useRef(null);
-  const { id } = useParams(); // For edit mode
-  const isEditMode = !!id;
+  const { title } = useParams(); // For edit mode
+  const isEditMode = !!title;
 
   // Main state for the camper post
   const [camperData, setCamperData] = useState({
     title: "",
     description: "",
-    category: [],
+    // category: [],
     featuredImage: "",
     imageTitle: "",
     content: [],
@@ -75,11 +76,12 @@ const CreateCamperPost = () => {
     if (isEditMode) {
       const fetchCamper = async () => {
         try {
-          const camper = await getCamperById(id);
+          const formattedTitle = title?.replace(/-/g, " ");
+          const camper = await getCamperById(formattedTitle);
           setCamperData({
             title: camper.title || "",
             description: camper.description || "",
-            category: camper.category || "",
+            // category: camper.category || "",
             featuredImage: camper.featuredImage || "",
             imageTitle: camper.imageTitle || "",
             content: camper.content || [],
@@ -97,7 +99,7 @@ const CreateCamperPost = () => {
 
       fetchCamper();
     }
-  }, [id, isEditMode]);
+  }, [title, isEditMode]);
 
   // Generate excerpt from content
   useEffect(() => {
@@ -231,7 +233,7 @@ const CreateCamperPost = () => {
   const validateForm = () => {
     if (!camperData.title) return "Title is required";
     if (!camperData.description) return "Description is required";
-    if (!camperData.category) return "Category is required";
+    // if (!camperData.category) return "Category is required";
     if (!camperData.featuredImage && !imageFile)
       return "Featured image is required";
     if (camperData.content.length === 0) return "Content is required";
@@ -265,7 +267,7 @@ const CreateCamperPost = () => {
 
       // Create or update camper
       if (isEditMode) {
-        await updateCamper(id, formattedData);
+        await updateCamper(title, formattedData);
         toast.success("Camper updated!");
       } else {
         await createCamper(formattedData);
@@ -433,9 +435,9 @@ toast.error("Category already selected!")
                   <span className="px-3 py-1 bg-white text-black rounded-full font-medium">
                     {camperData.price} {camperData.currency}
                   </span>
-                  <span className="px-3 py-1 bg-[#B4A481] text-white rounded-full font-medium">
+                  {/* <span className="px-3 py-1 bg-[#B4A481] text-white rounded-full font-medium">
                     {camperData.category}
-                  </span>
+                  </span> */}
                   <span className="px-3 py-1 bg-gray-800 text-white rounded-full font-medium">
                     {camperData.location}
                   </span>
@@ -475,11 +477,16 @@ toast.error("Category already selected!")
                 <input
                   type="text"
                   id="title"
+                  disabled={title}
                   value={camperData.title}
                   onChange={(e) => handleInputChange("title", e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#B4A481]/20 focus:border-[#B4A481]"
                   placeholder="Enter camper title"
                 />
+                <div className="bg-amber-100 flex items-center gap-2 py-2 px-3 border border-amber-600 rounded-lg mt-2">
+                 <Sparkles color="#d97706" size={18}/>
+                  <p className="text-xs text-amber-600">Do not repeat the title, it must always be unique to boast the SEO perfomance</p>
+                </div>
               </div>
 
               <div>
@@ -501,8 +508,8 @@ toast.error("Category already selected!")
                 ></textarea>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* <div>
                   <label
                     htmlFor="category"
                     className="block text-sm font-medium text-gray-700 mb-1"
@@ -543,7 +550,7 @@ toast.error("Category already selected!")
                       </p>
                     ))}
                   </div>
-                </div>
+                </div> */}
 
                 <div>
                   <label

@@ -81,7 +81,7 @@ const Footer = () => {
     ],
     specials: [
       { label: 'Our partner', path: '/partners', translationKey: 'partners' },
-      { label: 'Travelmagazine', path: '/publicmagazine', translationKey: 'travel_magazine' },
+      { label: 'Travelmagazine', path: '/travel-magazine', translationKey: 'travel_magazine' },
       { label: 'Travel Insurance', path: 'https://be.erv.ch/?agency=WAUREISEN_01&lang=de', external: true, translationKey: 'travel_insurance' }
     ],
     more: [

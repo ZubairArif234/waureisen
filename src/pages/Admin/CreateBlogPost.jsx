@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Upload, Eye, Save, X, Check } from 'lucide-react';
+import { ArrowLeft, Upload, Eye, Save, X, Check, Sparkles } from 'lucide-react';
 import { createBlog, getBlogById, updateBlog } from '../../api/travelMagazineAPI';
 import { uploadImageToCloudinary } from '../../utils/cloudinaryUtils';
 import toast from 'react-hot-toast';
+import { initAutocomplete, loadGoogleMapsScript } from '../../utils/googleMapsUtils';
 
 const CreateBlogPost = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); // For edit mode
-  const isEditMode = !!id;
-  
+  const { title } = useParams(); // For edit mode
+  const isEditMode = !!title;
+   const locationInputRef = useRef(null);
   // Main state for the blog post
   const [blogData, setBlogData] = useState({
     title: '',
@@ -37,11 +38,14 @@ const CreateBlogPost = () => {
     if (isEditMode) {
       const fetchBlog = async () => {
         try {
-          const blog = await getBlogById(id);
+            const formattedTitle = title?.replace(/-/g, " ");
+          const blog = await getBlogById(formattedTitle);
           setBlogData({
+            id: blog._id || '',
             title: blog.title || '',
             description: blog.description || '',
             category: blog.category || '',
+            country: blog.country || '',
             featuredImage: blog.featuredImage || '',
             imageTitle: blog.imageTitle || '',
             content: blog.content || [],
@@ -55,7 +59,25 @@ const CreateBlogPost = () => {
       
       fetchBlog();
     }
-  }, [id, isEditMode]);
+  }, [title, isEditMode]);
+
+  useEffect(() => {
+      loadGoogleMapsScript(() => {
+        if (window.google && window.google.maps && locationInputRef.current) {
+          const autocomplete = initAutocomplete(locationInputRef, (place) => {
+            if (place && place.formatted_address) {
+              // Update the location in camperData state
+               setBlogData(prev => ({
+  ...prev,
+  country: place.formatted_address
+}));
+                  
+             
+            }
+          });
+        }
+      });
+    }, []);
   
   // Generate excerpt from content
   useEffect(() => {
@@ -216,7 +238,7 @@ const normalizeUrl = (url) => {
       
       // Create or update blog
       if (isEditMode) {
-        await updateBlog(id, formattedData);
+        await updateBlog(blogData?.id, formattedData);
         toast.success('Blog post updated!');
       } else {
         await createBlog(formattedData);
@@ -224,7 +246,7 @@ const normalizeUrl = (url) => {
       }
       
       // Navigate back to travel magazine
-      navigate('/admin/magazine');
+      navigate('/admin/travel-magazine');
     } catch (error) {
       console.error('Error saving blog:', error);
       toast.error(error.response?.data?.message || 'Error saving blog post');
@@ -274,7 +296,7 @@ const normalizeUrl = (url) => {
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
           <button
-            onClick={() => navigate('/admin/magazine')}
+            onClick={() => navigate('/admin/travel-magazine')}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
             <ArrowLeft className="w-5 h-5 text-gray-500" />
@@ -357,11 +379,16 @@ const normalizeUrl = (url) => {
                 <input
                   type="text"
                   id="title"
+                  disabled={title}
                   value={blogData.title}
                   onChange={(e) => setBlogData({...blogData, title: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#B4A481]/20 focus:border-[#B4A481]"
                   placeholder="Enter blog title"
                 />
+                <div className="bg-amber-100 flex items-center gap-2 py-2 px-3 border border-amber-600 rounded-lg mt-2">
+                                 <Sparkles color="#d97706" size={18}/>
+                                  <p className="text-xs text-amber-600">Do not repeat the title, it must always be unique to boast the SEO perfomance</p>
+                                </div>
               </div>
               
               <div>
@@ -394,6 +421,31 @@ const normalizeUrl = (url) => {
                   <option value="Travel Tips">Travel Tips</option>
                   <option value="Pet Travel">Pet Travel</option>
                 </select>
+              </div>
+
+               <div>
+                <label
+                  htmlFor="location"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Location
+                </label>
+                <input
+                  type="text"
+                  id="location"
+                  ref={locationInputRef}
+                  value={blogData.country}
+                   onChange={(e) => setBlogData({...blogData, country: e.target.value})}
+                  
+                  // onChange={(e) =>
+                  //   handleInputChange("", e.target.value)
+                  // }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#B4A481]/20 focus:border-[#B4A481]"
+                  placeholder="Start typing a location..."
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Select a location from the dropdown suggestions
+                </p>
               </div>
             </div>
           </section>

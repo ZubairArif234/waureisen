@@ -9,9 +9,13 @@ import { getProviderProfile } from "../../api/providerAPI";
 import { getUserType, isUserType } from "../../utils/authService";
 import { toast } from "react-hot-toast";
 import { myCardDetails } from "../../api/paymentAPI";
+import { changeMetaData } from "../../utils/extra";
 
 const Profile = () => {
   const { t } = useLanguage();
+  useEffect(() => {
+                changeMetaData("Profile - Waureisen");
+              }, [])
   // Update the initial state to use streetNumber instead of street
   const [profileData, setProfileData] = useState({
     firstName: "",

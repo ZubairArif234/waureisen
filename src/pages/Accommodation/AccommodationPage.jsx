@@ -798,8 +798,7 @@ console.log(availableDates , maxGuests , "ye hai na");
                   ${accommodation?.pricePerNight?.currency || "CHF"}
                 </div>
               </div>
-{console.log(availableDates , " available dates")
-}
+
               {/* Date Picker */}
               <div className="mb-4 relative">
                 <button

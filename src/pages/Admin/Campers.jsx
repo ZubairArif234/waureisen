@@ -133,7 +133,8 @@ const Campers = () => {
 
   // Handler for editing a camper
   const handleEdit = (camper) => {
-    navigate(`/admin/campers/edit/${camper._id}`);
+    const formattedTitle = camper.title?.replace(/ /g, "-");
+    navigate(`/admin/campers/edit/${formattedTitle}`);
   };
 
   // Handler for deleting a camper

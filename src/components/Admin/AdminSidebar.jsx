@@ -69,7 +69,7 @@ const AdminSidebar = () => {
     {
       icon: Newspaper,
       label: "Travel Magazine",
-      path: "/admin/magazine",
+      path: "/admin/travel-magazine",
     },
     // {
     //   icon: MessageCircle,

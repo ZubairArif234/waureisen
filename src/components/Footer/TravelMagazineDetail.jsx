@@ -6,19 +6,24 @@ import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
 import { getBlogById } from '../../api/travelMagazineAPI';
 import { useLanguage } from '../../utils/LanguageContext';
+import { changeMetaData } from '../../utils/extra';
 
 const TravelMagazineDetail = () => {
-  const { id } = useParams();
+  const { title } = useParams();
   const [magazine, setMagazine] = useState(null);
   const [loading, setLoading] = useState(true);
   const { t } = useLanguage();
   const navigate = useNavigate();
-
+useEffect(() => {
+    const formattedTitle = title?.replace(/-/g, " ");
+          changeMetaData(`${formattedTitle} - Waureisen`);
+        }, []);
   useEffect(() => {
     const fetchMagazine = async () => {
+      const formattedTitle = title?.replace(/-/g, " ");
       try {
         setLoading(true);
-        const data = await getBlogById(id);
+        const data = await getBlogById(formattedTitle);
         setMagazine(data);
       } catch (error) {
         console.error('Error fetching magazine details:', error);
@@ -27,10 +32,10 @@ const TravelMagazineDetail = () => {
       }
     };
 
-    if (id) {
+    if (title) {
       fetchMagazine();
     }
-  }, [id]);
+  }, [title]);
 
   // Render content based on type
   const renderContent = (content) => {
@@ -88,7 +93,7 @@ const TravelMagazineDetail = () => {
             />
             <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center text-center p-4">
               <button 
-                onClick={() => navigate('/publicmagazine')}
+                onClick={() => navigate('/travel-magazine')}
                 className="absolute top-4 left-4 bg-white/80 backdrop-blur-sm p-2 rounded-full hover:bg-white transition-colors"
               >
                 <ArrowLeft className="w-6 h-6 text-gray-800" />
@@ -113,7 +118,7 @@ const TravelMagazineDetail = () => {
         <div className="flex flex-col items-center justify-center h-screen">
           <p className="text-xl text-gray-600 mb-4">{t('magazine_not_found')}</p>
           <button 
-            onClick={() => navigate('/publicmagazine')}
+            onClick={() => navigate('/travel-magazine')}
             className="px-4 py-2 bg-brand text-white rounded-lg"
           >
             {t('back_to_magazines')}

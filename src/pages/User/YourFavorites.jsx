@@ -6,6 +6,7 @@ import Footer from "../../components/Shared/Footer";
 import AccommodationCard from "../../components/HomeComponents/AccommodationCard";
 import { useLanguage } from "../../utils/LanguageContext";
 import API from "../../api/config";
+import { changeMetaData } from "../../utils/extra";
 
 const YourFavorites = () => {
   const { t } = useLanguage();
@@ -13,6 +14,10 @@ const YourFavorites = () => {
   const [favoriteListings, setFavoriteListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+                changeMetaData("Favourites - Waureisen");
+              }, [])
 
   // Fetch favorite listings from API
   useEffect(() => {

@@ -4,6 +4,7 @@ import Navbar from "../../components/Shared/Navbar";
 import Footer from "../../components/Shared/Footer";
 import { useLanguage } from "../../utils/LanguageContext";
 import API from "../../api/config";
+import { changeMetaData } from "../../utils/extra";
 
 const ImageGrid = ({ images, title, subtitle, link, isLoading }) => {
   // Determine grid layout based on number of images
@@ -127,6 +128,10 @@ const WishlistHome = () => {
   const [recentlyViewed, setRecentlyViewed] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+                changeMetaData("Wishlist - Waureisen");
+              }, [])
 
   // Fetch data from API
   useEffect(() => {

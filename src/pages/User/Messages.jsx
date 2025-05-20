@@ -7,6 +7,7 @@ import { getUserConversations, getConversationMessages, sendMessage, markConvers
 import { useSocket } from '../../utils/SocketContext';
 import defaultAvatar from '../../assets/avatar.png';
 import logo from "../../assets/logo.png";
+import { changeMetaData } from '../../utils/extra';
 
 // Message bubble component
 const MessageBubble = ({ message, isOwn ,provider}) => {
@@ -89,7 +90,10 @@ const Messages = () => {
   const [error, setError] = useState(null);
   const messagesEndRef = useRef(null);
   const { socket } = useSocket();
-
+  
+  useEffect(() => {
+                changeMetaData("Messages - Waureisen");
+              }, [])
   // Fetch conversations on component mount
   useEffect(() => {
     const fetchConversations = async () => {

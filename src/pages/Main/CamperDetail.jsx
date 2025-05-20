@@ -6,19 +6,24 @@ import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
 import { getCamperById } from '../../api/camperAPI';
 import { useLanguage } from '../../utils/LanguageContext';
+import { changeMetaData } from '../../utils/extra';
 
 const CamperDetail = () => {
-  const { id } = useParams();
+  const { title } = useParams();
   const [camper, setCamper] = useState(null);
   const [loading, setLoading] = useState(true);
   const { t } = useLanguage();
   const navigate = useNavigate();
-
+ useEffect(() => {
+   const formattedTitle = title?.replace(/-/g, " ");
+    changeMetaData(`${formattedTitle} - Camper Rental`);
+  }, []);
   useEffect(() => {
     const fetchCamper = async () => {
       try {
         setLoading(true);
-        const data = await getCamperById(id);
+      const formattedTitle = title?.replace(/-/g, " ");
+        const data = await getCamperById(formattedTitle);
         setCamper(data);
       } catch (error) {
         console.error('Error fetching camper details:', error);
@@ -27,10 +32,10 @@ const CamperDetail = () => {
       }
     };
 
-    if (id) {
+    if (title) {
       fetchCamper();
     }
-  }, [id]);
+  }, [title]);
 
   // Render content based on type
   const renderContent = (content) => {

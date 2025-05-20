@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -102,6 +102,7 @@ import ta6 from '../../assets/ta6.avif';
 import ta7 from '../../assets/ta7.avif';
 import ta8 from '../../assets/ta8.avif';
 import ta9 from '../../assets/ta9.avif';
+import { changeMetaData } from '../../utils/extra';
 
 
 
@@ -113,6 +114,9 @@ import ta9 from '../../assets/ta9.avif';
 const TravelShop = () => {
   // Sample product categories - these would typically come from an API
   const { t } = useLanguage();
+    useEffect(() => {
+      changeMetaData("Travel Shop - Waureisen");
+    }, []);
   const productCategories = [
     {
       title: t("car_seats"),

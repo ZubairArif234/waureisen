@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
 import together from '../../assets/together.png';
@@ -6,9 +6,13 @@ import ceo from '../../assets/ceo.png';
 import founder from '../../assets/partner.png';
 import { PawPrint } from 'lucide-react';
 import { useLanguage } from '../../utils/LanguageContext';
+import { changeMetaData } from '../../utils/extra';
 
 const AboutUs = () => {
   const { t } = useLanguage();
+  useEffect(() => {
+          changeMetaData("About Us - Waureisen");
+        }, []);
   return (
     <div className="min-h-screen bg-white">
       <Navbar />

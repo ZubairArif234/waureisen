@@ -41,9 +41,9 @@ const AdminLayout = () => {
             element={<AddAccommodation />}
           />
           <Route path="/transactions" element={<Transactions />} />
-          <Route path="/magazine" element={<TravelMagazine />} />
-          <Route path="/magazine/create" element={<CreateBlogPost />} />
-          <Route path="/magazine/edit/:id" element={<CreateBlogPost />} />{" "}
+          <Route path="/travel-magazine" element={<TravelMagazine />} />
+          <Route path="/travel-magazine/create" element={<CreateBlogPost />} />
+          <Route path="/travel-magazine/edit/:title" element={<CreateBlogPost />} />{" "}
           {/* New edit route */}
           <Route path="/customers" element={<Customers />} />
           <Route path="/providers" element={<Providers />} />
@@ -52,7 +52,7 @@ const AdminLayout = () => {
           <Route path="/filters" element={<FiltersManagement />} />
           <Route path="/campers" element={<Campers />} />
           <Route path="/campers/new" element={<CreateCamperPost />} />
-          <Route path="/campers/edit/:id" element={<CreateCamperPost />} />
+          <Route path="/campers/edit/:title" element={<CreateCamperPost />} />
         </Routes>
       </div>
     </div>

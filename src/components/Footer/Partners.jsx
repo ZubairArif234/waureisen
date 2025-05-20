@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
 import partnersBackground from '../../assets/ourpartners.png';
 import { PawPrint, Globe } from 'lucide-react';
 import { useLanguage } from '../../utils/LanguageContext';
+import { changeMetaData } from '../../utils/extra';
 
 const PartnerSection = ({ title, descriptionKey, url }) => {
   const { t } = useLanguage();
-  
+  useEffect(() => {
+            changeMetaData("Partners - Waureisen");
+          }, []);
   return (
     <div className="py-12 border-b border-gray-100">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">

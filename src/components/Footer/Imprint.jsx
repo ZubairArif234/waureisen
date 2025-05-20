@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
 import { useLanguage } from '../../utils/LanguageContext';
+import { changeMetaData } from '../../utils/extra';
 
 const Imprint = () => {
   const { t } = useLanguage();
+    useEffect(() => {
+      changeMetaData("Inprint - Waureisen");
+    }, []);
   return (
     <div className="min-h-screen bg-white">
       <Navbar />

@@ -7,12 +7,16 @@ import heroImage from '../../assets/tm1.png';
 import { getPublishedBlogs } from '../../api/travelMagazineAPI';
 import { useLanguage } from '../../utils/LanguageContext';
 import { BookOpen } from 'lucide-react';
+import { changeMetaData } from '../../utils/extra';
 
 const TravelMagazine = () => {
   const [magazines, setMagazines] = useState([]);
   const [loading, setLoading] = useState(true);
   const { t } = useLanguage();
   const navigate = useNavigate();
+  useEffect(() => {
+            changeMetaData("Travel Magazine - Waureisen");
+          }, []);
 
   useEffect(() => {
     const fetchMagazines = async () => {
@@ -30,8 +34,17 @@ const TravelMagazine = () => {
     fetchMagazines();
   }, []);
 
-  const handleOpenMagazine = (id) => {
-    navigate(`/magazine/${id}`);
+  const handleOpenMagazine = (country,category,title) => {
+    const formattedTitle = title?.replace(/ /g, "-");
+    const formattedCategory = category?.replace(/ /g, "-");
+    const formattedCountry = country?.replace(/ /g, "-");
+    if (country != ""){
+
+      navigate(`/travel-magazine/${formattedCountry}/${formattedCategory}/${formattedTitle}`);
+    }else{
+      navigate(`/travel-magazine/${formattedCategory}/${formattedTitle}`);
+
+    }
   };
 
   return (
@@ -95,7 +108,7 @@ const TravelMagazine = () => {
                   </p>
                   
                   <button 
-                    onClick={() => handleOpenMagazine(magazine._id)}
+                    onClick={() => handleOpenMagazine(magazine?.country || "",magazine?.category, magazine.title)}
                     className="mt-auto inline-flex items-center gap-2 px-6 py-3 bg-brand text-white rounded-lg hover:bg-brand/90 transition-colors"
                   >
                     <BookOpen className="w-5 h-5" />

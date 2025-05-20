@@ -7,12 +7,17 @@ import Footer from '../../components/Shared/Footer';
 import { getAvailableCampers } from '../../api/camperAPI';
 import { useLanguage } from '../../utils/LanguageContext';
 import { Eye, MapPin, DollarSign } from 'lucide-react';
+import { changeMetaData } from '../../utils/extra';
 
 const CamperRental = () => {
   const [campers, setCampers] = useState([]);
   const [loading, setLoading] = useState(true);
   const { t } = useLanguage();
   const navigate = useNavigate();
+
+   useEffect(() => {
+    changeMetaData("Camper Rental - Waureisen");
+  }, []);
 
   useEffect(() => {
     const fetchCampers = async () => {
@@ -30,8 +35,9 @@ const CamperRental = () => {
     fetchCampers();
   }, []);
 
-  const handleOpenCamper = (id) => {
-    navigate(`/camper/${id}`);
+  const handleOpenCamper = (title) => {
+    const formattedTitle = title?.split(" ").join("-")
+    navigate(`/camper/${formattedTitle}`);
   };
 
   return (
@@ -115,7 +121,7 @@ const CamperRental = () => {
                   
                   {camper.status === 'Available' ? (
                     <button 
-                      onClick={() => handleOpenCamper(camper._id)}
+                      onClick={() => handleOpenCamper(camper.title)}
                       className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-[#B4A481] text-white rounded-lg hover:bg-[#a3927b] transition-colors"
                     >
                       <Eye className="w-5 h-5" />

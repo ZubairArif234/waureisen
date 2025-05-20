@@ -8,8 +8,12 @@ import Footer from "../../components/Shared/Footer";
 import Calendly from "../../components/HomeComponents/Calendly";
 import ChatWidget from "../../components/Shared/ChatWidget";
 import { useNavigate } from "react-router-dom";
+import { changeMetaData } from "../../utils/extra";
 
 const Home = memo(() => {
+  useEffect(() => {
+                changeMetaData("Waureisen");
+              }, [])
   const navigate = useNavigate()
   const userType = localStorage?.getItem("userType")
 

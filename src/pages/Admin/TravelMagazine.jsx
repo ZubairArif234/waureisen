@@ -132,7 +132,8 @@ const TravelMagazine = () => {
 
   // Handler for editing a blog
   const handleEdit = (blog) => {
-    navigate(`/admin/magazine/edit/${blog._id}`);
+      const formattedTitle = blog.title?.replace(/ /g, "-");
+    navigate(`/admin/travel-magazine/edit/${formattedTitle}`);
   };
 
   // Handler for deleting a blog
@@ -186,7 +187,7 @@ const TravelMagazine = () => {
         </div>
 
         <button
-          onClick={() => navigate("/admin/magazine/create")}
+          onClick={() => navigate("/admin/travel-magazine/create")}
           className="mt-4 md:mt-0 flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-black/80 transition-colors"
         >
           <Plus className="w-5 h-5" />

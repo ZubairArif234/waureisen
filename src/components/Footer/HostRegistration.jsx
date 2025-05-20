@@ -1,13 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Navbar from '../Shared/Navbar';
 import Footer from '../Shared/Footer';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../utils/LanguageContext';
+import { changeMetaData } from '../../utils/extra';
 
 const HostRegistration = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  useEffect(() => {
+          changeMetaData("Become a host - Waureisen");
+        }, []);
   return (
     <div>
       <Navbar />

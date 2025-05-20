@@ -1,5 +1,9 @@
 const translations = {
   en: {
+     continue:"Continue",
+    welcome_back:"Welcome Back!",
+    great_to_see_you_again:"Great to see you again! Click on the button to continue.",
+    account_created:"Your account had been created! Click on the button to continue.",
     name:"Name",
        customer_number:"Customer number",
     customer_number_desc:"Customer number desc",
@@ -1165,6 +1169,10 @@ const translations = {
   },
 
   de: {
+    continue:"Weitermachen",
+    welcome_back:"Willkommen zurück!",
+    great_to_see_you_again:"Schön, Sie wiederzusehen! Klicken Sie auf die Schaltfläche, um fortzufahren.",
+    account_created:"Ihr Konto wurde erstellt! Klicken Sie auf die Schaltfläche, um fortzufahren.",
      name:"Name",
     customer_number:"Kundennummer",
     customer_number_desc:"Kundennummer bez",

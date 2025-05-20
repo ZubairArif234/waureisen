@@ -15,6 +15,7 @@ import { refundPayment } from "../../api/paymentAPI";
 import CancelBookingModal from "../../components/SearchComponents/CancelBookingModal";
 import Pagination from "../../components/HomeComponents/Pagination";
 import toast from "react-hot-toast";
+import { changeMetaData } from "../../utils/extra";
 
 // Edit Trip Modal Component
 const EditTripModal = ({ isOpen, onClose, trip, onSave, onCancel }) => {
@@ -296,6 +297,7 @@ const TripCard = ({ trip, onEdit }) => {
   const [activeModal, setActiveModal] = useState(false);
   const { t } = useLanguage();
   const navigate = useNavigate();
+  
 
   const start = moment(trip?.checkInDate);
   const end = moment(trip?.checkOutDate);
@@ -478,6 +480,10 @@ const TripsPage = () => {
   const [successMessage, setSuccessMessage] = useState(null);
   const [trips, setTrips] = useState();
   const [tripsLoading, setTripsLoading] = useState();
+
+  useEffect(() => {
+              changeMetaData("Trips - Waureisen");
+            }, [])
 
   const handleGetMyBooking = async () => {
     setTripsLoading(true)

@@ -47,7 +47,7 @@ function App() {
               <Route path="/search" element={<SearchResults />} />
               <Route path="/accommodation/:id" element={<AccommodationPage />} />
               <Route path="/camper-rental" element={<CamperRental />} />
-              <Route path="/camper/:id" element={<CamperDetail />} />
+              <Route path="/camper/:title" element={<CamperDetail />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
 
@@ -149,10 +149,10 @@ function App() {
               <Route path="/imprint" element={<Imprint />} />
               <Route path="/star-membership" element={<StarMembership />} />
               <Route path="/host" element={<HostRegistration />} />
-              <Route path="/publicmagazine" element={<TravelMagazine />} />
+              <Route path="/travel-magazine" element={<TravelMagazine />} />
               <Route path="/travelshop" element={<TravelShop />} />
-              <Route path="/magazine/:id" element={<TravelMagazineDetail />} />
-
+              <Route path="/travel-magazine/:country?/:category/:title" element={<TravelMagazineDetail />} />
+            
               {/* Admin Routes - Already protected in the AdminLayout component */}
               <Route path="/admin/*" element={<AdminLayout />} />
 
