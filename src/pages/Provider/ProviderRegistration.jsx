@@ -285,8 +285,9 @@ console.log(response, "jffk");
   const handleGetStripeAccount = async ()=>{
     setStripeLoading(true)
     const res= await getStripeAccount(accountId)
+    // console.log(res)
     if (res){
-      setStripeAccount(res?.data?.details_submitted)
+      setStripeAccount(res?.data?.details_submitted && res?.data?.charges_enabled && res?.data?.payouts_enabled)
       setStripeLoading(false)
     }
     setStripeLoading(false)
