@@ -1,321 +1,314 @@
-import React, { useState, useEffect, useRef } from "react";
-import { MoreHorizontal, Star, CheckCheck, AlertTriangle } from "lucide-react";
-import { getFeaturedAccommodations } from "../../api/adminAPI";
-import {
-  getCloudinaryUrl,
-  isCloudinaryUrl,
-  handleImageError,
-} from "../../utils/cloudinaryConfig";
+// Enhanced AccommodationCard.jsx with improved Interhome pricing handling
+
+import React, { useState, memo, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Heart, ChevronLeft, ChevronRight } from "lucide-react";
+import API from "../../api/config";
+import { useLanguage } from "../../utils/LanguageContext";
+import { fetchInterhomePrices } from "../../api/interhomeAPI";
 
 const AccommodationCard = ({
-  accommodation,
-  onEdit,
-  onToggleStatus,
-  onDelete,
-  onAddToFeatured,
-  onRemoveFromFeatured,
+  id = "1",
+  image,
+  images = [], // Images array prop
+  price,
+  location: propertyLocation,
+  provider,
+  listingSource,
+  isFavorited = false,
+  pricePerNight,
+  onToggleFavorite,
+  // Add Interhome-specific props
+  Code,
+  interhomePriceData,
+  // Original listing object for passing complete data
+  originalListing
 }) => {
-  const [showMenu, setShowMenu] = useState(false);
-  const [menuPosition, setMenuPosition] = useState("bottom"); // 'top' or 'bottom'
-  const menuRef = useRef(null);
-  const buttonRef = useRef(null);
-  const [fetchingFeatured, setFetchingFeatured] = useState(false);
-  const [featuredError, setFeaturedError] = useState(false);
-  const [error, setError] = useState(null);
+  const [isFavorite, setIsFavorite] = useState(isFavorited);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [loadedImages, setLoadedImages] = useState(new Set());
+  const [loading, setLoading] = useState(false);
+  // Store local price data in case we need to fetch it
+  const [localPriceData, setLocalPriceData] = useState(pricePerNight);
+  
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { t } = useLanguage();
 
-  const statusColors = {
-    active: "bg-green-100 text-green-800",
-    closed: "bg-amber-100 text-amber-800",
-    pending: "bg-blue-100 text-blue-800",
-    rejected: "bg-red-100 text-red-800",
-    deleted: "bg-gray-100 text-gray-800",
-  };
+  // Get date parameters from URL
+  const searchParams = new URLSearchParams(location.search);
+  const checkInDate = searchParams.get("dates")?.split(" - ")[0] || "";
 
-  // Function to set error with auto-clear
-  const setErrorWithTimeout = (message) => {
-    setError(message);
-    setTimeout(() => {
-      setError(null);
-    }, 8000);
-  };
+  // Combine single image with images array, avoiding duplicates
+  const allImages = React.useMemo(() => {
+    if (!images || images.length === 0) {
+      return image ? [image] : [];
+    }
+    // If we have both image and images array, and the first image in array matches the single image,
+    // use only the images array to avoid duplicates
+    if (image && images[0] === image) {
+      return images;
+    }
+    // If we have both but they're different, combine them
+    return image ? [image, ...images] : images;
+  }, [image, images]);
 
-  // Check if this accommodation is in any featured section
-  const [featuredSections, setFeaturedSections] = useState([]);
-
+  // Update local state when isFavorited prop changes
   useEffect(() => {
-    if (!accommodation?._id) return;
+    setIsFavorite(isFavorited);
+  }, [isFavorited]);
 
-    const fetchFeaturedStatus = async (retryCount = 0) => {
-      try {
-        setFetchingFeatured(true);
-        setFeaturedError(false);
+  // Handle image loading
+  const handleImageLoad = (index) => {
+    setLoadedImages(prev => new Set([...prev, index]));
+  };
 
-        const featured = await getFeaturedAccommodations();
-        const sections = [];
+  // Handle slider navigation
+  const handlePrevImage = (e) => {
+    e.stopPropagation();
+    setCurrentImageIndex(prev => (prev === 0 ? allImages.length - 1 : prev - 1));
+  };
 
-        if (featured.featured_accommodations.includes(accommodation._id)) {
-          sections.push("Featured");
+  const handleNextImage = (e) => {
+    e.stopPropagation();
+    setCurrentImageIndex(prev => (prev === allImages.length - 1 ? 0 : prev + 1));
+  };
+
+  // Format the date if needed
+  const formatDate = (dateStr) => {
+    if (!dateStr) return null;
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return null;
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
+
+  const formattedCheckInDate = formatDate(checkInDate);
+
+  // Fetch Interhome price data if needed
+  useEffect(() => {
+    const fetchInterhomePrice = async () => {
+      // Only fetch for Interhome listings with Code and when check-in date is available
+      if (
+        provider === 'Interhome' && 
+        Code && 
+        formattedCheckInDate && 
+        !interhomePriceData &&
+        !loading
+      ) {
+        setLoading(true);
+        try {
+          console.log(`Fetching Interhome price for ${Code} with date ${formattedCheckInDate}`);
+          
+          const response = await fetchInterhomePrices({
+            accommodationCode: Code,
+            checkInDate: formattedCheckInDate,
+            los: true
+          });
+          
+          // Process the price data
+          if (response?.priceList?.prices?.price?.length > 0) {
+            // Get options for 7-night stay, sorted by guest capacity
+            const duration7Options = response.priceList.prices.price
+              .filter(option => option.duration === 7)
+              .sort((a, b) => a.paxUpTo - b.paxUpTo);
+            
+            if (duration7Options.length > 0) {
+              // Get the first option (lowest guest capacity)
+              const selectedOption = duration7Options[0];
+              const calculatedPricePerNight = Math.round(selectedOption.price / 7);
+              
+              // Set the local price data
+              setLocalPriceData({
+                price: calculatedPricePerNight,
+                currency: response.priceList.currency || 'CHF',
+                totalPrice: selectedOption.price,
+                duration: 7,
+                paxUpTo: selectedOption.paxUpTo
+              });
+              
+              console.log(`Price data fetched for ${Code}: ${calculatedPricePerNight} ${response.priceList.currency}/night`);
+            }
+          }
+        } catch (error) {
+          console.error(`Error fetching Interhome price for ${Code}:`, error);
+        } finally {
+          setLoading(false);
         }
-        if (featured.new_accommodations.includes(accommodation._id)) {
-          sections.push("New");
-        }
-        if (featured.popular_accommodations.includes(accommodation._id)) {
-          sections.push("Popular");
-        }
-
-        setFeaturedSections(sections);
-      } catch (error) {
-        console.error("Error fetching featured status:", error);
-
-        // Retry on network errors
-        if (!error.response && retryCount < 2) {
-          // console.log(
-          //  `Retrying featured status fetch (attempt ${retryCount + 1})...`
-          //);
-          const delay = Math.pow(2, retryCount) * 800;
-          setTimeout(() => {
-            fetchFeaturedStatus(retryCount + 1);
-          }, delay);
-          return;
-        }
-
-        // Don't show any featured status badges on error
-        setFeaturedSections([]);
-        setFeaturedError(true);
-        setErrorWithTimeout("Failed to load featured status");
-      } finally {
-        setFetchingFeatured(false);
       }
     };
+    
+    fetchInterhomePrice();
+  }, [Code, formattedCheckInDate, provider, interhomePriceData, loading]);
 
-    fetchFeaturedStatus();
-  }, [accommodation._id]);
+  // Handle click to navigate to the accommodation details
+  const handleClick = () => {
+    // Determine the price data to pass
+    // First use localPriceData if available (which could be from API fetch)
+    // Then use pricePerNight from props
+    // Finally fallback to a simple price object
+    const priceData = localPriceData || pricePerNight || { price, currency: "CHF" };
+    
+    // Prepare Interhome-specific data if needed
+    const interhomeData = {};
+    if (provider === 'Interhome' && Code) {
+      interhomeData.Code = Code;
+      
+      // Include any Interhome price data we have
+      if (interhomePriceData) {
+        interhomeData.interhomePriceData = interhomePriceData;
+      }
+    }
+    
+    // Navigate to the accommodation details page
+    navigate(`/accommodation/${id}`, {
+      state: {
+        pricePerNight: priceData,
+        checkInDate: formattedCheckInDate,
+        ...interhomeData,
+        // Pass the complete original listing if available
+        originalListing
+      },
+    });
+  };
 
-  // Calculate menu position when showing
-  useEffect(() => {
-    if (showMenu && buttonRef.current) {
-      const buttonRect = buttonRef.current.getBoundingClientRect();
-      const windowHeight = window.innerHeight;
-      const spaceBelow = windowHeight - buttonRect.bottom;
+  // Handle favorite toggling
+  const handleFavoriteToggle = async (e) => {
+    e.stopPropagation();
 
-      // Use a fixed estimate for menu height
-      const estimatedMenuHeight = 120; // Estimate for 3 options
+    try {
+      const newFavoriteState = !isFavorite;
+      setIsFavorite(newFavoriteState);
 
-      // If there's not enough space below, position the menu above
-      if (spaceBelow < estimatedMenuHeight) {
-        setMenuPosition("top");
+      // Call the API to update the favorite status
+      if (newFavoriteState) {
+        await API.post(`/users/favorites/${id}`);
       } else {
-        setMenuPosition("bottom");
+        await API.delete(`/users/favorites/${id}`);
       }
+
+      // Call the callback if provided
+      if (onToggleFavorite) {
+        onToggleFavorite(id);
+      }
+    } catch (err) {
+      console.error("Failed to toggle favorite status:", err);
+      // Revert to previous state on error
+      setIsFavorite(isFavorite);
     }
-  }, [showMenu]);
+  };
 
-  // Close menu when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setShowMenu(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [menuRef]);
+  // Determine the display source (provider or listing source)
+  const displaySource = listingSource || provider || "Unknown";
 
-  // Menu options with consistent styling and behavior
-  const menuOptions = [
-    {
-      label: "Edit",
-      onClick: () => {
-        setErrorWithTimeout("Edit functionality is currently disabled");
-        setShowMenu(false);
-      },
-      className: "text-gray-400 hover:bg-gray-100 cursor-not-allowed",
-      disabled: true
-    },
-    {
-      label: accommodation.status === "active" ? "Deactivate" : "Activate",
-      onClick: () => {
-        onToggleStatus(accommodation._id, accommodation.status);
-        setShowMenu(false);
-      },
-      className: "text-gray-700 hover:bg-gray-100",
-    },
-    {
-      label: "Add to",
-      onClick: () => {
-        onAddToFeatured(accommodation._id);
-        setShowMenu(false);
-      },
-      className: "text-gray-700 hover:bg-gray-100",
-    },
-    ...(featuredSections.length > 0
-      ? [
-          {
-            label: "Remove from",
-            onClick: () => {
-              onRemoveFromFeatured(accommodation._id, featuredSections);
-              setShowMenu(false);
-            },
-            className: "text-amber-600 hover:bg-amber-50",
-          },
-        ]
-      : []),
-    {
-      label: "Delete",
-      onClick: () => {
-        onDelete(accommodation._id, accommodation.title);
-        setShowMenu(false);
-      },
-      className: "text-red-600 hover:bg-red-50",
-    },
-  ];
-
-  // Close menu when scrolling
-  useEffect(() => {
-    const handleScroll = () => {
-      if (showMenu) {
-        setShowMenu(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [showMenu]);
-
-  // Get first image or use a default
-  const firstImage = accommodation.images?.[0]?.url || "";
-  const imgSrc = isCloudinaryUrl(firstImage)
-    ? getCloudinaryUrl(firstImage, "c_fill,g_auto,h_300,w_500")
-    : firstImage || "/placeholder.jpg";
+  // Determine the price to display
+  // First use localPriceData if available (which could be from API fetch)
+  // Then use pricePerNight from props
+  // Finally fallback to the price prop
+  const displayPrice = localPriceData?.price || pricePerNight?.price || price || 0;
+  const displayCurrency = localPriceData?.currency || pricePerNight?.currency || "CHF";
 
   return (
-    <div className="bg-white rounded-lg overflow-hidden shadow border border-gray-200 transition-all duration-300 hover:shadow-md relative">
-      {/* Error message */}
-      {error && (
-        <div className="absolute top-0 left-0 right-0 bg-red-100 text-red-800 text-sm p-2 text-center">
-          {error}
-        </div>
-      )}
-      
-      {/* Featured badges */}
-      <div className="absolute top-2 left-2 z-10 flex flex-wrap gap-1 max-w-[calc(100%-60px)]">
-        {fetchingFeatured ? (
-          <div className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-800">
-            <div className="animate-spin h-3 w-3 border-b-2 border-gray-800 rounded-full mr-1"></div>
-            Loading...
-          </div>
-        ) : featuredError ? (
-          <div className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-800">
-            <AlertTriangle className="h-3 w-3 mr-1" />
-            Error
-          </div>
+    <div className="flex flex-col">
+      <div
+        className="rounded-xl overflow-hidden mb-3 relative cursor-pointer"
+        onClick={handleClick}
+      >
+        {/* Main image with lazy loading */}
+        {allImages[currentImageIndex] ? (
+          <img
+            src={allImages[currentImageIndex]}
+            alt={propertyLocation}
+            className="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
+            onLoad={() => handleImageLoad(currentImageIndex)}
+          />
         ) : (
-          featuredSections.map((section) => (
-            <div
-              key={section}
-              className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
-                section === "Featured"
-                  ? "bg-orange-100 text-orange-800"
-                  : section === "New"
-                  ? "bg-emerald-100 text-emerald-800"
-                  : "bg-blue-100 text-blue-800"
-              }`}
-            >
-              {section === "Featured" ? (
-                <Star className="h-3 w-3 mr-1" />
-              ) : section === "New" ? (
-                <CheckCheck className="h-3 w-3 mr-1" />
-              ) : (
-                <CheckCheck className="h-3 w-3 mr-1" />
-              )}
-              {section}
-            </div>
-          ))
+          <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+            <span className="text-gray-500">No image available</span>
+          </div>
         )}
-      </div>
 
-      {/* Status badge */}
-      <div className="absolute top-2 right-2 z-10">
-        <span
-          className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
-            statusColors[accommodation.status] || "bg-gray-100 text-gray-800"
-          }`}
-        >
-          {accommodation.status || "N/A"}
-        </span>
-      </div>
-
-      {/* Image container */}
-      <div className="h-48 overflow-hidden">
-        <img
-          src={imgSrc}
-          alt={accommodation.title}
-          className="w-full h-full object-cover"
-          onError={(e) => handleImageError(e, "/placeholder.jpg")}
-        />
-      </div>
-
-      {/* Content */}
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <div>
-            <h3 className="font-medium text-gray-900 line-clamp-1 mb-1">
-              {accommodation.title || "Unnamed Accommodation"}
-            </h3>
-            <p className="text-sm text-gray-500 line-clamp-1">
-              {accommodation.location?.city}, {accommodation.location?.country}
-            </p>
-          </div>
-
-          {/* More dropdown */}
-          <div className="relative" ref={menuRef}>
+        {/* Navigation arrows - only show if there are multiple images */}
+        {allImages.length > 1 && (
+          <>
             <button
-              ref={buttonRef}
-              onClick={() => setShowMenu(!showMenu)}
-              className="p-1 rounded-md hover:bg-gray-100 transition-colors"
-              aria-label="More options"
+              onClick={handlePrevImage}
+              className="absolute left-2 top-1/2 -translate-y-1/2 p-1 rounded-full bg-white/50 backdrop-blur-sm hover:bg-white/70 transition-colors"
             >
-              <MoreHorizontal className="w-5 h-5 text-gray-500" />
+              <ChevronLeft className="w-5 h-5 text-gray-600" />
             </button>
+            <button
+              onClick={handleNextImage}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full bg-white/50 backdrop-blur-sm hover:bg-white/70 transition-colors"
+            >
+              <ChevronRight className="w-5 h-5 text-gray-600" />
+            </button>
+          </>
+        )}
 
-            {/* Dropdown menu */}
-            {showMenu && (
-              <div
-                className={`absolute ${
-                  menuPosition === "top" ? "bottom-8" : "top-8"
-                } right-0 w-36 bg-white shadow-lg rounded-md z-20 border border-gray-200 py-1 text-sm`}
-              >
-                {menuOptions.map((option, idx) => (
-                  <button
-                    key={idx}
-                    onClick={option.onClick}
-                    className={`w-full text-left px-4 py-2 ${option.className}`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            )}
+        {/* Image counter */}
+        {allImages.length > 1 && (
+          <div className="absolute bottom-3 left-3 px-2 py-1 bg-black/80 text-white text-xs font-semibold rounded-md shadow">
+            {currentImageIndex + 1}/{allImages.length}
           </div>
-        </div>
+        )}
 
-        {/* Price */}
-        <div className="mt-2 flex items-center justify-between">
-          <div className="font-medium">
-            €{accommodation.pricing?.basePrice || "N/A"}
-            <span className="text-xs text-gray-500"> / night</span>
-          </div>
-          <div className="text-xs text-gray-500">
-            ID: {accommodation._id.substring(0, 8)}...
-          </div>
+        {/* Favorite button */}
+        <button
+          onClick={handleFavoriteToggle}
+          className="absolute top-3 right-3 p-2 rounded-full bg-white/50 backdrop-blur-sm hover:bg-white/70 transition-colors"
+        >
+          <Heart
+            className={`w-5 h-5 ${
+              isFavorite ? "fill-red-500 text-red-500" : "text-gray-600"
+            }`}
+          />
+        </button>
+
+        {/* Source badge */}
+        <div className="absolute bottom-3 right-3 px-2 py-1 bg-black/80 text-white text-xs font-semibold rounded-md shadow">
+          {displaySource}
         </div>
       </div>
+
+      {/* Price and location info */}
+      <div className="space-y-1 cursor-pointer" onClick={handleClick}>
+        <p className="text-brand text-sm">
+          {displayCurrency}{" "}
+          {displayPrice.toFixed(2)} {t("per_night")}
+          {loading && <span className="ml-2 text-xs text-gray-500">(Loading price...)</span>}
+        </p>
+        <h3 className="font-medium text-gray-900">{propertyLocation}</h3>
+      </div>
+
+      {/* Preload next image */}
+      {allImages.length > 1 && (
+        <img
+          src={allImages[(currentImageIndex + 1) % allImages.length]}
+          alt=""
+          className="hidden"
+          onLoad={() => handleImageLoad((currentImageIndex + 1) % allImages.length)}
+        />
+      )}
     </div>
   );
 };
 
-export default AccommodationCard;
+// Use memo to prevent unnecessary re-renders
+export default memo(AccommodationCard, (prevProps, nextProps) => {
+  return (
+    prevProps.id === nextProps.id &&
+    prevProps.image === nextProps.image &&
+    JSON.stringify(prevProps.images) === JSON.stringify(nextProps.images) &&
+    prevProps.price === nextProps.price &&
+    prevProps.location === nextProps.location &&
+    prevProps.provider === nextProps.provider &&
+    prevProps.Code === nextProps.Code &&
+    JSON.stringify(prevProps.pricePerNight) === JSON.stringify(nextProps.pricePerNight) &&
+    prevProps.isFavorited === nextProps.isFavorited
+  );
+});

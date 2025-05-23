@@ -4,60 +4,11 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
-// Get all listings
-export const getAllListings = async () => {
-  try {
-    const response = await API.get('/listings');
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching listings:', error);
-    throw error;
-  }
-};
 
-// Get listing by ID
-export const getListingById = async (id) => {
-  try {
-    const response = await API.get(`/listings/${id}`);
-    return response.data;
-  } catch (error) {
-    console.error(`Error fetching listing ${id}:`, error);
-    throw error;
-  }
-};
 
-// Search listings with parameters (combined function)
-export const searchListings = async (params) => {
-  try {
-    const { lat, lng, page, pageSize, filters, moreFilters, radius } = params;
 
-    const queryParams = new URLSearchParams({
-      lat,
-      lng,
-      page,
-      pageSize,
-    });
 
-    if (radius) {
-      queryParams.append('radius', radius);
-    }
 
-    if (filters && filters.length > 0) {
-      queryParams.append('filters', JSON.stringify(filters));
-    }
-
-    if (moreFilters) {
-      queryParams.append('moreFilters', JSON.stringify(moreFilters));
-    }
-
-    // ✅ Use shared API instance (which includes the baseURL from env)
-    const response = await API.get(`/listings/search?${queryParams.toString()}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error searching listings:', error);
-    throw error;
-  }
-};
 // For provider to add listings
 export const createListing = async (listingData) => {
   try {
@@ -178,6 +129,171 @@ export const fetchListingsByMapBounds = async (params) => {
     return response.data;
   } catch (error) {
     console.error('Error fetching listings by map bounds:', error);
+    throw error;
+  }
+};
+
+
+
+
+
+
+
+export const getStreamedListings = async (params) => {
+  try {
+    const {
+      limit = 12,
+      page = 1,
+      skip = null,
+      lat,
+      lng,
+      radius = 500,
+      filters = {},
+      priceMin,
+      priceMax
+    } = params;
+
+    console.log("API REQUEST WITH COORDINATES:", { lat, lng });
+
+    // Build query parameters
+    const queryParams = new URLSearchParams();
+    
+    // Add pagination params
+    queryParams.append('limit', limit);
+    queryParams.append('page', page);
+    
+    // Use skip if provided, or calculate from page
+    const skipCount = skip !== null ? skip : (page - 1) * limit;
+    queryParams.append('skip', skipCount);
+    
+    // Add coordinates as numbers, not strings
+    if (lat !== undefined && lat !== null) {
+      queryParams.append('lat', parseFloat(lat));
+    }
+    
+    if (lng !== undefined && lng !== null) {
+      queryParams.append('lng', parseFloat(lng));
+    }
+    
+    if (radius) {
+      queryParams.append('radius', radius);
+    }
+    
+    // Add filters if provided
+    if (typeof filters === 'string') {
+      queryParams.append('filters', filters);
+    } else if (Object.keys(filters).length > 0) {
+      queryParams.append('filters', JSON.stringify(filters));
+    }
+    
+    // Add price range
+    if (priceMin) queryParams.append('priceMin', priceMin);
+    if (priceMax) queryParams.append('priceMax', priceMax);
+
+    // Log the final request URL
+    console.log("API REQUEST URL:", `/listings/stream?${queryParams.toString()}`);
+
+    // Make the request
+    const response = await API.get(`/listings/stream?${queryParams.toString()}`);
+    
+    if (!response.data) {
+      return { listings: [], total: 0, page: 1, totalPages: 0, hasMore: false };
+    }
+    
+    const listings = response.data.listings || [];
+    const total = response.data.total || 0;
+    const totalPages = response.data.totalPages || Math.ceil(total / limit) || 1;
+    
+    return {
+      listings,
+      total,
+      page: parseInt(page),
+      totalPages,
+      hasMore: response.data.hasMore !== undefined ? response.data.hasMore : (page < totalPages)
+    };
+  } catch (error) {
+    console.error('Error fetching listings:', error);
+    return { listings: [], total: 0, page: 1, totalPages: 0, hasMore: false };
+  }
+};
+/**
+ * Get a single listing by ID
+ * @param {string} id - Listing ID
+ * @returns {Promise<Object>} Listing data
+ */
+export const getSingleListing = async (id) => {
+  try {
+    const response = await API.get(`/listings/single/${id}`);
+    return response.data.listing;
+  } catch (error) {
+    console.error(`Error fetching single listing ${id}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Get multiple listings by IDs (batch)
+ * @param {Array<string>} ids - Array of listing IDs
+ * @returns {Promise<Array<Object>>} Array of listings
+ */
+export const getListingsByIds = async (ids) => {
+  try {
+    const response = await API.post('/listings/batch', { ids });
+    return response.data.listings;
+  } catch (error) {
+    console.error('Error fetching batch listings:', error);
+    throw error;
+  }
+};
+
+// Keep existing API methods
+export const getAllListings = async () => {
+  try {
+    const response = await API.get('/listings');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching listings:', error);
+    throw error;
+  }
+};
+
+export const getListingById = async (id) => {
+  try {
+    const response = await API.get(`/listings/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching listing ${id}:`, error);
+    throw error;
+  }
+};
+
+export const searchListings = async (params) => {
+  try {
+    const { lat, lng, page, pageSize, filters, moreFilters, radius } = params;
+
+    const queryParams = new URLSearchParams({
+      lat,
+      lng,
+      page,
+      pageSize,
+    });
+
+    if (radius) {
+      queryParams.append('radius', radius);
+    }
+
+    if (filters && filters.length > 0) {
+      queryParams.append('filters', JSON.stringify(filters));
+    }
+
+    if (moreFilters) {
+      queryParams.append('moreFilters', JSON.stringify(moreFilters));
+    }
+
+    const response = await API.get(`/listings/search?${queryParams.toString()}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error searching listings:', error);
     throw error;
   }
 };

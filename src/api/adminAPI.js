@@ -1,5 +1,7 @@
 // src/api/adminAPI.js
 import API from "./config";
+import { setAuthHeader } from "../utils/authService";
+
 
 // Featured, Popular, and New Accommodations
 export const getFeaturedAccommodations = async (retryCount = 0) => {
@@ -409,14 +411,36 @@ export const updateProviderStatus = async (id, status) => {
 
 export const deleteProvider = async (id) => {
   try {
+    console.log('Attempting to delete provider with ID:', id);
+    
+    setAuthHeader();
+    
+    // Changed from /admin/providers to /providers
     const response = await API.delete(`/providers/${id}`);
+    
+    console.log('Delete provider response:', response.data);
     return response.data;
+    
   } catch (error) {
-    console.error("Error deleting provider:", error);
-    throw error;
+    console.error('Error deleting provider:', error);
+    
+    if (error.response) {
+      console.error('Response status:', error.response.status);
+      console.error('Response data:', error.response.data);
+      
+      const errorMessage = error.response.data?.message || 'Failed to delete provider';
+      const errorCode = error.response.data?.error || 'UNKNOWN_ERROR';
+      
+      throw new Error(`${errorMessage} (${errorCode})`);
+    } else if (error.request) {
+      console.error('No response received:', error.request);
+      throw new Error('No response from server');
+    } else {
+      console.error('Request setup error:', error.message);
+      throw new Error('Request configuration error');
+    }
   }
 };
-
 // Transactions
 export const getAllTransactions = async () => {
   try {

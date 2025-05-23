@@ -18,16 +18,22 @@ const SearchBar = ({ initialLocation = '', initialDateRange = { start: null, end
   const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
   const locationInputRef = useRef(null);
   const autocompleteRef = useRef(null);
+  const placeSelectedRef = useRef(false);
 
   // Load Google Maps script
   useEffect(() => {
     try {
-      loadGoogleMapsScript(() => {
-        // Initialize autocomplete when Google Maps script loads
-        if (window.google && window.google.maps && window.google.maps.places) {
-          autocompleteRef.current = initAutocomplete(locationInputRef, handlePlaceSelect);
+      loadGoogleMapsScript((success) => {
+        if (success) {
+          console.log("Google Maps script loaded successfully");
+          // Initialize autocomplete when Google Maps script loads
+          if (window.google && window.google.maps && window.google.maps.places) {
+            autocompleteRef.current = initAutocomplete(locationInputRef, handlePlaceSelect);
+          } else {
+            console.warn('Google Maps Places library not loaded. Autocomplete disabled.');
+          }
         } else {
-          console.warn('Google Maps Places library not loaded. Autocomplete disabled.');
+          console.error("Failed to load Google Maps script");
         }
       });
     } catch (error) {
@@ -42,59 +48,85 @@ const SearchBar = ({ initialLocation = '', initialDateRange = { start: null, end
     };
   }, []);
 
-  const handlePlaceSelect = (place) => {
-    if (place && place.formatted_address) {
-      setLocation(place.formatted_address);
-      setPlaceData({
-        address: place.formatted_address,
-        location: {
-          lat: place.geometry.location.lat(),
-          lng: place.geometry.location.lng()
-        }
-      });
-      setShowLocationSuggestions(false);
+
+const handlePlaceSelect = (place) => {
+  if (!place) {
+    console.warn("No place data received in handlePlaceSelect");
+    return;
+  }
+
+  if (!place.geometry || !place.geometry.location) {
+    console.warn("Place selected with no geometry/location:", place);
+    return;
+  }
+
+  // Get coordinates from the place
+  const lat = place.geometry.location.lat();
+  const lng = place.geometry.location.lng();
+  
+  if (isNaN(lat) || isNaN(lng)) {
+    console.warn("Place has invalid coordinates:", { lat, lng });
+    return;
+  }
+
+  console.log("Selected place with coordinates:", {
+    address: place.formatted_address,
+    lat: lat,
+    lng: lng
+  });
+
+  // Store location data including coordinates
+  setLocation(place.formatted_address);
+  setPlaceData({
+    address: place.formatted_address,
+    location: {
+      lat: lat,
+      lng: lng
     }
-  };
+  });
+  
+  placeSelectedRef.current = true;
+  setShowLocationSuggestions(false);
+};
+
+const handleSearch = () => {
+  // Get coordinates from placeData
+  console.log("Place data before search:", placeData);  
+  const coordinates = placeData?.location || { lat: 46.8182, lng: 8.2275 };
+
+  // Build search URL with coordinates
+  let searchUrl = `/search?location=${encodeURIComponent(location || "Switzerland")}`;
+  searchUrl += `&lat=${coordinates.lat}&lng=${coordinates.lng}`;
+  
+  // Add other parameters
+  let dateParam = '';
+  if (dateRange.start && dateRange.end) {
+    const startDate = `${dateRange.start.toLocaleString('default', { month: 'short' })} ${String(dateRange.start.getDate()).padStart(2, '0')} ${dateRange.start.getFullYear()}`;
+    const endDate = `${dateRange.end.toLocaleString('default', { month: 'short' })} ${String(dateRange.end.getDate()).padStart(2, '0')} ${dateRange.end.getFullYear()}`;
+    dateParam = `&dates=${startDate} - ${endDate}`;
+  }
+  searchUrl += `${dateParam}&people=${guests.people}&dogs=${guests.dogs}`;
+  
+  // Navigate to search page
+  if (onSearch && typeof onSearch === 'function') {
+    onSearch(searchUrl);
+  } else {
+    navigate(searchUrl);
+  }
+}
 
   const handleLocationChange = (e) => {
     setLocation(e.target.value);
     setShowLocationSuggestions(e.target.value.length > 0);
-  };
-
-  const handleSearch = () => {
-    if (!location) {
-      setLocation("Switzerland");
-      setPlaceData({
-        address: "Switzerland",
-        location: {
-          lat: 46.8182,
-          lng: 8.2275
-        }
-      });
-    }
-
-    // Format dates for URL with year included
-    let dateParam = '';
-    if (dateRange.start && dateRange.end) {
-      // Use ISO format for dates to ensure year is included
-      const startDate = `${dateRange.start.toLocaleString('default', { month: 'short' })} ${String(dateRange.start.getDate()).padStart(2, '0')} ${dateRange.start.getFullYear()}`;
-      const endDate = `${dateRange.end.toLocaleString('default', { month: 'short' })} ${String(dateRange.end.getDate()).padStart(2, '0')} ${dateRange.end.getFullYear()}`;
-      dateParam = `&dates=${dateRange.start} - ${dateRange.end}`;
-    }
-
-    // Build the search URL with coordinates if available
-    let searchUrl = `/search?location=${encodeURIComponent(location || "Switzerland")}${dateParam}&people=${guests.people}&dogs=${guests.dogs}`;
+    // Reset place selection status when the user types manually
+    placeSelectedRef.current = false;
     
-    if (placeData && placeData.location) {
-      searchUrl += `&lat=${placeData.location.lat}&lng=${placeData.location.lng}`;
-    }
-
-    if (onSearch) {
-      onSearch(searchUrl);
-    } else {
-      navigate(searchUrl);
+    // If the user clears the input, also clear the place data
+    if (!e.target.value) {
+      setPlaceData(null);
     }
   };
+
 
   return (
     <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 md:p-8 flex flex-col md:flex-row items-stretch md:items-center gap-4 w-full">
@@ -175,4 +207,4 @@ const SearchBar = ({ initialLocation = '', initialDateRange = { start: null, end
   );
 };
 
-export default SearchBar; 
+export default SearchBar;

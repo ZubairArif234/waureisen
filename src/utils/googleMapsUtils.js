@@ -26,7 +26,7 @@ export const loadGoogleMapsScript = (callback) => {
       scriptLoadPromise
         .then(() => callback(true))
         .catch((error) => {
-          // console.error('Error waiting for Google Maps script:', error);
+          console.error('Error waiting for Google Maps script:', error);
           callback(false);
         });
     }
@@ -99,7 +99,7 @@ export const loadGoogleMapsScript = (callback) => {
   }
 };
 
-// Initialize Google Places Autocomplete
+// Initialize Google Places Autocomplete with improved place selection handling
 export const initAutocomplete = (inputRef, callback) => {
   // Check if the input ref exists and is initialized
   if (!inputRef || !inputRef.current) {
@@ -122,7 +122,21 @@ export const initAutocomplete = (inputRef, callback) => {
     autocomplete.addListener('place_changed', () => {
       try {
         const place = autocomplete.getPlace();
-        if (place && callback) {
+        
+        // Verify that the place has geometry (coordinates)
+        if (!place.geometry || !place.geometry.location) {
+          console.warn('Place selected with no geometry/location:', place);
+          return;
+        }
+        
+        // Log successful place selection
+        console.log('Place selection successful:', {
+          address: place.formatted_address,
+          lat: place.geometry.location.lat(),
+          lng: place.geometry.location.lng()
+        });
+        
+        if (callback && typeof callback === 'function') {
           callback(place);
         }
       } catch (error) {
@@ -297,7 +311,7 @@ export const addMapMoveListener = (map, callback, debounceTime = 500) => {
 };
 
 // Helper function to calculate distance between two points using Haversine formula
-const haversineDistance = (lat1, lon1, lat2, lon2) => {
+export const haversineDistance = (lat1, lon1, lat2, lon2) => {
   const R = 6371; // Radius of the Earth in km
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;

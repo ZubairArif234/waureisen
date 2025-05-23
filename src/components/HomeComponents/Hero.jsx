@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../Shared/Navbar';
 import SearchBar from '../SearchComponents/SearchBar';
 import bgImage from '../../assets/bg.png';
@@ -6,6 +7,13 @@ import { useLanguage } from '../../utils/LanguageContext';
 
 const Hero = () => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
+
+  // Add this handler to properly process the search URL
+  const handleSearch = (searchUrl) => {
+    console.log("Search URL from Hero:", searchUrl);
+    navigate(searchUrl);
+  };
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden z-10">
@@ -34,8 +42,8 @@ const Hero = () => {
               </p>
             </div>
 
-            {/* Search Bar */}
-            <SearchBar />
+            {/* Search Bar - Now with onSearch prop */}
+            <SearchBar onSearch={handleSearch} />
           </div>
         </div>
       </div>

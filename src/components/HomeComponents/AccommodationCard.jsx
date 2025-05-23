@@ -15,6 +15,7 @@ const AccommodationCard = ({
   isFavorited = false,
   pricePerNight,
   onToggleFavorite,
+  owner, // Add owner prop to get provider details
 }) => {
   const [isFavorite, setIsFavorite] = useState(isFavorited);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -107,8 +108,46 @@ const AccommodationCard = ({
     }
   };
 
-  // Determine the display source
-  const displaySource = listingSource || provider || "Unknown";
+  // Improved display source logic
+  const getDisplaySource = () => {
+    // If listingSource is provided and it's not "waureisen", use it
+    if (listingSource && listingSource.toLowerCase() !== "waureisen") {
+      return listingSource;
+    }
+    
+    // If provider is provided and it's not "waureisen", use it
+    if (provider && provider.toLowerCase() !== "waureisen") {
+      return provider;
+    }
+    
+    // If we have owner information, try to use that
+    if (owner) {
+      // If owner has a display name, use it
+      if (owner.displayName) {
+        return owner.displayName;
+      }
+      
+      // If owner has firstName and lastName, combine them
+      if (owner.firstName || owner.lastName) {
+        return `${owner.firstName || ''} ${owner.lastName || ''}`.trim();
+      }
+      
+      // If owner has username, use it
+      if (owner.username) {
+        return owner.username;
+      }
+    }
+    
+    // Check if this is an Interhome listing
+    if (listingSource?.toLowerCase() === "interhome" || provider?.toLowerCase() === "interhome") {
+      return "Interhome";
+    }
+    
+    // For all other cases where we can't determine the source, use "Host"
+    return "Host";
+  };
+
+  const displaySource = getDisplaySource();
 
   return (
     <div className="flex flex-col">
@@ -197,6 +236,7 @@ export default memo(AccommodationCard, (prevProps, nextProps) => {
     prevProps.price === nextProps.price &&
     prevProps.location === nextProps.location &&
     prevProps.pricePerNight?.price === nextProps.pricePerNight?.price &&
-    prevProps.isFavorited === nextProps.isFavorited
+    prevProps.isFavorited === nextProps.isFavorited &&
+    prevProps.owner === nextProps.owner
   );
 });

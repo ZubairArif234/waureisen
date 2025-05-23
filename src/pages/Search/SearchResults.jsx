@@ -1,765 +1,351 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import { useLocation } from "react-router-dom";
+// src/pages/SearchResults.jsx
+import React, { useEffect, useState, useCallback, useRef } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Suspense, lazy } from 'react';
 import Navbar from "../../components/Shared/Navbar";
-import SearchFilters from "../../components/SearchComponents/SearchFilters";
-import AccommodationCard from "../../components/HomeComponents/AccommodationCard";
-import MockMap from "../../components/SearchComponents/MockMap";
+import OptimizedMapWithClustering from "../../components/SearchComponents/OptimizedMapWithClustering";
+import ImprovedVirtualizedListings from "../../components/SearchComponents/ImprovedVirtualizedListings";
 import MapToggle from "../../components/SearchComponents/MapToggle";
+import SkeletonCard from "../../components/SearchComponents/SkeletonCard";
 import Footer from "../../components/Shared/Footer";
-import { useLanguage } from "../../utils/LanguageContext";
-import { searchListings, fetchListingsByMapBounds } from "../../api/listingAPI";
-import axios from "axios";
-import { fetchInterhomePrices } from "../../api/interhomeAPI";
-import {
-  loadGoogleMapsScript,
-  createMap,
-  addListingMarkers,
-  clearMarkers,
-  addMapMoveListener,
-} from "../../utils/googleMapsUtils";
-import { usePriceFilter } from "../../context/PriceFilterContext";
-import SearchBar from "../../components/SearchComponents/SearchBar";
+import EnhancedSearchBar from "../../components/SearchComponents/SearchBarTwo";
+import { useListings, ListingProvider } from "../../context/ListingContext";
 
-// Import dummy images for now
-import i1 from "../../assets/i1.png";
-import i2 from "../../assets/i2.png";
-import i3 from "../../assets/i3.png";
+// Lazy-loaded components for better initial load performance
+const MoreFiltersModal = lazy(() => import('../../components/SearchComponents/MoreFiltersModal'));
 
-const SearchResults = () => {
+/**
+ * Main content component that uses the ListingContext
+ * Using a separate component allows us to use hooks inside the provider
+ */
+const SearchResultsContent = () => {
   const location = useLocation();
-  const { t } = useLanguage();
-  const urlSearchParams = new URLSearchParams(location.search);
-  const { applyPriceFilter } = usePriceFilter();
-
-  // Extract search parameters
-  const locationParam = urlSearchParams.get("location") || "";
-  const dateRange = urlSearchParams.get("dates") || "";
-  
-  // Fix the date formatting
-  const [startDate] = dateRange.split(" - ");
-  // console.log(dateRange , startDate , "dates");
-
-  const formatDate = (dateStr) => {
-    if (!dateStr) return null;
-
-    // Handle date format "May 03 2025"
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) {
-      console.log("Invalid date format");
-      return null;
-    }
-
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-
-    return `${year}-${month}-${day}`;
-  };
-
-  const formattedStartDate = formatDate(startDate);
-
-  console.log("Formatted date:", formattedStartDate);
-  const people = urlSearchParams.get("people") || 1;
-  const dogs = urlSearchParams.get("dogs") || 1;
-
-  // Get latitude and longitude from URL if available
-  const initialLat = parseFloat(urlSearchParams.get("lat")) || 46.818188;
-  const initialLng = parseFloat(urlSearchParams.get("lng")) || 8.227512;
-  
-  // Fixed search radius of 500km
-  const SEARCH_RADIUS = 500;
-
-  const [showMap, setShowMap] = useState(false);
+  const navigate = useNavigate();
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
-  const [listings, setListings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [areaName, setAreaName] = useState(locationParam || "this area");
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-
-  // Add new state for map-related data
-  const [mapInstance, setMapInstance] = useState(null);
-  const [mapMarkers, setMapMarkers] = useState([]);
-  const [isMapMoving, setIsMapMoving] = useState(false);
-  const [mapMoveListener, setMapMoveListener] = useState(null);
-  const mapRef = useRef(null);
-
-  // State for tracking map viewport
-  const [mapViewport, setMapViewport] = useState({
-    center: { lat: initialLat, lng: initialLng },
-    bounds: null,
-    zoom: 12,
-  });
-
-  // Refs for state preservation between renders
-  const listingsRef = useRef(listings);
-  const areaNameRef = useRef(areaName);
-  const observerRef = useRef(null);
-  const loadingRef = useRef(null);
-
-  // Create styles for proper layout and spacing
-  const pageContentStyle = {
-    minHeight: "100vh",
-    display: "flex",
-    flexDirection: "column",
-    paddingTop: "0",
-  };
-
-  // Keep refs in sync with state
+  const [isMoreFiltersOpen, setIsMoreFiltersOpen] = useState(false);
+  const urlProcessedRef = useRef(false);
+  const lastLocationRef = useRef('');
+  
+  const { 
+    listings, 
+    isLoading, 
+    isInitialLoad,
+    error, 
+    showMap, 
+    setShowMap,
+    searchParams,
+    updateSearchParams,
+    clearError,
+    hasMore,
+    totalAccommodationsInRadius,
+    isDraggingMap,
+    setMapDragging
+  } = useListings();
+  
   useEffect(() => {
-    listingsRef.current = listings;
-    areaNameRef.current = areaName;
-  }, [listings, areaName]);
-
-  // Function to get location name from coordinates using reverse geocoding
-  const getLocationName = useCallback(
-    async (lat, lng) => {
-      try {
-        // Skip geocoding if Google Maps isn't available yet
-        if (
-          !window.google ||
-          !window.google.maps ||
-          !window.google.maps.Geocoder
-        ) {
-          return locationParam || "this area";
-        }
-
-        const geocoder = new window.google.maps.Geocoder();
-        const result = await new Promise((resolve, reject) => {
-          geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-            if (status === "OK" && results.length > 0) {
-              resolve(results);
-            } else {
-              reject(new Error(`Geocoder failed: ${status}`));
-            }
-          });
-        });
-
-        // Try to find locality first
-        const locality = result.find((res) => res.types.includes("locality"));
-
-        if (locality) {
-          return locality.formatted_address;
-        }
-
-        // Try to find neighborhood
-        const neighborhood = result.find((res) =>
-          res.types.includes("neighborhood")
-        );
-
-        if (neighborhood) {
-          return neighborhood.formatted_address;
-        }
-
-        // Try to find administrative area
-        const adminArea = result.find(
-          (res) =>
-            res.types.includes("administrative_area_level_2") ||
-            res.types.includes("administrative_area_level_1")
-        );
-
-        if (adminArea) {
-          return adminArea.formatted_address;
-        }
-
-        // Fall back to the most specific result
-        return result[0].formatted_address;
-      } catch (error) {
-        console.warn("Error reverse geocoding:", error);
-        return locationParam || "this area";
-      }
-    },
-    [locationParam]
-  );
-
-  // Initialize map
-  useEffect(() => {
-    if (showMap && mapRef.current && !mapInstance) {
-      loadGoogleMapsScript((success) => {
-        if (success && window.google && window.google.maps) {
-          // Create map centered on search location
-          const map = createMap(mapRef, {
-            lat: initialLat,
-            lng: initialLng,
-          });
-
-          if (map) {
-            setMapInstance(map);
-
-            // Set a more appropriate zoom level
-            map.setZoom(8);
-
-            // Add markers for current listings
-            if (listings.length > 0) {
-              const markers = addListingMarkers(map, listings);
-              setMapMarkers(markers);
-            }
-          }
-        }
-      });
+    // Prevent re-processing the same URL
+    if (lastLocationRef.current === location.search) {
+      return;
     }
-  }, [showMap, mapRef, listings, initialLat, initialLng, mapInstance]);
-
-  // Create a function to fetch listings by map bounds
-  const fetchListingsByMapBounds = async (params) => {
+    
+    lastLocationRef.current = location.search;
+    
+    const urlParams = new URLSearchParams(location.search);
+    
+    // Extract location and coordinates
+    const locationName = urlParams.get("location") || "";
+    
+    // Extract and validate coordinates
+    let lat = urlParams.get("lat");
+    let lng = urlParams.get("lng");
+    
+    // Parse to numbers
+    lat = lat ? parseFloat(lat) : null;
+    lng = lng ? parseFloat(lng) : null;
+    
+    console.log("Extracted coordinates from URL:", { lat, lng });
+    
+    // Validate coordinates
+    if (lat === null || lng === null || isNaN(lat) || isNaN(lng) || 
+        lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      console.warn("Invalid or missing coordinates in URL, using defaults");
+      lat = 46.818188;
+      lng = 8.227512;
+    }
+    
+    // Use a 500km radius by default
+    const radius = parseFloat(urlParams.get("radius")) || 500;
+    
+    // Extract date range
+    const dateRange = urlParams.get("dates") || "";
+    const dates = dateRange ? dateRange.split(" - ") : [];
+    
+    // Extract guest counts
+    const people = parseInt(urlParams.get("people")) || 1;
+    const dogs = parseInt(urlParams.get("dogs")) || 0;
+    
+    // Extract filters
+    const filtersParam = urlParams.get("filters");
+    let filters = [];
     try {
-      const { lat, lng, radius, bounds, filters = {} } = params;
-
-      // Build query parameters
-      const queryParams = new URLSearchParams({
-        lat,
-        lng,
-        radius: radius || SEARCH_RADIUS, // Use fixed radius
-        ...filters,
-      });
-
-      // Add bounds if available
-      if (bounds) {
-        queryParams.append("neLat", bounds.ne.lat);
-        queryParams.append("neLng", bounds.ne.lng);
-        queryParams.append("swLat", bounds.sw.lat);
-        queryParams.append("swLng", bounds.sw.lng);
-      }
-
-      const response = await axios.get(
-        `/api/listings/map?${queryParams.toString()}`
-      );
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching listings by map bounds:", error);
-      throw error;
+      filters = filtersParam ? JSON.parse(filtersParam) : [];
+    } catch (e) {
+      console.error("Error parsing filters", e);
     }
-  };
-
-  // Fetch listings from API
-  const fetchListings = useCallback(
-    async (lat, lng, pageNum, append = false) => {
-      setIsUpdating(true);
-      try {
-        // Get filters from URL
-        const searchParams = new URLSearchParams(location.search);
-        const filtersParam = searchParams.get('filters');
-        const moreFiltersParam = searchParams.get('moreFilters');
-        const selectedFilters = filtersParam ? JSON.parse(filtersParam) : null;
-        const moreFilters = moreFiltersParam ? JSON.parse(moreFiltersParam) : null;
-
-        const response = await searchListings({
-          lat,
-          lng,
-          page: pageNum,
-          pageSize: 200,
-          filters: selectedFilters,
-          moreFilters: moreFilters,
-          radius: SEARCH_RADIUS // Always use fixed radius
-        });
-
-        // Process listings and fetch Interhome prices
-        let processedListings = await Promise.all(
-          (response?.listings || []).map(async (listing) => {
-            if (listing.provider === "Interhome" && listing.Code) {
-              try {
-                const priceData = await fetchInterhomePrices({
-                  accommodationCode: listing.Code,
-                  checkInDate: formattedStartDate,
-                  los: true,
-                });
-
-                // Calculate price per night from Interhome data
-                let pricePerNight = listing.pricePerNight?.price || 0;
-                if (
-                  priceData &&
-                  priceData.priceList &&
-                  priceData.priceList.prices &&
-                  priceData.priceList.prices.price &&
-                  priceData.priceList.prices.price.length > 0
-                ) {
-                  // Filter for duration 7 options
-                  const duration7Options = priceData.priceList.prices.price.filter(
-                    (option) => option.duration === 7
-                  );
-                  if (duration7Options.length > 0) {
-                    // Sort by paxUpTo (ascending)
-                    duration7Options.sort((a, b) => a.paxUpTo - b.paxUpTo);
-                    // Use the option with lowest paxUpTo
-                    const selectedOption = duration7Options[0];
-                    // Calculate price per night
-                    const calculatedPricePerNight = Math.round(
-                      selectedOption.price / 7
-                    );
-                    // Update the listing with calculated price per night
-                    return {
-                      ...listing,
-                      interhomePriceData: priceData,
-                      pricePerNight: {
-                        price: calculatedPricePerNight,
-                        currency: priceData.priceList.currency || "CHF",
-                        totalPrice: selectedOption.price,
-                        duration: 7,
-                        paxUpTo: selectedOption.paxUpTo,
-                      },
-                    };
-                  }
-                }
-                return {
-                  ...listing,
-                  interhomePriceData: priceData,
-                };
-              } catch (error) {
-                console.warn(
-                  `Failed to fetch Interhome prices for ${listing.Code}:`,
-                  error
-                );
-                return listing;
-              }
-            }
-            return listing;
-          })
-        );
-
-        // Apply price filter using the context
-        processedListings = applyPriceFilter(processedListings);
-
-        if (append) {
-          setListings((prev) => [...prev, ...processedListings]);
-        } else {
-          setListings(processedListings);
-        }
-
-        setHasMore(response?.hasMore || false);
-
-        // Update area name based on coordinates
-        const areaDisplayName = await getLocationName(lat, lng);
-        if (areaDisplayName !== areaNameRef.current) {
-          setAreaName(areaDisplayName);
-        }
-
-        return processedListings;
-      } catch (error) {
-        console.error("Error fetching listings:", error);
-        if (!append) {
-          setListings([]);
-        }
-        setHasMore(false);
-        return [];
-      } finally {
-        setIsUpdating(false);
-        setLoading(false);
-      }
-    },
-    [getLocationName, formattedStartDate, location.search, applyPriceFilter]
-  );
-
-  // Transform listings for map display - FIX THIS FUNCTION
-  const getMapReadyListings = useCallback((listingsData) => {
-    if (
-      !listingsData ||
-      !Array.isArray(listingsData) ||
-      listingsData.length === 0
-    ) {
-      console.log("No listings data available for map");
-      return [];
+    
+    // Extract more filters
+    const moreFiltersParam = urlParams.get("moreFilters");
+    let moreFilters = {};
+    try {
+      moreFilters = moreFiltersParam ? JSON.parse(moreFiltersParam) : {};
+    } catch (e) {
+      console.error("Error parsing moreFilters", e);
     }
+    
+    // Extract price range
+    const priceRange = { 
+      min: parseInt(urlParams.get("priceMin")) || 0,
+      max: parseInt(urlParams.get("priceMax")) || 10000
+    };
+    
+    // Create search param object
+    const newSearchParams = {
+      lat, 
+      lng,
+      radius,
+      locationName,
+      filters: {
+        dateRange: {
+          start: dates[0] ? new Date(dates[0]) : null,
+          end: dates[1] ? new Date(dates[1]) : null
+        },
+        amenities: filters,
+        guestCount: people,
+        dogCount: dogs,
+        ...moreFilters
+      },
+      priceRange
+    };
+    
+    console.log("Updating search params with coordinates:", { lat, lng });
+    
+    // Mark URL as processed to prevent loops
+    urlProcessedRef.current = true;
+    
+    // Update search params in context
+    updateSearchParams(newSearchParams);
+  }, [location.search, updateSearchParams]);
 
-    console.log("Preparing map data for", listingsData.length, "listings");
-
-    return listingsData
-      .map((listing) => {
-        // Check for position data in different formats
-        let position = null;
-
-        // Format 1: GeoJSON format with location.coordinates [lng, lat]
-        if (
-          listing.location &&
-          listing.location.coordinates &&
-          Array.isArray(listing.location.coordinates) &&
-          listing.location.coordinates.length === 2
-        ) {
-          position = {
-            lat: listing.location.coordinates[1],
-            lng: listing.location.coordinates[0],
-          };
-        }
-        // Format 2: Direct lat/lng properties
-        else if (listing.lat !== undefined && listing.lng !== undefined) {
-          position = {
-            lat: parseFloat(listing.lat),
-            lng: parseFloat(listing.lng),
-          };
-        }
-        // Format 3: Position object
-        else if (
-          listing.position &&
-          listing.position.lat !== undefined &&
-          listing.position.lng !== undefined
-        ) {
-          position = listing.position;
-        }
-
-        if (!position) {
-          console.warn(
-            "Invalid location data for listing:",
-            listing._id || listing.id
-          );
-          return null;
-        }
-
-        // Ensure we have valid coordinates
-        if (isNaN(position.lat) || isNaN(position.lng)) {
-          console.warn(
-            "Invalid coordinates for listing:",
-            listing._id || listing.id
-          );
-          return null;
-        }
-
-        // Create a properly formatted listing object for the map
-        return {
-          id: listing._id || listing.id,
-          title: listing.title || "Accommodation",
-          location: {
-            coordinates: [position.lng, position.lat], // Format expected by MockMap
-          },
-          pricePerNight: listing.pricePerNight || { price: 0, currency: "CHF" },
-          images: listing.images || [],
-          capacity: listing.capacity || { people: 2, dogs: 1 },
-          url: `/accommodations/${listing._id || listing.id}`,
-        };
-      })
-      .filter(Boolean); // Remove any null entries
-  }, []);
-
+  // Helper function to determine what to display for total count
+  const getTotalDisplay = useCallback(() => {
+    // If we're in initial load or reloading due to map drag, show "Searching..."
+    if (isInitialLoad || isDraggingMap) {
+      return "Searching accommodations...";
+    }
+    
+    // If we have a total count from the API, use that
+    if (totalAccommodationsInRadius > 0) {
+      return `${totalAccommodationsInRadius} accommodations found`;
+    }
+    
+    // Default case, no listings found
+    return "No accommodations found";
+  }, [isInitialLoad, isDraggingMap, totalAccommodationsInRadius]);
+  
   // Handle window resize
   useEffect(() => {
     const handleResize = () => {
       const newIsDesktop = window.innerWidth >= 1024;
       setIsDesktop(newIsDesktop);
+      
       // Reset map view when switching to desktop
       if (newIsDesktop && showMap) {
         setShowMap(false);
       }
     };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [showMap]);
-
-  // Fetch listings on initial load or when coordinates change
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [showMap, setShowMap]);
+  
+  // Handle search updates
+  const handleSearch = useCallback((searchUrl) => {
+    // Reset URL processed flag when user performs a new search
+    urlProcessedRef.current = false;
+    
+    // Update the URL without full page reload
+    navigate(searchUrl);
+  }, [navigate]);
+  
+  // Clear error on dismount
   useEffect(() => {
-    setLoading(true);
-    setPage(1);
-    fetchListings(initialLat, initialLng, 1, false);
-
-    // Update map viewport
-    setMapViewport((prev) => ({
-      ...prev,
-      center: { lat: initialLat, lng: initialLng },
-    }));
-  }, [initialLat, initialLng, fetchListings]);
-
-  // Set up intersection observer for infinite scrolling
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasMore && !isUpdating && !loading) {
-          setPage((prevPage) => prevPage + 1);
-        }
-      },
-      { threshold: 0.5 }
-    );
-
-    observerRef.current = observer;
-
-    if (loadingRef.current) {
-      observer.observe(loadingRef.current);
-    }
-
     return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
+      if (error) {
+        clearError();
       }
     };
-  }, [hasMore, isUpdating, loading]);
-
-  // Fetch more listings when page changes
+  }, [error, clearError]);
+  
+  // Setup map drag event handlers
   useEffect(() => {
-    if (page > 1) {
-      fetchListings(mapViewport.center.lat, mapViewport.center.lng, page, true);
-    }
-  }, [page, fetchListings, mapViewport.center]);
-
-  // Handle map viewport changes - only update when user manually changes location
-  const handleMapChange = useCallback(
-    (newViewport) => {
-      // Update viewport state
-      setMapViewport((prev) => ({
-        ...prev,
-        ...newViewport,
-      }));
-
-      // Only update listings if center has changed significantly AND zoom hasn't changed
-      // This prevents refreshing when just zooming in/out
-      if (mapViewport.center && newViewport.center) {
-        const oldCenter = mapViewport.center;
-        const newCenter = newViewport.center;
-
-        // Calculate distance between old and new center
-        const distance = Math.sqrt(
-          Math.pow(newCenter.lat - oldCenter.lat, 2) +
-            Math.pow(newCenter.lng - oldCenter.lng, 2)
-        );
-
-        // Check if this is just a zoom change or a very small movement
-        const isZoomChange = newViewport.zoom !== mapViewport.zoom;
-        const isSmallMovement = distance < 0.05; // Increased threshold for movement
-
-        // Only fetch new listings if:
-        // 1. The map has been dragged significantly (not just zoomed)
-        // 2. It's not a small movement caused by slight map adjustments
-        if (!isZoomChange && !isSmallMovement && distance > 0.05) {
-          console.log("Map moved significantly, fetching new listings");
-          setPage(1);
-          fetchListings(newCenter.lat, newCenter.lng, 1, false);
-        }
-      }
-    },
-    [mapViewport.center, mapViewport.zoom, fetchListings]
-  );
-
-  // Get the listings ready for the map component
-  const mapReadyListings = getMapReadyListings(listings);
-
-  // Create map view with loading indicator
-  const mapView = (
-    <div className="relative h-full">
-      <div ref={mapRef} className="w-full h-full rounded-lg"></div>
-      {isMapMoving && (
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white px-4 py-2 rounded-full shadow-md">
-          <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin"></div>
-            <span className="text-sm font-medium">
-              Loading accommodations...
-            </span>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-
-  // Add new state for search parameters
-  const [searchState, setSearchState] = useState({
-    location: locationParam,
-    dateRange: dateRange ? {
-      start: new Date(dateRange.split(' - ')[0]),
-      end: new Date(dateRange.split(' - ')[1])
-    } : { start: null, end: null },
-    guests: {
-      people: parseInt(people),
-      dogs: parseInt(dogs)
-    }
-  });
-
-  // Add handler for search updates
-  const handleSearch = (searchUrl) => {
-    // Update the URL without full page reload
-    window.history.pushState({}, '', searchUrl);
+    const handleMapDragStart = () => {
+      setMapDragging(true);
+    };
     
-    // Parse the new URL parameters
-    const newParams = new URLSearchParams(searchUrl.split('?')[1]);
-    const newLocation = newParams.get('location') || '';
-    const newDateRange = newParams.get('dates') || '';
-    const newPeople = parseInt(newParams.get('people')) || 1;
-    const newDogs = parseInt(newParams.get('dogs')) || 0;
-    const newLat = parseFloat(newParams.get('lat')) || initialLat;
-    const newLng = parseFloat(newParams.get('lng')) || initialLng;
-
-    // Update search parameters state
-    setSearchState({
-      location: newLocation,
-      dateRange: newDateRange ? {
-        start: new Date(newDateRange.split(' - ')[0]),
-        end: new Date(newDateRange.split(' - ')[1])
-      } : { start: null, end: null },
-      guests: {
-        people: newPeople,
-        dogs: newDogs
-      }
-    });
-
-    // Update map viewport
-    setMapViewport(prev => ({
-      ...prev,
-      center: { lat: newLat, lng: newLng },
-      zoom: 12 // Reset zoom level for new location
-    }));
-
-    // Clear existing markers
-    if (mapMarkers.length > 0) {
-      clearMarkers(mapMarkers);
-      setMapMarkers([]);
-    }
-
-    // Reset page and fetch new results
-    setPage(1);
-    setLoading(true);
-    fetchListings(newLat, newLng, 1, false).then(newListings => {
-      // Add new markers after fetching listings
-      if (mapInstance && newListings.length > 0) {
-        const markers = addListingMarkers(mapInstance, newListings);
-        setMapMarkers(markers);
-      }
-    });
-  };
-
+    const handleMapDragEnd = () => {
+      // Use a delay to ensure the new data is loaded
+      setTimeout(() => {
+        setMapDragging(false);
+      }, 2000);
+    };
+    
+    window.addEventListener('mapdragstart', handleMapDragStart);
+    window.addEventListener('mapdragend', handleMapDragEnd);
+    
+    return () => {
+      window.removeEventListener('mapdragstart', handleMapDragStart);
+      window.removeEventListener('mapdragend', handleMapDragEnd);
+    };
+  }, [setMapDragging]);
+  
   return (
-    <div className="min-h-screen" style={pageContentStyle}>
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
       
-      {/* Add SearchBar component with adjusted positioning */}
-      <div className="w-full mt-16 px-4 md:px-6 py-2 bg-white border-b">
-        <div className="max-w-7xl mx-auto">
-          <SearchBar
-            initialLocation={searchState.location}
-            initialDateRange={searchState.dateRange}
-            initialGuests={searchState.guests}
+      {/* Enhanced Search Bar */}
+      <div className="w-full mt-16 px-4 md:px-6 py-6 bg-white shadow-sm z-20 relative">
+        <div className="max-w-4xl mx-auto">
+          <EnhancedSearchBar
+            initialLocation={searchParams.locationName || ""}
+            initialDateRange={searchParams.filters.dateRange || { start: null, end: null }}
+            initialGuests={{
+              people: searchParams.filters.guestCount || 1,
+              dogs: searchParams.filters.dogCount || 0
+            }}
             onSearch={handleSearch}
           />
         </div>
       </div>
-
-      <div className="-mt-20">
-        <SearchFilters dateRange={dateRange} />
-      </div>
-
-      <div className="relative flex-grow">
-        {/* Mobile Map Toggle */}
-        <MapToggle showMap={showMap} onToggle={(show) => setShowMap(show)} />
-
-        {/* Main Content */}
-        <div className="relative flex flex-col lg:flex-row min-h-[calc(100vh-170px)]">
-          {/* List View */}
-          <main
-            className={`w-full px-4 sm:px-6 lg:px-8 py-8 lg:w-2/3 ${
-              showMap && !isDesktop ? "hidden" : ""
-            }`}
-          >
-            {loading ? (
-              <div className="flex justify-center items-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand"></div>
-              </div>
-            ) : (
-              <>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-semibold text-gray-900">
-                    {listings && listings.length ? listings.length : 0}{" "}
-                    {t("accommodations_found")}
-                    {areaName && (
-                      <span className="font-normal text-gray-600 text-base ml-2">
-                        in {areaName}
-                      </span>
-                    )}
-                  </h2>
-                </div>
-
-                {/* Loading indicator when updating */}
-                {isUpdating && (
-                  <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-brand text-white px-3 py-1 rounded-full text-sm z-50 opacity-80">
-                    Updating listings...
-                  </div>
-                )}
-
-                <div
-                  className={`grid grid-cols-1 sm:grid-cols-2 gap-6 transition-opacity duration-300 ${
-                    isUpdating ? "opacity-70" : "opacity-100"
-                  }`}
-                >
-                  {listings && listings.length > 0
-                    ? listings.map((accommodation) => (
-                        <AccommodationCard
-                          key={accommodation._id || accommodation.id}
-                          id={accommodation._id || accommodation.id}
-                          image={
-                            accommodation.images &&
-                            accommodation.images.length > 0
-                              ? accommodation.images[0]
-                              : null
-                          }
-                          images={accommodation.images || []}
-                          price={accommodation.pricePerNight?.price || 0}
-                          currency={
-                            accommodation.pricePerNight?.currency || "CHF"
-                          }
-                          location={
-                            accommodation.location?.address ||
-                            "Unknown location"
-                          }
-                          provider={accommodation.provider || "Unknown"}
-                          listingSource={
-                            accommodation.listingSource ||
-                            (accommodation.source &&
-                              accommodation.source.name) ||
-                            "Provider"
-                          }
-                          pricePerNight={accommodation.pricePerNight}
-                        />
-                      ))
-                    : null}
-                </div>
-
-                {/* Loading indicator for infinite scroll */}
-                {hasMore && (
-                  <div
-                    ref={loadingRef}
-                    className="flex justify-center items-center py-8"
-                  >
-                    {isUpdating && (
-                      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-brand"></div>
-                    )}
-                  </div>
-                )}
-
-                {(!listings || listings.length === 0) && !loading && (
-                  <div className="text-center py-12">
-                    <p className="text-gray-600 mb-4">
-                      {t("no_accommodations_found")}
-                    </p>
-                    <button
-                      onClick={() => (window.location.href = "/")}
-                      className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand/90"
-                    >
-                      {t("modify_search")}
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-          </main>
-
-          {/* Map View */}
-          <aside
-            className={`${
-              showMap && !isDesktop
-                ? "fixed inset-0 z-40"
-                : isDesktop
-                ? "lg:block lg:w-1/3 sticky top-0 right-0 h-screen"
-                : "hidden"
-            }`}
-          >
-            <div className="h-full pt-0">
-              {/* ONLY CHANGED THIS LINE - Using MockMap for mobile view instead of mapView */}
-              <MockMap
-                center={mapViewport.center}
-                listings={mapReadyListings}
-                locationName={areaName}
-                onMapChange={handleMapChange}
-                radius={SEARCH_RADIUS}
-              />
-            </div>
-          </aside>
+      
+      {/* Mobile Map Toggle */}
+      <MapToggle 
+        showMap={showMap} 
+        onToggle={(show) => setShowMap(show)} 
+      />
+      
+      {/* Loading indicator for initial load */}
+      {isInitialLoad && (
+        <div className="fixed top-32 left-1/2 transform -translate-x-1/2 bg-black text-white px-4 py-2 rounded-full text-sm z-50 shadow-lg bg-brand">
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            <span>Looking for accommodations...</span>
+          </div>
         </div>
+      )}
+      
+      {/* Main Content */}
+      <div className="relative flex flex-col lg:flex-row min-h-[calc(100vh-200px)]">
+        {/* List View */}
+        <main
+          className={`w-full px-4 sm:px-6 lg:px-8 py-8 lg:w-2/3 transition-opacity duration-300 ${
+            showMap && !isDesktop ? "hidden" : ""
+          } ${isInitialLoad ? "opacity-70" : "opacity-100"}`}
+        >
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-semibold text-gray-900">
+                <span className="font-semibold">{getTotalDisplay()}</span>
+              </h2>
+              <p className="text-sm text-gray-600 mt-1">
+                Within 500km radius 
+              </p>
+            </div>
+          </div>
+          
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 flex items-center">
+              <div className="flex-shrink-0 mr-3">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div>
+                <span className="font-medium">Error: </span>
+                {error}
+              </div>
+            </div>
+          )}
+          
+          {/* Results List - Simple container */}
+          
+            <div className="p-1">
+              <ImprovedVirtualizedListings />
+            </div>
+          
+         
+        </main>
+        
+        {/* Map View */}
+        <aside
+          className={`${
+            showMap && !isDesktop
+              ? "fixed inset-0 z-40 bg-white"
+              : isDesktop
+              ? "lg:block lg:w-1/3 sticky top-20 right-0 h-[calc(100vh-80px)]"
+              : "hidden"
+          }`}
+        >
+          <div className="h-full">
+            {/* Map Header for Mobile */}
+            {showMap && !isDesktop && (
+              <div className="p-4 border-b border-gray-200 bg-white">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-gray-900">Map View</h2>
+                  <button
+                    onClick={() => setShowMap(false)}
+                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
+            
+            {/* Map Container */}
+            <div className={`${showMap && !isDesktop ? 'h-[calc(100vh-80px)]' : 'h-full'} bg-gray-100 rounded-lg overflow-hidden`}>
+              <OptimizedMapWithClustering />
+            </div>
+          </div>
+        </aside>
       </div>
+      
+      {/* Footer */}
       <Footer />
+      
+      {/* Lazy-loaded modals */}
+      <Suspense fallback={null}>
+        <MoreFiltersModal 
+          isOpen={isMoreFiltersOpen}
+          onClose={() => setIsMoreFiltersOpen(false)}
+        />
+      </Suspense>
     </div>
+  );
+};
+
+
+
+/**
+ * Main search results page component that wraps content with ListingProvider
+ * This pattern allows context to be used within the component
+ */
+const SearchResults = () => {
+  return (
+    <ListingProvider>
+      <SearchResultsContent />
+    </ListingProvider>
   );
 };
 
