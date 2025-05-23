@@ -527,12 +527,12 @@ const Signup = () => {
                 {/* Signup Button */}
                 <button
                   type="submit"
-                  // disabled={!acceptTerms || isLoading || !userType || !isEmailVerified}
-                  // className={`w-full py-3 rounded-lg font-medium ${
-                  //   acceptTerms && !isLoading && userType && isEmailVerified
-                  //     ? "bg-gray-100 text-gray-800 hover:bg-gray-200"
-                  //     : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  // }`}
+                   disabled={!acceptTerms || isLoading || !userType || !isEmailVerified}
+                  className={`w-full py-3 rounded-lg font-medium ${
+                   acceptTerms && !isLoading && userType && isEmailVerified
+                    ? "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                    : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                   }`}
                 >
                   {isLoading ? t("signing_up") : t("sign_up")}
                 </button>
