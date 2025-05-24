@@ -17,6 +17,7 @@ import {
   getProviderTotalBookingsCount
 } from '../../api/providerAPI';
 import AnalyticsChart from '../../components/Provider/AnalyticsChart';
+import { changeMetaData } from '../../utils/extra';
 
 
  
@@ -111,6 +112,10 @@ const StatCard = ({ icon: Icon, title, value }) => {
  };
  
  const ProviderDashboard = () => {
+  useEffect(() => {
+  
+    changeMetaData(`Provider - Waureisen`);
+  }, []);
    const navigate = useNavigate();
    const [timeRange, setTimeRange] = useState('month');
    const [isLoading, setIsLoading] = useState(true);

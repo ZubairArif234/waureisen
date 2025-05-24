@@ -7,6 +7,7 @@ import {
   deleteVoucher,
 } from "../../api/adminAPI";
 import { exportToExcel } from "../../utils/exportUtils";
+import { changeMetaData } from "../../utils/extra";
 
 // Skeleton for loading state
 const SkeletonTable = () => {
@@ -412,6 +413,10 @@ const DeleteConfirmationModal = ({
 };
 
 const DiscountVouchers = () => {
+    useEffect(() => {
+          
+            changeMetaData(`Vouchers - Admin`);
+          }, []);
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editVoucher, setEditVoucher] = useState(null);

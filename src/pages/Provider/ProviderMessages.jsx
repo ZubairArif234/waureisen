@@ -7,6 +7,7 @@ import { useLanguage } from '../../utils/LanguageContext';
 import { getProviderConversations, getConversationMessages, sendMessage, markConversationAsRead, getConversationByBooking } from '../../api/conversationAPI';
 import { useSocket } from '../../utils/SocketContext';
 import defaultAvatar from '../../assets/avatar.png';
+import { changeMetaData } from '../../utils/extra';
 
 // ContactCard component for the sidebar
 const ContactCard = ({ contact, isActive, onClick }) => {
@@ -170,6 +171,10 @@ const BookingInfoCard = ({ booking, t }) => {
 };
 
 const ProviderMessages = () => {
+    useEffect(() => {
+        
+          changeMetaData(`Messages - Provider`);
+        }, []);
   const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();

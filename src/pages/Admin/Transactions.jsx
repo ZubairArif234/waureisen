@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { getAllTransactions, updateTransaction } from "../../api/adminAPI";
 import { exportToExcel } from "../../utils/exportUtils";
+import { changeMetaData } from "../../utils/extra";
 
 // Skeleton loader for transactions table
 const SkeletonTable = () => {
@@ -369,7 +370,10 @@ const Transactions = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  useEffect(() => {
+        
+          changeMetaData(`Transactions - Admin`);
+        }, []);
   // Fetch transactions on component mount
   useEffect(() => {
     fetchTransactions();

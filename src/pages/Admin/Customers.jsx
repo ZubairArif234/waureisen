@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { getAllUsers, updateUserStatus, deleteUser } from "../../api/adminAPI";
 import avatar from "../../assets/avatar.png";
+import { changeMetaData } from "../../utils/extra";
 
 // Skeleton for loading state
 const SkeletonTable = () => {
@@ -785,6 +786,10 @@ const exportToCSV = (data, filename) => {
 };
 
 const Customers = () => {
+    useEffect(() => {
+          
+            changeMetaData(`Customers - Admin`);
+          }, []);
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");

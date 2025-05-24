@@ -14,6 +14,7 @@ import {
 } from '../../api/providerAPI';
 import UnblockDatesModal from '../../components/Provider/UnblockDatesModal';
 import { toast } from 'react-hot-toast';
+import { changeMetaData } from '../../utils/extra';
 
 const formatDateWithoutTimezoneOffset = (date) => {
   const year = date.getFullYear();
@@ -607,6 +608,10 @@ const BlockDateModal = ({ isOpen, onClose, listings, selectedDate, onSave, booki
 };
 
 const ProviderCalendar = () => {
+    useEffect(() => {
+        
+          changeMetaData(`Calendar - Provider`);
+        }, []);
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [selectedListing, setSelectedListing] = useState('all');

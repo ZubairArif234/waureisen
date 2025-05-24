@@ -13,8 +13,13 @@ import DescriptionForm from "../../components/Admin/DescriptionForm";
 import PoliciesLocationForm from "../../components/Admin/PoliciesLocationForm";
 import toast from "react-hot-toast";
 import { getProviderTemplateFilter } from "../../api/providerAPI";
+import { changeMetaData } from "../../utils/extra";
 
 const CreateListing = () => {
+  useEffect(() => {
+        
+          changeMetaData(`Create Listing - Provider`);
+        }, []);
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { id } = useParams();

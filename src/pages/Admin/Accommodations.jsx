@@ -24,6 +24,7 @@ import {
   handleImageError,
 } from "../../utils/cloudinaryConfig";
 import AddToFeaturedModal from "../../components/Admin/AddToFeaturedModal";
+import { changeMetaData } from "../../utils/extra";
 
 // Default sources to use while loading or if API doesn't return any
 const DEFAULT_SOURCES = [
@@ -436,6 +437,10 @@ const DeleteConfirmationModal = ({
 };
 
 const Accommodations = () => {
+    useEffect(() => {
+        
+          changeMetaData(`Accommodations - Admin`);
+        }, []);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [loadingOperation, setLoadingOperation] = useState(""); // Track specific operation

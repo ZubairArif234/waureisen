@@ -5,6 +5,7 @@ import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
 import { useLanguage } from '../../utils/LanguageContext';
 import { myCardDetails } from '../../api/paymentAPI';
+import { changeMetaData } from '../../utils/extra';
 
 const InputField = ({ label, type = "text", placeholder, optional = false, value, onChange, name }) => (
   <div className="space-y-2">
@@ -24,6 +25,10 @@ const InputField = ({ label, type = "text", placeholder, optional = false, value
 );
 
 const PaymentMethodsPage = () => {
+    useEffect(() => {
+          
+            changeMetaData(`Payment Method - Waureisen`);
+          }, []);
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({

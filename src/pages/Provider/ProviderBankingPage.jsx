@@ -7,8 +7,13 @@ import { useLanguage } from '../../utils/LanguageContext';
 import { getProviderProfile, updateProviderProfile } from '../../api/providerAPI';
 import { getCurrentProvider } from '../../utils/authService';
 import toast from 'react-hot-toast';
+import { changeMetaData } from '../../utils/extra';
 
 const ProviderBankingPage = () => {
+    useEffect(() => {
+        
+          changeMetaData(`Bank Details - Provider`);
+        }, []);
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [isLoading, setIsLoading] = useState(true);

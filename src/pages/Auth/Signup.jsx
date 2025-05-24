@@ -11,8 +11,14 @@ import { userSignup, providerSignup } from "../../api/authAPI";
 import { sendVerificationCode, verifyCode } from "../../api/verificationAPI";
 import toast from "react-hot-toast";
 import WelcomeCustomerModal from "../../components/SearchComponents/WelcomeCustomerModal";
+import { changeMetaData } from "../../utils/extra";
 
 const Signup = () => {
+
+  useEffect(() => {
+    
+      changeMetaData(`Signup - Waureisen`);
+    }, []);
   const [userType, setUserType] = useState("");
   const [isTermsOpen, setIsTermsOpen] = useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);

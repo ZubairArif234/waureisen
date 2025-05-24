@@ -5,6 +5,7 @@ import BlogCard from "../../components/Admin/BlogCard";
 import BlogForm from "../../components/Admin/BlogForm";
 import { getAllBlogs, deleteBlog } from "../../api/travelMagazineAPI";
 import toast from "react-hot-toast";
+import { changeMetaData } from "../../utils/extra";
 
 // Skeleton cards for loading state
 const SkeletonCards = () => {
@@ -83,6 +84,10 @@ const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, blogTitle }) => {
 };
 
 const TravelMagazine = () => {
+    useEffect(() => {
+          
+            changeMetaData(`Travel Magazine - Admin`);
+          }, []);
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");

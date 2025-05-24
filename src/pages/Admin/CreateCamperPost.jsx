@@ -19,12 +19,17 @@ import {
   loadGoogleMapsScript,
   initAutocomplete,
 } from "../../utils/googleMapsUtils";
+import { changeMetaData } from "../../utils/extra";
 
 const CreateCamperPost = () => {
   const navigate = useNavigate();
   const locationInputRef = useRef(null);
   const { title } = useParams(); // For edit mode
   const isEditMode = !!title;
+    useEffect(() => {
+          
+            changeMetaData(`${title ? "Edit Camper": "Create Camper"} - Admin`);
+          }, []);
 
   // Main state for the camper post
   const [camperData, setCamperData] = useState({

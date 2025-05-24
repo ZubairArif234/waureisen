@@ -12,6 +12,7 @@ import Footer from "../../components/Shared/Footer";
 import i1 from "../../assets/i1.png";
 import { useLanguage } from "../../utils/LanguageContext";
 import { deleteListing, getListingDetails, getProviderListings } from "../../api/providerAPI";
+import { changeMetaData } from "../../utils/extra";
 
 // DeleteConfirmationModal component
 const DeleteConfirmationModal = ({
@@ -67,6 +68,7 @@ const DeleteConfirmationModal = ({
 
 // ListingCard with improved aspect ratio and overflow control
 const ListingCard = ({ listing, onEdit, onDelete, onView }) => {
+     
   const { t } = useLanguage();
   const [showMenu, setShowMenu] = useState(false);
 
@@ -171,6 +173,10 @@ const ListingCard = ({ listing, onEdit, onDelete, onView }) => {
 
 // Main YourListings component with constrained layout
 const YourListings = () => {
+  useEffect(() => {
+      
+        changeMetaData(`Your Listing - Provider`);
+      }, []);
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("active");

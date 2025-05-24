@@ -14,6 +14,7 @@ import {
   updateTemplateFilter
 } from '../../api/adminAPI';
 import { toast } from 'react-hot-toast';
+import { changeMetaData } from '../../utils/extra';
 
 // Modal for adding/editing a subsection
 const SubsectionModal = ({ isOpen, onClose, onSave, editingSubsection = null }) => {
@@ -509,6 +510,10 @@ const SubsectionIcon = ({ name }) => {
 };
 
 const FiltersManagement = () => {
+    useEffect(() => {
+          
+            changeMetaData(`Manage Filters - Admin`);
+          }, []);
   // State for active filter document and UI state
   const [activeFilter, setActiveFilter] = useState(null);
   const [loading, setLoading] = useState(true);

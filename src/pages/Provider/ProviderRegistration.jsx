@@ -6,8 +6,13 @@ import Footer from "../../components/Shared/Footer";
 import { completeProviderRegistration } from "../../api/authAPI";
 import { useLanguage } from "../../utils/LanguageContext";
 import { connectToStripe, getStripeAccount } from "../../api/paymentAPI";
+import { changeMetaData } from "../../utils/extra";
 
 const ProviderRegistration = () => {
+    useEffect(() => {
+        
+          changeMetaData(`Complete Profile - Provider`);
+        }, []);
   const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();

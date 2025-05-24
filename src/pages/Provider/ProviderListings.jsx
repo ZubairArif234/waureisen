@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import Navbar from '../../components/Shared/Navbar';
@@ -9,6 +9,7 @@ import s1 from '../../assets/s1.png';
 import s2 from '../../assets/s2.png';
 import i3 from '../../assets/magazine.jpg';
 import { useLanguage } from '../../utils/LanguageContext';
+import { changeMetaData } from '../../utils/extra';
 
 const ImageGrid = ({ images, title, subtitle, link }) => (
   <div className="flex flex-col items-center w-full md:w-auto">
@@ -54,6 +55,10 @@ const ImageGrid = ({ images, title, subtitle, link }) => (
 );
 
 const ProviderListings = () => {
+   useEffect(() => {
+    
+      changeMetaData(`Your Listing - Provider`);
+    }, []);
   const navigate = useNavigate();
   const { t } = useLanguage();
   

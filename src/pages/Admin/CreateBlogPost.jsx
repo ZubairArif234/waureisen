@@ -5,10 +5,15 @@ import { createBlog, getBlogById, updateBlog } from '../../api/travelMagazineAPI
 import { uploadImageToCloudinary } from '../../utils/cloudinaryUtils';
 import toast from 'react-hot-toast';
 import { initAutocomplete, loadGoogleMapsScript } from '../../utils/googleMapsUtils';
+import { changeMetaData } from '../../utils/extra';
 
 const CreateBlogPost = () => {
-  const navigate = useNavigate();
   const { title } = useParams(); // For edit mode
+    useEffect(() => {
+          
+            changeMetaData(`${title ? "Edit Blog": "Create Blog"} - Admin`);
+          }, []);
+  const navigate = useNavigate();
   const isEditMode = !!title;
    const locationInputRef = useRef(null);
   // Main state for the blog post

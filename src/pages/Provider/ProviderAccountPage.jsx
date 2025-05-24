@@ -6,6 +6,7 @@ import Footer from '../../components/Shared/Footer';
 import { useLanguage } from '../../utils/LanguageContext';
 import { getCurrentProvider } from '../../utils/authService';
 import { getProviderProfile } from '../../api/providerAPI';
+import { changeMetaData } from '../../utils/extra';
 
 const AccountCard = ({ icon: Icon, title, description, onClick }) => (
   <div 
@@ -25,6 +26,10 @@ const AccountCard = ({ icon: Icon, title, description, onClick }) => (
 );
 
 const ProviderAccountPage = () => {
+    useEffect(() => {
+        
+          changeMetaData(`Account - Provider`);
+        }, []);
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [providerData, setProviderData] = useState(null);

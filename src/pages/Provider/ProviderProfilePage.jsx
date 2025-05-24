@@ -11,8 +11,13 @@ import {
 import { getCurrentProvider } from "../../utils/authService";
 import { uploadImageToCloudinary } from "../../utils/cloudinaryUtils";
 import toast from "react-hot-toast";
+import { changeMetaData } from "../../utils/extra";
 
 const ProviderProfilePage = () => {
+    useEffect(() => {
+        
+          changeMetaData(`My Profile - Provider`);
+        }, []);
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [isLoading, setIsLoading] = useState(true);

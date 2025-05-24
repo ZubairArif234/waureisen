@@ -23,10 +23,15 @@ import { generateUniqueListingCode } from "../../utils/uniqueCodeGenerator";
 import toast from "react-hot-toast";
 import { updateListing } from "../../api/listingAPI";
 import moment from "moment";
+import { changeMetaData } from "../../utils/extra";
 
 const AddAccommodation = (props) => {
-  const navigate = useNavigate();
   const { id } = useParams();
+    useEffect(() => {
+          
+            changeMetaData(`${id ? "Edit Accommodation" :"Create Accommodation"} - Provider`);
+          }, []);
+  const navigate = useNavigate();
   const isEditMode = !!id;
   const isProviderMode = props?.isProviderMode || false;
   const [isLoading, setIsLoading] = useState(isEditMode);

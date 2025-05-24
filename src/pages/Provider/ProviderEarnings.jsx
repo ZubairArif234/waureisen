@@ -7,6 +7,7 @@ import { useLanguage } from '../../utils/LanguageContext';
 import { getProviderEarnings, getProviderTransactions } from '../../api/providerAPI';
 import { getMyProviderBooking } from '../../api/bookingApi';
 import moment from 'moment';
+import { changeMetaData } from '../../utils/extra';
 
 // EarningsSummaryCard Component
 const EarningsSummaryCard = ({ title, amount, subtitle, icon: Icon, color }) => {
@@ -232,6 +233,10 @@ const PaymentMethodCard = ({ paymentMethod, isDefault, onEdit, onDelete, onSetDe
 };
 
 const ProviderEarnings = () => {
+    useEffect(() => {
+        
+          changeMetaData(`Earning - Provider`);
+        }, []);
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [timeRange, setTimeRange] = useState('all');

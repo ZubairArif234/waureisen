@@ -8,8 +8,13 @@ import { getProviderProfile } from '../../api/providerAPI';
 import { updateProviderSecurity } from '../../api/providerAPI';
 import { getCurrentProvider } from '../../utils/authService';
 import toast from 'react-hot-toast';
+import { changeMetaData } from '../../utils/extra';
 
 const ProviderSecurityPage = () => {
+    useEffect(() => {
+        
+          changeMetaData(`Account Security - Provider`);
+        }, []);
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [isLoading, setIsLoading] = useState(true);

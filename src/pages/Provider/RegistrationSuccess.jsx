@@ -4,9 +4,14 @@ import { CheckCircle, ArrowRight } from 'lucide-react';
 import Navbar from '../../components/Shared/Navbar';
 import Footer from '../../components/Shared/Footer';
 import { useLanguage } from '../../utils/LanguageContext';
+import { changeMetaData } from '../../utils/extra';
 
 
 const RegistrationSuccess = () => {
+    useEffect(() => {
+        
+          changeMetaData(`Profile Created - Provider`);
+        }, []);
   const {t} = useLanguage();
   const navigate = useNavigate();
   

@@ -6,6 +6,7 @@ import Footer from '../../components/Shared/Footer';
 import { getProviderDashboardStats, getProviderStats } from '../../api/providerAPI';
 import { useLanguage } from '../../utils/LanguageContext';
 import AnalyticsChart from '../../components/Provider/AnalyticsChart';
+import { changeMetaData } from '../../utils/extra';
 
 
 const emptyAnalyticsData = {
@@ -149,6 +150,10 @@ const ListingPerformanceRow = ({ listing, onViewDetails }) => {
 };
 
 const ProviderAnalytics = () => {
+    useEffect(() => {
+        
+          changeMetaData(`Analytics - Provider`);
+        }, []);
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [timeRange, setTimeRange] = useState('month');

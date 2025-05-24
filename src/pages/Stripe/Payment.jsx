@@ -7,6 +7,7 @@ import { createPaymentIntent } from "../../api/paymentAPI";
 import { useLocation } from "react-router-dom";
 import moment from "moment";
 import logo from "../../assets/logo.png";
+import { changeMetaData } from "../../utils/extra";
 // const stripePromise = loadStripe(
 //   "pk_test_51QPmjyRuFURKkwuQO9cccKtZGjlFh5ULmjUIxPWlpCj3zKdUk3MAnKnntIB5hIzNUOp6qHJHbxjRCosLzQW0TNKG00Z6iVynXH"
 // );
@@ -14,6 +15,10 @@ const stripePromise = loadStripe(
   "pk_live_51QPmjyRuFURKkwuQNbUR2Wyy4J5ZPIyFQmZ7FlsnlbXDu2qqrGWpQkZPbm2YbCKtd0jDjQ6DGr4GE1iEQfW58Hj600b2XlHbLb"
 );
 const Payment = () => {
+    useEffect(() => {
+          
+            changeMetaData(`Pay - Waureisen`);
+          }, []);
   const location = useLocation();
   const { price, data, details } = location?.state;
   const [loading, setLoading] = useState(false);

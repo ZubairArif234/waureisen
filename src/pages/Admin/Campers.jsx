@@ -5,6 +5,7 @@ import { Search, Plus, Filter, AlertTriangle } from "lucide-react";
 import CamperCard from "../../components/Admin/CamperCard";
 import { getAllCampers, deleteCamper } from "../../api/camperAPI";
 import toast from "react-hot-toast";
+import { changeMetaData } from "../../utils/extra";
 
 // Skeleton cards for loading state
 const SkeletonCards = () => {
@@ -86,6 +87,10 @@ const DeleteConfirmationModal = ({
 };
 
 const Campers = () => {
+    useEffect(() => {
+          
+            changeMetaData(`Campers - Admin`);
+          }, []);
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");

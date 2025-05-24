@@ -10,8 +10,15 @@ import {
   redirectToSignup,
 } from "../../utils/authService";
 import WelcomeCustomerModal from "../../components/SearchComponents/WelcomeCustomerModal";
+import { changeMetaData } from "../../utils/extra";
 
 const Login = () => {
+
+ useEffect(() => {
+  
+    changeMetaData(`Login - Waureisen`);
+  }, []);
+
   const [email, setEmail] = useState("");
   const [userType, setUserType] = useState("user");
   const [password, setPassword] = useState("");

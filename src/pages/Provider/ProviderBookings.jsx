@@ -10,6 +10,7 @@ import { getProviderBookings, acceptBooking, cancelBooking } from '../../api/pro
 import Pagination from '../../components/Shared/Pagination';
 import toast from 'react-hot-toast';
 import moment from 'moment';
+import { changeMetaData } from '../../utils/extra';
 
 // Status Badge Component
 const StatusBadge = ({ status }) => {
@@ -175,6 +176,10 @@ const BookingCardMobile = ({ booking, onMessage, onAcceptBooking, onCancelBookin
 };
 
 const ProviderBookings = () => {
+  useEffect(() => {
+        
+          changeMetaData(`Bookings - Provider`);
+        }, []);
   const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
