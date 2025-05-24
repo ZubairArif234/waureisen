@@ -12,7 +12,7 @@ import { changeMetaData } from "../../utils/extra";
 
 const Home = memo(() => {
   useEffect(() => {
-                changeMetaData("Waureisen");
+                changeMetaData("Waureisen - Urlaub mit Hund");
               }, [])
   const navigate = useNavigate()
   const userType = localStorage?.getItem("userType")

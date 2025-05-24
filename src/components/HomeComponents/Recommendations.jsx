@@ -66,6 +66,7 @@ const RecommendationsSection = memo(({ title, listings, isLoading }) => {
             <AccommodationCard
               key={listing._id}
               id={listing._id}
+              code={listing.Code}
               image={null}
               images={listing.images || []}
               price={listing.dynamicPrice || listing.pricePerNight?.price || 0}

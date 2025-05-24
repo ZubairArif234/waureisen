@@ -37,6 +37,7 @@ import AccommodationDetails from "../../components/AccommodationDetails";
 import API from "../../api/config";
 import toast from "react-hot-toast";
 import { getBookingByListing } from "../../api/bookingApi";
+import { changeMetaData } from "../../utils/extra";
 
 const PlaceOffer = ({ icon: Icon, text, value }) => (
   <div className="flex-1 flex flex-col items-center text-center p-4 border-r border-[#767676] last:border-r-0 md:p-4 p-2">
@@ -129,7 +130,12 @@ const Amenity = ({ icon, text }) => (
 const AccommodationPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  console.log("Location state:", location.state);
   const { id } = useParams(); // Get the accommodation ID from URL
+  useEffect(() => {
+          
+            changeMetaData(`${id?.replace(/-/g , " ")} - Waureisen`);
+          }, []);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [bookedDates, setBookedDates] = useState([]);
   const [isGuestSelectorOpen, setIsGuestSelectorOpen] = useState(false);
@@ -157,7 +163,7 @@ const getAllDates = (startDate, endDate) => {
 console.log(bookedDates , "state dates");
 
 const handleGetBooking = async() =>{
- const res = await getBookingByListing(id)
+ const res = await getBookingByListing(location.state?.id)
 
  res.map((item)=>{
   const result = getAllDates(item?.checkInDate, item?.checkOutDate);
@@ -279,7 +285,7 @@ handleGetBooking()
         console.log("Search state:", searchState);
         console.log("Date from search:", dateFromSearch);
 
-        const data = await getListingById(id);
+        const data = await getListingById(location.state?.id);
 
         // If we have price data from search results, use it
         if (priceFromSearch) {
@@ -292,8 +298,8 @@ handleGetBooking()
         const token = localStorage.getItem("token");
         if (token && id) {
           try {
-            await API.post(`/users/recently-viewed/${id}`);
-            console.log("Added to recently viewed:", id);
+            await API.post(`/users/recently-viewed/${location.state?.id}`);
+            console.log("Added to recently viewed:", location.state?.id);
           } catch (err) {
             console.error("Error adding to recently viewed:", err);
           }
@@ -434,10 +440,10 @@ console.log(availableDates , maxGuests , "ye hai na");
       }
     };
 
-    if (id) {
+    if (location.state?.id) {
       fetchAccommodation();
     }
-  }, [id]);
+  }, [location.state?.id]);
 
   // Default place offers (will be overridden with actual data if available)
   const placeOffers = [

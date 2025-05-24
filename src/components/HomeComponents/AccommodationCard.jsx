@@ -16,6 +16,7 @@ const AccommodationCard = ({
   pricePerNight,
   onToggleFavorite,
   owner, // Add owner prop to get provider details
+  code, // Add code prop to get listing code
 }) => {
   const [isFavorite, setIsFavorite] = useState(isFavorited);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -76,9 +77,10 @@ const AccommodationCard = ({
 
   const formattedCheckInDate = formatDate(checkInDate);
 
-  const handleClick = () => {
-    navigate(`/accommodation/${id}`, {
+  const handleClick = (title) => {
+    navigate(`/accommodation/${title + "-"+ code}`, {
       state: {
+        id:id,
         pricePerNight: pricePerNight || { price, currency: "CHF" },
         checkInDate: formattedCheckInDate,
       },
@@ -153,7 +155,7 @@ const AccommodationCard = ({
     <div className="flex flex-col">
       <div
         className="rounded-xl overflow-hidden mb-3 relative cursor-pointer"
-        onClick={handleClick}
+        onClick={()=>handleClick(propertyLocation?.replace(/ /g, '-'))} // Convert location to URL-friendly format
       >
         {/* Main image with lazy loading */}
         <img
@@ -206,7 +208,7 @@ const AccommodationCard = ({
         </div>
       </div>
 
-      <div className="space-y-1 cursor-pointer" onClick={handleClick}>
+      <div className="space-y-1 cursor-pointer" onClick={()=>handleClick(propertyLocation)}>
         <p className="text-brand text-sm">
           {pricePerNight?.currency || "CHF"}{" "}
           {(pricePerNight?.price || price).toFixed(2)} {t("per_night")}
@@ -229,6 +231,8 @@ const AccommodationCard = ({
 
 // Use memo to prevent unnecessary re-renders
 export default memo(AccommodationCard, (prevProps, nextProps) => {
+  console.log(prevProps, nextProps , "kjkklk");
+  
   return (
     prevProps.id === nextProps.id &&
     prevProps.image === nextProps.image &&
@@ -237,6 +241,7 @@ export default memo(AccommodationCard, (prevProps, nextProps) => {
     prevProps.location === nextProps.location &&
     prevProps.pricePerNight?.price === nextProps.pricePerNight?.price &&
     prevProps.isFavorited === nextProps.isFavorited &&
-    prevProps.owner === nextProps.owner
+    prevProps.owner === nextProps.owner &&
+    prevProps.code === nextProps.code 
   );
 });

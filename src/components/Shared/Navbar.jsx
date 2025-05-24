@@ -258,6 +258,7 @@ const Navbar = () => {
 
   const handleLanguageSelect = (langCode) => {
     switchLanguage(langCode);
+    document.documentElement.lang = langCode;
   };
 
   const handleLogout = () => {
