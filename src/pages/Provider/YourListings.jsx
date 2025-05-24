@@ -41,9 +41,7 @@ const DeleteConfirmationModal = ({
           </div>
 
           <p className="text-gray-600 mb-6">
-            {t("delete_confirmation", {
-              title: <span className="font-medium">{listingTitle}</span>,
-            })}
+            {t("delete_confirmation")}
           </p>
 
           <div className="flex justify-end gap-3">
@@ -186,34 +184,34 @@ const YourListings = () => {
   const [error, setError] = useState(null);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, listing: null });
 
+  const fetchListings = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await getProviderListings();
+      
+      const formatted = data.map((l) => ({
+        id: l._id,
+        title: l.title || "Unnamed Listing",
+        location: l.location?.address || "Unknown location",
+        price: l.pricePerNight?.price || 0,
+        currency: l.pricePerNight?.currency || "CHF",
+        status: l.status || "draft",
+        image: l.images?.[0] || i1,
+        bookings: l.totalBookings || 0,
+        listingSource: l.source?.name || "waureisen",
+        propertyType: l.listingType || "Other",
+      }));
+      
+      setListings(formatted);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load listings. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
   useEffect(() => {
-    const fetchListings = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const data = await getProviderListings();
-        
-        const formatted = data.map((l) => ({
-          id: l._id,
-          title: l.title || "Unnamed Listing",
-          location: l.location?.address || "Unknown location",
-          price: l.pricePerNight?.price || 0,
-          currency: l.pricePerNight?.currency || "CHF",
-          status: l.status || "draft",
-          image: l.images?.[0] || i1,
-          bookings: l.totalBookings || 0,
-          listingSource: l.source?.name || "waureisen",
-          propertyType: l.listingType || "Other",
-        }));
-        
-        setListings(formatted);
-      } catch (err) {
-        console.error(err);
-        setError("Failed to load listings. Please try again.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchListings();
   }, []);
 
@@ -226,10 +224,30 @@ const YourListings = () => {
   });
 
   const handleEdit = (id) => navigate(`/provider/edit-listing/${id}`);
-  const handleDelete = (listing) => setDeleteModal({ isOpen: true, listing });
-  const confirmDelete = async () => { /* unchanged */ };
+  const handleDelete = (item) =>{console.log(item);
+   ; setDeleteModal({ isOpen: true, listing:item })};
+  const confirmDelete = async (id) => { 
+    try{
+      setIsLoading(true)
+ const res = await deleteListing(id);
+
+ if (res) {
+  setListings((prevAccommodations) =>
+        prevAccommodations.filter((acc) => acc._id !== id)
+      );}
+      setIsLoading(false)
+    }catch (error) {
+      setIsLoading(false)
+      console.log(error);
+      
+    }finally {
+      fetchListings()
+     setDeleteModal({ isOpen: false, listing:null })}
+  
+   };
   const handleView = (id) => navigate(`/accommodation/${id}`);
   const handleCreate = () => navigate(`/provider/create-listing`);
+console.log(deleteModal);
 
   // Loading state
   if (isLoading && !listings.length) {
@@ -363,7 +381,7 @@ const YourListings = () => {
                 key={item.id}
                 listing={item}
                 onEdit={handleEdit}
-                onDelete={handleDelete}
+                onDelete={()=>handleDelete(item)}
                 onView={handleView}
               />
             ))}
@@ -388,7 +406,7 @@ const YourListings = () => {
       <DeleteConfirmationModal
         isOpen={deleteModal.isOpen}
         onClose={() => setDeleteModal({ isOpen: false, listing: null })}
-        onConfirm={confirmDelete}
+        onConfirm={()=>confirmDelete(deleteModal.listing.id)}
         listingTitle={deleteModal.listing?.title || ""}
       />
 

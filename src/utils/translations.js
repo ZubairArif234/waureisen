@@ -559,7 +559,7 @@ const translations = {
     delete: "Delete",
     delete_listing: "Delete Listing",
     delete_confirmation:
-      'Are you sure you want to delete "{title}"? This action cannot be undone.',
+      'Are you sure you want to delete? This action cannot be undone.',
     cancel: "Cancel",
     active_status: "Active",
     pending_status: "Pending",
@@ -1984,7 +1984,7 @@ account_actions: "Kontoaktionen",
     delete: "Löschen",
     delete_listing: "Inserat löschen",
     delete_confirmation:
-      'Sind Sie sicher, dass Sie "{title}" löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.',
+      'Sind Sie sicher, dass Sie löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.',
     cancel: "Abbrechen",
     active_status: "Aktiv",
     pending_status: "Bearbeitung",

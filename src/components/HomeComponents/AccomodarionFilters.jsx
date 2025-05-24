@@ -73,7 +73,7 @@ const SubsectionIcon = ({ name }) => {
                               (filter, filterIndex) => (
                                 <div
                                   key={filterIndex}
-                                  className="flex items-center gap-3 p-3 border rounded-lg"
+                                  className="flex items-center gap-3 px-3 py-1 rounded-lg"
                                 >
                                   {/* {React.createElement(
                                     getAmenityIcon(filter.name?.toLowerCase()),
