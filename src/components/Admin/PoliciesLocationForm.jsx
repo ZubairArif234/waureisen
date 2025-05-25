@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MapPin, FileText, X, Upload } from 'lucide-react';
 import { loadGoogleMapsScript, initAutocomplete, createMap } from '../../utils/googleMapsUtils';
+import CustomRefundPolicy from '../HomeComponents/CustomRefundPolicy';
 
-const PoliciesLocationForm = ({ formData, handleInputChange, handleNestedInputChange }) => {
+const PoliciesLocationForm = ({ formData, handleInputChange, handleNestedInputChange ,setCustomPolicy,customPolicy}) => {
   const fullAddressRef = useRef(null);
 const mapRef = useRef(null);
 const [mapInstance, setMapInstance] = useState(null);
@@ -11,6 +12,8 @@ const [marker, setMarker] = useState(null);
   const [selectedAddress, setSelectedAddress] = useState(formData.location?.address || '');
   const [mapLocation, setMapLocation] = useState(formData.location?.mapLocation || null);
   const [uploadedFile, setUploadedFile] = useState(null);
+  
+    const [isCustomPolicyOpen, setIsCustomPolicyOpen] = useState(false);
 // console.log(selectedAddress , mapLocation , "klj");
 
 // Load Google Maps script and initialize autocomplete
@@ -118,6 +121,11 @@ useEffect(() => {
 
   const handlePolicyChange = (field, value) => {
     handleNestedInputChange('policies', field, value);
+    if (field === 'cancellationPolicy' && value === 'custom') {
+      setIsCustomPolicyOpen(true);
+    } else {
+      setIsCustomPolicyOpen(false);
+    }
   };
 
   const handleHouseRuleChange = (field, value) => {
@@ -225,6 +233,7 @@ useEffect(() => {
 
       {/* Policies Section */}
       <div>
+      <div>
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Policies</h2>
         <p className="text-gray-600 text-sm mb-6">Set your cancellation policy and other rules.</p>
 
@@ -242,7 +251,14 @@ useEffect(() => {
             <option value="Flexible (Full refund 1 day prior to arrival)">Flexible (Full refund 1 day prior to arrival)</option>
             <option value="Moderate (Full refund 5 days prior to arrival)">Moderate (Full refund 5 days prior to arrival)</option>
             <option value="Strict (50% refund up to 1 week prior to arrival)">Strict (50% refund up to 1 week prior to arrival)</option>
+            <option value="custom">Custom</option>
           </select>
+        </div>
+        {formData.policies.cancellationPolicy === 'custom' && customPolicy?.length > 0  && (
+          <p className='text-end cursor-pointer hover:underline hover:underline-offset-4 text-sm' onClick={()=>setIsCustomPolicyOpen(true)}>View custom policies</p>
+
+        )
+        }
         </div>
 
         {/* House Rules */}
@@ -329,6 +345,12 @@ useEffect(() => {
           <span>Maximum file size: 5MB</span>
         </div>
       </div>
+
+      <CustomRefundPolicy  isOpen={isCustomPolicyOpen}
+        onClose={() => setIsCustomPolicyOpen(false)}
+        customPolicy={customPolicy}
+        setCustomPolicy={setCustomPolicy}
+        />
     </div>
   </div>
   );

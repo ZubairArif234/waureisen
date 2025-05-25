@@ -10,6 +10,7 @@ import {
   createListing as adminCreateListing,
   updateListing as adminUpdateListing,
   getListingById,
+  getListingByIdWithFilters,
   getTemplateFilter,
 } from "../../api/adminAPI";
 import {
@@ -87,6 +88,12 @@ const AddAccommodation = (props) => {
       },
     },
   });
+  const [customPolicy, setCustomPolicy] = useState([
+    {
+      days:"",
+      refundAmount:"",
+    }
+  ]);
 
 
   // console.log(formData);
@@ -137,6 +144,7 @@ const AddAccommodation = (props) => {
     const fetchTemplate = async () => {
       try {
         const data = await getTemplateFilter();
+       
         setTemplate(data);
 
         // Initialize form data based on template structure
@@ -164,94 +172,223 @@ const AddAccommodation = (props) => {
     fetchTemplate();
   }, []);
 
-  // Load data if in edit mode
-  const fetchListing = async (id) => {
-    try {
-      setIsLoading(true);
-      
-      // Use the appropriate API based on provider mode
-      let listingData;
-      if (isProviderMode) {
-        listingData = await getProviderListingDetails(id);
-      } else {
-        listingData = await getListingById(id);
-      }
-      console.log(listingData , " data hai");
-      
-      if(listingData?.title){
 
-        setFormData({
-          // Basic Info
-          filter:listingData?.filter,
-          title: listingData?.title,
-          propertyType: listingData?.listingType,
-          listingSource: isProviderMode ? "Provider" : "Admin",
-          capacity: {
-            people: listingData?.maxGuests,
-            dogs: listingData?.maxDogs,
-            bedrooms: listingData?.bedRooms,
-            rooms: listingData?.rooms?.number,
-            washrooms: listingData?.washrooms,
-          },
-          pricing: {
-            currency: listingData?.pricePerNight?.currency,
-            regularPrice: listingData?.pricePerNight?.price,
-            discountedPrice: 0,
-          },
-          availability: {
-            checkInDates: "",
-            checkInDate: null,
-            checkOutDate: null,
-            checkInTime: { hour:listingData?.checkInTime ? moment(listingData?.checkInTime).format("h") : "", period: listingData?.checkInTime ? moment(listingData?.checkInTime).format("A") : "" },
-            checkOutTime: { hour:listingData?.checkOutTime ? moment(listingData?.checkOutTime).format("h") : "", period: listingData?.checkOutTime ? moment(listingData?.checkOutTime).format("A") : "" },
-            allowInstantBooking: false,
-            active: false,
-          },
-      
-          // Photos
-          mainImage: listingData?.images[0],
-          galleryImages: listingData?.images?.slice(1,listingData?.images?.length),
-      
-          // Description
-          shortDescription: listingData?.description?.general,
-          fullDescription: "",
-      
-          // Policies & Location
-          location: {
-            city: "",
-            fullAddress: listingData?.location?.address,
-            // mapLocation: listingData?.location?.coordinates,
-            mapLocation: { lat:listingData?.location?.coordinates[0] , lng: listingData?.location?.coordinates[1] },
-            address:listingData?.location?.address,
-          },
-          policies: {
-            cancellationPolicy: listingData?.legal?.cancellationPolicy,
-            customPolicyDetails: "",
-            houseRules: {
-              noSmoking: false,
-              noParties: false,
-              quietHours: false,
-            },
-          },
-        });
-      }
-      
-      setIsLoading(false);
-    } catch (error) {
-      console.error("Error fetching accommodation data:", error);
-      setIsLoading(false);
-      // Navigate back to listings on error
-      navigate(isProviderMode ? "/provider/your-listings" : "/admin/accommodations");
-    }
-  };
   useEffect(() => {
-    if (id||isEditMode) {
+  if (id || isEditMode) {
+    const fetchListing = async () => {
+      try {
+        setIsLoading(true);
+        // Use the appropriate API based on provider mode
+        let listingData;
+        if (isProviderMode) {
+          listingData = await getProviderListingDetails(id);
+        } else {
+          listingData = await getListingByIdWithFilters(id);
+        }
 
-      fetchListing(id);
-    }
-  }, [isEditMode, id, isProviderMode]);
+        let mySelectedData = null;
+         if(listingData?.filter){
+         mySelectedData = await getListingFilter(formData?.filter);
+        }
+        console.log("Fetched listing data:", listingData);
+        console.log("Fetched listing data:", mySelectedData);
+        if (listingData?.title) {
+          // First, initialize amenities data from template if available
+          const newFormData = { ...formData };
+          // Initialize amenities structure from template
+          if (template?.subsections) {
+            const amenitiesSection = template.subsections.find(s => s.name === 'Amenities');
+            if (amenitiesSection?.subsubsections) {
+              amenitiesSection.subsubsections.forEach(subsection => {
+                const key = `amenities_${subsection.name.toLowerCase().replace(/\s+/g, '_')}`;
+                newFormData[key] = {};
+                subsection.filters.forEach(filter => {
+                  newFormData[key][filter.name] = false;
+                });
+              });
+            }
+          }
+          // Load existing filter data if available
+          if (listingData.filters) {
+            const filterData = listingData.filters;
+            console.log("Loading existing filter data:", filterData);
+            // Map filter data to form structure
+            if (filterData?.subsections) {
+              filterData.subsections.forEach(section => {
+                if (section.name === 'Amenities' && section.subsubsections) {
+                  section.subsubsections.forEach(subsection => {
+                    const key = `amenities_${subsection.name.toLowerCase().replace(/\s+/g, '_')}`;
+                    if (!newFormData[key]) newFormData[key] = {};
+                    subsection.filters.forEach(filter => {
+                      newFormData[key][filter.name] = filter.value !== undefined ? filter.value : true;
+                    });
+                  });
+                }
+              });
+            }
+          }
+          // Map basic listing data to form structure
+          const updatedFormData = {
+            ...newFormData,
+            // Basic Info
+            filter: listingData?.filters, // Store the filter ObjectId reference
+            title: listingData?.title || "",
+            propertyType: listingData?.listingType || "Studio",
+            listingSource: isProviderMode ? "Provider" : "Admin",
+            capacity: {
+              people: listingData?.maxGuests || 6,
+              dogs: listingData?.maxDogs || 0,
+              bedrooms: listingData?.bedRooms || 0,
+              rooms: listingData?.rooms?.number || 0,
+              washrooms: listingData?.washrooms || 0,
+            },
+            pricing: {
+              currency: listingData?.pricePerNight?.currency || "CHF",
+              regularPrice: listingData?.pricePerNight?.price || 0,
+              discountedPrice: 0,
+            },
+            availability: {
+              checkInDates: "",
+              checkInDate: null,
+              checkOutDate: null,
+              checkInTime: {
+                hour: listingData?.checkInTime ? moment(listingData.checkInTime).format("h") : "",
+                period: listingData?.checkInTime ? moment(listingData.checkInTime).format("A") : ""
+              },
+              checkOutTime: {
+                hour: listingData?.checkOutTime ? moment(listingData.checkOutTime).format("h") : "",
+                period: listingData?.checkOutTime ? moment(listingData.checkOutTime).format("A") : ""
+              },
+              allowInstantBooking: false,
+              active: listingData?.status === "active",
+            },
+            // Photos
+            mainImage: listingData?.images?.[0] || null,
+            galleryImages: listingData?.images?.slice(1) || [],
+            // Description
+            shortDescription: listingData?.description?.general || "",
+            fullDescription: listingData?.description?.general || "",
+            // Policies & Location
+            location: {
+              city: "",
+              fullAddress: listingData?.location?.address || "",
+              mapLocation: listingData?.location?.coordinates
+                ? { lat: listingData.location.coordinates[1], lng: listingData.location.coordinates[0] }
+                : null,
+              address: listingData?.location?.address || "",
+            },
+            policies: {
+              cancellationPolicy: listingData?.legal?.cancellationPolicy || "Flexible (Full refund 1 day prior to arrival)",
+              customPolicyDetails: listingData?.legal?.customPolicyDetails || "",
+              houseRules: {
+                noSmoking: false,
+                noParties: false,
+                quietHours: false,
+              },
+            },
+          };
+          console.log("Final form data:", updatedFormData);
+          setFormData(updatedFormData);
+        }
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error fetching accommodation data:", error);
+        setIsLoading(false);
+        navigate(isProviderMode ? "/provider/your-listings" : "/admin/accommodations");
+      }
+    };
+    fetchListing();
+  }
+}, [isEditMode, id, navigate, isProviderMode, template]); // Add template as dependency
 
-  console.log(formData, "form data");
+  // Load data if in edit mode
+  // const fetchListing = async (id) => {
+  //   try {
+  //     setIsLoading(true);
+      
+  //     // Use the appropriate API based on provider mode
+  //     let listingData;
+  //     if (isProviderMode) {
+  //       listingData = await getProviderListingDetails(id);
+  //     } else {
+  //       listingData = await getListingById(id);
+  //     }
+  //     console.log(listingData , " data hai");
+      
+  //     if(listingData?.title){
+
+  //       setFormData({
+  //         // Basic Info
+  //         filter:listingData?.filter,
+  //         title: listingData?.title,
+  //         propertyType: listingData?.listingType,
+  //         listingSource: isProviderMode ? "Provider" : "Admin",
+  //         capacity: {
+  //           people: listingData?.maxGuests,
+  //           dogs: listingData?.maxDogs,
+  //           bedrooms: listingData?.bedRooms,
+  //           rooms: listingData?.rooms?.number,
+  //           washrooms: listingData?.washrooms,
+  //         },
+  //         pricing: {
+  //           currency: listingData?.pricePerNight?.currency,
+  //           regularPrice: listingData?.pricePerNight?.price,
+  //           discountedPrice: 0,
+  //         },
+  //         availability: {
+  //           checkInDates: "",
+  //           checkInDate: null,
+  //           checkOutDate: null,
+  //           checkInTime: { hour:listingData?.checkInTime ? moment(listingData?.checkInTime).format("h") : "", period: listingData?.checkInTime ? moment(listingData?.checkInTime).format("A") : "" },
+  //           checkOutTime: { hour:listingData?.checkOutTime ? moment(listingData?.checkOutTime).format("h") : "", period: listingData?.checkOutTime ? moment(listingData?.checkOutTime).format("A") : "" },
+  //           allowInstantBooking: false,
+  //           active: false,
+  //         },
+      
+  //         // Photos
+  //         mainImage: listingData?.images[0],
+  //         galleryImages: listingData?.images?.slice(1,listingData?.images?.length),
+      
+  //         // Description
+  //         shortDescription: listingData?.description?.general,
+  //         fullDescription: "",
+      
+  //         // Policies & Location
+  //         location: {
+  //           city: "",
+  //           fullAddress: listingData?.location?.address,
+  //           // mapLocation: listingData?.location?.coordinates,
+  //           mapLocation: { lat:listingData?.location?.coordinates[0] , lng: listingData?.location?.coordinates[1] },
+  //           address:listingData?.location?.address,
+  //         },
+  //         policies: {
+  //           cancellationPolicy: listingData?.legal?.cancellationPolicy,
+  //           customPolicyDetails: "",
+  //           houseRules: {
+  //             noSmoking: false,
+  //             noParties: false,
+  //             quietHours: false,
+  //           },
+  //         },
+  //       });
+  //     }
+  //     setCustomPolicy(listingData?.customRefundPolicies )
+      
+  //     setIsLoading(false);
+  //   } catch (error) {
+  //     console.error("Error fetching accommodation data:", error);
+  //     setIsLoading(false);
+  //     // Navigate back to listings on error
+  //     navigate(isProviderMode ? "/provider/your-listings" : "/admin/accommodations");
+  //   }
+  // };
+  // useEffect(() => {
+  //   if (id||isEditMode) {
+
+  //     fetchListing(id);
+  //   }
+  // }, [isEditMode, id, isProviderMode]);
+
   
 
   const handleInputChange = (field, value) => {
@@ -313,39 +450,39 @@ const AddAccommodation = (props) => {
         validationErrors.push("Custom policy details are required when using custom cancellation policy");
       }
   
-      // if (validationErrors.length > 0) {
-      //   toast.error(
-      //     <div className="space-y-2">
-      //       <div className="flex justify-between items-start">
-      //         <p className="font-medium">Please fix the following errors:</p>
-      //         <button 
-      //           onClick={() => toast.dismiss()}
-      //           className="text-gray-500 hover:text-gray-700"
-      //         >
-      //           ×
-      //         </button>
-      //       </div>
-      //       <ul className="list-disc list-inside text-sm">
-      //         {validationErrors.map((error, index) => (
-      //           <li key={index}>{error}</li>
-      //         ))}
-      //       </ul>
-      //     </div>,
-      //     {
-      //       duration: 5000,
-      //       style: {
-      //         background: '#FEF2F2',
-      //         color: '#991B1B',
-      //         border: '1px solid #FECACA',
-      //         borderRadius: '0.5rem',
-      //         padding: '1rem',
-      //         maxWidth: '32rem',
-      //       },
-      //       className: '!pl-4'
-      //     }
-      //   );
-      //   return;
-      // }
+      if (validationErrors.length > 0) {
+        toast.error(
+          <div className="space-y-2">
+            <div className="flex justify-between items-start">
+              <p className="font-medium">Please fix the following errors:</p>
+              <button 
+                onClick={() => toast.dismiss()}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ×
+              </button>
+            </div>
+            <ul className="list-disc list-inside text-sm">
+              {validationErrors.map((error, index) => (
+                <li key={index}>{error}</li>
+              ))}
+            </ul>
+          </div>,
+          {
+            duration: 5000,
+            style: {
+              background: '#FEF2F2',
+              color: '#991B1B',
+              border: '1px solid #FECACA',
+              borderRadius: '0.5rem',
+              padding: '1rem',
+              maxWidth: '32rem',
+            },
+            className: '!pl-4'
+          }
+        );
+        return;
+      }
   
       setIsLoading(true);
   
@@ -420,6 +557,7 @@ const AddAccommodation = (props) => {
           cancellationPolicy: formData?.policies?.cancellationPolicy,
           customPolicyDetails: formData?.policies?.customPolicyDetails,
         },
+        customRefundPolicies: customPolicy,
       };
   
       const filterData = { subsections: [] };
@@ -503,58 +641,62 @@ const AddAccommodation = (props) => {
           navigate("/provider/your-listings");
         }
       } else {
+          listingData.filterData = filterData;
         console.log("Creating listing as admin");
-        if (!token) throw new Error("Authentication token not found. Please log in again.");
+         listingResponse = await providerCreateListing(listingData);
+        // if (!token) throw new Error("Authentication token not found. Please log in again.");
   
-        const response = await fetch(`${apiUrl}/api/admins/add-listing`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            ...listingData,
-            owner: localStorage.getItem("adminId") || localStorage.getItem("userId"),
-            ownerType: "Admin",
-          }),
-        });
+        // const response = await fetch(`${apiUrl}/api/admins/add-listing`, {
+        //   method: "POST",
+        //   headers: {
+        //     "Content-Type": "application/json",
+        //     Authorization: `Bearer ${token}`,
+        //   },
+        //   body: JSON.stringify({
+        //     ...listingData,
+        //     owner: localStorage.getItem("adminId") || localStorage.getItem("userId"),
+        //     ownerType: "Admin",
+        //   }),
+        // });
   
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(`Failed to create listing: ${errorData.message || response.statusText}`);
-        }
+        // if (!response.ok) {
+        //   const errorData = await response.json();
+        //   throw new Error(`Failed to create listing: ${errorData.message || response.statusText}`);
+        // }
   
-        listingResponse = await response.json();
+        // listingResponse = await response.json();
   
         if (listingResponse?._id) {
-          try {
-            filterData.listing = listingResponse._id;
+           listingResponse = await updateListing(id,listingData);
+
+          // try {
+          //   filterData.listing = listingResponse._id;
   
-            const filterResponse = await fetch(`${apiUrl}/api/filters`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify(filterData),
-            });
+          //   const filterResponse = await fetch(`${apiUrl}/api/filters`, {
+          //     method: "POST",
+          //     headers: {
+          //       "Content-Type": "application/json",
+          //       Authorization: `Bearer ${token}`,
+          //     },
+          //     body: JSON.stringify(filterData),
+          //   });
   
-            if (filterResponse.ok) {
-              const filterRes = await filterResponse.json();
-              if (filterRes?._id) {
-                await fetch(`${apiUrl}/api/listings/${listingResponse._id}`, {
-                  method: "PUT",
-                  headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                  },
-                  body: JSON.stringify({ filters: filterRes._id }),
-                });
-              }
-            }
-          } catch (err) {
-            console.error("Error with filter creation:", err);
-          }
+          //   if (filterResponse.ok) {
+          //     const filterRes = await filterResponse.json();
+          //     if (filterRes?._id) {
+          //       await fetch(`${apiUrl}/api/listings/${listingResponse._id}`, {
+          //         method: "PUT",
+          //         headers: {
+          //           "Content-Type": "application/json",
+          //           Authorization: `Bearer ${token}`,
+          //         },
+          //         body: JSON.stringify({ filters: filterRes._id }),
+          //       });
+          //     }
+          //   }
+          // } catch (err) {
+          //   console.error("Error with filter creation:", err);
+          // }
   
           toast.success(
             <div className="flex justify-between items-center">
@@ -936,7 +1078,7 @@ const AddAccommodation = (props) => {
   //   }
   // };
   
-  console.log(activeTab, "active tab");
+  // console.log(activeTab, "active tab");
   
 
   const handleNext = () => {
@@ -1086,6 +1228,8 @@ console.log(subsection , "kln");
             handleInputChange={handleInputChange}
             handleNestedInputChange={handleNestedInputChange}
             subsection={subsection}
+            customPolicy={customPolicy}
+            setCustomPolicy={setCustomPolicy}
           />
         );
       default:

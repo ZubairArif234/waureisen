@@ -23,7 +23,7 @@ export const createListing = async (listingData) => {
 // For provider to update listings
 export const updateListing = async (id, listingData) => {
   try {
-    const response = await API.put(`/listings/${id}`, listingData);
+    const response = await API.put(`/providers/listing-with-filter/${id}`, listingData);
     return response.data;
   } catch (error) {
     console.error('Error updating listing:', error);

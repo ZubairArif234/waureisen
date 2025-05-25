@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../components/Shared/Navbar";
 import DateRangePicker from "../../components/HomeComponents/DateRangePicker";
 import GuestSelector from "../../components/HomeComponents/GuestSelector";
-import { Check, ChevronDown, AlertTriangle, ArrowLeft } from "lucide-react";
+import { Check, ChevronDown, AlertTriangle, ArrowLeft, Dot } from "lucide-react";
 import {
   Users,
   Home,
@@ -703,10 +703,17 @@ console.log(availableDates , maxGuests , "ye hai na");
               <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
                 {t("cancellation_policy")}
               </h2>
-              <p className="text-gray-600 text-sm">
+              {/* <p className="text-gray-600 text-sm">
                 {accommodation?.legal?.cancellationPolicy ||
                   "Je nach Reisezeitraum 90% Rückerstattung bis 0% Rückerstattung. (default)"}
-              </p>
+
+              </p> */}
+              <ul className="list-disc text-gray-600 text-sm mt-2">
+                {accommodation?.customRefundPolicies?.map((policy, index) => (
+
+                <ol key={index} className="flex gap-2 items-center"><Dot /> Cancellations made before {policy?.days} days: {policy?.refundAmount}% refund.</ol>
+                ))}
+              </ul>
 
               {accommodation?.legal?.termsAndConditions && (
                 <div className="mt-4">

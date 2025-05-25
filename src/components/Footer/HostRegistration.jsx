@@ -5,6 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../utils/LanguageContext';
 import { changeMetaData } from '../../utils/extra';
+import { PawPrint } from 'lucide-react';
 
 const HostRegistration = () => {
   const { t } = useLanguage();
@@ -32,13 +33,13 @@ const HostRegistration = () => {
           </p>
           
           <h2 className="text-2xl font-semibold mb-4">{t('benefits_hosting')}</h2>
-          <ul className="list-disc ml-6 mb-6 space-y-2">
-            <li>{t('benefit_1')}</li>
-            <li>{t('benefit_2')}</li>
-            <li>{t('benefit_3')}</li>
-            <li>{t('benefit_4')}</li>
-            <li>{t('benefit_5')}</li>
-            <li>{t('benefit_6')}</li>
+          <ul className="list-none ml-6 mb-6 space-y-2">
+            <li className='flex items-center gap-3'><PawPrint size={20} /> {t('benefit_1')}</li>
+            <li className='flex items-center gap-3'><PawPrint size={20} />{t('benefit_2')}</li>
+            <li className='flex items-center gap-3'><PawPrint size={20} />{t('benefit_3')}</li>
+            <li className='flex items-center gap-3'><PawPrint size={20} />{t('benefit_4')}</li>
+            <li className='flex items-center gap-3'><PawPrint size={20} />{t('benefit_5')}</li>
+            <li className='flex items-center gap-3'><PawPrint size={20}/>{t('benefit_6')}</li>
           </ul>
           
           <h2 className="text-2xl font-semibold mb-4">{t('how_it_works')}</h2>

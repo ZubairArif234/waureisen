@@ -253,6 +253,15 @@ export const getListingById = async (id) => {
     throw error;
   }
 };
+export const getListingByIdWithFilters = async (id) => {
+  try {
+    const response = await API.get(`/listings/with-filters/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching listing ${id}:`, error);
+    throw error;
+  }
+};
 
 export const createListing = async (listingData) => {
   try {

@@ -148,9 +148,32 @@ export const getProviderListings = async () => {
   }
 };
 
+// export const getListingDetails = async (listingId) => {
+//   try {
+//     const response = await API.get(`/providers/listings/${listingId}`);
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error fetching listing details:", error);
+//     throw error;
+//   }
+// };
+
+// Update the getListingDetails function to properly handle filter data
 export const getListingDetails = async (listingId) => {
   try {
+    setAuthHeader();
     const response = await API.get(`/providers/listings/${listingId}`);
+    // If the listing has a filters field that's an ObjectId, fetch the actual filter data
+    if (response.data && response.data.filters && typeof response.data.filters === 'string') {
+      try {
+        console.log("Fetching filter data for listing:", response.data.filters);
+        const filterData = await getProviderTemplateFilter(response.data.filters);
+        response.data.filterData = filterData; // Add as separate field to avoid confusion
+        console.log("Populated filter data for listing:", filterData);
+      } catch (filterError) {
+        console.warn('Could not fetch filter data:', filterError);
+      }
+    }
     return response.data;
   } catch (error) {
     console.error("Error fetching listing details:", error);
@@ -159,6 +182,7 @@ export const getListingDetails = async (listingId) => {
 };
 
 
+// -------------> extra controller work start <-------------------
 export const createListing = async (listingData) => {
   try {
     // Make sure to set auth header
@@ -173,13 +197,29 @@ export const createListing = async (listingData) => {
     }
     
     // Make the API call
-    const response = await API.post("/providers/add-listing", dataToSend);
+    const response = await API.post("/providers/listing-with-filter", dataToSend);
+    // const response = await API.post("/providers/add-listing/", dataToSend);
     return response.data;
   } catch (error) {
     console.error("Error creating listing:", error);
     throw error;
   }
 };
+
+export const getListingFilter = async (filterId) => {
+  try {
+    setAuthHeader();
+    const response = await API.get(`/providers/listing-filter/${filterId}`);
+    // If the listing has a filters field that's an ObjectId, fetch the actual filter data
+    
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching listing filters:", error);
+    throw error;
+  }
+};
+// -------------> extra controller work end <-------------------
+
 export const updateListing = async (id, listingData) => {
   try {
     setAuthHeader();
@@ -191,16 +231,37 @@ export const updateListing = async (id, listingData) => {
   }
 };
 
+// export const getProviderTemplateFilter = async (id) => {
+//   try {
+//     const response = await API.get(`/filters/${id}`);
+//     return response.data;
+//   } catch (error) {
+//     console.error('Error fetching template filter:', error);
+//     throw error;
+//   }
+// };
+
+// Get a specific filter by ID (for listing-specific data)
 export const getProviderTemplateFilter = async (id) => {
   try {
     const response = await API.get(`/filters/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching filter by ID:', error);
+    throw error;
+  }
+};
+
+// Get the template filter (for form structure)
+export const getTemplateFilter = async () => {
+  try {
+    const response = await API.get('/filters/template');
     return response.data;
   } catch (error) {
     console.error('Error fetching template filter:', error);
     throw error;
   }
 };
-
 export const updateProviderTemplateFilter = async (id) => {
   try {
     const response = await API.put(`/filters/${id}`);
