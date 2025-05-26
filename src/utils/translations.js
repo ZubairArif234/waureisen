@@ -86,6 +86,7 @@ const translations = {
     accept_terms: "I accept the",
     and_the: "and the",
     privacy_policy: "Privacy Policy",
+    subscribe_newsletter: "Subscribe to our newsletter and don't miss any highlights",
 
     accommodations_found:"Accommodations Found",
 
@@ -168,6 +169,7 @@ const translations = {
     travel_insurance: "Travel Insurance",
     travel_magazine: "Travel Magazine",
     newsletter: "Newsletter",
+    newsletter_description: "Select whether you would like to receive the Waureisen newsletter.",
     star_membership: "STAR membership",
     travel_shop: "Travel shop",
 
@@ -777,9 +779,10 @@ const translations = {
     terms_and_conditions: "Terms and Conditions",
     and: "and",
     privacy_policy: "Privacy Policy",
+    subscribe_newsletter: "Subscribe to our newsletter and don't miss any highlights",
     newsletter_opt_in:
-      "I would like to receive newsletters and marketing communications",
-    what_happens_next: "What happens next?",
+      "I möchte Newsletter und Marketingmitteilungen erhalten",
+    what_happens_next: "Was passiert als Nächstes?",
     application_review:
       "We'll review your application within 1-2 business days",
     create_listings_when_approved:
@@ -1506,6 +1509,7 @@ account_actions: "Kontoaktionen",
     accept_terms: "Ich akzeptiere die",
     and_the: "und die",
     privacy_policy: "Datenschutzrichtlinie",
+    subscribe_newsletter: "Newsletter abonnieren und keine Highlights mehr verpassen",
 
     // Features
     features: "Eigenschaften",
@@ -2205,6 +2209,7 @@ account_actions: "Kontoaktionen",
     terms_and_conditions: "Allgemeinen Geschäftsbedingungen",
     and: "und der",
     privacy_policy: "Datenschutzrichtlinie zu",
+    subscribe_newsletter: "Newsletter abonnieren und keine Highlights mehr verpassen",
     newsletter_opt_in:
       "Ich möchte Newsletter und Marketingmitteilungen erhalten",
     what_happens_next: "Was passiert als Nächstes?",

@@ -28,6 +28,7 @@ const Profile = () => {
     isProvider: false,
     profilePicture: null,
     customerNumber: "",
+    subscribeNewsletter: false,
     dogs: [{ id: 1, name: "", gender: "" }],
     travellers: [{ id: 1, name: "", gender: "", relationship: "" }],
   });
@@ -76,6 +77,7 @@ const Profile = () => {
           isProvider: userData?.isProvider || false, // Now mapping from the backend
           profilePicture: null,
           customerNumber: userData?.customerNumber ,
+          subscribeNewsletter: userData?.newsletter === 'on',
           dogs: userData?.dogs?.map((dog) => ({
             id: Math.random().toString(36).substr(2, 9), // Generate a unique ID for frontend
             name: dog?.name ,
@@ -237,10 +239,9 @@ const Profile = () => {
         nationality: profileData.nationality,
         gender: profileData.gender,
         isProvider: profileData.isProvider,
-        // For nested objects, make sure to include the entire structure
+        newsletter: profileData.subscribeNewsletter ? 'on' : 'off',
         paymentMethod: {
           streetNumber: profileData.streetNumber,
-          // Include other payment fields to avoid overwriting them with undefined
           cardNumber: "N/A",
           cardHolderName: "N/A",
           optional: "N/A",
@@ -250,12 +251,10 @@ const Profile = () => {
           country: "N/A",
           expiryDate: "N/A",
         },
-        // Format dogs array for backend - remove frontend-specific IDs
         dogs: profileData.dogs.map((dog) => ({
           name: dog.name,
           gender: dog.gender,
         })),
-        // Format travellers array for backend - remove frontend-specific IDs
         travellers: profileData.travellers.map((traveller) => ({
           name: traveller.name,
           gender: traveller.gender,
@@ -528,10 +527,6 @@ const Profile = () => {
                   <h3 className="text-md font-medium text-gray-800">
                     {t("customer_number") || "Customer Number"}
                   </h3>
-                  {/* <p className="text-sm text-gray-500">
-                    {t("customer_number_desc") ||
-                      "Your unique customer identification number"}
-                  </p> */}
                 </div>
                 <div className="text-lg font-semibold text-brand">
                   {profileData.customerNumber ? (
@@ -539,6 +534,38 @@ const Profile = () => {
                   ) : (
                     <span className="text-gray-400">Not assigned</span>
                   )}
+                </div>
+              </div>
+            </div>
+
+            {/* Newsletter Subscription */}
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-md font-medium text-gray-800">
+                    {t("newsletter")}
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    {t("newsletter_description")}
+                  </p>
+                </div>
+                <div className="flex items-center">
+                  <button
+                    type="button"
+                    disabled={!isEditing}
+                    onClick={() => setProfileData(prev => ({ ...prev, subscribeNewsletter: !prev.subscribeNewsletter }))}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                      profileData.subscribeNewsletter ? "bg-brand" : "bg-gray-200"
+                    } ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        profileData.subscribeNewsletter
+                          ? "translate-x-6"
+                          : "translate-x-1"
+                      }`}
+                    />
+                  </button>
                 </div>
               </div>
             </div>

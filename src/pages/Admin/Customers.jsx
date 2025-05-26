@@ -493,6 +493,11 @@ const CustomerRow = ({ customer, onAction }) => {
       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
         #{customer.customerNumber || "N/A"}
       </td>
+      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
+        <span className={`px-2 py-1 rounded-full text-xs font-medium ${customer.newsletter === 'on' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+          {customer.newsletter === 'on' ? 'On' : 'Off'}
+        </span>
+      </td>
       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600 text-center">
         {customer.totalBookings || 0}
       </td>
@@ -1037,46 +1042,33 @@ const Customers = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th
-                    scope="col"
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Customer
                   </th>
-                  <th
-                    scope="col"
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Email
                   </th>
-                  <th
-                    scope="col"
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Number
                   </th>
-                  <th
-                    scope="col"
-                    className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Newsletter
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Bookings
                   </th>
-                  <th
-                    scope="col"
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
-                  <th
-                    scope="col"
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredCustomers.length > 0 ? (
+                {loading ? (
+                  <SkeletonTable />
+                ) : filteredCustomers.length > 0 ? (
                   filteredCustomers.map((customer) => (
                     <CustomerRow
                       key={customer._id}
@@ -1086,11 +1078,8 @@ const Customers = () => {
                   ))
                 ) : (
                   <tr>
-                    <td
-                      colSpan="6"
-                      className="px-4 py-6 text-center text-gray-500"
-                    >
-                      No customers found matching your criteria
+                    <td colSpan="7" className="px-4 py-8 text-center text-gray-500">
+                      No customers found
                     </td>
                   </tr>
                 )}

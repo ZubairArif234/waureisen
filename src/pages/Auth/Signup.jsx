@@ -42,6 +42,7 @@ const Signup = () => {
   const [verificationLoading, setVerificationLoading] = useState(false);
   
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [subscribeNewsletter, setSubscribeNewsletter] = useState(false);
   const [redirectAfterSignup, setRedirectAfterSignup] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -171,6 +172,7 @@ const Signup = () => {
         phoneNumber: formData.phoneNumber || "",
         username:
           formData.displayName || `${formData.firstName} ${formData.lastName}`,
+        subscribeNewsletter: subscribeNewsletter,
       };
   
       let response;
@@ -509,6 +511,20 @@ const Signup = () => {
                     >
                       {t("privacy_policy")}
                     </button>
+                  </label>
+                </div>
+
+                {/* Newsletter Subscription */}
+                <div className="flex items-start sm:items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="newsletter"
+                    checked={subscribeNewsletter}
+                    onChange={(e) => setSubscribeNewsletter(e.target.checked)}
+                    className="mt-1 sm:mt-0 rounded border-gray-300 text-[#B4A481] focus:ring-[#B4A481]"
+                  />
+                  <label htmlFor="newsletter" className="text-sm text-gray-600">
+                    {t("subscribe_newsletter")}
                   </label>
                 </div>
 
