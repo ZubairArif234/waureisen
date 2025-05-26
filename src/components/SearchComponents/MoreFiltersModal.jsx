@@ -117,10 +117,30 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
       selected
     };
 
-    // console.log('Applying filters with price:', {
-    //  priceRange: ranges.price,
-    //  filterObject
-    //});
+    // Log hardcoded filters (from filterData)
+    console.log('Hardcoded Selected Filters:', {
+      accommodation: selected.accommodation,
+      kitchen: selected.kitchen,
+      pool: selected.pool,
+      wellness: selected.wellness,
+      kids: selected.kids,
+      water: selected.water,
+      catering: selected.catering,
+      parking: selected.parking,
+      view: selected.view,
+      sport: selected.sport,
+      smoking: selected.smoking,
+      accessibility: selected.accessibility
+    });
+
+    // Log dynamically loaded filters
+    console.log('Dynamic Filters from API:', filters.subsubsections?.map(subsection => ({
+      section: subsection.name,
+      selectedFilters: selected[subsection.name.toLowerCase()] || []
+    })));
+
+    // Log all ranges
+    console.log('Selected Ranges:', ranges);
 
     // Update URL with filters
     const searchParams = new URLSearchParams(window.location.search);
@@ -340,7 +360,7 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
               {t('clear_all')}
             </button>
             <button
-              onClick={handleApplyFilters}
+              onClick={handleShowResults}
               className="flex-1 px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand/90 transition-colors"
             >
               {t('show_results')}
@@ -353,3 +373,21 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
 };
 
 export default MoreFiltersModal;
+
+const handleShowResults = () => {
+  const getSelectedFilters = () => {
+    return Object.values(selected).flat();
+  };
+  const filteredListings = listings.filter(listing => {
+    return selectedFilters.every(filter =>
+      listing.filterData.subsubsections.some(subsection =>
+        subsection.filters.some(f => f.name === filter)
+      )
+    );
+  });
+  const updateListings = (filteredListings) => {
+    // Assume this function updates the displayed listings
+    console.log('Updated Listings:', filteredListings);
+  };
+};
+const listings = []; // Assume this is populated with listing data

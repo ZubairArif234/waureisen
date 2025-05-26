@@ -4,6 +4,7 @@ import { useListings } from '../../context/ListingContext';
 import AccommodationCard from './AccommodationCardWrapper'; 
 import SkeletonCard from './SkeletonCard';
 import { WifiOff, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
+import API from '../../api/config';
 
 /**
  * Improved listings component with pagination
@@ -29,6 +30,61 @@ const ImprovedVirtualizedListings = () => {
   
   const containerRef = useRef(null);
   const [showEmptyState, setShowEmptyState] = useState(false);
+  const [listingsWithFilters, setListingsWithFilters] = useState([]);
+  
+  // Function to fetch filter data by ID
+  const fetchFilterData = async (filterId) => {
+    try {
+      // Using the correct endpoint from the backend routes
+      const response = await API.get(`/filters/${filterId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching filter data:', error);
+      return null;
+    }
+  };
+
+  // Effect to fetch and attach filter data when listings change
+  useEffect(() => {
+    const attachFilterData = async () => {
+      if (listings.length === 0) return;
+
+      // Create a map of unique filter IDs
+      const uniqueFilterIds = new Set(
+        listings
+          .filter(listing => listing.filters)
+          .map(listing => listing.filters)
+      );
+
+      // Fetch all unique filters in parallel
+      const filterPromises = Array.from(uniqueFilterIds).map(id => fetchFilterData(id));
+      const filterResults = await Promise.all(filterPromises);
+
+      // Create a map of filter ID to filter data
+      const filterMap = new Map(
+        filterResults
+          .filter(result => result !== null)
+          .map(result => [result._id, result])
+      );
+
+      // Attach filter data to listings
+      const listingsWithFilterData = listings.map(listing => ({
+        ...listing,
+        filterData: listing.filters ? filterMap.get(listing.filters) : null
+      }));
+
+      setListingsWithFilters(listingsWithFilterData);
+      
+      // Log the enhanced listings with filter data
+      console.log('Listings with filter data:', listingsWithFilterData.map(listing => ({
+        id: listing._id,
+        filterId: listing.filters,
+        filterData: listing.filterData
+      })));
+    };
+
+    attachFilterData();
+  }, [listings]);
   
   // Calculate total number of pages
   const pagesCount = totalPages || Math.ceil(totalAccommodationsInRadius / itemsPerPage) || 1;
@@ -154,7 +210,7 @@ const ImprovedVirtualizedListings = () => {
     <div ref={containerRef}>
       {/* Listings */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        {listings.map((listing) => {
+        {listingsWithFilters.map((listing) => {
           // Handle possible object properties properly to avoid React rendering errors
           let sourceDisplay = 'Unknown';
           if (listing.source) {
@@ -190,21 +246,27 @@ const ImprovedVirtualizedListings = () => {
           
           return (
            <AccommodationCard
-  key={listing._id}
-  id={listing._id}
-  Code={listing.Code} // ✅ Add this line
-  images={listing.images || []}
-  price={listing.pricePerNight?.price || 0}
-  location={locationDisplay}
-  provider={listing.provider || listing.ownerType || 'Unknown'}
-  listingSource={sourceDisplay}
-  pricePerNight={listing.pricePerNight}
-  distance={distanceDisplay}
-/>
-
+              key={listing._id}
+              id={listing._id}
+              Code={listing.Code}
+              images={listing.images || []}
+              price={listing.pricePerNight?.price || 0}
+              location={locationDisplay}
+              provider={listing.provider || listing.ownerType || 'Unknown'}
+              listingSource={sourceDisplay}
+              pricePerNight={listing.pricePerNight}
+              distance={distanceDisplay}
+              filterData={listing.filterData}
+            />
           );
         })}
       </div>
+      
+      {/* Log filters for each listing */}
+      {listings.length > 0 && console.log('Accommodation Filters:', listings.map(listing => ({
+        id: listing._id,
+        filters: listing.filters
+      })))}
       
       {/* Pagination Controls */}
       {totalAccommodationsInRadius > 0 && (
