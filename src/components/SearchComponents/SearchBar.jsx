@@ -105,7 +105,7 @@ const handleSearch = () => {
     const endDate = `${dateRange.end.toLocaleString('default', { month: 'short' })} ${String(dateRange.end.getDate()).padStart(2, '0')} ${dateRange.end.getFullYear()}`;
     dateParam = `&dates=${startDate} - ${endDate}`;
   }
-  searchUrl += `${dateParam}&people=${guests.people}&dogs=${guests.dogs}`;
+  searchUrl += `${dateParam}&people=${guests.people}&dogs=0`;
   
   // Navigate to search page
   if (onSearch && typeof onSearch === 'function') {
@@ -173,14 +173,18 @@ const handleSearch = () => {
           </span>
         </div>
         {isGuestSelectorOpen && (
-          <GuestSelector
-            guests={guests}
-            onChange={setGuests}
-            onClose={() => setIsGuestSelectorOpen(false)}
-            maxGuests={25}
-            maxDogs={25}
-          />
-        )}
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-10">
+   
+      <GuestSelector
+        guests={guests}
+        onChange={setGuests}
+        onClose={() => setIsGuestSelectorOpen(false)}
+        maxGuests={25}
+        maxDogs={25}
+      />
+    
+  </div>
+)}
       </div>
 
       {/* Search Button */}

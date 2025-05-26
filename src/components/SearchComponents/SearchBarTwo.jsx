@@ -146,7 +146,7 @@ const SearchBarTwo = ({
       const endDate = `${dateRange.end.toLocaleString('default', { month: 'short' })} ${String(dateRange.end.getDate()).padStart(2, '0')} ${dateRange.end.getFullYear()}`;
       dateParam = `&dates=${startDate} - ${endDate}`;
     }
-    searchUrl += `${dateParam}&people=${guests.people}&dogs=${guests.dogs}`;
+    searchUrl += `${dateParam}&people=${guests.people}&dogs=0`;
     
     if (onSearch && typeof onSearch === 'function') {
       onSearch(searchUrl);
@@ -287,30 +287,7 @@ const SearchBarTwo = ({
         </div>
       )}
 
-      {/* Guest Selector Modal */}
-      {isGuestSelectorOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl p-4 sm:p-6 max-w-xs sm:max-w-md w-full mx-4">
-            <div className="flex justify-between items-center mb-3 sm:mb-4">
-              <h2 className="text-lg sm:text-xl font-semibold">{t('select_guests') || 'Select Guests'}</h2>
-              <button 
-                onClick={() => setIsGuestSelectorOpen(false)} 
-                className="text-gray-500 hover:text-gray-700 text-lg sm:text-xl"
-              >
-                ✕
-              </button>
-            </div>
-            
-            <GuestSelector
-              guests={guests}
-              onChange={setGuests}
-              onClose={() => setIsGuestSelectorOpen(false)}
-              maxGuests={25}
-              maxDogs={25}
-            />
-          </div>
-        </div>
-      )}
+     
 
       {/* More Filters Modal */}
       <MoreFiltersModal
