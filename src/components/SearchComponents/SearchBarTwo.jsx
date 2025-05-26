@@ -27,6 +27,24 @@ const SearchBarTwo = ({
   const autocompleteRef = useRef(null);
   const placeSelectedRef = useRef(false);
 
+  // Update state when props change
+  useEffect(() => {
+    setLocation(initialLocation);
+    setDateRange(initialDateRange);
+    setGuests(initialGuests);
+    
+    // If we have a location, set the placeData
+    if (initialLocation) {
+      setPlaceData({
+        address: initialLocation,
+        location: {
+          lat: 46.8182,
+          lng: 8.2275
+        }
+      });
+    }
+  }, [initialLocation, initialDateRange, initialGuests]);
+
   // Load Google Maps script
   useEffect(() => {
     try {
@@ -146,7 +164,7 @@ const SearchBarTwo = ({
       const endDate = `${dateRange.end.toLocaleString('default', { month: 'short' })} ${String(dateRange.end.getDate()).padStart(2, '0')} ${dateRange.end.getFullYear()}`;
       dateParam = `&dates=${startDate} - ${endDate}`;
     }
-    searchUrl += `${dateParam}&people=${guests.people}&dogs=0`;
+    searchUrl += `${dateParam}&people=${guests.people}&dogs=${guests.dogs}`;
     
     if (onSearch && typeof onSearch === 'function') {
       onSearch(searchUrl);
