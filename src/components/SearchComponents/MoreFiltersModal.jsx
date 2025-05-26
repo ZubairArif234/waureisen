@@ -360,7 +360,7 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
               {t('clear_all')}
             </button>
             <button
-              onClick={handleShowResults}
+              onClick={handleApplyFilters}
               className="flex-1 px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand/90 transition-colors"
             >
               {t('show_results')}
@@ -373,21 +373,3 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
 };
 
 export default MoreFiltersModal;
-
-const handleShowResults = () => {
-  const getSelectedFilters = () => {
-    return Object.values(selected).flat();
-  };
-  const filteredListings = listings.filter(listing => {
-    return selectedFilters.every(filter =>
-      listing.filterData.subsubsections.some(subsection =>
-        subsection.filters.some(f => f.name === filter)
-      )
-    );
-  });
-  const updateListings = (filteredListings) => {
-    // Assume this function updates the displayed listings
-    console.log('Updated Listings:', filteredListings);
-  };
-};
-const listings = []; // Assume this is populated with listing data

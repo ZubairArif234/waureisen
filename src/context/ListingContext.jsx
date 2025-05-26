@@ -2,7 +2,6 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback, useState, useRef } from 'react';
 import { getStreamedListings, getSingleListing, getListingsByIds } from '../api/listingAPI';
 import { fetchInterhomePrices } from '../api/interhomeAPI';
-import API from '../api/config';
 
 // Initial state
 const initialState = {
@@ -482,58 +481,18 @@ const fetchListingsPage = useCallback(async (page = 1) => {
     
     // Filter out any null results
     const validListings = processedListings.filter(listing => listing !== null);
-
-    // Fetch filter data for each listing
-    const uniqueFilterIds = new Set(
-      validListings
-        .filter(listing => listing.filters)
-        .map(listing => listing.filters)
-    );
-
-    // Fetch all unique filters in parallel
-    const filterPromises = Array.from(uniqueFilterIds).map(async (id) => {
-      try {
-        const response = await API.get(`/filters/${id}`);
-        return response.data;
-      } catch (error) {
-        console.error('Error fetching filter data:', error);
-        return null;
-      }
-    });
-
-    const filterResults = await Promise.all(filterPromises);
-
-    // Create a map of filter ID to filter data
-    const filterMap = new Map(
-      filterResults
-        .filter(result => result !== null)
-        .map(result => [result._id, result])
-    );
-
-    // Attach filter data to listings
-    const listingsWithFilterData = validListings.map(listing => ({
-      ...listing,
-      filterData: listing.filters ? filterMap.get(listing.filters) : null
-    }));
-
-    // Log the enhanced listings with filter data
-    console.log('Listings with filter data:', listingsWithFilterData.map(listing => ({
-      id: listing._id,
-      filterId: listing.filters,
-      filterData: listing.filterData
-    })));
     
     dispatch({ 
       type: Actions.FETCH_LISTINGS_SUCCESS, 
       payload: {
-        listings: listingsWithFilterData,
+        listings: validListings,
         hasMore: result.hasMore,
         totalPages: result.totalPages || Math.ceil(result.total / state.itemsPerPage) || 1,
         replace: true // Flag to replace listings instead of appending
       }
     });
     
-    return listingsWithFilterData;
+    return validListings;
   } catch (error) {
     console.error(`Error fetching listings for page ${page}:`, error);
     dispatch({ 
