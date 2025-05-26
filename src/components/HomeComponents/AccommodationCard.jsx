@@ -26,7 +26,7 @@ const AccommodationCard = ({
   const searchParams = new URLSearchParams(location.search);
   const checkInDate = searchParams.get("dates")?.split(" - ")[0] || "";
   const { t } = useLanguage();
-
+console.log(code)
   // Combine single image with images array, avoiding duplicates
   const allImages = React.useMemo(() => {
     if (!images || images.length === 0) {
@@ -78,6 +78,7 @@ const AccommodationCard = ({
   const formattedCheckInDate = formatDate(checkInDate);
 
   const handleClick = (title) => {
+    console.log(code)
     navigate(`/accommodation/${title + "-"+ code}`, {
       state: {
         id:id,
@@ -155,7 +156,7 @@ const AccommodationCard = ({
     <div className="flex flex-col">
       <div
         className="rounded-xl overflow-hidden mb-3 relative cursor-pointer"
-        onClick={()=>handleClick(propertyLocation?.replace(/ /g, '-'))} // Convert location to URL-friendly format
+        onClick={()=>handleClick(propertyLocation?.replace(/ /g, '-') ,)} // Convert location to URL-friendly format
       >
         {/* Main image with lazy loading */}
         <img

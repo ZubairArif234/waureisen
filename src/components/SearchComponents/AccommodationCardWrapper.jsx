@@ -14,6 +14,7 @@ const AccommodationCardWrapper = ({
   pricePerNight,
   distance
 }) => {
+  console.log(Code)
   const [formattedPricePerNight, setFormattedPricePerNight] = useState(null);
 
   useEffect(() => {
@@ -79,6 +80,7 @@ const AccommodationCardWrapper = ({
         listingSource={listingSource}
         isFavorited={isFavorited || false}
         pricePerNight={formattedPricePerNight}
+        code={Code}
       />
       {distance && (
         <div className="mt-1 text-xs text-gray-500">{distance}</div>

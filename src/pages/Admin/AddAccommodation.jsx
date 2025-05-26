@@ -441,9 +441,9 @@ const AddAccommodation = (props) => {
       }
   
       if (!formData?.mainImage) validationErrors.push("Main image is required");
-      // if (!formData?.galleryImages || formData?.galleryImages.length < 4) {
-      //   validationErrors.push("At least 4 gallery images are required");
-      // }
+      if (!formData?.galleryImages || formData?.galleryImages.length < 4) {
+        validationErrors.push("At least 4 gallery images are required");
+      }
   
       // if (!formData?.shortDescription) validationErrors.push("Short description is required");
       // if (!formData?.fullDescription) validationErrors.push("Full description is required");
@@ -559,7 +559,7 @@ const AddAccommodation = (props) => {
           number: formData?.capacity?.rooms,
         },
         washrooms: formData?.capacity?.washrooms,
-        status: isProviderMode ? "pending approval" : (formData?.availability?.active ? "active" : "pending approval"),
+        // status: isProviderMode ? "pending approval" : (formData?.availability?.active ? "active" : "pending approval"),
         images: photos,
         legal: {
           cancellationPolicy: formData?.policies?.cancellationPolicy,
@@ -621,7 +621,7 @@ const AddAccommodation = (props) => {
           ]);
   toast.success(
            <div className="flex justify-between items-center">
-             <span>Listing updated successfully, your request had been submitted to the admin!</span>
+             <span>Listing updated successfully!</span>
              <button 
                onClick={() => toast.dismiss()}
                className="text-gray-500 hover:text-gray-700 ml-4"
@@ -670,7 +670,7 @@ const AddAccommodation = (props) => {
              className: '!pl-4'
            }
          );
-        //  navigate(-1)
+         navigate(-1)
         }
   
         if (listingResponse?._id) {
@@ -1175,9 +1175,9 @@ const AddAccommodation = (props) => {
     }else if (activeTab === "photos") {
 
       if (!formData?.mainImage) validationErrors.push("Main image is required");
-      // if (!formData?.galleryImages || formData?.galleryImages.length < 4) {
-      //   validationErrors.push("At least 4 gallery images are required");
-      // }
+      if (!formData?.galleryImages || formData?.galleryImages.length < 4) {
+        validationErrors.push("At least 4 gallery images are required");
+      }
 
     }else if( activeTab === "description") {
        if ( !formData?.shortDescription) validationErrors.push("Description is required");
