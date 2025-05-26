@@ -8,6 +8,7 @@ import RangeSlider from './RangeSlider';
 import * as filterData from './moreFiltersData';
 import { useLanguage } from '../../utils/LanguageContext';
 import { usePriceFilter } from '../../context/PriceFilterContext';
+import { useSearchFilters } from '../../context/SearchFiltersContext';
 
 const FilterSection = ({ icon, title, options, selected, onChange }) => (
   <div className="mb-8">
@@ -36,6 +37,7 @@ const FilterSection = ({ icon, title, options, selected, onChange }) => (
 
 const MoreFiltersModal = ({ isOpen, onClose }) => {
   const { priceRange, setPriceRange, setIsPriceFilterActive } = usePriceFilter();
+  const { searchFilters, updateFilters } = useSearchFilters();
   const [filters, setFilters] = useState([]);
   const { t } = useLanguage();
   const [ranges, setRanges] = useState({
@@ -91,12 +93,16 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
       if (!prev[category]) {
         prev[category] = [];
       }
-      return {
+      const newSelected = {
         ...prev,
         [category]: prev[category].includes(option)
           ? prev[category].filter(item => item !== option)
           : [...prev[category], option]
       };
+      
+      // Update global search filters context
+      updateFilters({ filters: newSelected });
+      return newSelected;
     });
   };
 
@@ -117,35 +123,19 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
       selected
     };
 
-    // Log hardcoded filters (from filterData)
-    console.log('Hardcoded Selected Filters:', {
-      accommodation: selected.accommodation,
-      kitchen: selected.kitchen,
-      pool: selected.pool,
-      wellness: selected.wellness,
-      kids: selected.kids,
-      water: selected.water,
-      catering: selected.catering,
-      parking: selected.parking,
-      view: selected.view,
-      sport: selected.sport,
-      smoking: selected.smoking,
-      accessibility: selected.accessibility
-    });
+    // Update search filters context
+    updateFilters(filterObject);
 
-    // Log dynamically loaded filters
-    console.log('Dynamic Filters from API:', filters.subsubsections?.map(subsection => ({
-      section: subsection.name,
-      selectedFilters: selected[subsection.name.toLowerCase()] || []
-    })));
-
-    // Log all ranges
-    console.log('Selected Ranges:', ranges);
-
-    // Update URL with filters
+    // Get current URL parameters
     const searchParams = new URLSearchParams(window.location.search);
-    searchParams.set('moreFilters', JSON.stringify(filterObject));
-    window.history.replaceState({}, '', `${window.location.pathname}?${searchParams.toString()}`);
+
+    // Trigger a new search by updating the URL with a timestamp
+    // This will cause the SearchResults component to re-fetch data
+    searchParams.set('_t', Date.now());
+    window.history.pushState({}, '', `${window.location.pathname}?${searchParams.toString()}`);
+
+    // Dispatch a popstate event to trigger URL change handlers
+    window.dispatchEvent(new PopStateEvent('popstate'));
 
     // Close modal
     onClose();

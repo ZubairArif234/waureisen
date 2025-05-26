@@ -269,7 +269,8 @@ export const getListingById = async (id) => {
 
 export const searchListings = async (params) => {
   try {
-    const { lat, lng, page, pageSize, filters, moreFilters, radius } = params;
+    //     const { lat, lng, page, pageSize, filters, moreFilters, radius } = params; OLD
+    const { lat, lng, page, pageSize, radius, searchFilters } = params;
 
     const queryParams = new URLSearchParams({
       lat,
@@ -282,7 +283,8 @@ export const searchListings = async (params) => {
       queryParams.append('radius', radius);
     }
 
-    if (filters && filters.length > 0) {
+    // OLD 
+    /*if (filters && filters.length > 0) {
       queryParams.append('filters', JSON.stringify(filters));
     }
 
@@ -290,7 +292,15 @@ export const searchListings = async (params) => {
       queryParams.append('moreFilters', JSON.stringify(moreFilters));
     }
 
-    const response = await API.get(`/listings/search?${queryParams.toString()}`);
+    const response = await API.get(`/listings/search?${queryParams.toString()}`); */
+
+    // Configure headers with search filters
+    const headers = {};
+    if (searchFilters) {
+      headers['SearchFiltersData'] = JSON.stringify(searchFilters);
+    }
+
+    const response = await API.get(`/listings/search?${queryParams.toString()}`, { headers });
     return response.data;
   } catch (error) {
     console.error('Error searching listings:', error);

@@ -10,6 +10,7 @@ import SkeletonCard from "../../components/SearchComponents/SkeletonCard";
 import Footer from "../../components/Shared/Footer";
 import EnhancedSearchBar from "../../components/SearchComponents/SearchBarTwo";
 import { useListings, ListingProvider } from "../../context/ListingContext";
+import { SearchFiltersProvider, useSearchFilters } from "../../context/SearchFiltersContext";
 
 // Lazy-loaded components for better initial load performance
 const MoreFiltersModal = lazy(() => import('../../components/SearchComponents/MoreFiltersModal'));
@@ -21,6 +22,7 @@ const MoreFiltersModal = lazy(() => import('../../components/SearchComponents/Mo
 const SearchResultsContent = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { searchFilters } = useSearchFilters();
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
   const [isMoreFiltersOpen, setIsMoreFiltersOpen] = useState(false);
   const urlProcessedRef = useRef(false);
@@ -124,6 +126,7 @@ const SearchResultsContent = () => {
         dogCount: dogs,
         ...moreFilters
       },
+      searchFilters, // This will be sent as header
       priceRange
     };
     
@@ -134,7 +137,7 @@ const SearchResultsContent = () => {
     
     // Update search params in context
     updateSearchParams(newSearchParams);
-  }, [location.search, updateSearchParams]);
+  }, [location.search, updateSearchParams, searchFilters]);
 
   // Helper function to determine what to display for total count
   const getTotalDisplay = useCallback(() => {
@@ -343,9 +346,11 @@ const SearchResultsContent = () => {
  */
 const SearchResults = () => {
   return (
-    <ListingProvider>
-      <SearchResultsContent />
-    </ListingProvider>
+    <SearchFiltersProvider>
+      <ListingProvider>
+        <SearchResultsContent />
+      </ListingProvider>
+    </SearchFiltersProvider>
   );
 };
 
