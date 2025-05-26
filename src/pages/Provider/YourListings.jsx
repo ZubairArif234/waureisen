@@ -78,7 +78,7 @@ const ListingCard = ({ listing, onEdit, onDelete, onView }) => {
           src={listing.image}
           alt={listing.title}
           className="w-full h-full object-cover cursor-pointer"
-          onClick={() => onView(listing.id)}
+          onClick={() => onView(listing.id,listing.title)}
         />
 
         {/* Status badge */}
@@ -104,7 +104,7 @@ const ListingCard = ({ listing, onEdit, onDelete, onView }) => {
       {/* Card body */}
       <div className="p-4">
         <div className="flex items-start justify-between gap-2 mb-2">
-          <div onClick={() => onView(listing.id)} className="cursor-pointer">
+          <div onClick={() => onView(listing.id,listing.title)} className="cursor-pointer">
             <h3 className="font-medium text-gray-900 mb-1">{listing.title}</h3>
             <p className="text-sm text-gray-500">{listing.location}</p>
           </div>
@@ -128,7 +128,7 @@ const ListingCard = ({ listing, onEdit, onDelete, onView }) => {
                 <div className="absolute right-0 mt-1 bg-white rounded-md shadow-lg z-50 w-32 py-1 border border-gray-200">
                   <button
                     onClick={() => {
-                      onView(listing.id);
+                      onView(listing.id,listing.title);
                       setShowMenu(false);
                     }}
                     className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -245,7 +245,7 @@ const YourListings = () => {
      setDeleteModal({ isOpen: false, listing:null })}
   
    };
-  const handleView = (id) => navigate(`/accommodation/${id}`);
+  const handleView = (id,name) => navigate(`/accommodation/${name}`, { state: { id } });
   const handleCreate = () => navigate(`/provider/create-listing`);
 console.log(deleteModal);
 
@@ -376,9 +376,9 @@ console.log(deleteModal);
 
           {/* Listings Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.map((item) => (
+            {filtered?.map((item,i) => (
               <ListingCard
-                key={item.id}
+                key={i}
                 listing={item}
                 onEdit={handleEdit}
                 onDelete={()=>handleDelete(item)}

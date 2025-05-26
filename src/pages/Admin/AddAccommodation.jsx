@@ -234,7 +234,7 @@ const AddAccommodation = (props) => {
             filter: listingData?.filters, // Store the filter ObjectId reference
             title: listingData?.title || "",
             propertyType: listingData?.listingType || "Studio",
-            listingSource: isProviderMode ? "Provider" : "Admin",
+            listingSource: listingData?.ownerType || isProviderMode ? "Provider" : "Admin",
             capacity: {
               people: listingData?.maxGuests || 6,
               dogs: listingData?.maxDogs || 0,
@@ -289,6 +289,10 @@ const AddAccommodation = (props) => {
           };
           console.log("Final form data:", updatedFormData);
           setFormData(updatedFormData);
+          if(listingData?.customRefundPolicies && listingData?.customRefundPolicies.length > 0){
+
+            setCustomPolicy(listingData?.customRefundPolicies )
+          }
         }
         setIsLoading(false);
       } catch (error) {
@@ -437,16 +441,20 @@ const AddAccommodation = (props) => {
       }
   
       if (!formData?.mainImage) validationErrors.push("Main image is required");
-      if (!formData?.galleryImages || formData?.galleryImages.length < 4) {
-        validationErrors.push("At least 4 gallery images are required");
-      }
+      // if (!formData?.galleryImages || formData?.galleryImages.length < 4) {
+      //   validationErrors.push("At least 4 gallery images are required");
+      // }
   
       // if (!formData?.shortDescription) validationErrors.push("Short description is required");
       // if (!formData?.fullDescription) validationErrors.push("Full description is required");
   
       if (!formData?.location.mapLocation) validationErrors.push("Map location is required");
       if (!formData?.policies.cancellationPolicy) validationErrors.push("Cancellation policy is required");
-      if (formData?.policies.cancellationPolicy === 'custom' && !formData.policies?.customPolicyDetails) {
+     const isEmpty = customPolicy.some(
+      (policy) =>  policy.days == "" || policy.refundAmount == ""
+    );
+    console.log("Custom Policy Data:", customPolicy, "Is Empty:", isEmpty);
+      if (formData?.policies.cancellationPolicy === 'custom' && isEmpty) {
         validationErrors.push("Custom policy details are required when using custom cancellation policy");
       }
   
@@ -604,15 +612,65 @@ const AddAccommodation = (props) => {
   
       if (isProviderMode) {
         listingData.filterData = filterData;
-        console.log(listingData , formData);
+        // console.log(listingData , formData);
         
         if(id){
           listingResponse = await updateListing(id,listingData);
-
-
+          setCustomPolicy([
+            {days:'', refundAmount:''}
+          ]);
+  toast.success(
+           <div className="flex justify-between items-center">
+             <span>Listing updated successfully, your request had been submitted to the admin!</span>
+             <button 
+               onClick={() => toast.dismiss()}
+               className="text-gray-500 hover:text-gray-700 ml-4"
+             >
+               ×
+             </button>
+           </div>,
+           {
+             duration: 3000,
+             style: {
+               background: '#ECFDF5',
+               color: '#065F46',
+               border: '1px solid #A7F3D0',
+               borderRadius: '0.5rem',
+               padding: '1rem',
+             },
+             className: '!pl-4'
+           }
+         );
+ navigate(-1)
         }else{
 
           listingResponse = await providerCreateListing(listingData);
+          setCustomPolicy([
+            {days:'', refundAmount:''}
+          ]);
+           toast.success(
+           <div className="flex justify-between items-center">
+             <span>Listing created successfully!</span>
+             <button 
+               onClick={() => toast.dismiss()}
+               className="text-gray-500 hover:text-gray-700 ml-4"
+             >
+               ×
+             </button>
+           </div>,
+           {
+             duration: 3000,
+             style: {
+               background: '#ECFDF5',
+               color: '#065F46',
+               border: '1px solid #A7F3D0',
+               borderRadius: '0.5rem',
+               padding: '1rem',
+             },
+             className: '!pl-4'
+           }
+         );
+        //  navigate(-1)
         }
   
         if (listingResponse?._id) {
@@ -643,7 +701,8 @@ const AddAccommodation = (props) => {
       } else {
           listingData.filterData = filterData;
         console.log("Creating listing as admin");
-         listingResponse = await providerCreateListing(listingData);
+        //  listingResponse = await providerCreateListing(listingData);
+       
         // if (!token) throw new Error("Authentication token not found. Please log in again.");
   
         // const response = await fetch(`${apiUrl}/api/admins/add-listing`, {
@@ -666,39 +725,47 @@ const AddAccommodation = (props) => {
   
         // listingResponse = await response.json();
   
-        if (listingResponse?._id) {
+        if (id) {
+           console.log("Update new listing as admin");
            listingResponse = await updateListing(id,listingData);
 
-          // try {
-          //   filterData.listing = listingResponse._id;
-  
-          //   const filterResponse = await fetch(`${apiUrl}/api/filters`, {
-          //     method: "POST",
-          //     headers: {
-          //       "Content-Type": "application/json",
-          //       Authorization: `Bearer ${token}`,
-          //     },
-          //     body: JSON.stringify(filterData),
-          //   });
-  
-          //   if (filterResponse.ok) {
-          //     const filterRes = await filterResponse.json();
-          //     if (filterRes?._id) {
-          //       await fetch(`${apiUrl}/api/listings/${listingResponse._id}`, {
-          //         method: "PUT",
-          //         headers: {
-          //           "Content-Type": "application/json",
-          //           Authorization: `Bearer ${token}`,
-          //         },
-          //         body: JSON.stringify({ filters: filterRes._id }),
-          //       });
-          //     }
-          //   }
-          // } catch (err) {
-          //   console.error("Error with filter creation:", err);
-          // }
-  
+       
+  setCustomPolicy([
+            {days:'', refundAmount:''}
+          ]);
           toast.success(
+            <div className="flex justify-between items-center">
+              <span>Listing updated successfully!</span>
+              <button 
+                onClick={() => toast.dismiss()}
+                className="text-gray-500 hover:text-gray-700 ml-4"
+              >
+                ×
+              </button>
+            </div>,
+            {
+              duration: 3000,
+              style: {
+                background: '#ECFDF5',
+                color: '#065F46',
+                border: '1px solid #A7F3D0',
+                borderRadius: '0.5rem',
+                padding: '1rem',
+              },
+              className: '!pl-4'
+            }
+          );
+          navigate(-1);
+          // navigate(`/accommodation/${listingResponse._id}`, { state: { from: "admin" } });
+        }else{
+         
+          console.log("Creating new listing as admin");
+          
+           listingResponse = await providerCreateListing(listingData);
+           setCustomPolicy([
+            {days:'', refundAmount:''}
+          ]);
+        toast.success(
             <div className="flex justify-between items-center">
               <span>Listing created successfully!</span>
               <button 
@@ -720,7 +787,7 @@ const AddAccommodation = (props) => {
               className: '!pl-4'
             }
           );
-          navigate(`/accommodation/${listingResponse._id}`, { state: { from: "admin" } });
+          navigate(-1);
         }
       }
     } catch (error) {
@@ -1108,9 +1175,9 @@ const AddAccommodation = (props) => {
     }else if (activeTab === "photos") {
 
       if (!formData?.mainImage) validationErrors.push("Main image is required");
-      if (!formData?.galleryImages || formData?.galleryImages.length < 4) {
-        validationErrors.push("At least 4 gallery images are required");
-      }
+      // if (!formData?.galleryImages || formData?.galleryImages.length < 4) {
+      //   validationErrors.push("At least 4 gallery images are required");
+      // }
 
     }else if( activeTab === "description") {
        if ( !formData?.shortDescription) validationErrors.push("Description is required");
@@ -1118,7 +1185,7 @@ const AddAccommodation = (props) => {
     }else if (activeTab === "policiesLocation") {
        if (!formData?.location.mapLocation) validationErrors.push("Map location is required");
       if (!formData?.policies.cancellationPolicy) validationErrors.push("Cancellation policy is required");
-      if (formData?.policies.cancellationPolicy === 'custom' && !formData.policies?.customPolicyDetails) {
+      if (formData?.policies.cancellationPolicy === 'custom' && customPolicy?.length < 1) {
         validationErrors.push("Custom policy details are required when using custom cancellation policy");
       }
     }
