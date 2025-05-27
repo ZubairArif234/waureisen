@@ -227,24 +227,30 @@ const CreateCamperPost = () => {
   };
 
   // Handle content edit
-  const editContent = (index, item) => {
-    // if (!contentText) return;
+  const editContent = () => {
+  // Build the new content item
+  const newContent = { type: content.type, text: contentText };
 
-    let newContent= {type: item.type, text: contentText};
+  // Replace item at given index immutably
+  const updatedContent = camperData.content.map((c, i) =>
+    i === content.index ? newContent : c
+  );
 
-const filterCamper = camperData.content.filter((_, i) => i !== index);    
-console.log(filterCamper, "filterCamper");
+  console.log(updatedContent, content.index);
+  
+  // Update state
+  setCamperData({
+    ...camperData,
+    content: updatedContent,
+  });
 
-    setCamperData({
-      ...camperData,
-      content: [...filterCamper, newContent],
-    });
+  // Optionally reset inputs
+  setContentType(null);
+  setContent(null);
+  setContentText("");
+  setLinkUrl("");
+};
 
-    // Reset the content inputs
-    setContentType(null);
-    setContentText("");
-    setLinkUrl("");
-  };
 console.log(camperData, "camperData");
 
   // Remove a content item
@@ -295,7 +301,7 @@ console.log(camperData, "camperData");
 
       // Create or update camper
       if (isEditMode) {
-        await updateCamper(title, formattedData);
+        await updateCamper(title.replace(/-/g , " "), formattedData);
         toast.success("Camper updated!");
       } else {
         await createCamper(formattedData);
@@ -860,7 +866,7 @@ toast.error("Category already selected!")
                     )}
 
                     <button
-                      onClick={addContent}
+                      onClick={content ? editContent:addContent}
                       disabled={
                         !contentText ||
                         ((contentType === "link" || contentType === "cta") &&
@@ -875,7 +881,7 @@ toast.error("Category already selected!")
                       }`}
                     >
                       <Check className="w-4 h-4" />
-                      Add {contentType.toUpperCase()}
+                      {content  ? "Edit" : "Add"} {contentType.toUpperCase()}
                     </button>
                   </div>
                 </div>
@@ -929,7 +935,7 @@ toast.error("Category already selected!")
                           </div>
                         </div>
                         <button
-                          onClick={() => {setContentType(item?.type);setContentText(item?.text); setLinkUrl(item?.url) ; setContent(item)}}
+                          onClick={() => {setContentType(item?.type);setContentText(item?.text); setLinkUrl(item?.url) ; setContent({...item,index:index})}}
                           className="p-1 hover:bg-gray-100 rounded-full flex-shrink-0"
                         >
                           <Pencil   className="w-4 h-4 text-gray-500" />
