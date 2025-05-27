@@ -164,7 +164,7 @@ const SearchBarTwo = ({
       const endDate = `${dateRange.end.toLocaleString('default', { month: 'short' })} ${String(dateRange.end.getDate()).padStart(2, '0')} ${dateRange.end.getFullYear()}`;
       dateParam = `&dates=${startDate} - ${endDate}`;
     }
-    searchUrl += `${dateParam}&people=${guests.people}&dogs=${guests.dogs}`;
+    searchUrl += `${dateParam}&people=${guests.people}&dogs=0`;
     
     if (onSearch && typeof onSearch === 'function') {
       onSearch(searchUrl);
