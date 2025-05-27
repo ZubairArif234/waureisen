@@ -126,11 +126,12 @@ const SearchResultsContent = () => {
         dogCount: dogs,
         ...moreFilters
       },
-      searchFilters, // This will be sent as header
-      priceRange
+      priceRange,
+      searchFilters // Add search filters from context
     };
     
     console.log("Updating search params with coordinates:", { lat, lng });
+    console.log("Updating search params with filters:", searchFilters);
     
     // Mark URL as processed to prevent loops
     urlProcessedRef.current = true;
@@ -172,13 +173,24 @@ const SearchResultsContent = () => {
   }, [showMap, setShowMap]);
   
   // Handle search updates
-  const handleSearch = useCallback((searchUrl) => {
+  const handleSearch = useCallback((searchUrl, filters) => {
     // Reset URL processed flag when user performs a new search
     urlProcessedRef.current = false;
     
     // Update the URL without full page reload
     navigate(searchUrl);
-  }, [navigate]);
+    
+    // Update search params with filters
+    if (filters) {
+      updateSearchParams(prev => ({
+        ...prev,
+        filters: {
+          ...prev.filters,
+          searchFilters: filters
+        }
+      }));
+    }
+  }, [navigate, updateSearchParams]);
   
   // Clear error on dismount
   useEffect(() => {

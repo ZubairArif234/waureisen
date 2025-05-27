@@ -34,7 +34,8 @@ const initialState = {
       guestCount: 1,
       dogCount: 0
     },
-    priceRange: { min: 0, max: 10000 }
+    priceRange: { min: 0, max: 10000 },
+    searchFilters: {} // Add searchFilters to state
   },
   
   // Map state
@@ -405,110 +406,113 @@ export function ListingProvider({ children }) {
   }, []);
   
   // Fetch listings for a specific page
-const fetchListingsPage = useCallback(async (page = 1) => {
-  const { lat, lng, radius, filters, priceRange } = state.searchParams;
-  
-  // Skip if lat/lng not set
-  if (!lat || !lng) return [];
-  
-  try {
-    dispatch({ type: Actions.FETCH_LISTINGS_START });
+  const fetchListingsPage = useCallback(async (page = 1) => {
+    const { lat, lng, radius, filters, priceRange, searchFilters } = state.searchParams;
     
-    // Pass ALL filters to the backend without modification
-    // The backend now handles all filtering logic
-    const result = await getStreamedListings({
-      limit: state.itemsPerPage,
-      skip: (page - 1) * state.itemsPerPage,
-      page: page,
-      lat,
-      lng,
-      radius,
-      filters: JSON.stringify(filters),
-      priceMin: priceRange?.min,
-      priceMax: priceRange?.max
-    });
+    // Skip if lat/lng not set
+    if (!lat || !lng) return [];
     
-    // Update total accommodations count if available
-    if (result.total !== undefined) {
+    try {
+      dispatch({ type: Actions.FETCH_LISTINGS_START });
+      
+      // Log the filters being sent
+      console.log('Sending search filters to API:', searchFilters);
+      
+      // Pass filters to the backend
+      const result = await getStreamedListings({
+        limit: state.itemsPerPage,
+        skip: (page - 1) * state.itemsPerPage,
+        page: page,
+        lat,
+        lng,
+        radius,
+        filters: JSON.stringify(filters),
+        priceMin: priceRange?.min,
+        priceMax: priceRange?.max,
+        searchFilters // Pass the search filters from state
+      });
+      
+      // Update total accommodations count if available
+      if (result.total !== undefined) {
+        dispatch({ 
+          type: Actions.SET_TOTAL_ACCOMMODATIONS, 
+          payload: result.total 
+        });
+      }
+      
+      // Update total pages if available
+      if (result.totalPages) {
+        dispatch({
+          type: Actions.SET_TOTAL_PAGES,
+          payload: result.totalPages
+        });
+      }
+      
+      // Ensure we have valid listings
+      if (!result.listings || !Array.isArray(result.listings)) {
+        console.error('Invalid listings data received:', result);
+        dispatch({ 
+          type: Actions.FETCH_LISTINGS_ERROR, 
+          payload: 'Invalid listings data received from server' 
+        });
+        return [];
+      }
+      
+      // The backend should now handle Interhome price data,
+      // but we'll check if there's any need for client-side processing
+      const listings = result.listings;
+      
+      // Use first date from filters if available for price calculations
+      const checkInDate = filters.dateRange?.start 
+        ? formatDate(filters.dateRange.start) 
+        : null;
+      
+      // Only run client-side processing if necessary 
+      // (if any Interhome listings are missing price data)
+      let processedListings = listings;
+      const needPriceProcessing = checkInDate && listings.some(listing => 
+        listing.provider === 'Interhome' && 
+        listing.Code && 
+        (!listing.interhomePriceData || !listing.pricePerNight)
+      );
+      
+      if (needPriceProcessing) {
+        console.log('Running client-side price processing for Interhome listings');
+        processedListings = await Promise.all(
+          listings.map(listing => processInterhomePricing(listing, checkInDate))
+        );
+      }
+      
+      // Filter out any null results
+      const validListings = processedListings.filter(listing => listing !== null);
+      
       dispatch({ 
-        type: Actions.SET_TOTAL_ACCOMMODATIONS, 
-        payload: result.total 
+        type: Actions.FETCH_LISTINGS_SUCCESS, 
+        payload: {
+          listings: validListings,
+          hasMore: result.hasMore,
+          totalPages: result.totalPages || Math.ceil(result.total / state.itemsPerPage) || 1,
+          replace: true // Flag to replace listings instead of appending
+        }
       });
-    }
-    
-    // Update total pages if available
-    if (result.totalPages) {
-      dispatch({
-        type: Actions.SET_TOTAL_PAGES,
-        payload: result.totalPages
-      });
-    }
-    
-    // Ensure we have valid listings
-    if (!result.listings || !Array.isArray(result.listings)) {
-      console.error('Invalid listings data received:', result);
+      
+      return validListings;
+    } catch (error) {
+      console.error(`Error fetching listings for page ${page}:`, error);
       dispatch({ 
         type: Actions.FETCH_LISTINGS_ERROR, 
-        payload: 'Invalid listings data received from server' 
+        payload: error.message 
       });
       return [];
     }
-    
-    // The backend should now handle Interhome price data,
-    // but we'll check if there's any need for client-side processing
-    const listings = result.listings;
-    
-    // Use first date from filters if available for price calculations
-    const checkInDate = filters.dateRange?.start 
-      ? formatDate(filters.dateRange.start) 
-      : null;
-    
-    // Only run client-side processing if necessary 
-    // (if any Interhome listings are missing price data)
-    let processedListings = listings;
-    const needPriceProcessing = checkInDate && listings.some(listing => 
-      listing.provider === 'Interhome' && 
-      listing.Code && 
-      (!listing.interhomePriceData || !listing.pricePerNight)
-    );
-    
-    if (needPriceProcessing) {
-      console.log('Running client-side price processing for Interhome listings');
-      processedListings = await Promise.all(
-        listings.map(listing => processInterhomePricing(listing, checkInDate))
-      );
-    }
-    
-    // Filter out any null results
-    const validListings = processedListings.filter(listing => listing !== null);
-    
-    dispatch({ 
-      type: Actions.FETCH_LISTINGS_SUCCESS, 
-      payload: {
-        listings: validListings,
-        hasMore: result.hasMore,
-        totalPages: result.totalPages || Math.ceil(result.total / state.itemsPerPage) || 1,
-        replace: true // Flag to replace listings instead of appending
-      }
-    });
-    
-    return validListings;
-  } catch (error) {
-    console.error(`Error fetching listings for page ${page}:`, error);
-    dispatch({ 
-      type: Actions.FETCH_LISTINGS_ERROR, 
-      payload: error.message 
-    });
-    return [];
-  }
-}, [
-  state.searchParams,
-  state.itemsPerPage,
-  formatDate,
-  processInterhomePricing,
-  getStreamedListings,
-  dispatch
-]);
+  }, [
+    state.searchParams,
+    state.itemsPerPage,
+    formatDate,
+    processInterhomePricing,
+    getStreamedListings,
+    dispatch
+  ]);
   
   // Fetch initial batch of listings
   const fetchInitialListings = useCallback(async () => {

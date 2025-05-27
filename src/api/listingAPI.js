@@ -1,6 +1,7 @@
 // src/api/listingAPI.js
 import API from './config';
 import axios from 'axios';
+import { useSearchFilters } from '../context/SearchFiltersContext';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -150,10 +151,12 @@ export const getStreamedListings = async (params) => {
       radius = 500,
       filters = {},
       priceMin,
-      priceMax
+      priceMax,
+      searchFilters
     } = params;
 
     console.log("API REQUEST WITH COORDINATES:", { lat, lng });
+    console.log("API REQUEST WITH SEARCH FILTERS:", searchFilters);
 
     // Build query parameters
     const queryParams = new URLSearchParams();
@@ -190,10 +193,23 @@ export const getStreamedListings = async (params) => {
     if (priceMin) queryParams.append('priceMin', priceMin);
     if (priceMax) queryParams.append('priceMax', priceMax);
 
-    // Log the final request URL
-    console.log("API REQUEST URL:", `/listings/stream?${queryParams.toString()}`);
+    // Add search filters as query parameter if they exist
+    if (searchFilters) {
+      // Only add search filters if there are actual values
+      const hasSelectedFilters = Object.values(searchFilters.selected || {}).some(arr => arr && arr.length > 0);
+      const hasRangeFilters = Object.values(searchFilters.ranges || {}).some(range => 
+        range && (range.min !== undefined || range.max !== undefined)
+      );
+      
+      if (hasSelectedFilters || hasRangeFilters) {
+        queryParams.append('searchFilters', JSON.stringify(searchFilters));
+        console.log("Stream API - Adding search filters to query params:", searchFilters);
+      }
+    }
 
-    // Make the request
+    console.log("Stream API - URL:", `/listings/stream?${queryParams.toString()}`);
+
+    // Make the request without custom headers
     const response = await API.get(`/listings/stream?${queryParams.toString()}`);
     
     if (!response.data) {
@@ -269,7 +285,6 @@ export const getListingById = async (id) => {
 
 export const searchListings = async (params) => {
   try {
-    //     const { lat, lng, page, pageSize, filters, moreFilters, radius } = params; OLD
     const { lat, lng, page, pageSize, radius, searchFilters } = params;
 
     const queryParams = new URLSearchParams({
@@ -283,23 +298,13 @@ export const searchListings = async (params) => {
       queryParams.append('radius', radius);
     }
 
-    // OLD 
-    /*if (filters && filters.length > 0) {
-      queryParams.append('filters', JSON.stringify(filters));
-    }
-
-    if (moreFilters) {
-      queryParams.append('moreFilters', JSON.stringify(moreFilters));
-    }
-
-    const response = await API.get(`/listings/search?${queryParams.toString()}`); */
-
     // Configure headers with search filters
     const headers = {};
     if (searchFilters) {
       headers['SearchFiltersData'] = JSON.stringify(searchFilters);
     }
 
+    console.log('Search API - Headers:', headers);
     const response = await API.get(`/listings/search?${queryParams.toString()}`, { headers });
     return response.data;
   } catch (error) {
