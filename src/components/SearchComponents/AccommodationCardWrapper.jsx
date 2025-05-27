@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import OriginalAccommodationCard from "../../components/HomeComponents/AccommodationCard";
 import { fetchInterhomePrices } from "../../api/interhomeAPI";
 import { useSearchFilters } from "../../context/SearchFiltersContext";
+import SkeletonCard from "./SkeletonCard";
 
 const AccommodationCardWrapper = ({
   id,
@@ -16,10 +17,12 @@ const AccommodationCardWrapper = ({
   distance
 }) => {
   const [formattedPricePerNight, setFormattedPricePerNight] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { searchFilters } = useSearchFilters();
 
   useEffect(() => {
     const fetchPrice = async () => {
+      setIsLoading(true);
       const isInterhome =
         (listingSource?.toLowerCase() === "interhome" ||
          provider?.toLowerCase() === "interhome") &&
@@ -53,6 +56,7 @@ const AccommodationCardWrapper = ({
                 duration: 7,
                 paxUpTo: selectedOption.paxUpTo,
               });
+              setIsLoading(false);
               return;
             }
           }
@@ -65,6 +69,7 @@ const AccommodationCardWrapper = ({
       setFormattedPricePerNight(
         pricePerNight || { price: price || 0, currency: "CHF" }
       );
+      setIsLoading(false);
     };
 
     fetchPrice();
@@ -76,6 +81,11 @@ const AccommodationCardWrapper = ({
     const { min, max } = searchFilters.ranges.price || { min: 0, max: 10000 };
     return currentPrice >= min && currentPrice <= max;
   };
+
+  // Show skeleton while loading
+  if (isLoading) {
+    return <SkeletonCard />;
+  }
 
   // If the listing price is outside the selected range, don't render it
   if (!shouldShowListing()) {
