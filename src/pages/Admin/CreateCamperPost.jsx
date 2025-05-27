@@ -429,6 +429,12 @@ toast.error("Category already selected!")
               </a>
             </p>
           );
+          case 'img':
+          return (
+            <div key={index} className={`my-4 flex justify-center mx-[8rem]`}>
+             <img src={item?.url}  className='w-full h-[40vh]'/>
+            </div>
+          );
         default:
           return null;
       }
