@@ -74,7 +74,7 @@ const CamperRental = () => {
 
       {/* Camper Vans Section */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <h2 className="text-3xl font-bold text-center mb-12">Our Campers</h2>
+        <h2 className="text-3xl font-bold text-center mb-12">{t('our_camper')}</h2>
         
         {loading ? (
           <div className="flex justify-center py-12">

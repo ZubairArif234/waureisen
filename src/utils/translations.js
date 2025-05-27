@@ -1,5 +1,6 @@
 const translations = {
   en: {
+    our_camper:"Our Camper",
      continue:"Continue",
     welcome_back:"Welcome Back!",
     great_to_see_you_again:"Great to see you again! Click on the button to continue.",
@@ -1173,6 +1174,7 @@ const translations = {
   },
 
   de: {
+      our_camper:"Unsere Camper",
     continue:"Weitermachen",
     welcome_back:"Willkommen zurück!",
     great_to_see_you_again:"Schön, Sie wiederzusehen! Klicken Sie auf die Schaltfläche, um fortzufahren.",

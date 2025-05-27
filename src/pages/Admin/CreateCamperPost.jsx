@@ -50,6 +50,7 @@ const CreateCamperPost = () => {
   // State for content editing
   const [contentType, setContentType] = useState(null);
   const [contentText, setContentText] = useState("");
+  const [contentImg, setContentImg] = useState(null);
   const [content, setContent] = useState({})
   const [linkUrl, setLinkUrl] = useState("");
   const [showPreview, setShowPreview] = useState(false);
@@ -164,6 +165,18 @@ const CreateCamperPost = () => {
     });
   };
 
+  const handleContentImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+  
+
+    // Create a temporary URL for preview
+    const imageUrl = URL.createObjectURL(file);
+    setContentImg({file:file , url: imageUrl});
+    setContentText("uiu");
+  };
+
   // Upload image to Cloudinary
   const uploadImage = async () => {
     if (!imageFile) return camperData.featuredImage; // Return existing URL if no new file
@@ -180,7 +193,7 @@ const CreateCamperPost = () => {
   };
 
   // Handle content addition
-  const addContent = () => {
+  const addContent = async () => {
     if (!contentText) return;
 
     let newContent;
@@ -211,6 +224,14 @@ const CreateCamperPost = () => {
           url: normalizeUrl(linkUrl),
         };
         break;
+      case "img":
+        if (!contentImg?.file) return;
+         const cloudinaryUrl = await uploadImageToCloudinary(contentImg?.file);
+        newContent = {
+          type: "img",
+          url: cloudinaryUrl,
+        };
+        break;
       default:
         return;
     }
@@ -227,9 +248,27 @@ const CreateCamperPost = () => {
   };
 
   // Handle content edit
-  const editContent = () => {
+  const editContent = async () => {
   // Build the new content item
-  const newContent = { type: content.type, text: contentText };
+  let newContent
+  if (contentType === "h1" || contentType === "h2" || contentType === "p") {
+
+    newContent = { type: content.type, text: contentText };
+  }else if( contentType === "link" || contentType === "cta") {
+      if (!linkUrl) return;
+     newContent = {
+          type: content,
+          text: contentText,
+          url: normalizeUrl(linkUrl),
+        };
+  }else if (contentType === "img") {
+    if (!contentImg?.file) return;
+    const cloudinaryUrl = await uploadImageToCloudinary(contentImg?.file);
+        newContent = {
+          type: "img",
+          url: cloudinaryUrl,
+        };
+  }
 
   // Replace item at given index immutably
   const updatedContent = camperData.content.map((c, i) =>
@@ -404,8 +443,20 @@ toast.error("Category already selected!")
     }));
   };
 
-  console.log(content);
-  
+
+  // console.log(contentType , contentImg);
+  console.log( (
+    (contentType == "link" || contentType === "cta") && !linkUrl
+  ) ||
+  (
+    contentType == "img" && !contentImg
+  ) ||
+  (
+    contentType != "img" &&
+    contentType != "link" &&
+    contentType != "cta" &&
+    !contentText
+  ), contentType)
 
   return (
     <div className="p-6">
@@ -817,6 +868,17 @@ toast.error("Category already selected!")
                 >
                   CTA
                 </button>
+
+                <button
+                  onClick={() => {setContentType("img"); setContentText("");setContent(null)}}
+                  className={`px-3 py-1 rounded-lg text-sm font-medium ${
+                    contentType === "img"
+                      ? "bg-[#B4A481] text-white"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  }`}
+                >
+                  Image
+                </button>
               </div>
 
               {/* Content Input Form */}
@@ -835,20 +897,53 @@ toast.error("Category already selected!")
                   </div>
 
                   <div className="space-y-3">
+                      {contentType  == "img" ?  contentImg?.url ?  (<div className="relative">
+                    <img
+                      src={contentImg.url}
+                      alt="Camper cover"
+                      className="w-full h-[300px] object-cover rounded-lg"
+                    />
+                    <button
+                      onClick={() => {
+                        setContentImg(null);
+                      }}
+                      className="absolute top-2 right-2 p-1 bg-white rounded-full shadow-md hover:bg-gray-100"
+                    >
+                      <X className="w-5 h-5 text-gray-600" />
+                    </button>
+                  </div>): ( <label className="flex flex-col items-center justify-center cursor-pointer">
+                          <Upload className="w-12 h-12 text-gray-400 mb-3" />
+                          <span className="text-gray-600 font-medium mb-1">
+                            Drag & drop your image here
+                          </span>
+                          <span className="text-gray-500 text-sm mb-3">or</span>
+                          <span className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                            Choose File
+                          </span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleContentImageUpload}
+                            disabled={uploading}
+                          />
+                        </label>) : (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {contentType === "link" || contentType === "cta"
-                          ? "Text to Display"
-                          : "Content Text"}
-                      </label>
-                      <input
-                        type="text"
-                        value={contentText}
-                        onChange={(e) => setContentText(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#B4A481]/20 focus:border-[#B4A481]"
-                        placeholder={`Enter ${contentType} text`}
-                      />
-                    </div>
+
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {contentType === "link" || contentType === "cta"
+                        ? "Text to Display"
+                        : "Content Text"}
+                    </label>
+                    <input
+                      type="text"
+                      value={contentText}
+                      onChange={(e) => setContentText(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#B4A481]/20 focus:border-[#B4A481]"
+                      placeholder={`Enter ${contentType} text`}
+                    />
+                  </div>
+                      )}
 
                     {(contentType === "link" || contentType === "cta") && (
                       <div>
@@ -867,11 +962,22 @@ toast.error("Category already selected!")
 
                     <button
                       onClick={content ? editContent:addContent}
-                      disabled={
-                        !contentText ||
-                        ((contentType === "link" || contentType === "cta") &&
-                          !linkUrl)
-                      }
+                     disabled={
+  (
+    (contentType === "link" || contentType === "cta") && !linkUrl
+  ) ||
+  (
+    contentType === "img" && !contentImg
+  ) ||
+  (
+    contentType !== "img" &&
+    contentType !== "link" &&
+    contentType !== "cta" &&
+    !contentText
+  )
+}
+// {/}
+
                       className={`w-full py-2 flex items-center justify-center gap-2 rounded-lg transition-colors ${
                         !contentText ||
                         ((contentType === "link" || contentType === "cta") &&
@@ -920,6 +1026,8 @@ toast.error("Category already selected!")
                                 ? "bg-green-100 text-green-800"
                                 : item.type === "link"
                                 ? "bg-yellow-100 text-yellow-800"
+                               : item.type === "img"?
+                                "bg-orange-100 text-orange-800"
                                 : "bg-red-100 text-red-800"
                             }`}
                           >
@@ -932,10 +1040,19 @@ toast.error("Category already selected!")
                                 {item.url}
                               </span>
                             )}
+                            {item.type === "img" && (
+                              <div className="flex items-center gap-2">
+                                <img src={item.url} className="w-6 h-6"/>
+
+                              <span className="text-gray-400 text-xs ml-2 block truncate">
+                                {item.url}
+                              </span>
+                              </div>
+                            )}
                           </div>
                         </div>
                         <button
-                          onClick={() => {setContentType(item?.type);setContentText(item?.text); setLinkUrl(item?.url) ; setContent({...item,index:index})}}
+                          onClick={() => {setContentType(item?.type);setContentText(item?.text); setLinkUrl(item?.url) ; setContentImg({...item,index:index})}}
                           className="p-1 hover:bg-gray-100 rounded-full flex-shrink-0"
                         >
                           <Pencil   className="w-4 h-4 text-gray-500" />
