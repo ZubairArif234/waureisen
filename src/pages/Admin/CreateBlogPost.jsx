@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Upload, Eye, Save, X, Check, Sparkles } from 'lucide-react';
+import { ArrowLeft, Upload, Eye, Save, X, Check, Sparkles, Pencil } from 'lucide-react';
 import { createBlog, getBlogById, updateBlog } from '../../api/travelMagazineAPI';
 import { uploadImageToCloudinary } from '../../utils/cloudinaryUtils';
 import toast from 'react-hot-toast';
@@ -28,6 +28,7 @@ const CreateBlogPost = () => {
   });
   
   // State for content editing
+  const [content, setContent] = useState({})
   const [contentType, setContentType] = useState(null);
   const [contentText, setContentText] = useState('');
   const [linkUrl, setLinkUrl] = useState('');
@@ -199,6 +200,27 @@ const normalizeUrl = (url) => {
     setContentText('');
     setLinkUrl('');
   };
+
+   // Handle content edit
+  const editContent = () => {
+  const newContent = { type: content.type, text: contentText };
+
+  const updatedContent = blogData.content.map((c, i) =>
+    i === content.index ? newContent : c
+  );
+
+  
+  setBlogData({
+    ...blogData,
+    content: updatedContent,
+  });
+
+  setContentType(null);
+  setContent(null);
+  setContentText("");
+  setLinkUrl("");
+};
+
   
   // Remove a content item
   const removeContent = (index) => {
@@ -540,7 +562,8 @@ const normalizeUrl = (url) => {
             <div className="mb-4">
               <div className="flex flex-wrap gap-2 mb-4">
                 <button
-                  onClick={() => setContentType('h1')}
+                  onClick={() => {setContentType("h1"); setContentText("");setContent(null)}}
+                 
                   className={`px-3 py-1 rounded-lg text-sm font-medium ${
                     contentType === 'h1' 
                       ? 'bg-[#B4A481] text-white' 
@@ -551,7 +574,8 @@ const normalizeUrl = (url) => {
                 </button>
                 
                 <button
-                  onClick={() => setContentType('h2')}
+                 onClick={() => {setContentType("h2"); setContentText("");setContent(null)}}
+                 
                   className={`px-3 py-1 rounded-lg text-sm font-medium ${
                     contentType === 'h2' 
                       ? 'bg-[#B4A481] text-white' 
@@ -562,7 +586,8 @@ const normalizeUrl = (url) => {
                 </button>
                 
                 <button
-                  onClick={() => setContentType('p')}
+                   onClick={() => {setContentType("p"); setContentText("");setContent(null)}}
+                 
                   className={`px-3 py-1 rounded-lg text-sm font-medium ${
                     contentType === 'p' 
                       ? 'bg-[#B4A481] text-white' 
@@ -573,7 +598,8 @@ const normalizeUrl = (url) => {
                 </button>
                 
                 <button
-                  onClick={() => setContentType('link')}
+                 onClick={() => {setContentType("link"); setContentText("");setContent(null)}}
+                 
                   className={`px-3 py-1 rounded-lg text-sm font-medium ${
                     contentType === 'link' 
                       ? 'bg-[#B4A481] text-white' 
@@ -584,7 +610,8 @@ const normalizeUrl = (url) => {
                 </button>
                 
                 <button
-                  onClick={() => setContentType('cta')}
+                  onClick={() => {setContentType("cta"); setContentText("");setContent(null)}}
+                 
                   className={`px-3 py-1 rounded-lg text-sm font-medium ${
                     contentType === 'cta' 
                       ? 'bg-[#B4A481] text-white' 
@@ -600,7 +627,7 @@ const normalizeUrl = (url) => {
                 <div className="p-4 bg-gray-50 rounded-lg mb-4 border border-gray-200">
                   <div className="flex justify-between items-center mb-3">
                     <h3 className="font-medium text-gray-800">
-                      Add {contentType.toUpperCase()} Content
+                       {content  ? "Edit" : "Add"} {contentType.toUpperCase()} Content
                     </h3>
                     <button
                       onClick={() => setContentType(null)}
@@ -640,7 +667,7 @@ const normalizeUrl = (url) => {
                     )}
                     
                     <button
-                      onClick={addContent}
+                       onClick={content ? editContent:addContent}
                       disabled={!contentText || ((contentType === 'link' || contentType === 'cta') && !linkUrl)}
                       className={`w-full py-2 flex items-center justify-center gap-2 rounded-lg transition-colors ${
                         !contentText || ((contentType === 'link' || contentType === 'cta') && !linkUrl)
@@ -649,7 +676,7 @@ const normalizeUrl = (url) => {
                       }`}
                     >
                       <Check className="w-4 h-4" />
-                      Add {contentType.toUpperCase()}
+                       {content  ? "Edit" : "Add"} {contentType.toUpperCase()}
                     </button>
                   </div>
                 </div>
@@ -687,6 +714,12 @@ const normalizeUrl = (url) => {
                             )}
                           </div>
                         </div>
+                         <button
+                                                  onClick={() => {setContentType(item?.type);setContentText(item?.text); setLinkUrl(item?.url) ; setContent({...item,index:index})}}
+                                                  className="p-1 hover:bg-gray-100 rounded-full flex-shrink-0"
+                                                >
+                                                  <Pencil   className="w-4 h-4 text-gray-500" />
+                                                </button>
                         <button
                           onClick={() => removeContent(index)}
                           className="p-1 hover:bg-gray-100 rounded-full flex-shrink-0"
