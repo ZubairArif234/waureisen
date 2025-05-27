@@ -40,14 +40,7 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
   const { searchFilters, updateFilters } = useSearchFilters();
   const [filters, setFilters] = useState([]);
   const { t } = useLanguage();
-  const [ranges, setRanges] = useState({
-    people: { min: 1, max: 25 },
-    dogs: { min: 0, max: 25 },
-    rooms: { min: 1, max: 25 },
-    bathrooms: { min: 1, max: 25 },
-    price: priceRange
-  });
-
+  const [ranges, setRanges] = useState(searchFilters.ranges);
   const [selected, setSelected] = useState({
     accommodation: [],
     kitchen: [],
@@ -62,6 +55,29 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
     smoking: [],
     accessibility: []
   });
+
+  // Initialize selected state from searchFilters when component mounts
+  useEffect(() => {
+    if (searchFilters.selected) {
+      setSelected(prev => ({
+        ...prev,
+        ...searchFilters.selected
+      }));
+    }
+  }, []);
+
+  // Update local state when global filters change
+  useEffect(() => {
+    if (searchFilters.ranges) {
+      setRanges(searchFilters.ranges);
+    }
+    if (searchFilters.selected) {
+      setSelected(prev => ({
+        ...prev,
+        ...searchFilters.selected
+      }));
+    }
+  }, [searchFilters]);
 
   useEffect(() => {
     const fetchFilters = async () => {
@@ -88,22 +104,27 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
   }, [priceRange]);
 
   const handleSelectionChange = (category, option) => {
-    setSelected(prev => {
-      // Ensure the category exists in the state
-      if (!prev[category]) {
-        prev[category] = [];
-      }
-      const newSelected = {
-        ...prev,
-        [category]: prev[category].includes(option)
-          ? prev[category].filter(item => item !== option)
-          : [...prev[category], option]
-      };
-      
-      // Update global search filters context
-      updateFilters({ filters: newSelected });
-      return newSelected;
-    });
+    // Ensure the category exists in the state
+    if (!selected[category]) {
+      selected[category] = [];
+    }
+    
+    const newSelected = {
+      ...selected,
+      [category]: selected[category].includes(option)
+        ? selected[category].filter(item => item !== option)
+        : [...selected[category], option]
+    };
+    
+    console.log('MoreFiltersModal - Selected filters updated:', newSelected);
+    
+    // Update local state first
+    setSelected(newSelected);
+    
+    // Then update global context in the next tick
+    setTimeout(() => {
+      updateFilters({ selected: newSelected });
+    }, 0);
   };
 
   const handleApplyFilters = () => {
@@ -123,14 +144,20 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
       selected
     };
 
+    console.log('MoreFiltersModal - Current selected state:', selected);
+    console.log('MoreFiltersModal - Current ranges state:', ranges);
+    console.log('MoreFiltersModal - Applying filters:', filterObject);
+
     // Update search filters context
     updateFilters(filterObject);
 
     // Get current URL parameters
     const searchParams = new URLSearchParams(window.location.search);
 
+    // Add filters to URL parameters
+    searchParams.set('searchFilters', JSON.stringify(filterObject));
+
     // Trigger a new search by updating the URL with a timestamp
-    // This will cause the SearchResults component to re-fetch data
     searchParams.set('_t', Date.now());
     window.history.pushState({}, '', `${window.location.pathname}?${searchParams.toString()}`);
 
@@ -146,14 +173,15 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
     setPriceRange(defaultPriceRange);
     setIsPriceFilterActive(false);
     
-    setRanges({
+    const defaultRanges = {
       people: { min: 1, max: 25 },
       dogs: { min: 0, max: 25 },
       rooms: { min: 1, max: 25 },
       bathrooms: { min: 1, max: 25 },
       price: defaultPriceRange
-    });
-    setSelected({
+    };
+
+    const defaultSelected = {
       accommodation: [],
       kitchen: [],
       pool: [],
@@ -166,6 +194,15 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
       sport: [],
       smoking: [],
       accessibility: []
+    };
+
+    setRanges(defaultRanges);
+    setSelected(defaultSelected);
+    
+    // Clear global filters
+    updateFilters({
+      ranges: defaultRanges,
+      selected: defaultSelected
     });
   };
 
@@ -236,24 +273,31 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
           />
 
           {/* Dynamic Filters */}
-      {filters.subsubsections?.map(subsection => (
-        <div key={subsection._id} className="mb-8">
-          <h3 className="text-gray-700 font-medium mb-4">{subsection.name}</h3>
-          <div className="space-y-3">
-            {subsection.filters?.map(filter => (
-              <label key={filter._id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer">
-                <input
-                  type={filter.type}
-                  checked={selected[subsection.name.toLowerCase()]?.includes(filter.name)}
-                  onChange={() => handleSelectionChange(subsection.name.toLowerCase(), filter.name)}
-                  className="w-5 h-5 rounded border-gray-300 text-brand focus:ring-brand"
-                />
-                <span className="text-gray-700">{filter.name}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-      ))}
+          {filters.subsubsections?.map(subsection => (
+            <div key={subsection._id} className="mb-8">
+              <h3 className="text-gray-700 font-medium mb-4">{subsection.name}</h3>
+              <div className="space-y-3">
+                {subsection.filters?.map(filter => {
+                  const category = subsection.name.toLowerCase();
+                  // Ensure the category exists in selected state
+                  if (!selected[category]) {
+                    selected[category] = [];
+                  }
+                  return (
+                    <label key={filter._id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer">
+                      <input
+                        type={filter.type}
+                        checked={selected[category]?.includes(filter.name)}
+                        onChange={() => handleSelectionChange(category, filter.name)}
+                        className="w-5 h-5 rounded border-gray-300 text-brand focus:ring-brand"
+                      />
+                      <span className="text-gray-700">{filter.name}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
           <FilterSection
             icon={<Tv className="w-5 h-5 text-gray-400" />}
             title="Accommodation features"

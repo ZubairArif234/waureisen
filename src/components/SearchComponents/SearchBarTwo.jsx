@@ -6,6 +6,7 @@ import { Search, Calendar, Users, SlidersHorizontal } from 'lucide-react';
 import { loadGoogleMapsScript, initAutocomplete } from '../../utils/googleMapsUtils';
 import { useLanguage } from '../../utils/LanguageContext';
 import MoreFiltersModal from './MoreFiltersModal';
+import { useSearchFilters } from '../../context/SearchFiltersContext';
 
 const SearchBarTwo = ({ 
   initialLocation = '', 
@@ -15,6 +16,7 @@ const SearchBarTwo = ({
 }) => {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const { searchFilters } = useSearchFilters();
   const [location, setLocation] = useState(initialLocation);
   const [placeData, setPlaceData] = useState(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
@@ -153,6 +155,8 @@ const SearchBarTwo = ({
 
   const handleSearch = () => {
     console.log("Place data before search:", placeData);  
+    console.log("Current search filters from context:", searchFilters);
+    
     const coordinates = placeData?.location || { lat: 46.8182, lng: 8.2275 };
 
     let searchUrl = `/search?location=${encodeURIComponent(location || "Switzerland")}`;
@@ -166,8 +170,44 @@ const SearchBarTwo = ({
     }
     searchUrl += `${dateParam}&people=${guests.people}&dogs=0`;
     
+    // Get filters from URL if they exist
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlFilters = urlParams.get('searchFilters');
+    
+    // Use filters from URL if available, otherwise use context
+    let filtersToSend = null;
+    if (urlFilters) {
+      try {
+        filtersToSend = JSON.parse(urlFilters);
+        console.log('Using filters from URL:', filtersToSend);
+      } catch (e) {
+        console.error('Error parsing filters from URL:', e);
+      }
+    } else if (searchFilters) {
+      // Ensure we have the correct structure
+      filtersToSend = {
+        selected: searchFilters.selected || {},
+        ranges: searchFilters.ranges || {}
+      };
+      console.log('Using filters from context:', filtersToSend);
+    }
+    
+    // Only add filters if they exist and have values
+    if (filtersToSend) {
+      const hasSelectedFilters = Object.values(filtersToSend.selected || {}).some(arr => arr && arr.length > 0);
+      const hasRangeFilters = Object.values(filtersToSend.ranges || {}).some(range => 
+        range && (range.min !== undefined || range.max !== undefined)
+      );
+      
+      if (hasSelectedFilters || hasRangeFilters) {
+        console.log('Sending filters to API:', filtersToSend);
+        searchUrl += `&searchFilters=${encodeURIComponent(JSON.stringify(filtersToSend))}`;
+      }
+    }
+    
     if (onSearch && typeof onSearch === 'function') {
-      onSearch(searchUrl);
+      // Pass the filters directly to the onSearch function
+      onSearch(searchUrl, filtersToSend);
     } else {
       navigate(searchUrl);
     }
