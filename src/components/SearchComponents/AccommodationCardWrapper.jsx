@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import OriginalAccommodationCard from "../../components/HomeComponents/AccommodationCard";
 import { fetchInterhomePrices } from "../../api/interhomeAPI";
+import { useSearchFilters } from "../../context/SearchFiltersContext";
 
 const AccommodationCardWrapper = ({
   id,
@@ -14,8 +15,8 @@ const AccommodationCardWrapper = ({
   pricePerNight,
   distance
 }) => {
-  console.log(Code)
   const [formattedPricePerNight, setFormattedPricePerNight] = useState(null);
+  const { searchFilters } = useSearchFilters();
 
   useEffect(() => {
     const fetchPrice = async () => {
@@ -68,6 +69,18 @@ const AccommodationCardWrapper = ({
 
     fetchPrice();
   }, [Code, price, pricePerNight, listingSource, provider]);
+
+  // Check if the listing should be visible based on price range
+  const shouldShowListing = () => {
+    const currentPrice = formattedPricePerNight?.price || pricePerNight?.price || price || 0;
+    const { min, max } = searchFilters.ranges.price || { min: 0, max: 10000 };
+    return currentPrice >= min && currentPrice <= max;
+  };
+
+  // If the listing price is outside the selected range, don't render it
+  if (!shouldShowListing()) {
+    return null;
+  }
 
   return (
     <div className="h-full">

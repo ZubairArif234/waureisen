@@ -44,6 +44,24 @@ const SearchResultsContent = () => {
     setMapDragging
   } = useListings();
   
+  // Filter listings based on price range
+  const filteredListings = listings.filter(listing => {
+    // If we're still loading or in initial load, don't filter by price
+    if (isLoading || isInitialLoad) {
+      return true;
+    }
+
+    const price = listing.pricePerNight?.price || 0;
+    const { min, max } = searchFilters.ranges.price || { min: 0, max: 10000 };
+    
+    // If price is 0 and we're not in loading state, it means the listing is not available
+    if (price === 0 && !isLoading) {
+      return false;
+    }
+    
+    return price >= min && price <= max;
+  });
+  
   useEffect(() => {
     // Prevent re-processing the same URL
     if (lastLocationRef.current === location.search) {
@@ -292,12 +310,9 @@ const SearchResultsContent = () => {
           )}
           
           {/* Results List - Simple container */}
-          
-            <div className="p-1">
-              <ImprovedVirtualizedListings />
-            </div>
-          
-         
+          <div className="p-1">
+            <ImprovedVirtualizedListings listings={filteredListings} />
+          </div>
         </main>
         
         {/* Map View */}
@@ -330,7 +345,7 @@ const SearchResultsContent = () => {
             
             {/* Map Container */}
             <div className={`${showMap && !isDesktop ? 'h-[calc(100vh-80px)]' : 'h-full'} bg-gray-100 rounded-lg overflow-hidden`}>
-              <OptimizedMapWithClustering />
+              <OptimizedMapWithClustering listings={filteredListings} />
             </div>
           </div>
         </aside>
