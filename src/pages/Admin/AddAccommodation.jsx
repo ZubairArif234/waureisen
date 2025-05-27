@@ -526,7 +526,7 @@ const AddAccommodation = (props) => {
         if (!timeObj?.hour || !timeObj?.period) return null;
       
         const hour24 = String(convertTo24Hour(timeObj.hour, timeObj.period)).padStart(2 ,'0');
-        console.log(houre24, "hour24");
+        console.log(hour24, "hour24");
         const timeStr = `1970-01-01T${hour24}:00:00Z`;
         const date = new Date(timeStr);
         return isNaN(date.getTime()) ? null : date;
