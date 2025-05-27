@@ -130,7 +130,6 @@ const Amenity = ({ icon, text }) => (
 const AccommodationPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  console.log("Location state:", location.state);
   const { id } = useParams(); // Get the accommodation ID from URL
   useEffect(() => {
           
@@ -698,16 +697,54 @@ console.log(availableDates , maxGuests , "ye hai na");
               </div>
             </section>
 
+<div className="mb-10">
+ <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
+                {/* {t("about_listing_provider")} */}
+                Timings
+              </h2>
+            {
+              accommodation?.checkInTime && (
+                <div>
+                  <p className="font-medium">Checkin Time: <span className="font-thin">{moment(accommodation?.checkInTime).format("hh:mm A")}</span></p>
+                </div>
+              )
+            }
+            {
+              accommodation?.checkOutTime && (
+                <div>
+                  <p className="font-medium">Checkout Time: <span className="font-thin">{moment(accommodation?.checkOutTime).format("hh:mm A")}</span></p>
+                </div>
+              )
+            }
+            </div>
+            {/* house rules */}
+            {accommodation?.houseRules &&  (
+                  <section className="mb-10">
+              <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
+                {/* {t("cancellation_policy")} */}
+                House Rules
+              </h2>
+          
+              <ul className="list-disc text-gray-600 text-sm mt-2">
+                
+                <ol className="flex gap-2 items-center"><Dot /> {accommodation?.houseRules?.noSmoking && "No smoking"}</ol>
+                <ol className="flex gap-2 items-center"><Dot /> {accommodation?.houseRules?.noParties && "No parties or event"}</ol>
+                <ol className="flex gap-2 items-center"><Dot /> {accommodation?.houseRules?.quietHours && "Quiet hours after 10 PM"}</ol>
+              
+              </ul>
+
+           
+            </section>
+            )}
+
             {/* Cancellation Policy */}
+            {accommodation?.customRefundPolicies?.length > 0 && accommodation?.legal?.cancellationPolicy == "custom" ? (
+
             <section className="mb-10">
               <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
                 {t("cancellation_policy")}
               </h2>
-              {/* <p className="text-gray-600 text-sm">
-                {accommodation?.legal?.cancellationPolicy ||
-                  "Je nach Reisezeitraum 90% Rückerstattung bis 0% Rückerstattung. (default)"}
-
-              </p> */}
+          
               <ul className="list-disc text-gray-600 text-sm mt-2">
                 {accommodation?.customRefundPolicies?.map((policy, index) => (
 
@@ -726,6 +763,14 @@ console.log(availableDates , maxGuests , "ye hai na");
                 </div>
               )}
             </section>
+            ) :(
+               <section className="mb-10">
+              <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
+                {t("cancellation_policy")}
+              </h2>
+              <p  className="text-gray-600 text-sm whitespace-pre-line">{accommodation?.legal?.cancellationPolicy}</p>
+              </section>
+            )}
 
             {/* Reviews */}
             {/* <section className="mb-10">

@@ -11,6 +11,7 @@ import {
   Image as ImageIcon,
   MoreHorizontal,
   Sparkles,
+  Pencil,
 } from "lucide-react";
 import { createCamper, getCamperById, updateCamper } from "../../api/camperAPI";
 import { uploadImageToCloudinary } from "../../utils/cloudinaryUtils";
@@ -49,6 +50,7 @@ const CreateCamperPost = () => {
   // State for content editing
   const [contentType, setContentType] = useState(null);
   const [contentText, setContentText] = useState("");
+  const [content, setContent] = useState({})
   const [linkUrl, setLinkUrl] = useState("");
   const [showPreview, setShowPreview] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -224,6 +226,27 @@ const CreateCamperPost = () => {
     setLinkUrl("");
   };
 
+  // Handle content edit
+  const editContent = (index, item) => {
+    // if (!contentText) return;
+
+    let newContent= {type: item.type, text: contentText};
+
+const filterCamper = camperData.content.filter((_, i) => i !== index);    
+console.log(filterCamper, "filterCamper");
+
+    setCamperData({
+      ...camperData,
+      content: [...filterCamper, newContent],
+    });
+
+    // Reset the content inputs
+    setContentType(null);
+    setContentText("");
+    setLinkUrl("");
+  };
+console.log(camperData, "camperData");
+
   // Remove a content item
   const removeContent = (index) => {
     const newContent = [...camperData.content];
@@ -374,6 +397,9 @@ toast.error("Category already selected!")
       category: updated,
     }));
   };
+
+  console.log(content);
+  
 
   return (
     <div className="p-6">
@@ -732,7 +758,7 @@ toast.error("Category already selected!")
             <div className="mb-4">
               <div className="flex flex-wrap gap-2 mb-4">
                 <button
-                  onClick={() => setContentType("h1")}
+                  onClick={() => {setContentType("h1"); setContentText(""); setContent(null);}}
                   className={`px-3 py-1 rounded-lg text-sm font-medium ${
                     contentType === "h1"
                       ? "bg-[#B4A481] text-white"
@@ -743,7 +769,7 @@ toast.error("Category already selected!")
                 </button>
 
                 <button
-                  onClick={() => setContentType("h2")}
+                  onClick={() => {setContentType("h2"); setContentText("");setContent(null)}}
                   className={`px-3 py-1 rounded-lg text-sm font-medium ${
                     contentType === "h2"
                       ? "bg-[#B4A481] text-white"
@@ -754,7 +780,7 @@ toast.error("Category already selected!")
                 </button>
 
                 <button
-                  onClick={() => setContentType("p")}
+                  onClick={() => {setContentType("p"); setContentText("");setContent(null)}}
                   className={`px-3 py-1 rounded-lg text-sm font-medium ${
                     contentType === "p"
                       ? "bg-[#B4A481] text-white"
@@ -765,7 +791,7 @@ toast.error("Category already selected!")
                 </button>
 
                 <button
-                  onClick={() => setContentType("link")}
+                  onClick={() => {setContentType("link"); setContentText("");setContent(null)}}
                   className={`px-3 py-1 rounded-lg text-sm font-medium ${
                     contentType === "link"
                       ? "bg-[#B4A481] text-white"
@@ -776,7 +802,7 @@ toast.error("Category already selected!")
                 </button>
 
                 <button
-                  onClick={() => setContentType("cta")}
+                  onClick={() => {setContentType("cta"); setContentText("");setContent(null)}}
                   className={`px-3 py-1 rounded-lg text-sm font-medium ${
                     contentType === "cta"
                       ? "bg-[#B4A481] text-white"
@@ -792,7 +818,7 @@ toast.error("Category already selected!")
                 <div className="p-4 bg-gray-50 rounded-lg mb-4 border border-gray-200">
                   <div className="flex justify-between items-center mb-3">
                     <h3 className="font-medium text-gray-800">
-                      Add {contentType.toUpperCase()} Content
+                      {content  ? "Edit" : "Add"} {contentType.toUpperCase()} Content
                     </h3>
                     <button
                       onClick={() => setContentType(null)}
@@ -902,6 +928,12 @@ toast.error("Category already selected!")
                             )}
                           </div>
                         </div>
+                        <button
+                          onClick={() => {setContentType(item?.type);setContentText(item?.text); setLinkUrl(item?.url) ; setContent(item)}}
+                          className="p-1 hover:bg-gray-100 rounded-full flex-shrink-0"
+                        >
+                          <Pencil   className="w-4 h-4 text-gray-500" />
+                        </button>
                         <button
                           onClick={() => removeContent(index)}
                           className="p-1 hover:bg-gray-100 rounded-full flex-shrink-0"

@@ -281,9 +281,9 @@ const AddAccommodation = (props) => {
               cancellationPolicy: listingData?.legal?.cancellationPolicy || "Flexible (Full refund 1 day prior to arrival)",
               customPolicyDetails: listingData?.legal?.customPolicyDetails || "",
               houseRules: {
-                noSmoking: false,
-                noParties: false,
-                quietHours: false,
+                noSmoking:  listingData?.houseRules?.noSmoking || false ,
+                noParties: listingData?.houseRules?.noParties || false,
+                quietHours: listingData?.houseRules?.quietHours || false,
               },
             },
           };
@@ -402,6 +402,7 @@ const AddAccommodation = (props) => {
     });
   };
 
+  console.log("Form Data:", formData);
   // For nested objects in the form data
   const handleNestedInputChange = (section, field, value) => {
     setFormData(prevFormData => ({
@@ -441,9 +442,9 @@ const AddAccommodation = (props) => {
       }
   
       if (!formData?.mainImage) validationErrors.push("Main image is required");
-      if (!formData?.galleryImages || formData?.galleryImages.length < 4) {
-        validationErrors.push("At least 4 gallery images are required");
-      }
+      // if (!formData?.galleryImages || formData?.galleryImages.length < 4) {
+      //   validationErrors.push("At least 4 gallery images are required");
+      // }
   
       // if (!formData?.shortDescription) validationErrors.push("Short description is required");
       // if (!formData?.fullDescription) validationErrors.push("Full description is required");
@@ -516,15 +517,16 @@ const AddAccommodation = (props) => {
 
       const convertTo24Hour = (hour, period) => {
         const h = parseInt(hour);
-        if (period?.toLowerCase() === 'pm' && h !== 12) return h + 12;
-        if (period?.toLowerCase() === 'am' && h === 12) return 0;
+        if (period?.toLowerCase() === 'pm' && h !== 12) return h ;
+        if (period?.toLowerCase() === 'am' && h === 12) return h;
         return h;
       };
       
       const getTimeFromForm = (timeObj) => {
         if (!timeObj?.hour || !timeObj?.period) return null;
       
-        const hour24 = String(convertTo24Hour(timeObj.hour, timeObj.period)).padStart(2, '0');
+        const hour24 = String(convertTo24Hour(timeObj.hour, timeObj.period)).padStart(2 ,'0');
+        console.log(houre24, "hour24");
         const timeStr = `1970-01-01T${hour24}:00:00Z`;
         const date = new Date(timeStr);
         return isNaN(date.getTime()) ? null : date;
@@ -565,9 +567,11 @@ const AddAccommodation = (props) => {
           cancellationPolicy: formData?.policies?.cancellationPolicy,
           customPolicyDetails: formData?.policies?.customPolicyDetails,
         },
+        houseRules:formData?.policies?.houseRules,
         customRefundPolicies: customPolicy,
       };
   
+      console.log("Listing Data to be saved:", listingData , formData);
       const filterData = { subsections: [] };
       if (template?.subsections) {
         template.subsections.forEach(section => {
@@ -1175,9 +1179,9 @@ const AddAccommodation = (props) => {
     }else if (activeTab === "photos") {
 
       if (!formData?.mainImage) validationErrors.push("Main image is required");
-      if (!formData?.galleryImages || formData?.galleryImages.length < 4) {
-        validationErrors.push("At least 4 gallery images are required");
-      }
+      // if (!formData?.galleryImages || formData?.galleryImages.length < 4) {
+      //   validationErrors.push("At least 4 gallery images are required");
+      // }
 
     }else if( activeTab === "description") {
        if ( !formData?.shortDescription) validationErrors.push("Description is required");
