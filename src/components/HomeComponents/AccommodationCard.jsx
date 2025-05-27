@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Heart, ChevronLeft, ChevronRight } from "lucide-react";
 import API from "../../api/config";
 import { useLanguage } from "../../utils/LanguageContext";
-import { useSearchFilters } from "../../context/SearchFiltersContext";
 
 const AccommodationCard = ({
   id = "1",
@@ -27,19 +26,6 @@ const AccommodationCard = ({
   const searchParams = new URLSearchParams(location.search);
   const checkInDate = searchParams.get("dates")?.split(" - ")[0] || "";
   const { t } = useLanguage();
-  const { searchFilters } = useSearchFilters();
-
-  // Check if the listing should be visible based on price range
-  const shouldShowListing = () => {
-    const currentPrice = pricePerNight?.price || price || 0;
-    const { min, max } = searchFilters.ranges.price || { min: 0, max: 10000 };
-    return currentPrice >= min && currentPrice <= max;
-  };
-
-  // If the listing price is outside the selected range, don't render it
-  if (!shouldShowListing()) {
-    return null;
-  }
 
   // Combine single image with images array, avoiding duplicates
   const allImages = React.useMemo(() => {
