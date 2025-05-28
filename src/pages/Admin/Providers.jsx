@@ -207,9 +207,14 @@ const ProviderDetailModal = ({ provider, isOpen, onClose, onBanUnban }) => {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Profile Status</p>
-                <p className={`font-medium ${provider.profileStatus === "banned" ? "text-red-600" : 
-                  provider.profileStatus === "verified" ? "text-green-600" : "text-amber-600"}`}>
-                  {provider.profileStatus.charAt(0).toUpperCase() + provider.profileStatus.slice(1)}
+                <p className={`font-medium ${
+                  getStatusText() === "Active Account" ? "text-green-600" :
+                  provider.profileStatus === "banned" ? "text-red-600" : 
+                  "text-amber-600"
+                }`}>
+                  {getStatusText() === "Active Account" ? "Active" : 
+                   getStatusText() === "Pending Registration" ? "Pending" :
+                   provider.profileStatus.charAt(0).toUpperCase() + provider.profileStatus.slice(1)}
                 </p>
               </div>
             </div>
@@ -226,7 +231,7 @@ const ProviderDetailModal = ({ provider, isOpen, onClose, onBanUnban }) => {
           )}
 
           {/* Provider's Listings */}
-          {provider.listings && provider.listings.length > 0 && (
+          {/* {provider.listings && provider.listings.length > 0 && (
             <div className="mb-6">
               <h4 className="font-medium text-gray-900 mb-3">
                 Active Listings
@@ -274,7 +279,7 @@ const ProviderDetailModal = ({ provider, isOpen, onClose, onBanUnban }) => {
                 </table>
               </div>
             </div>
-          )}
+          )} */}
           </div>
 
           {/* Actions */}
