@@ -630,10 +630,10 @@ const ProviderCalendar = () => {
   const getWiderDateRange = () => {
     const currentMonth = currentDate.getMonth();
     const currentYear = currentDate.getFullYear();
-    const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
-    const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
-    const paddedStartDate = new Date(currentYear, currentMonth - 2, 1);
-    const paddedEndDate = new Date(currentYear, currentMonth + 3, 0);
+    
+    // Instead of using a fixed range, use a much wider range
+    const paddedStartDate = new Date(currentYear - 1, 0, 1); // Start from January 1st of previous year
+    const paddedEndDate = new Date(currentYear + 1, 11, 31); // End at December 31st of next year
     
     return {
       startDate: formatDate(paddedStartDate),
