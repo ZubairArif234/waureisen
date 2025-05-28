@@ -47,6 +47,7 @@ function App() {
               <Route path="/search" element={<SearchResults />} />
               <Route path="/accommodation/:id" element={<AccommodationPage />} />
               <Route path="/camper-rental" element={<CamperRental />} />
+              <Route path="/:prefix/camper-rental" element={<CamperRental />} />
               <Route path="/camper/:title" element={<CamperDetail />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
@@ -145,12 +146,16 @@ function App() {
               {/* Footer Routes */}
               <Route path="/faq" element={<FAQ />} />
               <Route path="/about-us" element={<AboutUs />} />
+              <Route path="/:prefix/about-us" element={<AboutUs />} />
               <Route path="/partners" element={<Partners />} />
               <Route path="/imprint" element={<Imprint />} />
+              <Route path="/:prefix/imprint" element={<Imprint />} />
               <Route path="/star-membership" element={<StarMembership />} />
               <Route path="/host" element={<HostRegistration />} />
               <Route path="/travel-magazine" element={<TravelMagazine />} />
+              <Route path="/:prefix/travel-magazine" element={<TravelMagazine />} />
               <Route path="/travelshop" element={<TravelShop />} />
+              <Route path="/:prefix/travelshop" element={<TravelShop />} />
               <Route path="/travel-magazine/:country?/:category/:title" element={<TravelMagazineDetail />} />
             
               {/* Admin Routes - Already protected in the AdminLayout component */}

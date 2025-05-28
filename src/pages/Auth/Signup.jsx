@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import Navbar from "../../components/Shared/Navbar";
 import authBg from "../../assets/bg.png";
 import Footer from "../../components/Shared/Footer";
@@ -15,11 +15,13 @@ import { changeMetaData } from "../../utils/extra";
 
 const Signup = () => {
 
+const [searchParams] = useSearchParams();
+  const role = searchParams.get('role'); 
   useEffect(() => {
     
       changeMetaData(`Signup - Waureisen`);
     }, []);
-  const [userType, setUserType] = useState("");
+  const [userType, setUserType] = useState(role || "");
   const [isTermsOpen, setIsTermsOpen] = useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [error, setError] = useState("");

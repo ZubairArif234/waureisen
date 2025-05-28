@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import Navbar from "../../components/Shared/Navbar";
 import authBg from "../../assets/bg.png";
 import Footer from "../../components/Shared/Footer";
@@ -13,14 +13,15 @@ import WelcomeCustomerModal from "../../components/SearchComponents/WelcomeCusto
 import { changeMetaData } from "../../utils/extra";
 
 const Login = () => {
-
+const [searchParams] = useSearchParams();
+  const role = searchParams.get('role'); 
  useEffect(() => {
   
     changeMetaData(`Login - Waureisen`);
   }, []);
 
   const [email, setEmail] = useState("");
-  const [userType, setUserType] = useState("user");
+  const [userType, setUserType] = useState(role || "user");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -146,7 +147,7 @@ const Login = () => {
                   </label>
                   <div className="relative">
                     <select
-                      value={userType}
+                      value={ userType } 
                       onChange={(e) => setUserType(e.target.value)}
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481] appearance-none bg-white"
                     >
