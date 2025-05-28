@@ -1,6 +1,6 @@
 // src/pages/Main/CamperRental.jsx
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Shared/Navbar';
 import camperBg from '../../assets/camper.png';
 import Footer from '../../components/Shared/Footer';
@@ -14,6 +14,10 @@ const CamperRental = () => {
   const [loading, setLoading] = useState(true);
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
+    useEffect(() => {
+      if (location?.pathname != "/camper-rental") navigate("/camper-rental");
+    }, [location.pathname]);
 
    useEffect(() => {
     changeMetaData("Camper Rental - Waureisen");

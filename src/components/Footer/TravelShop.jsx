@@ -103,6 +103,7 @@ import ta7 from '../../assets/ta7.avif';
 import ta8 from '../../assets/ta8.avif';
 import ta9 from '../../assets/ta9.avif';
 import { changeMetaData } from '../../utils/extra';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 
 
@@ -114,9 +115,14 @@ import { changeMetaData } from '../../utils/extra';
 const TravelShop = () => {
   // Sample product categories - these would typically come from an API
   const { t } = useLanguage();
+  const  location  = useLocation();
+  const  navigate  = useNavigate();
     useEffect(() => {
       changeMetaData("Travel Shop - Waureisen");
     }, []);
+      useEffect(() => {
+        if (location?.pathname != "/travelshop") navigate("/travelshop");
+      }, [location.pathname]);
   const productCategories = [
     {
       title: t("car_seats"),

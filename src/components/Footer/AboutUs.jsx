@@ -7,9 +7,15 @@ import founder from '../../assets/partner.png';
 import { PawPrint } from 'lucide-react';
 import { useLanguage } from '../../utils/LanguageContext';
 import { changeMetaData } from '../../utils/extra';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const AboutUs = () => {
+  const location = useLocation()
+  const navigate = useNavigate()
   const { t } = useLanguage();
+    useEffect(() => {
+    if (location?.pathname != "/about-us") navigate("/about-us");
+  }, [location.pathname]);
   useEffect(() => {
           changeMetaData("About Us - Waureisen");
         }, []);
