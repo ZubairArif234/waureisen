@@ -20,6 +20,7 @@ import {
   Lock,
   Flame,
 } from "lucide-react";
+import { useLanguage } from '../../utils/LanguageContext';
 
 // Icon mapping for amenities
 const getAmenityIcon = (amenityName) => {
@@ -58,7 +59,7 @@ const getSubsectionIcon = (subsectionName) => {
 
 const AmenityItem = ({ name, checked, onChange }) => {
   const Icon = getAmenityIcon(name);
-  
+  const {t} = useLanguage()
   return (
     <label className="flex items-center space-x-3 cursor-pointer p-3 border rounded-lg hover:bg-gray-50 transition-colors">
       <input
@@ -69,7 +70,7 @@ const AmenityItem = ({ name, checked, onChange }) => {
       />
       <div className="flex items-center gap-3">
         {/* <Icon className="w-5 h-5 text-[#767676]" /> */}
-        <span className="text-gray-700">{name}</span>
+        <span className="text-gray-700">{t(name)}</span>
       </div>
     </label>
   );
@@ -77,12 +78,12 @@ const AmenityItem = ({ name, checked, onChange }) => {
 
 const CheckboxGroup = ({ title, description, filters, selected, onChange }) => {
   const SubsectionIcon = getSubsectionIcon(title);
-  
+  const {t} = useLanguage()
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <SubsectionIcon className="w-5 h-5 text-[#767676]" />
-        <h3 className="text-lg font-medium text-gray-900">{title}</h3>
+        <h3 className="text-lg font-medium text-gray-900">{t(title)}</h3>
       </div>
       {description && <p className="text-sm text-gray-600">{description}</p>}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">

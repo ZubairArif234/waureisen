@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useLanguage } from "../../src/utils/LanguageContext";
+import {  useLanguage } from "../../src/utils/LanguageContext";
 import {
   Utensils,
   Dog,
@@ -157,7 +157,7 @@ const AccommodationDetails = ({ accommodation }) => {
 
         { allFilters?.slice(0,6)?.map((item,i)=>{
           return(
-            <p className="text-gray-700 text-md py-2 " key={i}>{item}</p>
+            <p className="text-gray-700 text-md py-2 " key={i}>{t(item)}</p>
           )
         })}
         </div>

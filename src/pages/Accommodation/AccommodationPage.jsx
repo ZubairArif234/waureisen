@@ -696,29 +696,32 @@ console.log(availableDates , maxGuests , "ye hai na");
                 />
               </div>
             </section>
+{accommodation?.provider !== "Interhome" && (
 
 <div className="mb-10">
  <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
-                {/* {t("about_listing_provider")} */}
-                Timings
+                {t("timing")}
+                
               </h2>
             {
               accommodation?.checkInTime && (
                 <div>
-                  <p className="font-medium">Checkin Time: <span className="font-thin">{moment(accommodation?.checkInTime).format("hh:mm A")}</span></p>
+                  <p className="font-medium">{t("checkin_time")} Checkin Time: <span className="font-thin">{moment(accommodation?.checkInTime).format("hh:mm A")}</span></p>
                 </div>
               )
             }
             {
               accommodation?.checkOutTime && (
-                <div>
-                  <p className="font-medium">Checkout Time: <span className="font-thin">{moment(accommodation?.checkOutTime).format("hh:mm A")}</span></p>
+                <div> 
+                  <p className="font-medium">{t("checkout_time")} Checkout Time: <span className="font-thin">{moment(accommodation?.checkOutTime).format("hh:mm A")}</span></p>
                 </div>
               )
             }
             </div>
+)}
+
             {/* house rules */}
-            {accommodation?.houseRules &&  (
+            {accommodation?.houseRules && accommodation?.provider !== "Interhome" &&  (
                   <section className="mb-10">
               <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
                 {/* {t("cancellation_policy")} */}
@@ -727,9 +730,9 @@ console.log(availableDates , maxGuests , "ye hai na");
           
               <ul className="list-disc text-gray-600 text-sm mt-2">
                 
-                <ol className="flex gap-2 items-center"><Dot /> {accommodation?.houseRules?.noSmoking && "No smoking"}</ol>
-                <ol className="flex gap-2 items-center"><Dot /> {accommodation?.houseRules?.noParties && "No parties or event"}</ol>
-                <ol className="flex gap-2 items-center"><Dot /> {accommodation?.houseRules?.quietHours && "Quiet hours after 10 PM"}</ol>
+               {accommodation?.houseRules?.noSmoking && <ol className="flex gap-2 items-center capitalize"><Dot />{t("no_smoking")}  </ol>}
+               {accommodation?.houseRules?.noParties && <ol className="flex gap-2 items-center capitalize"><Dot /> {t("no_event")} </ol>}
+               {accommodation?.houseRules?.quietHours && <ol className="flex gap-2 items-center capitalize"><Dot /> {t("no_hours")}</ol>}
               
               </ul>
 

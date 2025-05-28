@@ -66,7 +66,7 @@ const SubsectionIcon = ({ name }) => {
                       subsubsection.filters.length > 0 && (
                         <div key={subIndex} className='mb-4'>
                           <h3 className="text-[#4D484D] flex items-center gap-2 md:text-lg text-md font-semibold mb-2">
-                          <SubsectionIcon name={subsubsection.name} />  {subsubsection.name + "kll"}
+                          <SubsectionIcon name={subsubsection.name} />  {t(subsubsection.name) }
                           </h3>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {subsubsection.filters.map(
@@ -80,7 +80,7 @@ const SubsectionIcon = ({ name }) => {
                                     { className: "w-5 h-5 text-[#767676]" }
                                   )} */}
                                   <span className="text-gray-700 text-sm">
-                                    {filter.name}
+                                    {t(filter.name)}
                                   </span>
                                 </div>
                               )
