@@ -275,7 +275,7 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
           {/* Dynamic Filters */}
           {filters.subsubsections?.map(subsection => (
             <div key={subsection._id} className="mb-8">
-              <h3 className="text-gray-700 font-medium mb-4">{subsection.name}</h3>
+              <h3 className="text-gray-700 font-medium mb-4">{t(subsection.name)}</h3>
               <div className="space-y-3">
                 {subsection.filters?.map(filter => {
                   const category = subsection.name.toLowerCase();
@@ -291,7 +291,7 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
                         onChange={() => handleSelectionChange(category, filter.name)}
                         className="w-5 h-5 rounded border-gray-300 text-brand focus:ring-brand"
                       />
-                      <span className="text-gray-700">{filter.name}</span>
+                      <span className="text-gray-700">{t(filter.name)}</span>
                     </label>
                   );
                 })}

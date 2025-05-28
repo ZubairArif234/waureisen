@@ -1,6 +1,8 @@
 const translations = {
   en: {
     timing:"Timings",
+    total_price:"Total Price",
+    service_charge:"Bedienungsgeld",
     
 checkout_time:"Checkout Time",
 checkin_time:"Checkin Time",
@@ -1321,6 +1323,8 @@ no_hours:"quite hours after 10 PM",
 
   de: {
 timing:"Zeitangaben",
+total_price:"Gesamtpreis",
+service_charge:"service_charge",
 checkout_time:"Check-out-Zeit",
 checkin_time:"Check-in-Zeit",
 

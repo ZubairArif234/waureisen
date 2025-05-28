@@ -732,7 +732,7 @@ console.log(availableDates , maxGuests , "ye hai na");
                 
                {accommodation?.houseRules?.noSmoking && <ol className="flex gap-2 items-center capitalize"><Dot />{t("no_smoking")}  </ol>}
                {accommodation?.houseRules?.noParties && <ol className="flex gap-2 items-center capitalize"><Dot /> {t("no_event")} </ol>}
-               {accommodation?.houseRules?.quietHours && <ol className="flex gap-2 items-center capitalize"><Dot /> {t("no_hours")}</ol>}
+               {accommodation?.houseRules?.quietHours && <ol className="flex gap-2 items-center "><Dot /> {t("no_hours")}</ol>}
               
               </ul>
 
@@ -837,7 +837,7 @@ console.log(availableDates , maxGuests , "ye hai na");
               <div className="flex flex-col mb-6">
                 <div className="flex items-baseline">
                   <span className="text-gray-600 mr-2 font-bold">
-                    Total Price:
+                   {t('total_price')} :
                   </span>
                   <span className="text-xl font-semibold">
                     {isPriceLoading ? (
@@ -948,7 +948,7 @@ console.log(availableDates , maxGuests , "ye hai na");
                   </div>
                   <div className="flex justify-between items-center">
                     <p className="text-sm text-gray-700">
-                      Service charge (2.9%)
+                     {t("service_charge")} (2.9%)
                     </p>
                     <p className="text-sm text-gray-700">
                       {(() => {
