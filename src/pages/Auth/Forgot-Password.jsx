@@ -11,18 +11,17 @@ import {
 } from "../../utils/authService";
 import WelcomeCustomerModal from "../../components/SearchComponents/WelcomeCustomerModal";
 import { changeMetaData } from "../../utils/extra";
+import { SendHorizontal } from "lucide-react";
 
-const Login = () => {
-const [searchParams] = useSearchParams();
-  const role = searchParams.get('role'); 
+const ForgotPassword = () => {
  useEffect(() => {
   
-    changeMetaData(`Login - Waureisen`);
+    changeMetaData(`Forgot Password - Waureisen`);
   }, []);
 
   const [email, setEmail] = useState("");
-  const [userType, setUserType] = useState(role || "user");
-  const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpField, setOtpField] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -94,6 +93,12 @@ const [searchParams] = useSearchParams();
     }
   };
 
+  const handleSendOtp = () => {
+    if (email?.trim() !== ""){
+        setOtpField(true)
+    }
+  }
+
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -116,19 +121,14 @@ const [searchParams] = useSearchParams();
             {/* Auth Type Selector */}
             <div className="flex text-2xl font-semibold border-b relative">
               <Link
-                to="/signup"
+                to="/forgot-password"
                 className="flex-1 text-center py-4 text-gray-500 hover:text-gray-700"
               >
-                {t("sign_up")}
+                {t("forgot_password")}
               </Link>
-              <Link
-                to="/login"
-                className="flex-1 text-center py-4 text-gray-900"
-              >
-                {t("log_in")}
-              </Link>
+             
               {/* Active Indicator Line */}
-              <div className="absolute bottom-0 right-0 w-1/2 h-0.5 bg-[#B4A481]" />
+              {/* <div className="absolute bottom-0 right-0 w-1/2 h-0.5 bg-[#B4A481]" /> */}
             </div>
 
             {/* Login Form */}
@@ -141,40 +141,11 @@ const [searchParams] = useSearchParams();
                   </div>
                 )}
 
-                <div className="space-y-3">
-                  <label className="block text-sm font-medium text-gray-700">
-                    {t("login_as")}
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={ userType } 
-                      onChange={(e) => setUserType(e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481] appearance-none bg-white"
-                    >
-                      <option value="user">{t("customer")}</option>
-                      <option value="provider">{t("provider")}</option>
-                      <option value="admin">{t("admin")}</option>
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                      <svg
-                        className="w-4 h-4 text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M19 9l-7 7-7-7"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
+               
 
                 {/* Email Field */}
-                <div className="space-y-3">
+                <div className="flex items-end gap-2">
+                <div className="space-y-3 w-full">
                   <label
                     htmlFor="email"
                     className="block text-sm font-medium text-gray-700"
@@ -190,51 +161,48 @@ const [searchParams] = useSearchParams();
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
                   />
                 </div>
+<button type="button" onClick={handleSendOtp}  className={` py-3 px-4 rounded-lg font-medium ${
+                    isLoading
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                  }`}><SendHorizontal /></button>
+                </div>
 
                 {/* Password Field */}
+                {otpField && (
+
                 <div className="space-y-3">
                   <label
                     htmlFor="password"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    {t("password")}
+                    OTP
                   </label>
                   <input
-                    type="password"
+                    type="text"
                     id="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder={t("password_placeholder")}
+                    value={otp}
+                    // onChange={(e) => setPassword(e.target.value)}
+                    placeholder={t("otp_placeholder")}
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
                   />
                 </div>
+                )}
 
-                {/* Forgot Password Link */}
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500">{t("forgot_password")}</span>
-                  <Link 
-                  to={"/forgot-password"}
-                    
-                    className="text-[#B4A481] hover:underline ml-2"
-                  >
-                    {t("reset_password")}
-                  </Link>
-                </div>
-
-                {/* Login Button */}
+              
                 <button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isLoading || !otp }
                   className={`w-full py-3 px-4 rounded-lg font-medium ${
                     isLoading
                       ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                       : "bg-gray-100 text-gray-800 hover:bg-gray-200"
                   }`}
                 >
-                  {isLoading ? t("logging_in") : t("log_in")}
+                  {isLoading ? t("logging_in") : t("reset_password")}
                 </button>
 
-                {/* Login Credentials Help */}
+              
                
               </div>
             </form>
@@ -244,19 +212,10 @@ const [searchParams] = useSearchParams();
           </div>
         </div>
       </div>
-      <WelcomeCustomerModal
-              isOpen={activeModal}
-              onClose={() =>{ setActiveModal(false);navigate("/")}}
-              title={t("welcome_back")}
-              onConfirm={()=>navigate("/")}
-            >
-              <p className="text-center">
-               {t("great_to_see_you_again")}
-              </p>
-            </WelcomeCustomerModal>
+     
       <Footer />
     </div>
   );
 };
 
-export default Login;
+export default ForgotPassword;

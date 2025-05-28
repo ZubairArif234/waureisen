@@ -1,5 +1,8 @@
 const translations = {
   en: {
+    otp_placeholder:"Enter OTP ",
+    reset_password:"Reset Password ",
+
     timing:"Timings",
     total_price:"Total Price",
     service_charge:"Bedienungsgeld",
@@ -1322,6 +1325,9 @@ no_hours:"quite hours after 10 PM",
   },
 
   de: {
+ otp_placeholder:"Geben Sie OTP ein ",
+    reset_password:"Passwort zurücksetzen",
+
 timing:"Zeitangaben",
 total_price:"Gesamtpreis",
 service_charge:"service_charge",

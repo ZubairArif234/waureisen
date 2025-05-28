@@ -33,6 +33,7 @@ import Payment from "./pages/Stripe/Payment";
 import ProtectedRoute from "./components/Shared/ProtectedRoute";
 import { PriceFilterProvider } from './context/PriceFilterContext';
 import ProviderPublicProfile from "./pages/User/ProviderPublicProfile";
+import ForgotPassword from "./pages/Auth/Forgot-Password";
 
 function App() {
   return (
@@ -51,6 +52,7 @@ function App() {
               <Route path="/camper/:title" element={<CamperDetail />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
 
               {/* Payment requires authentication */}
               <Route
