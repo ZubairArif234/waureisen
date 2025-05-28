@@ -202,10 +202,10 @@ const CustomerDetailModal = ({ customer, isOpen, onClose, onBanUnban }) => {
                   {new Date(customer.createdAt).toLocaleDateString()}
                 </p>
               </div>
-              <div>
+              {/* <div>
                 <p className="text-sm text-gray-500">Total Bookings</p>
                 <p className="font-medium">{customer.totalBookings || 0}</p>
-              </div>
+              </div> */}
             </div>
           </div>
 
