@@ -9,6 +9,7 @@ import * as filterData from './moreFiltersData';
 import { useLanguage } from '../../utils/LanguageContext';
 import { usePriceFilter } from '../../context/PriceFilterContext';
 import { useSearchFilters } from '../../context/SearchFiltersContext';
+import API from "../../api/config";
 
 const FilterSection = ({ icon, title, options, selected, onChange }) => (
   <div className="mb-8">
@@ -82,10 +83,11 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
   useEffect(() => {
     const fetchFilters = async () => {
       try {
-        const response = await fetch('/api/filters/template');
-        const data = await response.json();
+       const response = await API.get('/filters/template');
+        const data = response.data;
         const amenities = data.subsections.find(sub => sub.name === 'Amenities');
         setFilters(amenities);
+        
       } catch (error) {
         console.error('Error fetching filters:', error);
       }
