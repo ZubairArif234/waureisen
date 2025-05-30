@@ -231,6 +231,41 @@ const AddAccommodation = (props) => {
             }
           }
           // console.log(a);
+
+          // ---------dates-------------
+          function convertFromISOString(isoString) {
+  const dateObj = new Date(isoString);
+
+  // Extract YYYY-MM-DD in local time
+  const year = dateObj.getUTCFullYear();
+  const month = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(dateObj.getUTCDate()).padStart(2, '0');
+  const date = `${year}-${month}-${day}`;
+
+  // Extract hour in 12-hour format
+  let hours = dateObj.getUTCHours();
+  const period = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  if (hours === 0) hours = 12;
+
+  return {
+    date,
+    time: {
+      hour: String(hours),
+      period
+    }
+  };
+}
+
+// Example usage:
+const isoCheckIn = "2025-06-01T22:00:00.000Z";
+const isoCheckOut = "2025-06-02T06:00:00.000Z";
+
+const checkIn = convertFromISOString(listingData?.checkInTime);
+const checkOut = convertFromISOString(listingData?.checkOutTime);
+
+console.log(checkIn , checkOut ,"klkkkkkkkkkkkkkkkkkkkkkk");
+
           
           // Map basic listing data to form structure
           setIsDiscount(listingData?.pricePerNight?.isDiscountActivate)
@@ -258,14 +293,8 @@ const AddAccommodation = (props) => {
               checkInDates: "",
               checkInDate: null,
               checkOutDate: null,
-              checkInTime: {
-                hour: listingData?.checkInTime ? moment(listingData.checkInTime).format("h") : "",
-                period: listingData?.checkInTime ? moment(listingData.checkInTime).format("A") : ""
-              },
-              checkOutTime: {
-                hour: listingData?.checkOutTime ? moment(listingData.checkOutTime).format("h") : "",
-                period: listingData?.checkOutTime ? moment(listingData.checkOutTime).format("A") : ""
-              },
+              checkInTime: checkIn?.time,
+              checkOutTime:checkOut?.time,
               allowInstantBooking: false,
               active: listingData?.status === "active",
             },
@@ -421,6 +450,9 @@ const AddAccommodation = (props) => {
     }));
   };
 
+  
+console.log(formData?.availability , "availibility");
+
   const handleSubmit = async () => {
     try {
       // Log cancellation policy and location data
@@ -549,8 +581,33 @@ const AddAccommodation = (props) => {
                 validatedUrlOfAdditionalFile = ensureCloudinaryUrl(cloudinaryUrl);
        console.log(additionalFile , validatedUrlOfAdditionalFile);
       }
-      
 
+      // ------------date time------------
+     // Sample input
+const checkInDate = "2025-06-01";
+const checkOutDate = "2025-06-02";
+
+// const checkInTime = { hour: '10', period: 'PM' };
+// const checkOutTime = { hour: '6', period: 'AM' };
+
+// Convert to ISO 8601 format (UTC)
+function convertToISOString(dateStr, timeObj) {
+  const hour = parseInt(timeObj.hour, 10);
+  const period = timeObj.period.toUpperCase();
+  const hours24 = hour % 12 + (period === 'PM' ? 12 : 0);
+
+  // Construct a UTC date string and convert to ISO format
+  const date = new Date(`${dateStr}T${hours24.toString().padStart(2, '0')}:00:00Z`);
+  return date.toISOString();
+}
+
+// Get ISO strings
+const isoCheckIn = convertToISOString(checkInDate, formData.availability.checkInTime);
+const isoCheckOut = convertToISOString(checkOutDate, formData.availability.checkOutTime);
+
+// Output
+// console.log("Check-In (ISO):", isoCheckIn);   // "2025-06-01T22:00:00.000Z"
+// console.log("Check-Out (ISO):", isoCheckOut); // "2025-06-02T06:00:00.000Z"
 
       const listingData = {
         Code: uniqueCode,
@@ -561,8 +618,8 @@ const AddAccommodation = (props) => {
           short: formData?.shortDescription,
         },
         additionalDoc:validatedUrlOfAdditionalFile,
-        checkInTime: getTimeFromForm(formData.availability.checkInTime),
-        checkOutTime: getTimeFromForm(formData.availability.checkOutTime),
+        checkInTime: isoCheckIn,
+        checkOutTime: isoCheckOut,
         checkInDates: formData?.availability?.checkInDates || '',
         location: {
           address: formData?.location?.fullAddress,

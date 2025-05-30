@@ -46,27 +46,27 @@ const RecommendationsSection = memo(({ title, listings, isLoading }) => {
           // Show skeleton cards when loading
           skeletonCards
         ) : listings && listings.length > 0 ? (
-          listings?.map((listing) => (
+          listings?.map((listing,i ) => (
             <AccommodationCard
-              key={listing._id}
-              id={listing._id}
+              key={i}
+              id={listing?._id}
               image={
-                listing.images && listing.images.length > 0
-                  ? listing.images[0]
+                listing?.images && listing?.images?.length > 0
+                  ? listing?.images[0]
                   : "https://via.placeholder.com/300x200?text=No+Image"
               }
-              price={listing.dynamicPrice || listing.pricePerNight?.price || 0}
-              location={listing.title || "Unnamed Accommodation"}
-              provider={listing.provider || "Unknown"}
+              price={listing?.dynamicPrice || listing?.pricePerNight?.price || 0}
+              location={listing?.title || "Unnamed Accommodation"}
+              provider={listing?.provider || "Unknown"}
               listingSource={
-                listing.listingSource ||
-                (listing.source && listing.source.name) ||
+                listing?.listingSource ||
+                (listing?.source && listing?.source?.name) ||
                 "Provider"
               }
               pricePerNight={
-                listing.dynamicPrice
-                  ? { price: listing.dynamicPrice, currency: "CHF" }
-                  : listing.pricePerNight
+                listing?.dynamicPrice
+                  ? { price: listing?.dynamicPrice, currency: "CHF" }
+                  : listing?.pricePerNight
               }
             //   isFavorited={isLoggedIn && favorites.includes(listing._id)}
             />

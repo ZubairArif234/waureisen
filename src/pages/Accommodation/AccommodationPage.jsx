@@ -160,16 +160,16 @@ const getAllDates = (startDate, endDate) => {
 
   return dates;
 };
-console.log(bookedDates , "state dates");
 
 const handleGetBooking = async() =>{
  const res = await getBookingByListing(location.state?.id)
 const calenderRes = await getUnavailableDates({listingId:location?.state?.id , startDate: `${new Date().getFullYear()}-01-01` , endDate:`${new Date().getFullYear() + 1}-12-31`}) 
-console.log(calenderRes , "calender dates");
 const calenderBookedDates = calenderRes?.map((item)=>item?.date)
+// console.log(calenderRes , "calender dates" , calenderBookedDates);
+
 res.filter((item)=>item?.status == "confirmed").map((item)=>{
   const result = getAllDates(item?.checkInDate, item?.checkOutDate);
-  console.log(result , "result");
+  // console.log(result , "result");
   
   setBookedDates(prev => {
     const combined = [...prev,...calenderBookedDates, ...result];
@@ -177,7 +177,7 @@ res.filter((item)=>item?.status == "confirmed").map((item)=>{
     return uniqueDates;
   });
   
- })
+})
 }
 
 useEffect(()=>{
@@ -709,14 +709,14 @@ console.log(availableDates , maxGuests , "ye hai na");
             {
               accommodation?.checkInTime && (
                 <div>
-                  <p className="font-medium">{t("checkin_time")} Checkin Time: <span className="font-thin">{moment(accommodation?.checkInTime).format("hh:mm A")}</span></p>
+                  <p className="font-medium">{t("checkin_time")} Checkin Time: <span className="font-thin">{moment(accommodation?.checkInTime).utc().format("hh:mm A")}</span></p>
                 </div>
               )
             }
             {
               accommodation?.checkOutTime && (
                 <div> 
-                  <p className="font-medium">{t("checkout_time")} Checkout Time: <span className="font-thin">{moment(accommodation?.checkOutTime).format("hh:mm A")}</span></p>
+                  <p className="font-medium">{t("checkout_time")} Checkout Time: <span className="font-thin">{moment(accommodation?.checkOutTime).utc().format("hh:mm A")}</span></p>
                 </div>
               )
             }
@@ -788,7 +788,7 @@ console.log(availableDates , maxGuests , "ye hai na");
                     <FileText className="w-8 h-8 text-brand" />
                     <Link
                       className="text-slate-700 line-clamp-1"
-                     to={`https://docs.google.com/gview?url=${encodeURIComponent(accommodation.additionalDoc)}&embedded=true`}
+                     to={accommodation.additionalDoc?.includes(".docx") ? `https://docs.google.com/gview?url=${encodeURIComponent(accommodation.additionalDoc)}&embedded=true` : accommodation.additionalDoc}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
