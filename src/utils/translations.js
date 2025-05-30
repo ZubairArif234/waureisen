@@ -3,7 +3,7 @@ const translations = {
     additional_file:"Additional Document",
     otp_placeholder:"Enter OTP ",
     reset_password:"Reset Password ",
-
+    in_progress_trips: "In Progress Trips",
     timing:"Timings",
     total_price:"Total Price",
     service_charge:"transaction fee",
@@ -584,7 +584,9 @@ no_hours:"quite hours after 10 PM",
     start_hosting_text:
       "Complete our simple registration process and start hosting in as little as 24 hours.",
     register_as_host: "Register as a Host",
-
+    in_progress: "In Progress",
+    confirmed_by_provider: "Confirmed by Provider",
+    booking_confirmed: "Booking Confirmed",
     // Partners page
 
     learn_about_partners: "Learn more about our partners!",
@@ -2711,6 +2713,10 @@ account_actions: "Kontoaktionen",
     permitted_on_the_bed: "Auf dem Bett erlaubt",
     permitted_on_the_sofa: "Auf dem Sofa erlaubt",
     dog_menu_available: "Hundemenü verfügbar",
+    in_progress: "Im Gange",
+confirmed_by_provider: "Vom Anbieter bestätigt", 
+booking_confirmed: "Buchung bestätigt",
+in_progress_trips: "Laufende Reisen",
     dog_crate: "Hundebox",
     dog_kennel: "Hundehütte",
     dog_room_service: "Hundezimmerservice",

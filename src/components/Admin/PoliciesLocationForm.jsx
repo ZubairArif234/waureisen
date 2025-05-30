@@ -306,7 +306,7 @@ useEffect(() => {
         {/* Additional Custom Document Upload */}
       <div className="space-y-4">
         <h3 className="text-lg font-medium text-gray-900 mt-8">Additional Documents</h3>
-        <p className="text-sm text-gray-600">Upload any additional policy documents or guidelines (PDF, DOCX, or TXT)</p>
+        <p className="text-sm text-gray-600">Upload any additional policy documents or guidelines (DOCX)</p>
 
         <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
           {!uploadedFile ? (
