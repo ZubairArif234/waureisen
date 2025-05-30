@@ -66,6 +66,7 @@ const DeleteConfirmationModal = ({
 
 // ListingCard with improved aspect ratio and overflow control
 const ListingCard = ({ listing, onEdit, onDelete, onView }) => {
+     console.log(listing);
      
   const { t } = useLanguage();
   const [showMenu, setShowMenu] = useState(false);
@@ -161,7 +162,7 @@ const ListingCard = ({ listing, onEdit, onDelete, onView }) => {
 
         <div className="flex items-center justify-between">
           <span className="text-brand font-medium">
-            {listing.price} CHF/night
+            { listing.price} CHF/night
           </span>
         </div>
       </div>
@@ -220,6 +221,7 @@ const YourListings = () => {
     const searchMatch =
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.location.toLowerCase().includes(searchQuery.toLowerCase());
+
     return statusMatch && searchMatch;
   });
 

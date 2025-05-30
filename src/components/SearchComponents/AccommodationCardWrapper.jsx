@@ -19,6 +19,7 @@ const AccommodationCardWrapper = ({
   const [formattedPricePerNight, setFormattedPricePerNight] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const { searchFilters } = useSearchFilters();
+console.log(price,pricePerNight);
 
   useEffect(() => {
     const fetchPrice = async () => {
@@ -97,12 +98,12 @@ const AccommodationCardWrapper = ({
       <OriginalAccommodationCard
         id={id}
         images={images || []}
-        price={formattedPricePerNight?.price || 0}
+        price={ formattedPricePerNight?.price || 0}
         location={location || "Accommodation"}
         provider={provider || "Unknown"}
         listingSource={listingSource}
         isFavorited={isFavorited || false}
-        pricePerNight={formattedPricePerNight}
+        pricePerNight={ formattedPricePerNight}
         code={Code}
       />
       {distance && (

@@ -18,6 +18,8 @@ const AccommodationCard = ({
   owner, // Add owner prop to get provider details
   code, // Add code prop to get listing code
 }) => {
+  console.log(pricePerNight ,"price per night");
+  
   const [isFavorite, setIsFavorite] = useState(isFavorited);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [loadedImages, setLoadedImages] = useState(new Set());
@@ -212,7 +214,7 @@ const AccommodationCard = ({
       <div className="space-y-1 cursor-pointer" onClick={()=>handleClick(propertyLocation)}>
         <p className="text-brand text-sm">
           {pricePerNight?.currency || "CHF"}{" "}
-          {(pricePerNight?.price || price).toFixed(2)} {t("per_night")}
+          {((pricePerNight?.isDiscountActivate && pricePerNight?.discount)|| pricePerNight?.price || price).toFixed(2)} {t("per_night")}
         </p>
         <h3 className="font-medium text-gray-900">{propertyLocation}</h3>
       </div>

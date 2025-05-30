@@ -38,6 +38,7 @@ import API from "../../api/config";
 import toast from "react-hot-toast";
 import { getBookingByListing } from "../../api/bookingApi";
 import { changeMetaData } from "../../utils/extra";
+import { getUnavailableDates } from "../../api/providerAPI";
 
 const PlaceOffer = ({ icon: Icon, text, value }) => (
   <div className="flex-1 flex flex-col items-center text-center p-4 border-r border-[#767676] last:border-r-0 md:p-4 p-2">
@@ -163,13 +164,15 @@ console.log(bookedDates , "state dates");
 
 const handleGetBooking = async() =>{
  const res = await getBookingByListing(location.state?.id)
-
- res.map((item)=>{
+const calenderRes = await getUnavailableDates({listingId:location?.state?.id , startDate: `${new Date().getFullYear()}-01-01` , endDate:`${new Date().getFullYear() + 1}-12-31`}) 
+console.log(calenderRes , "calender dates");
+const calenderBookedDates = calenderRes?.map((item)=>item?.date)
+res.filter((item)=>item?.status == "confirmed").map((item)=>{
   const result = getAllDates(item?.checkInDate, item?.checkOutDate);
   console.log(result , "result");
   
   setBookedDates(prev => {
-    const combined = [...prev, ...result];
+    const combined = [...prev,...calenderBookedDates, ...result];
     const uniqueDates = Array.from(new Set(combined));
     return uniqueDates;
   });

@@ -194,7 +194,7 @@ const ImprovedVirtualizedListings = () => {
   id={listing._id}
   Code={listing.Code} // ✅ Add this line
   images={listing.images || []}
-  price={listing.pricePerNight?.price || 0}
+  price={(listing.pricePerNight?.isDiscountActivate && listing.pricePerNight?.discount) || listing.pricePerNight?.price || 0}
   location={locationDisplay}
   provider={listing.provider || listing.ownerType || 'Unknown'}
   listingSource={sourceDisplay}
