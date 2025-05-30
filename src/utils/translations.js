@@ -1,5 +1,6 @@
 const translations = {
   en: {
+    additional_file:"Additional Document",
     otp_placeholder:"Enter OTP ",
     reset_password:"Reset Password ",
 
@@ -1325,6 +1326,7 @@ no_hours:"quite hours after 10 PM",
   },
 
   de: {
+    additional_file:"Zusätzliches Dokument",
  otp_placeholder:"Geben Sie OTP ein ",
     reset_password:"Passwort zurücksetzen",
 

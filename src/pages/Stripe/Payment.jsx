@@ -8,13 +8,13 @@ import { useLocation } from "react-router-dom";
 import moment from "moment";
 import logo from "../../assets/logo.png";
 import { changeMetaData } from "../../utils/extra";
-// const stripePromise = loadStripe(
-//   "pk_test_51QPmjyRuFURKkwuQO9cccKtZGjlFh5ULmjUIxPWlpCj3zKdUk3MAnKnntIB5hIzNUOp6qHJHbxjRCosLzQW0TNKG00Z6iVynXH"
-  
-// );
 const stripePromise = loadStripe(
-  "pk_live_51QPmjyRuFURKkwuQNbUR2Wyy4J5ZPIyFQmZ7FlsnlbXDu2qqrGWpQkZPbm2YbCKtd0jDjQ6DGr4GE1iEQfW58Hj600b2XlHbLb"
+  "pk_test_51QPmjyRuFURKkwuQO9cccKtZGjlFh5ULmjUIxPWlpCj3zKdUk3MAnKnntIB5hIzNUOp6qHJHbxjRCosLzQW0TNKG00Z6iVynXH"
+  
 );
+// const stripePromise = loadStripe(
+//   "pk_live_51QPmjyRuFURKkwuQNbUR2Wyy4J5ZPIyFQmZ7FlsnlbXDu2qqrGWpQkZPbm2YbCKtd0jDjQ6DGr4GE1iEQfW58Hj600b2XlHbLb"
+// );
 const Payment = () => {
     useEffect(() => {
           
@@ -27,11 +27,13 @@ const Payment = () => {
     clientSecret: "",
     paymentIntentId: "",
   });
+  console.log(location);
+  
   const getPaymentIntent = async () => {
-    if (!data?.pricePerNight?.price) return;
+    if (!data?.pricePerNight?.discount || !data?.pricePerNight?.price) return;
 
     const noOfDays = details?.noOfDays > 0 ? details.noOfDays : 1;
-    const pricePerNight = data.pricePerNight.price;
+    const pricePerNight = data?.pricePerNight?.discount || data.pricePerNight.price;
 
     const amount = pricePerNight * noOfDays * 1.029;
 
@@ -48,7 +50,7 @@ const Payment = () => {
       providerId: data?.owner?._id,
       checkInDate: moment(details.startDate).startOf("day").utc().toDate(),
       checkOutDate: moment(details.endDate).endOf("day").utc().toDate(),
-      providerAccountId: "809jujj9ehfhjf99g",
+      providerAccountId: data?.owner?.stripeAccountId,
       paymentDelayDays: diffDays,
       
     });
@@ -109,11 +111,11 @@ const Payment = () => {
 
             <div className="flex justify-between items-center">
               <p className="text-sm text-gray-700">
-                {data?.pricePerNight?.price} x{" "}
+                {data?.pricePerNight?.discount || data?.pricePerNight?.price} x{" "}
                 {details?.noOfDays > 0 ? details?.noOfDays : 1}
               </p>
               <p>
-                {data?.pricePerNight?.price *
+                {(data?.pricePerNight?.discount ||data?.pricePerNight?.price) *
                   (details?.noOfDays > 0 ? details?.noOfDays : 1)}
               </p>
             </div>
@@ -122,7 +124,7 @@ const Payment = () => {
               <p className="text-sm text-gray-700">Service charge (2.9%)</p>
               <p className="text-sm text-gray-700">
                 {(
-                  data?.pricePerNight?.price *
+                  (data?.pricePerNight?.discount || data?.pricePerNight?.price) *
                   (details?.noOfDays > 0 ? details?.noOfDays : 1) *
                   0.029
                 ).toFixed(2)}
@@ -135,7 +137,7 @@ const Payment = () => {
               <span>Total</span>
               <span>
                 {(
-                  data?.pricePerNight?.price *
+                  (data?.pricePerNight?.discount || data?.pricePerNight?.price) *
                   (details?.noOfDays > 0 ? details?.noOfDays : 1) *
                   1.029
                 ).toFixed(2)}

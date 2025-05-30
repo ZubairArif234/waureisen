@@ -2,8 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { MapPin, FileText, X, Upload } from 'lucide-react';
 import { loadGoogleMapsScript, initAutocomplete, createMap } from '../../utils/googleMapsUtils';
 import CustomRefundPolicy from '../HomeComponents/CustomRefundPolicy';
+import toast from 'react-hot-toast';
+import { Link } from 'react-router-dom';
 
-const PoliciesLocationForm = ({ formData, handleInputChange, handleNestedInputChange ,setCustomPolicy,customPolicy}) => {
+const PoliciesLocationForm = ({ formData, handleInputChange, handleNestedInputChange ,setCustomPolicy,customPolicy,setAdditionalFile}) => {
   const fullAddressRef = useRef(null);
 const mapRef = useRef(null);
 const [mapInstance, setMapInstance] = useState(null);
@@ -148,17 +150,18 @@ useEffect(() => {
       
       if (!validTypes.includes(fileType) && 
           !file.name.endsWith('.docx')) {
-        alert('Please upload only PDF, DOCX, or TXT files');
+        toast.error('Please upload only PDF, DOCX, or TXT files');
         return;
       }
 
       // Check file size (5MB limit)
       if (file.size > 5 * 1024 * 1024) {
-        alert('File size should not exceed 5MB');
+        toast.error('File size should not exceed 5MB');
         return;
       }
 
       setUploadedFile(file);
+      setAdditionalFile(file)
     }
   };
 
@@ -166,6 +169,8 @@ useEffect(() => {
     setUploadedFile(null);
   };
 
+  console.log((formData?.additionalDoc));
+  
   return (
     <div className="space-y-8">
       {/* Location Section */}
@@ -319,7 +324,7 @@ useEffect(() => {
                 onChange={handleFileUpload}
               />
             </label>
-          ) : (
+          ) :  (
             <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
               <div className="flex items-center gap-3">
                 <FileText className="w-8 h-8 text-brand" />
@@ -339,6 +344,23 @@ useEffect(() => {
             </div>
           )}
         </div>
+        {formData?.additionalDoc && (
+  <div className="flex flex-col gap-3 border border-slate-100 px-4 py-2 rounded-md">
+    <div className="flex items-center gap-3">
+      <FileText className="w-8 h-8 text-brand" />
+      <Link
+        className="text-slate-700 line-clamp-1"
+       to={`https://docs.google.com/gview?url=${encodeURIComponent(formData.additionalDoc)}&embedded=true`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {formData.additionalDoc}
+      </Link>
+    </div>
+   
+  </div>
+)}
+
 
         <div className="flex items-center gap-2 text-xs text-gray-500">
           <Upload className="w-4 h-4" />

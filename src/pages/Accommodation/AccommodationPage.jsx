@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../components/Shared/Navbar";
 import DateRangePicker from "../../components/HomeComponents/DateRangePicker";
 import GuestSelector from "../../components/HomeComponents/GuestSelector";
-import { Check, ChevronDown, AlertTriangle, ArrowLeft, Dot } from "lucide-react";
+import { Check, ChevronDown, AlertTriangle, ArrowLeft, Dot, FileText } from "lucide-react";
 import {
   Users,
   Home,
@@ -775,6 +775,25 @@ console.log(availableDates , maxGuests , "ye hai na");
               </section>
             )}
 
+{/* additional files */}
+{accommodation.additionalDoc && 
+ <section className="mb-10">
+              <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
+                {t("additional_file")}
+              </h2>
+               <div className="flex items-center gap-3">
+                    <FileText className="w-8 h-8 text-brand" />
+                    <Link
+                      className="text-slate-700 line-clamp-1"
+                     to={`https://docs.google.com/gview?url=${encodeURIComponent(accommodation.additionalDoc)}&embedded=true`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {accommodation.additionalDoc}
+                    </Link>
+                  </div>
+              </section>
+}
             {/* Reviews */}
             {/* <section className="mb-10">
               <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
@@ -843,10 +862,10 @@ console.log(availableDates , maxGuests , "ye hai na");
                     {isPriceLoading ? (
                       <div className="w-16 h-8 bg-gray-200 animate-pulse rounded"></div>
                     ) : (
-                      `${accommodation?.pricePerNight?.price || 0} X ${
+                      `${(accommodation?.pricePerNight?.isDiscountActivate && accommodation?.pricePerNight?.discount) || accommodation?.pricePerNight?.price || 0} X ${
                         getNoOfDays(dateRange?.start, dateRange?.end) || 1
                       } = ${
-                        (accommodation?.pricePerNight?.price || 0) *
+                        ((accommodation?.pricePerNight?.isDiscountActivate && accommodation?.pricePerNight?.discount) || accommodation?.pricePerNight?.price || 0) *
                         (getNoOfDays(dateRange?.start, dateRange?.end) || 1)
                       } ${accommodation?.pricePerNight?.currency || "CHF"}`
                     )}
@@ -854,9 +873,9 @@ console.log(availableDates , maxGuests , "ye hai na");
                 </div>
                 <div className="text-sm text-gray-600 mt-2">
                   {t("price_per_person_per_night")}:{" "}
-                  {(accommodation?.pricePerNight?.price || 0) /
+                  {((accommodation?.pricePerNight?.isDiscountActivate && accommodation?.pricePerNight?.discount) || accommodation?.pricePerNight?.price || 0) /
                     (guests?.people || 1)}{" "}
-                  ${accommodation?.pricePerNight?.currency || "CHF"}
+                  ${(accommodation?.pricePerNight?.isDiscountActivate && accommodation?.pricePerNight?.discount) || accommodation?.pricePerNight?.currency || "CHF"}
                 </div>
               </div>
 
@@ -930,7 +949,7 @@ console.log(availableDates , maxGuests , "ye hai na");
                 <div className="mb-4">
                   <div className="flex justify-between items-center">
                     <p className="text-sm text-gray-700">
-                      {accommodation?.pricePerNight?.price || 0} x{" "}
+                      {(accommodation?.pricePerNight?.isDiscountActivate && accommodation?.pricePerNight?.discount) || accommodation?.pricePerNight?.price || 0} x{" "}
                       {getNoOfDays(dateRange?.start, dateRange?.endDate) > 0
                         ? getNoOfDays(dateRange?.start, dateRange?.endDate)
                         : "1"}
@@ -939,6 +958,7 @@ console.log(availableDates , maxGuests , "ye hai na");
                       const days =
                         getNoOfDays(dateRange?.start, dateRange?.end) || 0;
                       const unitPrice =
+                      (accommodation?.pricePerNight?.isDiscountActivate && accommodation?.pricePerNight?.discount) ||
                         accommodation.pricePerNight.originalPrice ||
                         accommodation.pricePerNight.price;
                       const total = days > 0 ? unitPrice * days : unitPrice;
@@ -955,6 +975,7 @@ console.log(availableDates , maxGuests , "ye hai na");
                         const days =
                           getNoOfDays(dateRange?.start, dateRange?.end) || 0;
                         const unitPrice =
+                        (accommodation?.pricePerNight?.isDiscountActivate && accommodation?.pricePerNight?.discount) ||
                           accommodation.pricePerNight.originalPrice ||
                           accommodation.pricePerNight.price;
                         const baseAmount = days * unitPrice;
@@ -972,6 +993,7 @@ console.log(availableDates , maxGuests , "ye hai na");
                         const days =
                           getNoOfDays(dateRange?.start, dateRange?.end) || 0;
                         const unitPrice =
+                        (accommodation?.pricePerNight?.isDiscountActivate && accommodation?.pricePerNight?.discount) ||
                           accommodation.pricePerNight.originalPrice ||
                           accommodation.pricePerNight.price;
                         const baseAmount = days * unitPrice;

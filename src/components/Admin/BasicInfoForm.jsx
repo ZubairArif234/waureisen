@@ -4,8 +4,9 @@ import { useState } from 'react';
 import DateRangePicker from '../HomeComponents/DateRangePicker';
 
 
-const BasicInfoForm = ({ formData, handleInputChange, handleNestedInputChange }) => {
+const BasicInfoForm = ({ formData, handleInputChange,isDiscount, handleNestedInputChange ,handleActivateDiscount }) => {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+
   const [selectedRange, setSelectedRange] = useState({
     start: formData.availability.checkInDate ? new Date(formData.availability.checkInDate) : null,
     end: formData.availability.checkOutDate ? new Date(formData.availability.checkOutDate) : null
@@ -242,13 +243,16 @@ const BasicInfoForm = ({ formData, handleInputChange, handleNestedInputChange })
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 flex gap-2 items-end">
+            <div>
+
             <label className="block text-sm font-medium text-gray-700">Discounted Price per Night</label>
             <div className="flex">
               <select
+              onChange={(e) => handleNestedInputChange('pricing', 'currency', e.target.value)}
               defaultValue={formData.pricing.currency}
                 value={formData.pricing.currency}
-                disabled
+                disabled={!isDiscount}
                 className="w-auto px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
               >
                 <option value="CHF">CHF</option>
@@ -256,12 +260,16 @@ const BasicInfoForm = ({ formData, handleInputChange, handleNestedInputChange })
                 <option value="USD">USD</option>
               </select>
               <input
+              disabled={!isDiscount}
                 type="number"
-                value={formData.pricing.discountedPrice}
+                value={formData.pricing.discountedPrice }
                 onChange={(e) => handleNestedInputChange('pricing', 'discountedPrice', parseInt(e.target.value))}
                 className="w-full px-3 py-2 border-y border-r border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
               />
             </div>
+            </div>
+            <button onClick={handleActivateDiscount} type='button'  className="px-4 py-2 bg-black text-white rounded-lg hover:bg-black/80 transition-colors flex items-center gap-2"
+         >{!isDiscount ? "Activate" : "Deactivate"} </button>
           </div>
         </div>
       </div>

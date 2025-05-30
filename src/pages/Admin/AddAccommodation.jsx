@@ -24,6 +24,7 @@ import toast from "react-hot-toast";
 import { updateListing } from "../../api/listingAPI";
 import moment from "moment";
 import { changeMetaData } from "../../utils/extra";
+import { ensureCloudinaryUrl, uploadImageToCloudinary } from "../../utils/cloudinaryUtils";
 
 const AddAccommodation = (props) => {
   const { id } = useParams();
@@ -37,6 +38,8 @@ const AddAccommodation = (props) => {
   const [isLoading, setIsLoading] = useState(isEditMode);
   const [activeTab, setActiveTab] = useState(null); // Changed to null initially
   const [template, setTemplate] = useState(null);
+  const [additionalFile, setAdditionalFile] = useState(null);
+  const [isDiscount, setIsDiscount] = useState(false);
   const [formData, setFormData] = useState({
     // Basic Info
     title: "",
@@ -227,7 +230,10 @@ const AddAccommodation = (props) => {
               });
             }
           }
+          // console.log(a);
+          
           // Map basic listing data to form structure
+          setIsDiscount(listingData?.pricePerNight?.isDiscountActivate)
           const updatedFormData = {
             ...newFormData,
             // Basic Info
@@ -235,6 +241,7 @@ const AddAccommodation = (props) => {
             title: listingData?.title || "",
             propertyType: listingData?.listingType || "Studio",
             listingSource: listingData?.ownerType || isProviderMode ? "Provider" : "Admin",
+            additionalDoc: listingData?.additionalDoc,
             capacity: {
               people: listingData?.maxGuests || 6,
               dogs: listingData?.maxDogs || 0,
@@ -245,7 +252,7 @@ const AddAccommodation = (props) => {
             pricing: {
               currency: listingData?.pricePerNight?.currency || "CHF",
               regularPrice: listingData?.pricePerNight?.price || 0,
-              discountedPrice: 0,
+              discountedPrice:  listingData?.pricePerNight?.discount || 0,
             },
             availability: {
               checkInDates: "",
@@ -532,6 +539,18 @@ const AddAccommodation = (props) => {
         return isNaN(date.getTime()) ? null : date;
       };
 
+      // -----------------additional file------------
+      let validatedUrlOfAdditionalFile;
+      if (additionalFile) {
+        
+        const cloudinaryUrl = await uploadImageToCloudinary(additionalFile);
+       
+               // Validate the returned URL
+                validatedUrlOfAdditionalFile = ensureCloudinaryUrl(cloudinaryUrl);
+       console.log(additionalFile , validatedUrlOfAdditionalFile);
+      }
+      
+
 
       const listingData = {
         Code: uniqueCode,
@@ -541,6 +560,7 @@ const AddAccommodation = (props) => {
           general: formData?.shortDescription,
           short: formData?.shortDescription,
         },
+        additionalDoc:validatedUrlOfAdditionalFile,
         checkInTime: getTimeFromForm(formData.availability.checkInTime),
         checkOutTime: getTimeFromForm(formData.availability.checkOutTime),
         checkInDates: formData?.availability?.checkInDates || '',
@@ -552,7 +572,9 @@ const AddAccommodation = (props) => {
         },
         pricePerNight: {
           price: formData?.pricing?.regularPrice,
+          discount: formData?.pricing?.discountedPrice,
           currency: formData?.pricing?.currency,
+          isDiscountActivate:isDiscount || false,
         },
         maxDogs: formData?.capacity?.dogs,
         maxGuests: formData?.capacity?.people,
@@ -1244,6 +1266,9 @@ console.log(findIndex, "find index");
       setActiveTab(availableTabs[findIndex-1]?.id );}
   }
   
+  const handleActivateDiscount = () => {
+    setIsDiscount(!isDiscount)
+  }
 
   const renderForm = () => {
     if (!template) return <div>Loading template...</div>;
@@ -1266,6 +1291,8 @@ console.log(subsection , "kln");
             handleNestedInputChange={handleNestedInputChange}
             subsection={subsection}
             isProviderMode={isProviderMode}
+            isDiscount={isDiscount}
+            handleActivateDiscount={handleActivateDiscount}
           />
         );
       case "photos":
@@ -1301,12 +1328,14 @@ console.log(subsection , "kln");
             subsection={subsection}
             customPolicy={customPolicy}
             setCustomPolicy={setCustomPolicy}
+            setAdditionalFile={setAdditionalFile}
           />
         );
       default:
         return null;
     }
   };
+
 
   return (
     <div className="p-6">
