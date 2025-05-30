@@ -20,7 +20,10 @@ const TravelMagazine = () => {
   }, []);
 
   useEffect(() => {
-    if (location?.pathname != "/travel-magazine") navigate("/travel-magazine");
+    if(location?.pathname != "/admin/travel-magazine"){
+      // navigate("/admin/travel-magazine")
+    }
+    else if (location?.pathname != "/travel-magazine" ) navigate("/travel-magazine");
   }, [location.pathname]);
 
   useEffect(() => {

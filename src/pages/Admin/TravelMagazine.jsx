@@ -85,6 +85,7 @@ const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, blogTitle }) => {
 
 const TravelMagazine = () => {
     useEffect(() => {
+         
           
             changeMetaData(`Travel Magazine - Admin`);
           }, []);
