@@ -67,7 +67,7 @@ const HostRegistration = () => {
               const isUserLoggedIn = localStorage.getItem('user') || false;
               
               if (isUserLoggedIn) {
-                navigate('/provider/registration');
+                navigate('/signup?userType=provider');
               } else {
                 // Redirect to signup with a redirect parameter
                 navigate('/signup?redirect=provider-registration');
