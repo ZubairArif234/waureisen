@@ -6,7 +6,7 @@ const translations = {
 
     timing:"Timings",
     total_price:"Total Price",
-    service_charge:"Bedienungsgeld",
+    service_charge:"transaction fee",
     
 checkout_time:"Checkout Time",
 checkin_time:"Checkin Time",
@@ -2738,6 +2738,7 @@ account_actions: "Kontoaktionen",
     profile_saved_successfully: "Profil erfolgreich gespeichert",
     Dashboard: "Dashboard",
     hosting_information: "Vermieter Informationen",
+    service_charge: "transaktionsgebühr"
   },
 };
 
