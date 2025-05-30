@@ -195,7 +195,7 @@ const YourListings = () => {
         id: l._id,
         title: l.title || "Unnamed Listing",
         location: l.location?.address || "Unknown location",
-        price: l.pricePerNight?.price || 0,
+        price: (l.pricePerNight?.isDiscountActivate && l.pricePerNight?.discount) || l.pricePerNight?.price || 0,
         currency: l.pricePerNight?.currency || "CHF",
         status: l.status || "draft",
         image: l.images?.[0] || i1,
