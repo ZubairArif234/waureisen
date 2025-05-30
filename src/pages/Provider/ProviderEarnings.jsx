@@ -585,7 +585,7 @@ const ProviderEarnings = () => {
               </td>
             </tr>
             <tr>
-              <td>Platform Fee (2.9%)</td>
+              <td>Transaction Fee (2.9%)</td>
               <td style="text-align: right;" class="negative-amount">
                 -${invoiceData.platformFee.toFixed(0)} ${invoiceData.currency}
               </td>
