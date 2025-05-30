@@ -451,15 +451,7 @@ export const deleteProvider = async (id) => {
   }
 };
 // Transactions
-export const getAllTransactions = async () => {
-  try {
-    const response = await API.get("/admins/view-all-transactions");
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching all transactions:", error);
-    throw error;
-  }
-};
+
 
 export const getTransactionById = async (id) => {
   try {
@@ -471,15 +463,7 @@ export const getTransactionById = async (id) => {
   }
 };
 
-export const updateTransaction = async (id, data) => {
-  try {
-    const response = await API.put(`/transactions/${id}`, data);
-    return response.data;
-  } catch (error) {
-    console.error("Error updating transaction:", error);
-    throw error;
-  }
-};
+
 
 export const cancelBookingTransaction = async (id) => {
   try {
@@ -682,6 +666,27 @@ export const createListingFilter = async (filterData) => {
     return response.data;
   } catch (error) {
     console.error('Error creating listing filter:', error);
+    throw error;
+  }
+};
+
+
+export const getAllTransactions = async () => {
+  try {
+    const response = await API.get('/payment/transactions');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching transactions:', error);
+    throw error;
+  }
+};
+
+export const updateTransaction = async (transactionId, updateData) => {
+  try {
+    const response = await API.put(`/payment/transactions/${transactionId}`, updateData);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating transaction:', error);
     throw error;
   }
 };

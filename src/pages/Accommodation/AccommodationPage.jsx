@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../components/Shared/Navbar";
 import DateRangePicker from "../../components/HomeComponents/DateRangePicker";
 import GuestSelector from "../../components/HomeComponents/GuestSelector";
-import { Check, ChevronDown, AlertTriangle, ArrowLeft, Dot, FileText } from "lucide-react";
+import { Check, ChevronDown, AlertTriangle, ArrowLeft, Dot } from "lucide-react";
 import {
   Users,
   Home,
@@ -38,7 +38,6 @@ import API from "../../api/config";
 import toast from "react-hot-toast";
 import { getBookingByListing } from "../../api/bookingApi";
 import { changeMetaData } from "../../utils/extra";
-import { getUnavailableDates } from "../../api/providerAPI";
 
 const PlaceOffer = ({ icon: Icon, text, value }) => (
   <div className="flex-1 flex flex-col items-center text-center p-4 border-r border-[#767676] last:border-r-0 md:p-4 p-2">
@@ -160,24 +159,22 @@ const getAllDates = (startDate, endDate) => {
 
   return dates;
 };
+console.log(bookedDates , "state dates");
 
 const handleGetBooking = async() =>{
  const res = await getBookingByListing(location.state?.id)
-const calenderRes = await getUnavailableDates({listingId:location?.state?.id , startDate: `${new Date().getFullYear()}-01-01` , endDate:`${new Date().getFullYear() + 1}-12-31`}) 
-const calenderBookedDates = calenderRes?.map((item)=>item?.date)
-// console.log(calenderRes , "calender dates" , calenderBookedDates);
 
-res.filter((item)=>item?.status == "confirmed").map((item)=>{
+ res.map((item)=>{
   const result = getAllDates(item?.checkInDate, item?.checkOutDate);
-  // console.log(result , "result");
+  console.log(result , "result");
   
   setBookedDates(prev => {
-    const combined = [...prev,...calenderBookedDates, ...result];
+    const combined = [...prev, ...result];
     const uniqueDates = Array.from(new Set(combined));
     return uniqueDates;
   });
   
-})
+ })
 }
 
 useEffect(()=>{
@@ -548,6 +545,19 @@ console.log(availableDates , maxGuests , "ye hai na");
     );
   }
 
+  const getBookingPrice = () => {
+  // If discount is active, use discounted price for booking
+  if (accommodation?.pricePerNight?.isDiscountActivate && accommodation?.pricePerNight?.discount) {
+    return accommodation?.pricePerNight?.discount;
+  }
+  // Otherwise, use the original price
+  return accommodation?.pricePerNight?.price || 0;
+};
+
+// Helper function to get display price (same as booking price in this case)
+const getDisplayPrice = () => {
+  return getBookingPrice();
+};
   const getNoOfDays = (startDate, endDate) => {
     const start = moment(startDate);
     const end = moment(endDate);
@@ -557,41 +567,55 @@ console.log(availableDates , maxGuests , "ye hai na");
   };
 
   const handleReserved = () => {
-    console.log("Reserved button clicked : ", accommodation?.provider);
-    if (!dateRange?.start || !dateRange?.end) {
-      // alert("Please select both check-in and check-out dates before reserving.");
+  console.log("Reserved button clicked : ", accommodation?.provider);
+  if (!dateRange?.start || !dateRange?.end) {
     toast.error("Please select both check-in and check-out dates before reserving.")
-      return;
-    }
-    if (accommodation?.provider === "Interhome") {
-      const checkInDate = moment(dateRange.start).format("YYYY-MM-DD");
-      const duration = moment(dateRange.end).diff(
-        moment(dateRange.start),
-        "days"
-      );
-      // console.log("Check-in Date:", checkInDate);
-      // console.log("Duration:", duration);
-
-      const partnerId = import.meta.env.VITE_INTERHOME_PARTNER_ID;
-      const iframeUrl = `https://www.interhome.com/Forward.aspx?navigationid=12&aCode=${accommodation.Code}&dtCheckin=${checkInDate}&duration=${duration}&partnerid=${partnerId}&adrAdults=${guests.people}&iniframe=1`;
-      window.location.href = iframeUrl;
-    } else {
-      console.log(dateRange.start, dateRange.end  , getNoOfDays(dateRange.start, dateRange.end));
-      let  days = getNoOfDays(dateRange.start, dateRange.end);
-      navigate("/payment", {
-        state: {
-          price: location.state,
-          data: accommodation,
-          details: {
-            noOfDays: days,
-            startDate: dateRange?.start,
-            endDate: dateRange?.end,
-            guests:guests
-          },
+    return;
+  }
+  
+  if (accommodation?.provider === "Interhome") {
+    const checkInDate = moment(dateRange.start).format("YYYY-MM-DD");
+    const duration = moment(dateRange.end).diff(
+      moment(dateRange.start),
+      "days"
+    );
+    
+    const partnerId = import.meta.env.VITE_INTERHOME_PARTNER_ID;
+    const iframeUrl = `https://www.interhome.com/Forward.aspx?navigationid=12&aCode=${accommodation.Code}&dtCheckin=${checkInDate}&duration=${duration}&partnerid=${partnerId}&adrAdults=${guests.people}&iniframe=1`;
+    window.location.href = iframeUrl;
+  } else {
+    console.log(dateRange.start, dateRange.end, getNoOfDays(dateRange.start, dateRange.end));
+    let days = getNoOfDays(dateRange.start, dateRange.end);
+    
+    // Create updated accommodation object with correct pricing
+    const updatedAccommodation = {
+      ...accommodation,
+      pricePerNight: {
+        ...accommodation.pricePerNight,
+        // Use the booking price (either discounted or original based on isDiscountActivate)
+        finalBookingPrice: getBookingPrice(),
+        currency: accommodation?.pricePerNight?.currency || "CHF"
+      }
+    };
+    
+    navigate("/payment", {
+      state: {
+        price: location.state,
+        data: updatedAccommodation, // Pass updated accommodation with correct pricing
+        details: {
+          noOfDays: days,
+          startDate: dateRange?.start,
+          endDate: dateRange?.end,
+          guests: guests,
+          totalAmount: getBookingPrice() * days, // Total before service charge
+          serviceCharge: (getBookingPrice() * days) * 0.029, // 2.9% service charge
+          finalAmount: (getBookingPrice() * days) + ((getBookingPrice() * days) * 0.029) // Total with service charge
         },
-      });
-    }
-  };
+      },
+    });
+  }
+};
+
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
@@ -709,14 +733,14 @@ console.log(availableDates , maxGuests , "ye hai na");
             {
               accommodation?.checkInTime && (
                 <div>
-                  <p className="font-medium">{t("checkin_time")} Checkin Time: <span className="font-thin">{moment(accommodation?.checkInTime).utc().format("hh:mm A")}</span></p>
+                  <p className="font-medium">{t("checkin_time")} Checkin Time: <span className="font-thin">{moment(accommodation?.checkInTime).format("hh:mm A")}</span></p>
                 </div>
               )
             }
             {
               accommodation?.checkOutTime && (
                 <div> 
-                  <p className="font-medium">{t("checkout_time")} Checkout Time: <span className="font-thin">{moment(accommodation?.checkOutTime).utc().format("hh:mm A")}</span></p>
+                  <p className="font-medium">{t("checkout_time")} Checkout Time: <span className="font-thin">{moment(accommodation?.checkOutTime).format("hh:mm A")}</span></p>
                 </div>
               )
             }
@@ -778,25 +802,6 @@ console.log(availableDates , maxGuests , "ye hai na");
               </section>
             )}
 
-{/* additional files */}
-{accommodation.additionalDoc && 
- <section className="mb-10">
-              <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
-                {t("additional_file")}
-              </h2>
-               <div className="flex items-center gap-3">
-                    <FileText className="w-8 h-8 text-brand" />
-                    <Link
-                      className="text-slate-700 line-clamp-1"
-                     to={accommodation.additionalDoc?.includes(".docx") ? `https://docs.google.com/gview?url=${encodeURIComponent(accommodation.additionalDoc)}&embedded=true` : accommodation.additionalDoc}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {accommodation.additionalDoc}
-                    </Link>
-                  </div>
-              </section>
-}
             {/* Reviews */}
             {/* <section className="mb-10">
               <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
@@ -858,28 +863,26 @@ console.log(availableDates , maxGuests , "ye hai na");
               {/* Price Display */}
               <div className="flex flex-col mb-6">
                 <div className="flex items-baseline">
-                  <span className="text-gray-600 mr-2 font-bold">
-                   {t('total_price')} :
-                  </span>
-                  <span className="text-xl font-semibold">
-                    {isPriceLoading ? (
-                      <div className="w-16 h-8 bg-gray-200 animate-pulse rounded"></div>
-                    ) : (
-                      `${(accommodation?.pricePerNight?.isDiscountActivate && accommodation?.pricePerNight?.discount) || accommodation?.pricePerNight?.price || 0} X ${
-                        getNoOfDays(dateRange?.start, dateRange?.end) || 1
-                      } = ${
-                        ((accommodation?.pricePerNight?.isDiscountActivate && accommodation?.pricePerNight?.discount) || accommodation?.pricePerNight?.price || 0) *
-                        (getNoOfDays(dateRange?.start, dateRange?.end) || 1)
-                      } ${accommodation?.pricePerNight?.currency || "CHF"}`
-                    )}
-                  </span>
-                </div>
+  <span className="text-gray-600 mr-2 font-bold">
+   {t('total_price')} :
+  </span>
+  <span className="text-xl font-semibold">
+    {isPriceLoading ? (
+      <div className="w-16 h-8 bg-gray-200 animate-pulse rounded"></div>
+    ) : (
+      `${getBookingPrice()} X ${
+        getNoOfDays(dateRange?.start, dateRange?.end) || 1
+      } = ${
+        getBookingPrice() * (getNoOfDays(dateRange?.start, dateRange?.end) || 1)
+      } ${accommodation?.pricePerNight?.currency || "CHF"}`
+    )}
+  </span>
+</div>
                 <div className="text-sm text-gray-600 mt-2">
-                  {t("price_per_person_per_night")}:{" "}
-                  {((accommodation?.pricePerNight?.isDiscountActivate && accommodation?.pricePerNight?.discount) || accommodation?.pricePerNight?.price || 0) /
-                    (guests?.people || 1)}{" "}
-                  ${(accommodation?.pricePerNight?.isDiscountActivate && accommodation?.pricePerNight?.discount) || accommodation?.pricePerNight?.currency || "CHF"}
-                </div>
+  {t("price_per_person_per_night")}:{" "}
+  {getBookingPrice() / (guests?.people || 1)}{" "}
+  {accommodation?.pricePerNight?.currency || "CHF"}
+</div>
               </div>
 
               {/* Date Picker */}
@@ -950,62 +953,47 @@ console.log(availableDates , maxGuests , "ye hai na");
 
               {accommodation?.provider !== "Interhome" && (
                 <div className="mb-4">
-                  <div className="flex justify-between items-center">
-                    <p className="text-sm text-gray-700">
-                      {(accommodation?.pricePerNight?.isDiscountActivate && accommodation?.pricePerNight?.discount) || accommodation?.pricePerNight?.price || 0} x{" "}
-                      {getNoOfDays(dateRange?.start, dateRange?.endDate) > 0
-                        ? getNoOfDays(dateRange?.start, dateRange?.endDate)
-                        : "1"}
-                    </p>
-                    {(() => {
-                      const days =
-                        getNoOfDays(dateRange?.start, dateRange?.end) || 0;
-                      const unitPrice =
-                      (accommodation?.pricePerNight?.isDiscountActivate && accommodation?.pricePerNight?.discount) ||
-                        accommodation.pricePerNight.originalPrice ||
-                        accommodation.pricePerNight.price;
-                      const total = days > 0 ? unitPrice * days : unitPrice;
-
-                      return <p className="text-sm text-gray-700">{total}</p>;
-                    })()}
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <p className="text-sm text-gray-700">
-                     {t("service_charge")} (2.9%)
-                    </p>
-                    <p className="text-sm text-gray-700">
-                      {(() => {
-                        const days =
-                          getNoOfDays(dateRange?.start, dateRange?.end) || 0;
-                        const unitPrice =
-                        (accommodation?.pricePerNight?.isDiscountActivate && accommodation?.pricePerNight?.discount) ||
-                          accommodation.pricePerNight.originalPrice ||
-                          accommodation.pricePerNight.price;
-                        const baseAmount = days * unitPrice;
-                        const totalWithStripe = baseAmount * 0.029;
-
-                        return totalWithStripe.toFixed(2); // rounded to 2 decimal places
-                      })()}
-                    </p>
-                  </div>
+                 <div className="flex justify-between items-center">
+  <p className="text-sm text-gray-700">
+    {getBookingPrice()} x{" "}
+    {getNoOfDays(dateRange?.start, dateRange?.endDate) > 0
+      ? getNoOfDays(dateRange?.start, dateRange?.endDate)
+      : "1"}
+  </p>
+  {(() => {
+    const days = getNoOfDays(dateRange?.start, dateRange?.end) || 0;
+    const unitPrice = getBookingPrice();
+    const total = days > 0 ? unitPrice * days : unitPrice;
+    return <p className="text-sm text-gray-700">{total}</p>;
+  })()}
+</div>
+                <div className="flex justify-between items-center">
+  <p className="text-sm text-gray-700">
+   {t("service_charge")} (2.9%)
+  </p>
+  <p className="text-sm text-gray-700">
+    {(() => {
+      const days = getNoOfDays(dateRange?.start, dateRange?.end) || 0;
+      const unitPrice = getBookingPrice();
+      const baseAmount = days * unitPrice;
+      const totalWithStripe = baseAmount * 0.029;
+      return totalWithStripe.toFixed(2);
+    })()}
+  </p>
+</div>
                   <div className="border-t border-gray-200 my-4"></div>
-                  <div className="flex justify-between font-semibold">
-                    <span>{t("total")}</span>
-                    <span>
-                      {(() => {
-                        const days =
-                          getNoOfDays(dateRange?.start, dateRange?.end) || 0;
-                        const unitPrice =
-                        (accommodation?.pricePerNight?.isDiscountActivate && accommodation?.pricePerNight?.discount) ||
-                          accommodation.pricePerNight.originalPrice ||
-                          accommodation.pricePerNight.price;
-                        const baseAmount = days * unitPrice;
-                        const totalWithStripe = baseAmount + baseAmount * 0.029;
-
-                        return totalWithStripe.toFixed(2); // rounded to 2 decimal places
-                      })()}
-                    </span>
-                  </div>
+               <div className="flex justify-between font-semibold">
+  <span>{t("total")}</span>
+  <span>
+    {(() => {
+      const days = getNoOfDays(dateRange?.start, dateRange?.end) || 0;
+      const unitPrice = getBookingPrice();
+      const baseAmount = days * unitPrice;
+      const totalWithStripe = baseAmount + baseAmount * 0.029;
+      return totalWithStripe.toFixed(2);
+    })()}
+  </span>
+</div>
                 </div>
               )}
 

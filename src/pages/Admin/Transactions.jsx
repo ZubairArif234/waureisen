@@ -77,23 +77,8 @@ const SkeletonTable = () => {
   );
 };
 
-const TransactionDetailModal = ({ transaction, isOpen, onClose, onCancel }) => {
-  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
+const TransactionDetailModal = ({ transaction, isOpen, onClose }) => {
   if (!isOpen) return null;
-
-  const handleCancel = async () => {
-    setIsLoading(true);
-    try {
-      await onCancel(transaction._id);
-      setShowCancelConfirm(false);
-    } catch (error) {
-      console.error("Error cancelling transaction:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -211,16 +196,7 @@ const TransactionDetailModal = ({ transaction, isOpen, onClose, onCancel }) => {
             </div>
           </div>
           
-          <div className="mt-6 flex justify-between">
-            {transaction.status === "paid" && (
-              <button
-                onClick={() => setShowCancelConfirm(true)}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                disabled={isLoading}
-              >
-                {isLoading ? "Processing..." : "Cancel Booking"}
-              </button>
-            )}
+          <div className="mt-6 flex justify-end">
             <button
               onClick={onClose}
               className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand/90 transition-colors"
@@ -230,39 +206,6 @@ const TransactionDetailModal = ({ transaction, isOpen, onClose, onCancel }) => {
           </div>
         </div>
       </div>
-
-      {/* Cancel Confirmation Dialog */}
-      {showCancelConfirm && (
-        <div className="fixed inset-0 flex items-center justify-center z-[60]">
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50"
-            onClick={() => setShowCancelConfirm(false)}
-          />
-          <div className="bg-white rounded-lg p-6 w-96 relative z-10">
-            <h4 className="text-lg font-medium mb-4">Cancel Booking</h4>
-            <p className="text-gray-600 mb-6">
-              Are you sure you want to cancel this booking? This action cannot
-              be undone.
-            </p>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setShowCancelConfirm(false)}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
-                disabled={isLoading}
-              >
-                No, Keep it
-              </button>
-              <button
-                onClick={handleCancel}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-                disabled={isLoading}
-              >
-                {isLoading ? "Processing..." : "Yes, Cancel Booking"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 };
@@ -370,10 +313,11 @@ const Transactions = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
   useEffect(() => {
-        
-          changeMetaData(`Transactions - Admin`);
-        }, []);
+    changeMetaData(`Transactions - Admin`);
+  }, []);
+  
   // Fetch transactions on component mount
   useEffect(() => {
     fetchTransactions();
@@ -390,33 +334,6 @@ const Transactions = () => {
       setError("Failed to load transactions. Please try again later.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleCancelBooking = async (transactionId) => {
-    try {
-      // Update the transaction status to 'canceled'
-      await updateTransaction(transactionId, { status: "canceled" });
-      
-      // Update the local state
-      setTransactions((prevTransactions) =>
-        prevTransactions.map((transaction) =>
-          transaction._id === transactionId
-            ? { ...transaction, status: "canceled" }
-            : transaction
-        )
-      );
-      
-      // Also update the selected transaction if it's open in the modal
-      if (selectedTransaction && selectedTransaction._id === transactionId) {
-        setSelectedTransaction((prev) => ({ ...prev, status: "canceled" }));
-      }
-      
-      return true;
-    } catch (error) {
-      console.error("Error canceling booking:", error);
-      setError("Failed to cancel booking. Please try again.");
-      return false;
     }
   };
 
@@ -520,12 +437,7 @@ const Transactions = () => {
         </div>
 
         {/* Filter Button */}
-        <div className="flex gap-3">
-          {/* <button className="flex items-center gap-2 px-3 py-2 border rounded-lg hover:bg-gray-50">
-            <Filter className="w-5 h-5 text-gray-400" />
-            <span className="text-gray-700">Filter</span>
-          </button> */}
-          
+        <div className="flex gap-3">          
           {/* Export Button */}
           <button
             onClick={handleExport}
@@ -636,7 +548,6 @@ const Transactions = () => {
           transaction={selectedTransaction}
           isOpen={detailModalOpen}
           onClose={() => setDetailModalOpen(false)}
-          onCancel={handleCancelBooking}
         />
       )}
     </div>

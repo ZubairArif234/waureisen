@@ -8,18 +8,16 @@ import { useLocation } from "react-router-dom";
 import moment from "moment";
 import logo from "../../assets/logo.png";
 import { changeMetaData } from "../../utils/extra";
+
 const stripePromise = loadStripe(
   "pk_test_51QPmjyRuFURKkwuQO9cccKtZGjlFh5ULmjUIxPWlpCj3zKdUk3MAnKnntIB5hIzNUOp6qHJHbxjRCosLzQW0TNKG00Z6iVynXH"
-  
 );
-// const stripePromise = loadStripe(
-//   "pk_live_51QPmjyRuFURKkwuQNbUR2Wyy4J5ZPIyFQmZ7FlsnlbXDu2qqrGWpQkZPbm2YbCKtd0jDjQ6DGr4GE1iEQfW58Hj600b2XlHbLb"
-// );
+
 const Payment = () => {
-    useEffect(() => {
-          
-            changeMetaData(`Pay - Waureisen`);
-          }, []);
+  useEffect(() => {
+    changeMetaData(`Pay - Waureisen`);
+  }, []);
+
   const location = useLocation();
   const { price, data, details } = location?.state;
   const [loading, setLoading] = useState(false);
@@ -27,107 +25,114 @@ const Payment = () => {
     clientSecret: "",
     paymentIntentId: "",
   });
+
   console.log(location);
+
+  // Helper function to get the correct booking price
+  const getCorrectBookingPrice = () => {
+    // First check if finalBookingPrice is set (from AccommodationPage)
+    if (data?.pricePerNight?.finalBookingPrice) {
+      return data.pricePerNight.finalBookingPrice;
+    }
+    
+    // Fallback to the same logic as AccommodationPage
+    if (data?.pricePerNight?.isDiscountActivate && data?.pricePerNight?.discount) {
+      return data.pricePerNight.discount;
+    }
+    
+    return data?.pricePerNight?.price || 0;
+  };
+
+  // Get pricing values - prioritize pre-calculated values from details
+  const pricePerNight = getCorrectBookingPrice();
+  const numberOfDays = details?.noOfDays > 0 ? details.noOfDays : 1;
   
+  // Use pre-calculated values from AccommodationPage if available, otherwise calculate
+  const baseAmount = details?.totalAmount || (pricePerNight * numberOfDays);
+  const serviceChargeAmount = details?.serviceCharge || (baseAmount * 0.029);
+  const finalAmount = details?.finalAmount || (baseAmount + serviceChargeAmount);
+
   const getPaymentIntent = async () => {
-    if (!data?.pricePerNight?.discount || !data?.pricePerNight?.price) return;
-
-    const noOfDays = details?.noOfDays > 0 ? details.noOfDays : 1;
-    const pricePerNight = data?.pricePerNight?.discount || data.pricePerNight.price;
-
-    const amount = pricePerNight * noOfDays * 1.029;
+    if (!pricePerNight) return;
 
     // payment delay days
     const today = moment().startOf("day");
     const checkInDate = moment(details?.startDate).startOf("day");
-
     const diffDays = checkInDate.diff(today, "days");
+    
     setLoading(true);
-    const res = await createPaymentIntent({
-      amount: Math.round(amount),
-      currency: data?.pricePerNight?.currency,
-      listingId: data?._id,
-      providerId: data?.owner?._id,
-      checkInDate: moment(details.startDate).startOf("day").utc().toDate(),
-      checkOutDate: moment(details.endDate).endOf("day").utc().toDate(),
-      providerAccountId: data?.owner?.stripeAccountId,
-      paymentDelayDays: diffDays,
+    
+    try {
+      const res = await createPaymentIntent({
+        amount: Math.round(finalAmount), // Use the final calculated amount
+        currency: data?.pricePerNight?.currency,
+        listingId: data?._id,
+        providerId: data?.owner?._id,
+        checkInDate: moment(details.startDate).startOf("day").utc().toDate(),
+        checkOutDate: moment(details.endDate).endOf("day").utc().toDate(),
+        providerAccountId: data?.owner?.stripeAccountId,
+        paymentDelayDays: diffDays,
+      });
       
-    });
-    setPaymentIntent({
-      clientSecret: res.data.clientSecret,
-      paymentIntentId: res.data.paymentIntentIday,
-    });
-    setLoading(false);
+      setPaymentIntent({
+        clientSecret: res.data.clientSecret,
+        paymentIntentId: res.data.paymentIntentId, // Fixed typo: was paymentIntentIday
+      });
+    } catch (error) {
+      console.error("Payment intent creation failed:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     getPaymentIntent();
   }, []);
 
-  // console.log(location);
-
   const options = {
     clientSecret: paymentIntent.clientSecret,
   };
+
   return (
-    <div className="grid grid-cols-2 gap-4  items-start h-screen py-10 px-20">
+    <div className="grid grid-cols-2 gap-4 items-start h-screen py-10 px-20">
       <div>
-      <img src={logo} alt="Wau Logo" className="h-16 mb-6" />
-        <p className="text-xl font-medium  mb-2 ">
+        <img src={logo} alt="Wau Logo" className="h-16 mb-6" />
+        <p className="text-xl font-medium mb-2">
           {data?.title}{" "}
           <span className="text-slate-400 font-light text-sm">
             {data?.Code}
           </span>
         </p>
-        <p className="text-slate-400 font-light text-sm ">
-          {data?.description?.general}{" "}
-          
+        <p className="text-slate-400 font-light text-sm">
+          {data?.description?.general}
         </p>
-       
-        {data?.provider != "Interhome" && (
+
+        {data?.provider !== "Interhome" && (
           <div className="my-4">
             <div className="flex justify-between items-center">
-              <p className="text-sm text-gray-700">
-                No of guests
-              </p>
-              <p>
-                {details?.guests?.people 
-                  || 0}
-              </p>
+              <p className="text-sm text-gray-700">No of guests</p>
+              <p>{details?.guests?.people || 0}</p>
             </div>
 
             <div className="flex justify-between items-center">
-              <p className="text-sm text-gray-700">
-                No of dogs
-              </p>
-              <p>
-                {details?.guests?.dogs || 0}
-              </p>
+              <p className="text-sm text-gray-700">No of dogs</p>
+              <p>{details?.guests?.dogs || 0}</p>
             </div>
 
             <div className="border-t border-gray-200 my-4"></div>
 
-
+            {/* Updated pricing display using correct values */}
             <div className="flex justify-between items-center">
               <p className="text-sm text-gray-700">
-                {data?.pricePerNight?.discount || data?.pricePerNight?.price} x{" "}
-                {details?.noOfDays > 0 ? details?.noOfDays : 1}
+                {pricePerNight} x {numberOfDays}
               </p>
-              <p>
-                {(data?.pricePerNight?.discount ||data?.pricePerNight?.price) *
-                  (details?.noOfDays > 0 ? details?.noOfDays : 1)}
-              </p>
+              <p>{baseAmount.toFixed(2)}</p>
             </div>
 
             <div className="flex justify-between items-center">
               <p className="text-sm text-gray-700">Service charge (2.9%)</p>
               <p className="text-sm text-gray-700">
-                {(
-                  (data?.pricePerNight?.discount || data?.pricePerNight?.price) *
-                  (details?.noOfDays > 0 ? details?.noOfDays : 1) *
-                  0.029
-                ).toFixed(2)}
+                {serviceChargeAmount.toFixed(2)}
               </p>
             </div>
 
@@ -136,24 +141,30 @@ const Payment = () => {
             <div className="flex justify-between font-semibold">
               <span>Total</span>
               <span>
-                {(
-                  (data?.pricePerNight?.discount || data?.pricePerNight?.price) *
-                  (details?.noOfDays > 0 ? details?.noOfDays : 1) *
-                  1.029
-                ).toFixed(2)}
+                {finalAmount.toFixed(2)} {data?.pricePerNight?.currency || "CHF"}
               </span>
             </div>
+
+            {/* Optional: Show discount information if applicable */}
+            {data?.pricePerNight?.isDiscountActivate && data?.pricePerNight?.discount && (
+              <div className="mt-2 text-sm text-green-600">
+                <span className="line-through text-gray-400">
+                  Original: {data?.pricePerNight?.price} {data?.pricePerNight?.currency}
+                </span>
+                <span className="ml-2 font-medium">
+                  Discounted: {data?.pricePerNight?.discount} {data?.pricePerNight?.currency}
+                </span>
+              </div>
+            )}
           </div>
         )}
       </div>
-      {/* <div className="w-full md:w-2/3 lg:w-1/2   h-screen  px-20"> */}
 
       {paymentIntent?.clientSecret && !loading && (
         <Elements stripe={stripePromise} options={options}>
           <CheckoutForm />
         </Elements>
       )}
-      {/* </div> */}
     </div>
   );
 };
