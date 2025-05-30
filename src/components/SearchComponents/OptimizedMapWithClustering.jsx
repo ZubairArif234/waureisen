@@ -133,9 +133,7 @@ const OptimizedMapWithClustering = () => {
         ${listing.images && listing.images.length > 0 ? 
           `<div style="width: 100%; height: 120px; background-image: url('${listing.images[0]}'); background-size: cover; background-position: center; border-radius: 8px; margin-bottom: 8px;"></div>` : 
           ''}
-        <p style="margin: 0 0 5px; font-size: 16px; font-weight: 500; color: #B4A481;">
-          ${listing.pricePerNight ? `${listing.pricePerNight.price} ${listing.pricePerNight.currency}/night` : ''}
-        </p>
+        
         <div style="margin: 0; font-size: 12px; color: #666; display: flex; align-items: center;">
           <span>${listing.capacity ? `${listing.capacity.people} ${listing.capacity.people === 1 ? 'guest' : 'guests'}, ${listing.capacity.dogs || 0} ${listing.capacity.dogs === 1 ? 'dog' : 'dogs'}` : ''}</span>
         </div>

@@ -602,7 +602,7 @@ const ProviderMessages = () => {
                     <div 
                       ref={messageContainerRef}
                       className="flex-1 p-4 overflow-y-auto"
-                      style={{ maxHeight: 'calc(100vh - 220px)' }}
+                      style={{ maxHeight: 'calc(90vh - 220px)' }}
                     >
                       {isLoading ? (
                         <div className="flex justify-center items-center h-32">
