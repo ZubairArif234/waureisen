@@ -318,7 +318,7 @@ const Navbar = () => {
                 if (isLoggedIn) {
                   navigate("/host");
                 } else {
-                  navigate("/signup?redirect=host");
+                  navigate("/host");
                 }
               }}
               className="text-gray-700 hover:text-gray-100 text-sm font-medium whitespace-nowrap"
