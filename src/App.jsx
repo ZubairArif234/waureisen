@@ -52,8 +52,8 @@ function App() {
               <Route path="/camper/:title" element={<CamperDetail />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-
+              <Route path="/forgot-password/:role" element={<ForgotPassword />} />
+             
               {/* Payment requires authentication */}
               <Route
                 path="/payment"

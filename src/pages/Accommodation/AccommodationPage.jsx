@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../components/Shared/Navbar";
 import DateRangePicker from "../../components/HomeComponents/DateRangePicker";
 import GuestSelector from "../../components/HomeComponents/GuestSelector";
-import { Check, ChevronDown, AlertTriangle, ArrowLeft, Dot } from "lucide-react";
+import { Check, ChevronDown, AlertTriangle, ArrowLeft, Dot,FileText } from "lucide-react";
 import {
   Users,
   Home,
@@ -733,14 +733,14 @@ const getDisplayPrice = () => {
             {
               accommodation?.checkInTime && (
                 <div>
-                  <p className="font-medium">{t("checkin_time")} Checkin Time: <span className="font-thin">{moment(accommodation?.checkInTime).format("hh:mm A")}</span></p>
+                  <p className="font-medium">{t("checkin_time")} : <span className="font-thin">{moment(accommodation?.checkInTime).utc().format("hh:mm A")}</span></p>
                 </div>
               )
             }
             {
               accommodation?.checkOutTime && (
                 <div> 
-                  <p className="font-medium">{t("checkout_time")} Checkout Time: <span className="font-thin">{moment(accommodation?.checkOutTime).format("hh:mm A")}</span></p>
+                  <p className="font-medium">{t("checkout_time")} : <span className="font-thin">{moment(accommodation?.checkOutTime).utc().format("hh:mm A")}</span></p>
                 </div>
               )
             }
@@ -801,6 +801,26 @@ const getDisplayPrice = () => {
               <p  className="text-gray-600 text-sm whitespace-pre-line">{accommodation?.legal?.cancellationPolicy}</p>
               </section>
             )}
+
+            {/* additional files */}
+{accommodation.additionalDoc && 
+ <section className="mb-10">
+              <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
+                {t("additional_file")}
+              </h2>
+               <div className="flex items-center gap-3">
+                    <FileText className="w-8 h-8 text-brand" />
+                    <Link
+                      className="text-slate-700 line-clamp-1"
+                     to={accommodation.additionalDoc?.includes(".docx") ? `https://docs.google.com/gview?url=${encodeURIComponent(accommodation.additionalDoc)}&embedded=true` : accommodation.additionalDoc}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {accommodation.additionalDoc}
+                    </Link>
+                  </div>
+              </section>
+}
 
             {/* Reviews */}
             {/* <section className="mb-10">

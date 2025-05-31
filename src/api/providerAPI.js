@@ -2,6 +2,29 @@
 import API from "./config";
 import { setAuthHeader } from "../utils/authService";
 
+export const providerForgotPassword = async (credentials) => {
+  try {
+    // console.log("Attempting user login with:", credentials);
+    const response = await API.post("/providers/forgot-password", credentials);
+    // console.log("User login response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("forgot password  error:", error);
+    throw error;
+  }
+};
+export const providerResetPassword = async (credentials) => {
+  try {
+    // console.log("Attempting user login with:", credentials);
+    const response = await API.post("/providers/reset-password", credentials);
+    // console.log("User login response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("rest password  error:", error);
+    throw error;
+  }
+};
+
 export const getProviderProfile = async () => {
   try {
     setAuthHeader();

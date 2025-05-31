@@ -213,7 +213,7 @@ const [searchParams] = useSearchParams();
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-500">{t("forgot_password")}</span>
                   <Link 
-                  to={"/forgot-password"}
+                  to={`/forgot-password/${userType}`}
                     
                     className="text-[#B4A481] hover:underline ml-2"
                   >

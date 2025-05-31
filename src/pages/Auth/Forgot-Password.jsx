@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useLocation,
+  useSearchParams,
+  useParams,
+} from "react-router-dom";
 import Navbar from "../../components/Shared/Navbar";
 import authBg from "../../assets/bg.png";
 import Footer from "../../components/Shared/Footer";
@@ -12,23 +18,26 @@ import {
 import WelcomeCustomerModal from "../../components/SearchComponents/WelcomeCustomerModal";
 import { changeMetaData } from "../../utils/extra";
 import { SendHorizontal } from "lucide-react";
+import { userForgotPassword, userResetPassword } from "../../api/authAPI";
+import toast from "react-hot-toast";
+import { providerForgotPassword, providerResetPassword } from "../../api/providerAPI";
 
 const ForgotPassword = () => {
- useEffect(() => {
-  
+  useEffect(() => {
     changeMetaData(`Forgot Password - Waureisen`);
   }, []);
 
   const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
+  const {role} = useParams();
+  const [newPassword, setNewPassword] = useState("");
+  const [otp, setOtp] = useState(null);
   const [otpField, setOtpField] = useState(false);
   const [error, setError] = useState("");
+  const [isOtpLoading, setIsOtpLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useLanguage();
-  
-     const [activeModal, setActiveModal] = useState(false);
 
   // Check for session_expired param in URL
   useEffect(() => {
@@ -42,24 +51,43 @@ const ForgotPassword = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    let response;
+    // navigate("/reset-password")
+
     setError(""); // Reset error on new submission
     setIsLoading(true);
 
     try {
       // Use the centralized login function from authService
-      const response = await login({ email, password }, userType);
+      if (role == "user") {
+        response = await userResetPassword({
+          email,
+          password: newPassword,
+          passwordResetToken: otp,
+        });
+      } else if (role == "provider") {
+        response = await providerResetPassword({
+          email,
+          password: newPassword,
+          passwordResetToken: otp,
+        });
+      }
 
-      // console.log("Login successful:", response);
+      if (response) {
+        toast.success("Password Changed Successfully");
+        navigate("/login");
+        console.log("Login successful:", response);
+      }
 
       // Navigate based on user type
-      if (userType === "admin") {
-        navigate("/admin/accommodations");
-      } else if (userType === "provider") {
-        navigate("/provider/dashboard");
-      } else {
-        setActiveModal(true)
-        // navigate("/");
-      }
+      // if (userType === "admin") {
+      //   navigate("/admin/accommodations");
+      // } else if (userType === "provider") {
+      //   navigate("/provider/dashboard");
+      // } else {
+      //   setActiveModal(true)
+      //   // navigate("/");
+      // }
     } catch (error) {
       console.error("Login error:", error);
 
@@ -93,11 +121,27 @@ const ForgotPassword = () => {
     }
   };
 
-  const handleSendOtp = () => {
-    if (email?.trim() !== ""){
-        setOtpField(true)
+  const handleSendOtp = async () => {
+    try {
+      
+      let res;
+      setIsOtpLoading(true);
+      if (email?.trim() != "") {
+        if (role == "user") {
+          res = await userForgotPassword({ email });
+        } else if (role == "provider") {
+          res = await providerForgotPassword({ email });
+        }
+        if (res) {
+          setOtpField(true);
+          setIsOtpLoading(false);
+        }
+      }
+    } catch (err) {
+      setIsOtpLoading(false);
+      console.log(err);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen">
@@ -126,12 +170,8 @@ const ForgotPassword = () => {
               >
                 {t("forgot_password")}
               </Link>
-             
-              {/* Active Indicator Line */}
-              {/* <div className="absolute bottom-0 right-0 w-1/2 h-0.5 bg-[#B4A481]" /> */}
             </div>
 
-            {/* Login Form */}
             <form onSubmit={handleSubmit} className="p-8">
               <div className="space-y-8">
                 {/* Error Message */}
@@ -141,58 +181,79 @@ const ForgotPassword = () => {
                   </div>
                 )}
 
-               
-
                 {/* Email Field */}
                 <div className="flex items-end gap-2">
-                <div className="space-y-3 w-full">
-                  <label
-                    htmlFor="email"
-                    className="block text-sm font-medium text-gray-700"
+                  <div className="space-y-3 w-full">
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      {t("email")}
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder={t("email_placeholder")}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleSendOtp}
+                    disabled={otp}
+                    className={` py-3 px-4 rounded-lg font-medium ${
+                      isLoading
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                    }`}
                   >
-                    {t("email")}
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder={t("email_placeholder")}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
-                  />
-                </div>
-<button type="button" onClick={handleSendOtp}  className={` py-3 px-4 rounded-lg font-medium ${
-                    isLoading
-                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      : "bg-gray-100 text-gray-800 hover:bg-gray-200"
-                  }`}><SendHorizontal /></button>
+                    <SendHorizontal />
+                  </button>
                 </div>
 
                 {/* Password Field */}
                 {otpField && (
-
-                <div className="space-y-3">
-                  <label
-                    htmlFor="password"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    OTP
-                  </label>
-                  <input
-                    type="text"
-                    id="password"
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
-                    placeholder={t("otp_placeholder")}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
-                  />
-                </div>
+                  <>
+                    <div className="space-y-3">
+                      <label
+                        htmlFor="password"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        OTP
+                      </label>
+                      <input
+                        type="text"
+                        id="password"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value)}
+                        placeholder={t("otp_placeholder")}
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
+                      />
+                    </div>
+                    <div className="space-y-3">
+                      <label
+                        htmlFor="password"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        {t("new_password")}
+                      </label>
+                      <input
+                        type="password"
+                        id="password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        placeholder={t("password_placeholder")}
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
+                      />
+                    </div>
+                  </>
                 )}
 
-              
                 <button
                   type="submit"
-                  disabled={isLoading || !otp }
+                  disabled={isLoading || !otp}
                   className={`w-full py-3 px-4 rounded-lg font-medium ${
                     isLoading
                       ? "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -201,9 +262,6 @@ const ForgotPassword = () => {
                 >
                   {isLoading ? t("logging_in") : t("reset_password")}
                 </button>
-
-              
-               
               </div>
             </form>
 
@@ -212,7 +270,7 @@ const ForgotPassword = () => {
           </div>
         </div>
       </div>
-     
+
       <Footer />
     </div>
   );

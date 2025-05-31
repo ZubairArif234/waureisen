@@ -26,6 +26,29 @@ export const userSignup = async (userData) => {
   }
 };
 
+export const userForgotPassword = async (credentials) => {
+  try {
+    // console.log("Attempting user login with:", credentials);
+    const response = await API.post("/users/forgot-password", credentials);
+    // console.log("User login response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("forgot password  error:", error);
+    throw error;
+  }
+};
+export const userResetPassword = async (credentials) => {
+  try {
+    // console.log("Attempting user login with:", credentials);
+    const response = await API.post("/users/reset-password", credentials);
+    // console.log("User login response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("rest password  error:", error);
+    throw error;
+  }
+};
+
 // Provider authentication
 export const providerLogin = async (credentials) => {
   try {
