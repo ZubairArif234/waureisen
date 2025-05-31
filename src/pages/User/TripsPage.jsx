@@ -343,17 +343,6 @@ const TripCard = ({ trip, onEdit }) => {
                 )}
               </div>
 
-              {trip.status === "confirmed" && checkInDate.isAfter(currentDate) && (
-                <button
-                  className="p-2 text-gray-500 hover:text-brand hover:bg-gray-100 rounded-full"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEdit(trip);
-                  }}
-                >
-                  <Edit className="w-5 h-5" />
-                </button>
-              )}
             </div>
 
             <div className="space-y-3 mb-4 flex-grow">
