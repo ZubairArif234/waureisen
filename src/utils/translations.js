@@ -537,7 +537,7 @@ no_hours:"quite hours after 10 PM",
     liability_text:
       "The content of our website is maintained with the greatest possible care. However, no liability is assumed for the content. Waureisen GmbH expressly and completely disclaims any liability for any claims in connection with its website, the information and data on its website and/or the use of its website. In particular, Waureisen GmbH assumes no liability and/or responsibility for references and/or links to third-party websites listed on its website and for any problems that may arise in connection with them.",
     general_provisions: "General Provisions",
-    copyright_info: "Copyright: 2024 Waureisen GmbH",
+    copyright_info: "Copyright: 2025 Waureisen GmbH",
     content_copyright:
       "The content of all texts, logos, and images are protected by copyright.",
 
@@ -574,13 +574,13 @@ no_hours:"quite hours after 10 PM",
       "Join our community of dog-friendly accommodation providers and start earning income while creating wonderful experiences for guests and their furry companions.",
     benefits_hosting: "Benefits of Hosting with Waureisen",
     benefit_1:
-      "Reach a targeted audience of dog owners looking for pet-friendly stays",
+      "Increased visibility: Your accommodation will be showcased to dog owners specifically looking for pet-friendly stays.",
     benefit_2:
-      "Flexible hosting options - rent your entire property or just a room",
-    benefit_3: "Set your own availability, prices, and house rules",
-    benefit_4: "24/7 host support and dedicated account management",
-    benefit_5: "Professional photography and listing optimization assistance",
-    benefit_6: "Comprehensive host insurance and damage protection",
+      "Easy booking process: Quick and hassle-free bookings – optimized for both hosts and guests with dogs.",
+    benefit_3: "Targeted marketing: We reach exactly the right audience searching for dog-friendly accommodations.",
+    benefit_4: "Trust & security: Verified guests, secure payments, and support from our service team.",
+    benefit_5: "Direct communication: Easily connect with dog owners to arrange individual requests.",
+    benefit_6: "10% commission on the accommodation price: Fair and transparent – you only pay when a booking is made.",
     how_it_works: "How It Works",
     how_it_works_1:
       "Create your listing - Add photos, description, and set your price",
@@ -601,7 +601,7 @@ no_hours:"quite hours after 10 PM",
     interhome_description:
       'Interhome was founded in London in 1965 by Bruno Franzen and Werner Frey under the name Swiss Chalets and renamed Interhome after a merger in 1977. The company became known for innovative approaches such as the attempt to establish a paperless office. In 1984, the distinctive "migratory bird" logo was introduced, which has served as the recognizable symbol since 2008. In 1999, the first online bookings followed, which already accounted for around 60% of total bookings in 2009. In 2015, Interhome celebrated its 50th anniversary and took 6th place in the "Swiss Arbeitgeber Awards" in the 50-99 employee category.',
     europarcs_description:
-      "EuroParcs was founded in the 1980s by Wim Vos and specializes in managing holiday parks. The company grew rapidly and acquired the competitor Droomparken in 2019. In 2021, EuroParcs opened an office in Cologne. In November 2024, EuroParcs was acquired by Waterland Private Equity. The EuroParcs Charity Foundation offers free stays for families with seriously ill children and people with disabilities.",
+      "Travelcoup has been the first provider to offer package tours in private jets since 2021 - with the aim of making flying an exclusive and special experience again. To this end, Embraer regional jets (ERJ 135/145) are converted into semi-private jets with 16 or 22 comfortable first-class seats with the help of special certification (STC). The aircraft are characterized by an elegant cabin design, high-quality materials and generous legroom. Customers benefit from the use of private jet terminals, lounges, first-class in-flight service and an online concierge for onward travel and bookings. In cooperation with Waureisen, dogs weighing up to 30 kg can also travel comfortably in the cabin.",
     petco_description:
       'PET & Co. was founded in 2021 by siblings Kerstin and Sarah. With a great passion and attention to detail, the team designs comfortable, easy-care, and aesthetically pleasing products, tailored to the needs of dogs, cats, and their owners. True to the motto: "Create good vibes in your home and live in a happy place."',
     kitsune_description:
@@ -1332,14 +1332,32 @@ no_hours:"quite hours after 10 PM",
     profile_saved_successfully: "Profile saved successfully",
     Dashboard: "Dashboard",
     hosting_information: "Hosting Information",
+    searching_accommodations: "Searching accommodations...",
+  accommodations_found: "accommodations found",
+  no_accommodations_found: "No accommodations found", 
+  looking_for_accommodations: "Looking for accommodations...",
+  within_radius: "Within 500km radius",
+  map_view: "Map View",
+  error: "Error",
+  close: "Close",
+  filters: "Filters",
+    
   },
 
   de: {
+    filters: "Filter",
     guests:"Gäste",
     dogs:"Hunde",
      booking_created:"Booking Created Successfully",
     booking_created_msg:"Ihre Buchung wurde erfolgreich erstellt. Sobald der Anbieter sie bestätigt hat, erhalten Sie eine Benachrichtigung per E-Mail.",
-    
+     searching_accommodations: "Suche Unterkünfte...",
+  accommodations_found: "Unterkünfte gefunden", 
+  no_accommodations_found: "Keine Unterkünfte gefunden",
+  looking_for_accommodations: "Suche nach Unterkünften...",
+  within_radius: "Im Umkreis von 500km",
+  map_view: "Kartenansicht", 
+  error: "Fehler",
+  close: "Schließen",
     awaiting_confirmation:"Warten auf Bestätigung",
     waiting_provider_response:"Warten auf Antwort des Anbieters",
     additional_file:"Zusätzliches Dokument",
@@ -1571,7 +1589,7 @@ no_hours:"ziemlich Stunden nach 22 Uhr",
     account_deletion_failed:
       "Konto konnte nicht gelöscht werden. Bitte versuche es erneut oder kontaktiere den Support.",
     account_actions: "Kontoaktionen",
-
+    terms_and_conditions: "Geschäftsbedingungen",
 
      // Chat-related translations
   messages: "Nachrichten",
@@ -2164,14 +2182,14 @@ account_actions: "Kontoaktionen",
     host_intro: "Schliessen Sie sich unserer Gemeinschaft von hundefreundlichen Unterkunftsanbietern an und erzielen Sie ein Einkommen, während Sie wunderbare Erlebnisse für Gäste und ihre pelzigen Begleiter schaffen.",
     benefits_hosting: "Vorteile als Gastgeber bei Waureisen",
     benefit_1:
-      "Erreichen Sie eine gezielte Zielgruppe von Hundebesitzern, die nach haustierfreundlichen Unterkünften suchen",
+      "Erhöhte Sichtbarkeit: Ihre Unterkunft wird Hundebesitzern präsentiert, die gezielt nach haustierfreundlichen Unterkünften suchen.",
     benefit_2:
-      "Flexible Gastgeber-Optionen - vermieten Sie Ihre gesamte Immobilie oder nur ein Zimmer",
+      "Einfacher Buchungsvorgang: Schnelle und unkomplizierte Buchung – optimiert für Gastgeber und Gäste mit Hund.",
     benefit_3:
-      "Legen Sie Ihre eigene Verfügbarkeit, Preise und Hausregeln fest",
-    benefit_4: "24/7 Gastgeber-Support und dediziertes Account-Management",
-    benefit_5: "Professionelle Fotografie und Optimierung Ihres Angebots",
-    benefit_6: "Umfassende Gastgeber-Versicherung und Schadensschutz",
+      "Zielgerichtetes Marketing: Wir erreichen genau die richtige Zielgruppe, die nach hundefreundlichen Unterkünften sucht.",
+    benefit_4: "Vertrauen & Sicherheit: Verifizierte Gäste, sichere Zahlungen und Unterstützung durch unser Serviceteam.",
+    benefit_5: "Direkte Kommunikation: Einfach mit Hundebesitzern in Kontakt treten, um individuelle Wünsche zu klären.",
+    benefit_6: "10 % Provision auf den Übernachtungspreis: Fair und transparent – ​​Sie zahlen nur bei einer Buchung.",
     how_it_works: "Wie es funktioniert",
     how_it_works_1:
       "Erstellen Sie Ihr Angebot - Fügen Sie Fotos und Beschreibungen hinzu und legen Sie Ihren Preis fest",
@@ -2189,7 +2207,7 @@ account_actions: "Kontoaktionen",
     interhome_description:
       'Interhome wurde 1965 in London von Bruno Franzen und Werner Frey unter dem Namen Swiss Chalets gegründet und nach einer Fusion 1977 in Interhome umbenannt. Bekannt wurde das Unternehmen durch innovative Ansätze wie den Versuch, ein papierloses Büro zu etablieren. 1984 wurde das markante "Zugvogel"-Logo eingeführt, das seit 2008 als Erkennungszeichen dient. 1999 folgten die ersten Onlinebuchungen, die 2009 bereits rund 60% der Gesamtbuchungen ausmachten. 2015 feierte Interhome sein 50-jähriges Jubiläum und belegte den 6. Platz bei den "Swiss Arbeitgeber Awards" in der Kategorie 50–99 Mitarbeiter.',
     europarcs_description:
-      "EuroParcs wurde in den 1980er Jahren von Wim Vos gegründet und hat sich auf die Verwaltung von Ferienparks spezialisiert. Das Unternehmen wuchs schnell und übernahm 2019 den Konkurrenten Droomparken. 2021 eröffnete EuroParcs ein Büro in Köln. Im November 2024 wurde EuroParcs von Waterland Private Equity übernommen. Die EuroParcs Charity Foundation bietet kostenlose Aufenthalte für Familien mit schwerkranken Kindern und Menschen mit Behinderungen.",
+      "Travelcoup bietet seit 2021 als erster Anbieter Pauschalreisen im Privatjet an – mit dem Ziel, Fliegen wieder zu einem exklusiven und besonderen Erlebnis zu machen. Dafür werden Embraer Regionaljets (ERJ 135/145) mithilfe einer Sonderzertifizierung (STC) zu Semi-Privatjets mit 16 bzw. 22 komfortablen First-Class-Sitzen umgebaut. Die Flugzeuge zeichnen sich durch ein elegantes Kabinendesign, hochwertige Materialien und großzügige Beinfreiheit aus. Kunden profitieren von der Nutzung von Privatjet-Terminals, Lounges, erstklassigem Bordservice sowie einem Online-Concierge für Weiterreise und Buchung. In Kooperation mit Waureisen können auch Hunde bis 30 kg bequem in der Kabine reisen.",
     petco_description:
       'PET & Co. wurde 2021 von den Geschwistern Kerstin und Sarah gegründet. Mit grosser Leidenschaft und Liebe zum Detail entwirft das Team komfortable, pflegeleichte und ästhetisch ansprechende Produkte, die auf die Bedürfnisse von Hunden, Katzen und deren Besitzern zugeschnitten sind. Getreu dem Motto: "Schaffe gute Stimmung in deinem Zuhause und lebe an einem glücklichen Ort."',
     kitsune_description:

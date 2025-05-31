@@ -65,7 +65,7 @@ const Partners = () => {
   
   {/* EuroParcs */}
   <PartnerSection 
-    title="EuroParcs"
+    title="TravelCoup"
     descriptionKey="europarcs_description"
     url="https://www.europarcs.de/"
   />

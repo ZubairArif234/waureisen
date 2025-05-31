@@ -4,7 +4,7 @@ const TermsContent = () => {
   return (
     <div className="prose prose-sm max-w-none">
       <h1 className="text-2xl font-bold mb-6">
-        Terms and Conditions
+        Geschäftsbedingungen
       </h1>
       
       <p className="mb-6">

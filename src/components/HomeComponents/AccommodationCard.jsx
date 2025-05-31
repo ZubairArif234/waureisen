@@ -18,8 +18,6 @@ const AccommodationCard = ({
   owner, // Add owner prop to get provider details
   code, // Add code prop to get listing code
 }) => {
-  console.log(pricePerNight ,"price per night");
-  
   const [isFavorite, setIsFavorite] = useState(isFavorited);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [loadedImages, setLoadedImages] = useState(new Set());
@@ -114,43 +112,44 @@ const AccommodationCard = ({
   };
 
   // Improved display source logic
-  const getDisplaySource = () => {
-    // If listingSource is provided and it's not "waureisen", use it
-    if (listingSource && listingSource.toLowerCase() !== "waureisen") {
-      return listingSource;
+ // Improved display source logic
+const getDisplaySource = () => {
+  // Check if this is an Interhome listing first (with capital I)
+  if (listingSource?.toLowerCase() === "interhome" || provider?.toLowerCase() === "interhome") {
+    return "Interhome";
+  }
+  
+  // If listingSource is provided and it's not "waureisen", use it
+  if (listingSource && listingSource.toLowerCase() !== "waureisen") {
+    return listingSource;
+  }
+  
+  // If provider is provided and it's not "waureisen", use it
+  if (provider && provider.toLowerCase() !== "waureisen") {
+    return provider;
+  }
+  
+  // If we have owner information, try to use that
+  if (owner) {
+    // If owner has a display name, use it
+    if (owner.displayName) {
+      return owner.displayName;
     }
     
-    // If provider is provided and it's not "waureisen", use it
-    if (provider && provider.toLowerCase() !== "waureisen") {
-      return provider;
+    // If owner has firstName and lastName, combine them
+    if (owner.firstName || owner.lastName) {
+      return `${owner.firstName || ''} ${owner.lastName || ''}`.trim();
     }
     
-    // If we have owner information, try to use that
-    if (owner) {
-      // If owner has a display name, use it
-      if (owner.displayName) {
-        return owner.displayName;
-      }
-      
-      // If owner has firstName and lastName, combine them
-      if (owner.firstName || owner.lastName) {
-        return `${owner.firstName || ''} ${owner.lastName || ''}`.trim();
-      }
-      
-      // If owner has username, use it
-      if (owner.username) {
-        return owner.username;
-      }
+    // If owner has username, use it
+    if (owner.username) {
+      return owner.username;
     }
-    
-    // Check if this is an Interhome listing
-    if (listingSource?.toLowerCase() === "interhome" || provider?.toLowerCase() === "interhome") {
-      return "Interhome";
-    }
-    
-    // For all other cases where we can't determine the source, use "Host"
-    return "Host";
-  };
+  }
+  
+  // For all other cases where we can't determine the source, use "Host"
+  return "Host";
+};
 
   const displaySource = getDisplaySource();
 
@@ -214,7 +213,7 @@ const AccommodationCard = ({
       <div className="space-y-1 cursor-pointer" onClick={()=>handleClick(propertyLocation)}>
         <p className="text-brand text-sm">
           {pricePerNight?.currency || "CHF"}{" "}
-          {((pricePerNight?.isDiscountActivate && pricePerNight?.discount)|| pricePerNight?.price || price).toFixed(2)} {t("per_night")}
+          {(pricePerNight?.price || price).toFixed(2)} {t("per_night")}
         </p>
         <h3 className="font-medium text-gray-900">{propertyLocation}</h3>
       </div>

@@ -168,7 +168,12 @@ const SearchBarTwo = ({
       const endDate = `${dateRange.end.toLocaleString('default', { month: 'short' })} ${String(dateRange.end.getDate()).padStart(2, '0')} ${dateRange.end.getFullYear()}`;
       dateParam = `&dates=${startDate} - ${endDate}`;
     }
-    searchUrl += `${dateParam}&people=${guests.people}&dogs=0`;
+
+    let guestParam = `&people=${guests.people}`;
+  if (guests.dogs && guests.dogs > 0) {
+    guestParam += `||dogs=${guests.dogs}`;
+  }
+    searchUrl += `${dateParam}${guestParam}`;
     
     // Get filters from URL if they exist
     const urlParams = new URLSearchParams(window.location.search);
@@ -322,7 +327,7 @@ const SearchBarTwo = ({
           className="flex items-center gap-2 px-2 sm:px-4 py-2 border border-gray-300 rounded-xl hover:border-gray-400 transition-colors bg-white flex-shrink-0"
         >
           <SlidersHorizontal className="w-4 h-4" />
-          <span className="text-sm font-medium hidden sm:block">{t('filters') || 'Filters'}</span>
+          <span className="text-sm font-medium hidden sm:block">{t('filters') || 'Filter'}</span>
         </button>
       </div>
 

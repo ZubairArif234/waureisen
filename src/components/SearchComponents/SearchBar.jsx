@@ -105,7 +105,14 @@ const handleSearch = () => {
     const endDate = `${dateRange.end.toLocaleString('default', { month: 'short' })} ${String(dateRange.end.getDate()).padStart(2, '0')} ${dateRange.end.getFullYear()}`;
     dateParam = `&dates=${startDate} - ${endDate}`;
   }
-  searchUrl += `${dateParam}&people=${guests.people}&dogs=0`;
+  
+  // Build people and dogs parameter with || separator
+  let guestParam = `&people=${guests.people}`;
+  if (guests.dogs && guests.dogs > 0) {
+    guestParam += `||dogs=${guests.dogs}`;
+  }
+  
+  searchUrl += `${dateParam}${guestParam}`;
   
   // Navigate to search page
   if (onSearch && typeof onSearch === 'function') {

@@ -711,11 +711,10 @@ const OptimizedMapWithClustering = () => {
         </div>
       )}
       
-      {/* Empty state - only show when not loading or dragging */}
       {isLoaded && !isDraggingMap && !isInitialLoad && !isLoading && listings && listings.length === 0 && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80 rounded-lg">
-          <div className="text-center p-4">
-            <p className="text-base font-medium text-gray-800">No accommodations found within 500km</p>
+        <div className="absolute inset-0 flex items-center justify-center rounded-lg pointer-events-none">
+          <div className="text-center p-4 bg-white bg-opacity-90 rounded-lg shadow-lg pointer-events-auto">
+            <p className="text-base font-medium text-gray-200">No accommodations found within 500km</p>
             <p className="text-sm text-gray-600 mt-2">Try adjusting your search criteria or choosing a different location</p>
           </div>
         </div>

@@ -8,6 +8,7 @@ import ImprovedVirtualizedListings from "../../components/SearchComponents/Impro
 import MapToggle from "../../components/SearchComponents/MapToggle";
 import SkeletonCard from "../../components/SearchComponents/SkeletonCard";
 import Footer from "../../components/Shared/Footer";
+import { useLanguage } from '../../utils/LanguageContext';
 import EnhancedSearchBar from "../../components/SearchComponents/SearchBarTwo";
 import { useListings, ListingProvider } from "../../context/ListingContext";
 import { SearchFiltersProvider, useSearchFilters } from "../../context/SearchFiltersContext";
@@ -20,6 +21,7 @@ const MoreFiltersModal = lazy(() => import('../../components/SearchComponents/Mo
  * Using a separate component allows us to use hooks inside the provider
  */
 const SearchResultsContent = () => {
+  const { t } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
   const { searchFilters } = useSearchFilters();
@@ -128,6 +130,7 @@ const SearchResultsContent = () => {
       max: parseInt(urlParams.get("priceMax")) || 10000
     };
     
+   
     // Create search param object
     const newSearchParams = {
       lat, 
@@ -137,7 +140,8 @@ const SearchResultsContent = () => {
       filters: {
         dateRange: {
           start: dates[0] ? new Date(dates[0]) : null,
-          end: dates[1] ? new Date(dates[1]) : null
+          end: dates[1] ? new Date(dates[1]) : null,
+           
         },
         amenities: filters,
         guestCount: people,
@@ -162,17 +166,17 @@ const SearchResultsContent = () => {
   const getTotalDisplay = useCallback(() => {
     // If we're in initial load or reloading due to map drag, show "Searching..."
     if (isInitialLoad || isDraggingMap) {
-      return "Searching accommodations...";
+      return t('searching_accommodations');
     }
     
     // If we have a total count from the API, use that
     if (totalAccommodationsInRadius > 0) {
-      return `${totalAccommodationsInRadius} accommodations found`;
+      return `${totalAccommodationsInRadius} ${t('accommodations_found')}`;
     }
     
     // Default case, no listings found
-    return "No accommodations found";
-  }, [isInitialLoad, isDraggingMap, totalAccommodationsInRadius]);
+    return t('no_accommodations_found');
+  }, [isInitialLoad, isDraggingMap, totalAccommodationsInRadius, t]);
   
   // Handle window resize
   useEffect(() => {
@@ -271,7 +275,7 @@ const SearchResultsContent = () => {
         <div className="fixed top-32 left-1/2 transform -translate-x-1/2 bg-black text-white px-4 py-2 rounded-full text-sm z-50 shadow-lg bg-brand">
           <div className="flex items-center space-x-2">
             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            <span>Looking for accommodations...</span>
+            <span>{t('looking_for_accommodations')}</span>
           </div>
         </div>
       )}
@@ -290,7 +294,7 @@ const SearchResultsContent = () => {
                 <span className="font-semibold">{getTotalDisplay()}</span>
               </h2>
               <p className="text-sm text-gray-600 mt-1">
-                Within 500km radius 
+                {t('within_radius')}
               </p>
             </div>
           </div>
@@ -303,7 +307,7 @@ const SearchResultsContent = () => {
                 </svg>
               </div>
               <div>
-                <span className="font-medium">Error: </span>
+                <span className="font-medium">{t('error')}: </span>
                 {error}
               </div>
             </div>
@@ -330,10 +334,11 @@ const SearchResultsContent = () => {
             {showMap && !isDesktop && (
               <div className="p-4 border-b border-gray-200 bg-white">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900">Map View</h2>
+                  <h2 className="text-lg font-semibold text-gray-900">{t('map_view')}</h2>
                   <button
                     onClick={() => setShowMap(false)}
                     className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                    aria-label={t('close')}
                   >
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -364,8 +369,6 @@ const SearchResultsContent = () => {
     </div>
   );
 };
-
-
 
 /**
  * Main search results page component that wraps content with ListingProvider
