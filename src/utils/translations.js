@@ -1,5 +1,8 @@
 const translations = {
   en: {
+    awaiting_confirmation:"Awaiting Confirmation",
+    
+    waiting_provider_response:"Waiting provider response",
     additional_file:"Additional Document",
     otp_placeholder:"Enter OTP ",
     reset_password:"Reset Password ",
@@ -1328,6 +1331,8 @@ no_hours:"quite hours after 10 PM",
   },
 
   de: {
+    awaiting_confirmation:"Warten auf Bestätigung",
+    waiting_provider_response:"Warten auf Antwort des Anbieters",
     additional_file:"Zusätzliches Dokument",
  otp_placeholder:"Geben Sie OTP ein ",
     reset_password:"Passwort zurücksetzen",

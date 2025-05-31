@@ -4,13 +4,14 @@ import {
   useElements,
   useStripe,
 } from "@stripe/react-stripe-js";
-import React from "react";
+import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const CheckoutForm = () => {
   const navigate = useNavigate();
   const stripe = useStripe();
+  const [isLoading , setIsLoading] = useState(false)
   const { state } = useLocation();
   const elements = useElements();
   const handleSubmit = async (event) => {
@@ -19,6 +20,7 @@ const CheckoutForm = () => {
     if (!stripe || !elements) {
       return;
     }
+    setIsLoading(true)
     const result = await stripe.confirmPayment({
       //`Elements` instance that was used to create the Payment Element
       elements,
@@ -30,6 +32,7 @@ const CheckoutForm = () => {
     // console.log(result);
 
     if (result.error) {
+         setIsLoading(false)
       console.error("Payment Failed:", result.error.message);
       toast.error("Payment failed")
       // navigate(-1)
@@ -40,8 +43,12 @@ const CheckoutForm = () => {
       result.paymentIntent &&
       result.paymentIntent.status === "succeeded"
     ) {
-      toast.success("Payment done successfully")
-      navigate("/trips")
+
+      setTimeout(() => {
+        setIsLoading(false)
+        toast.success("Payment done successfully")
+        navigate("/trips")
+      }, 5000);
       // navigate("/payment-success", {
       //   state: {
       //     status: "success",
@@ -53,6 +60,7 @@ const CheckoutForm = () => {
     } else {
       console.log("⚠️ Payment Status:", result.paymentIntent.status);
     }
+ 
   };
 
   return (
@@ -63,8 +71,8 @@ const CheckoutForm = () => {
         <PaymentElement />
 
         <button type="submit" size="lg"  className="w-full mt-10 bg-brand text-white py-3 rounded-lg font-medium hover:bg-brand-dark transition-colors"
-               disabled={!stripe}>
-          Pay
+               disabled={!stripe || isLoading}>
+                {isLoading ? "Loading ..." : "Pay"}
         </button>
       </form>
     </div>
