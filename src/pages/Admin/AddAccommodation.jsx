@@ -617,7 +617,7 @@ const isoCheckOut = convertToISOString(checkOutDate, formData.availability.check
           general: formData?.shortDescription,
           short: formData?.shortDescription,
         },
-        additionalDoc:validatedUrlOfAdditionalFile,
+        additionalDoc:validatedUrlOfAdditionalFile || formData?.additionalDoc,
         checkInTime: isoCheckIn,
         checkOutTime: isoCheckOut,
         checkInDates: formData?.availability?.checkInDates || '',
@@ -1327,6 +1327,10 @@ console.log(findIndex, "find index");
     setIsDiscount(!isDiscount)
   }
 
+  const handleRemoveAdditionalFile = () => {
+    const prevData = {...formData}
+    setFormData({...prevData , additionalDoc:""})
+  }
   const renderForm = () => {
     if (!template) return <div>Loading template...</div>;
     if (!activeTab) return null;
@@ -1386,6 +1390,7 @@ console.log(subsection , "kln");
             customPolicy={customPolicy}
             setCustomPolicy={setCustomPolicy}
             setAdditionalFile={setAdditionalFile}
+            handleRemoveAdditionalFile={handleRemoveAdditionalFile}
           />
         );
       default:

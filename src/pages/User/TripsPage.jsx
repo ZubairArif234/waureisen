@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Calendar, MapPin, Dog, Edit, X, AlertTriangle, ArrowLeft } from "lucide-react";
+import { Calendar, MapPin, Dog, Edit, X, AlertTriangle, ArrowLeft, UsersRound } from "lucide-react";
 import Navbar from "../../components/Shared/Navbar";
 import Footer from "../../components/Shared/Footer";
 import DateRangePicker from "../../components/HomeComponents/DateRangePicker";
@@ -371,6 +371,17 @@ const TripCard = ({ trip, onEdit }) => {
                 <Dog className="w-5 h-5" />
                 <span>{trip?.listing?.provider}</span>
               </div>
+
+              <div className="flex items-center gap-2 text-gray-600">
+              <div className="flex items-center gap-2 text-gray-600">
+                <UsersRound className="w-5 h-5" />
+                <span className="capitalize">{trip?.capacity?.people} {t('guests')}</span>
+              </div>
+              <div className="flex items-center gap-2 text-gray-600">
+                <Dog className="w-5 h-5" />
+                <span className="capitalize">{trip?.capacity?.dogs} {t('dogs')}</span>
+              </div>
+              </div>
             </div>
 
             <div className="flex items-center justify-between mt-auto pt-4 border-t">
@@ -475,9 +486,50 @@ const SuccessMessage = ({ message, onClose }) => {
   );
 };
 
+const SuccessBooking = ({ message, onClose }) => {
+  const {t} = useLanguage()
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     onClose();
+  //   }, 3000);
+
+  //   return () => clearTimeout(timer);
+  // }, [onClose]);
+
+  return (
+    <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-green-50 text-green-800 px-4 py-3 rounded-lg shadow-lg border border-green-200 flex items-center justify-between max-w-md">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-10 h-10 bg-green-200 rounded-full flex items-center justify-center mr-3">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-8 w-8 text-green-600"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fillRule="evenodd"
+              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </div>
+        <p>
+
+        <p className="text-lg font-semibold text-center">{t("booking_created")}</p>
+        <p className="text-slate-600 text-center">{t("booking_created_msg")}</p>
+        </p>
+      </div>
+      <button onClick={onClose} className="absolute top-2 right-2 ml-4 text-gray-500 hover:text-gray-800">
+        <X className="h-5 w-5" />
+      </button>
+    </div>
+  );
+};
+
 // Main TripsPage Component
 const TripsPage = () => {
   const { t } = useLanguage();
+  const [isBookingModal, seIsBookingModal] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
@@ -496,6 +548,18 @@ const TripsPage = () => {
   const [currentCanceledPage, setCurrentCanceledPage] = useState(1);
 
   const itemPerPage = 5;
+
+  const queryString = window.location.search; 
+const params = new URLSearchParams(queryString);
+
+const booking = params.get('booking'); 
+console.log(booking);
+
+useEffect(()=>{
+if(booking == "true"){
+  seIsBookingModal(true)
+}
+},[booking])
 
   useEffect(() => {
     changeMetaData("Trips - Waureisen");
@@ -657,7 +721,7 @@ const TripsPage = () => {
         <TripCard key={i} trip={trip} onEdit={handleEditTrip} />
       ))}
     </div>
-    <div className="flex justify-end">
+    {/* <div className="flex justify-end">
       <Pagination
         type="inprogress"
         currentPage={currentInProgressPage}
@@ -676,7 +740,7 @@ const TripsPage = () => {
         )}
         onPageChange={handlePageChange}
       />
-    </div>
+    </div> */}
   </div>
 )}
             {/* Upcoming Trips */}
@@ -690,7 +754,7 @@ const TripsPage = () => {
                     <TripCard key={i} trip={trip} onEdit={handleEditTrip} />
                   ))}
                 </div>
-                <div className="flex justify-end">
+                {/* <div className="flex justify-end">
                   <Pagination
                     type="upcoming"
                     currentPage={currentUpcomingPage}
@@ -705,7 +769,7 @@ const TripsPage = () => {
                     )}
                     onPageChange={handlePageChange}
                   />
-                </div>
+                </div> */}
               </div>
             )}
 
@@ -721,7 +785,7 @@ const TripsPage = () => {
        <TripCard key={i} trip={trip} onEdit={handleEditTrip} />
      ))}
    </div>
-   <div className="flex justify-end">
+   {/* <div className="flex justify-end">
      <Pagination
        type="completed"
        currentPage={currentCompletedPage}
@@ -736,7 +800,7 @@ const TripsPage = () => {
        )}
        onPageChange={handlePageChange}
      />
-   </div>
+   </div> */}
  </div>
 )}
 
@@ -751,7 +815,7 @@ const TripsPage = () => {
                     <TripCard key={i} trip={trip} onEdit={handleEditTrip} />
                   ))}
                 </div>
-                <div className="flex justify-end">
+                {/* <div className="flex justify-end">
                   <Pagination
                     type="canceled"
                     currentPage={currentCanceledPage}
@@ -760,7 +824,7 @@ const TripsPage = () => {
                     )}
                     onPageChange={handlePageChange}
                   />
-                </div>
+                </div> */}
               </div>
             )}
           </div>
@@ -783,6 +847,13 @@ const TripsPage = () => {
         <SuccessMessage
           message={successMessage}
           onClose={() => setSuccessMessage(null)}
+        />
+      )}
+      {/* Success Booking */}
+      {isBookingModal && (
+        <SuccessBooking
+          message={"kl kkklkl ioii mkkl"}
+          onClose={() =>{ seIsBookingModal(false) ; location.replace("/trips")}}
         />
       )}
 

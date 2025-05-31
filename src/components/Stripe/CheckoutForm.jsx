@@ -47,7 +47,7 @@ const CheckoutForm = () => {
       setTimeout(() => {
         setIsLoading(false)
         toast.success("Payment done successfully")
-        navigate("/trips")
+        navigate("/trips?booking=true")
       }, 5000);
       // navigate("/payment-success", {
       //   state: {

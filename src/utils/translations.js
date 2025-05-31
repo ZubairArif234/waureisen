@@ -1,5 +1,9 @@
 const translations = {
   en: {
+    guests:"Guests",
+    dogs:"Dogs",
+    booking_created:"Booking Created Successfully",
+    booking_created_msg:"Your booking had been created successfully , Once the provider confirms it , you'll receive the notification via email.",
     awaiting_confirmation:"Awaiting Confirmation",
     
     waiting_provider_response:"Waiting provider response",
@@ -1331,6 +1335,11 @@ no_hours:"quite hours after 10 PM",
   },
 
   de: {
+    guests:"Gäste",
+    dogs:"Hunde",
+     booking_created:"Booking Created Successfully",
+    booking_created_msg:"Ihre Buchung wurde erfolgreich erstellt. Sobald der Anbieter sie bestätigt hat, erhalten Sie eine Benachrichtigung per E-Mail.",
+    
     awaiting_confirmation:"Warten auf Bestätigung",
     waiting_provider_response:"Warten auf Antwort des Anbieters",
     additional_file:"Zusätzliches Dokument",

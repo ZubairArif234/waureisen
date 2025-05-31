@@ -182,7 +182,7 @@ const ForgotPassword = () => {
                     type="text"
                     id="password"
                     value={otp}
-                    // onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => setOtp(e.target.value)}
                     placeholder={t("otp_placeholder")}
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#B4A481] focus:border-[#B4A481]"
                   />

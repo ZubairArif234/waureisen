@@ -5,7 +5,7 @@ import CustomRefundPolicy from '../HomeComponents/CustomRefundPolicy';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 
-const PoliciesLocationForm = ({ formData, handleInputChange, handleNestedInputChange ,setCustomPolicy,customPolicy,setAdditionalFile}) => {
+const PoliciesLocationForm = ({handleRemoveAdditionalFile, formData, handleInputChange, handleNestedInputChange ,setCustomPolicy,customPolicy,setAdditionalFile}) => {
   const fullAddressRef = useRef(null);
 const mapRef = useRef(null);
 const [mapInstance, setMapInstance] = useState(null);
@@ -310,6 +310,8 @@ useEffect(() => {
 
         <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
           {!uploadedFile ? (
+            <div>
+
             <label className="flex flex-col items-center justify-center cursor-pointer">
               <FileText className="w-12 h-12 text-gray-400 mb-3" />
               <span className="text-gray-600 font-medium mb-1">Drag & drop your document here</span>
@@ -319,11 +321,13 @@ useEffect(() => {
               </span>
               <input 
                 type="file" 
-                accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" 
+                accept=".docx" 
                 className="hidden" 
                 onChange={handleFileUpload}
-              />
+                />
             </label>
+            {formData?.additionalDoc && (<p className='text-center text-sm text-amber-500'>The new uploaded file will automatically replaced with the perious one.</p>)}
+                </div>
           ) :  (
             <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
               <div className="flex items-center gap-3">
@@ -345,7 +349,7 @@ useEffect(() => {
           )}
         </div>
         {formData?.additionalDoc && (
-  <div className="flex flex-col gap-3 border border-slate-100 px-4 py-2 rounded-md">
+  <div className="flex flex-col gap-3 border border-slate-200 px-4 py-2 rounded-md">
     <div className="flex items-center gap-3">
       <FileText className="w-8 h-8 text-brand" />
       <Link
@@ -356,6 +360,7 @@ useEffect(() => {
       >
         {formData.additionalDoc}
       </Link>
+      <X onClick={handleRemoveAdditionalFile}/>
     </div>
    
   </div>
