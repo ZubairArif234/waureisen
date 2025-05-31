@@ -272,7 +272,7 @@ const SearchBarTwo = ({
                 <span className="text-xs text-gray-500 truncate block sm:hidden">
                   {dateRange.start && dateRange.end
                     ? `${dateRange.start.getDate()}/${dateRange.start.getMonth() + 1} - ${dateRange.end.getDate()}/${dateRange.end.getMonth() + 1}`
-                    : 'When?'}
+                    : t('when') || 'When?'}
                 </span>
               </div>
             </div>
