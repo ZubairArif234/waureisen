@@ -4,12 +4,14 @@ import { useListings } from '../../context/ListingContext';
 import AccommodationCard from './AccommodationCardWrapper'; 
 import SkeletonCard from './SkeletonCard';
 import { WifiOff, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useLanguage } from '../../utils/LanguageContext';
 
 /**
  * Improved listings component with pagination
  * Uses the same AccommodationCard component as the home page
  */
 const ImprovedVirtualizedListings = () => {
+  const { t } = useLanguage();
   const { 
     listings, 
     isLoading, 
@@ -89,21 +91,21 @@ const ImprovedVirtualizedListings = () => {
         <div className="flex justify-center mb-4">
           <WifiOff className="h-12 w-12 text-red-500" />
         </div>
-        <h3 className="text-lg font-medium text-red-800 mb-2">Connection Error</h3>
+        <h3 className="text-lg font-medium text-red-800 mb-2">{t('connection_error')}</h3>
         <p className="text-gray-600 mb-6">
-          We can't connect to the server right now. This could be due to:
+          {t('connection_error_description')}
         </p>
         <ul className="text-left text-gray-600 mb-6 pl-8 list-disc">
-          <li>Your internet connection</li>
-          <li>The server is not running</li>
-          <li>The server is running on a different port than expected</li>
+          <li>{t('internet_connection')}</li>
+          <li>{t('server_not_running')}</li>
+          <li>{t('server_different_port')}</li>
         </ul>
         <button
           onClick={handleRetry}
           className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand/90 inline-flex items-center"
         >
           <RefreshCw className="h-4 w-4 mr-2" />
-          Try Again
+          {t('try_again')}
         </button>
       </div>
     );
@@ -115,7 +117,7 @@ const ImprovedVirtualizedListings = () => {
       <div className="text-center py-12">
         <div className="w-10 h-10 border-4 border-brand border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
         <p className="text-gray-600 font-medium text-lg">
-          Please wait while we find accommodations in this area...
+          {t('finding_accommodations')}
         </p>
       </div>
     );
@@ -137,13 +139,13 @@ const ImprovedVirtualizedListings = () => {
     return (
       <div className="text-center py-12">
         <p className="text-gray-600 mb-4">
-          No accommodations found within 500km of this location. Try adjusting your search criteria or choosing a different location.
+          {t('no_accommodations_found')}
         </p>
         <button
           onClick={() => window.location.href = "/"}
           className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand/90"
         >
-          Modify Search
+          {t('modify_search')}
         </button>
       </div>
     );
@@ -156,7 +158,7 @@ const ImprovedVirtualizedListings = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {listings.map((listing) => {
           // Handle possible object properties properly to avoid React rendering errors
-          let sourceDisplay = 'Unknown';
+          let sourceDisplay = t('unknown');
           if (listing.source) {
             // Check if source is an object with a name property
             if (typeof listing.source === 'object' && listing.source.name) {
@@ -167,7 +169,7 @@ const ImprovedVirtualizedListings = () => {
           }
           
           // Handle location properly
-          let locationDisplay = 'Accommodation';
+          let locationDisplay = t('accommodation');
           if (listing.title) {
             locationDisplay = listing.title;
           } else if (listing.location) {
@@ -196,7 +198,7 @@ const ImprovedVirtualizedListings = () => {
   images={listing.images || []}
   price={(listing.pricePerNight?.isDiscountActivate && listing.pricePerNight?.discount) || listing.pricePerNight?.price || 0}
   location={locationDisplay}
-  provider={listing.provider || listing.ownerType || 'Unknown'}
+  provider={listing.provider || listing.ownerType || t('unknown')}
   listingSource={sourceDisplay}
   pricePerNight={listing.pricePerNight}
   distance={distanceDisplay}
@@ -220,7 +222,7 @@ const ImprovedVirtualizedListings = () => {
             }`}
           >
             <ChevronLeft className="w-5 h-5 mr-1" />
-            Previous
+            {t('previous')}
           </button>
           
           {/* Page Indicators */}
@@ -282,7 +284,7 @@ const ImprovedVirtualizedListings = () => {
           
           {/* Mobile Page Indicator */}
           <span className="sm:hidden text-gray-600">
-            Page {currentPage} of {pagesCount}
+            {t('page')} {currentPage} {t('of')} {pagesCount}
           </span>
           
           {/* Next Page Button */}
@@ -295,7 +297,7 @@ const ImprovedVirtualizedListings = () => {
                 : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'
             }`}
           >
-            Next
+            {t('next')}
             <ChevronRight className="w-5 h-5 ml-1" />
           </button>
         </div>
