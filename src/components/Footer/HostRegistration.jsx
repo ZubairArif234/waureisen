@@ -33,13 +33,13 @@ const HostRegistration = () => {
           </p>
           
           <h2 className="text-2xl font-semibold mb-4">{t('benefits_hosting')}</h2>
-          <ul className="list-none ml-6 mb-6 space-y-2">
-            <li className='flex items-center gap-3'><PawPrint size={20} /> {t('benefit_1')}</li>
-            <li className='flex items-center gap-3'><PawPrint size={20} />{t('benefit_2')}</li>
-            <li className='flex items-center gap-3'><PawPrint size={20} />{t('benefit_3')}</li>
-            <li className='flex items-center gap-3'><PawPrint size={20} />{t('benefit_4')}</li>
-            <li className='flex items-center gap-3'><PawPrint size={20} />{t('benefit_5')}</li>
-            <li className='flex items-center gap-3'><PawPrint size={20}/>{t('benefit_6')}</li>
+          <ul className="list-none  mb-6 space-y-2">
+            <li className='flex items-center gap-3' ><PawPrint size={24} className='w-28 '/> <p ><span className='font-semibold'>{t("benefit_heading_1")}</span> {t('benefit_1')}</p></li>
+            <li className='flex items-center gap-3'><PawPrint size={24} className='w-28'/><p ><span className='font-semibold'>{t("benefit_heading_2")}</span> {t('benefit_2')}</p></li>
+            <li className='flex items-center gap-3'><PawPrint size={24} className='w-28'/><p ><span className='font-semibold'>{t("benefit_heading_3")}</span> {t('benefit_3')}</p></li>
+            <li className='flex items-center gap-3'><PawPrint size={24} className='w-28'/><p ><span className='font-semibold'>{t("benefit_heading_4")}</span> {t('benefit_4')}</p></li>
+            <li className='flex items-center gap-3'><PawPrint size={24} className='w-28'/><p ><span className='font-semibold'>{t("benefit_heading_5")}</span> {t('benefit_5')}</p></li>
+            <li className='flex items-center gap-3'><PawPrint size={24} className='w-28'/><p ><span className='font-semibold'>{t("benefit_heading_6")}</span> {t('benefit_6')}</p></li>
           </ul>
           
           <h2 className="text-2xl font-semibold mb-4">{t('how_it_works')}</h2>

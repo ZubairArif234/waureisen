@@ -573,14 +573,20 @@ no_hours:"quite hours after 10 PM",
     host_intro:
       "Join our community of dog-friendly accommodation providers and start earning income while creating wonderful experiences for guests and their furry companions.",
     benefits_hosting: "Benefits of Hosting with Waureisen",
+    benefit_heading_1:"Increased visibility:",
     benefit_1:
-      "Increased visibility: Your accommodation will be showcased to dog owners specifically looking for pet-friendly stays.",
-    benefit_2:
-      "Easy booking process: Quick and hassle-free bookings – optimized for both hosts and guests with dogs.",
-    benefit_3: "Targeted marketing: We reach exactly the right audience searching for dog-friendly accommodations.",
-    benefit_4: "Trust & security: Verified guests, secure payments, and support from our service team.",
-    benefit_5: "Direct communication: Easily connect with dog owners to arrange individual requests.",
-    benefit_6: "10% commission on the accommodation price: Fair and transparent – you only pay when a booking is made.",
+      "Your accommodation will be showcased to dog owners specifically looking for pet-friendly stays.",
+     benefit_heading_2:"Easy booking process:",
+     benefit_2:
+     "Quick and hassle-free bookings – optimized for both hosts and guests with dogs.",
+     benefit_heading_3:"Targeted marketing:",
+     benefit_3: "We reach exactly the right audience searching for dog-friendly accommodations.",
+     benefit_heading_4:"Trust & security:",
+     benefit_4: "Verified guests, secure payments, and support from our service team.",
+     benefit_heading_5:"Direct communication:",
+     benefit_5: "Easily connect with dog owners to arrange individual requests.",
+     benefit_heading_6:"10% commission on the accommodation price:",
+    benefit_6: "Fair and transparent – you only pay when a booking is made.",
     how_it_works: "How It Works",
     how_it_works_1:
       "Create your listing - Add photos, description, and set your price",

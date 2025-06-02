@@ -67,7 +67,8 @@ const Partners = () => {
   <PartnerSection 
     title="TravelCoup"
     descriptionKey="europarcs_description"
-    url="https://www.europarcs.de/"
+    url="https://www.travelcoup.com"
+    // url="https://www.europarcs.de/"
   />
   
   {/* Pet & Co */}
