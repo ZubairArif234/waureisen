@@ -1886,7 +1886,7 @@ account_actions: "Kontoaktionen",
     phone_number_placeholder: "Telefonnummer eingeben",
     accept_terms: "Ich akzeptiere die",
     and_the: "und die",
-    privacy_policy: "Datenschutzrichtlinie",
+    privacy_policy: "Datenschutzrichtlinien",
     subscribe_newsletter: "Newsletter abonnieren und keine Highlights mehr verpassen",
 
     // Features
@@ -1955,7 +1955,7 @@ account_actions: "Kontoaktionen",
     about_us: "Über uns",
     faq: "FAQ",
     imprint: "Impressum",
-    data_policy: "Datenschutz",
+    data_policy: "Datenschutzrichtlinien",
     partners: "Partner",
     contact: "Kontakt",
     copyright: "© 2025 Waureisen. Alle Rechte vorbehalten.",
@@ -2592,7 +2592,7 @@ account_actions: "Kontoaktionen",
     agree_to: "Ich stimme den",
     terms_and_conditions: "Allgemeinen Geschäftsbedingungen",
     and: "und der",
-    privacy_policy: "Datenschutzrichtlinie zu",
+    privacy_policy: "Datenschutzrichtlinien",
     subscribe_newsletter: "Newsletter abonnieren und keine Highlights mehr verpassen",
     newsletter_opt_in:
       "Ich möchte Newsletter und Marketingmitteilungen erhalten",
@@ -2817,7 +2817,7 @@ in_progress_trips: "Laufende Reisen",
     profile_saved_successfully: "Profil erfolgreich gespeichert",
     Dashboard: "Dashboard",
     hosting_information: "Vermieter Informationen",
-    service_charge: "transaktionsgebühr"
+    service_charge: "Transaktionsgebühr"
   },
 };
 

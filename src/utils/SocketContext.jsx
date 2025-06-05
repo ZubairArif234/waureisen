@@ -21,7 +21,7 @@ export const SocketProvider = ({ children }) => {
     const userType = getUserType();
 
     // Create socket instance
-    const socketInstance = io(import.meta.env.VITE_API_URL || 'http://localhost:5000', {
+    const socketInstance = io(import.meta.env.VITE_API_URL || 'https://waureisen.com', {
       auth: { token },
       query: { userType },
       transports: ['websocket'],
