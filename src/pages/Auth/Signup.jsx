@@ -5,7 +5,7 @@ import authBg from "../../assets/bg.png";
 import Footer from "../../components/Shared/Footer";
 import Modal from "../../components/Auth/Modal";
 import TermsContent from "../../components/Auth/TermsContent";
-import PrivacyContent from "../../components/Auth/PrivacyContent";
+import DataPolicy from "../../components/Footer/DataPolicy";
 import { useLanguage } from "../../utils/LanguageContext";
 import { userSignup, providerSignup } from "../../api/authAPI";
 import { sendVerificationCode, verifyCode } from "../../api/verificationAPI";
@@ -23,7 +23,7 @@ const [searchParams] = useSearchParams();
     }, []);
   const [userType, setUserType] = useState(role || "");
   const [isTermsOpen, setIsTermsOpen] = useState(false);
-  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+  const [isDataPolicyOpen, setIsDataPolicyOpen] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -508,10 +508,10 @@ const [searchParams] = useSearchParams();
                     {t("and_the")}{" "}
                     <button
                       type="button"
-                      onClick={() => setIsPrivacyOpen(true)}
+                      onClick={() => setIsDataPolicyOpen(true)}
                       className="text-[#B4A481] hover:underline"
                     >
-                      {t("privacy_policy")}
+                      {t("data_policy")}
                     </button>
                   </label>
                 </div>
@@ -523,7 +523,6 @@ const [searchParams] = useSearchParams();
                     id="newsletter"
                     checked={subscribeNewsletter}
                     onChange={(e) => setSubscribeNewsletter(e.target.checked)}
-                    className="mt-1 sm:mt-0 rounded border-gray-300 text-[#B4A481] focus:ring-[#B4A481]"
                   />
                   <label htmlFor="newsletter" className="text-sm text-gray-600">
                     {t("subscribe_newsletter")}
@@ -539,13 +538,13 @@ const [searchParams] = useSearchParams();
                   <TermsContent />
                 </Modal>
 
-                {/* Privacy Policy Modal */}
+                {/* Data Policy Modal */}
                 <Modal
-                  isOpen={isPrivacyOpen}
-                  onClose={() => setIsPrivacyOpen(false)}
-                  title={t("privacy_policy")}
+                  isOpen={isDataPolicyOpen}
+                  onClose={() => setIsDataPolicyOpen(false)}
+                  title={t("data_policy")}
                 >
-                  <PrivacyContent />
+                  <DataPolicy />
                 </Modal>
 
                 {/* Signup Button */}
