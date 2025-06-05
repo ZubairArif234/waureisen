@@ -10,7 +10,7 @@ import { changeMetaData } from "../../utils/extra";
 
 import Modal from "../../components/Auth/Modal";
 import TermsContent from "../../components/Auth/TermsContent";
-import PrivacyContent from "../../components/Auth/PrivacyContent";
+import DataPolicy from "../../components/Footer/DataPolicy";
 
 const ProviderRegistration = () => {
     useEffect(() => {
@@ -28,7 +28,7 @@ const ProviderRegistration = () => {
   const savedCurrentStep = localStorage.getItem("currentStep");
   
   const [isTermsOpen, setIsTermsOpen] = useState(false);
-  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+  const [isDataPolicyOpen, setIsDataPolicyOpen] = useState(false);
   const [stripeLoading, setStripeLoading] = useState(false);
   const [stripeAccount, setStripeAccount] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -949,10 +949,10 @@ console.log(response, "jffk");
                     </span>{" "}
                     {t("and")}{" "}
                     <span
-                      onClick={()=> setIsPrivacyOpen(true)}
+                      onClick={()=> setIsDataPolicyOpen(true)}
                       className="text-brand hover:underline cursor-pointer"
                     >
-                      {t("privacy_policy")}
+                      {t("data_policy")}
                     </span>
                   </label>
                   {errors.terms && (
@@ -1147,14 +1147,14 @@ console.log(response, "jffk");
                         <TermsContent />
                       </Modal>
       
-                      {/* Privacy Policy Modal */}
-                      <Modal
-                        isOpen={isPrivacyOpen}
-                        onClose={() => setIsPrivacyOpen(false)}
-                        title={t("privacy_policy")}
-                      >
-                        <PrivacyContent />
-                      </Modal>
+                      {/* Data Policy Modal */}
+                     <Modal
+                  isOpen={isDataPolicyOpen}
+                  onClose={() => setIsDataPolicyOpen(false)}
+                  title={t("data_policy")}
+                >
+                  <DataPolicy />
+                </Modal>
 
       {/* <Footer /> */}
     </div>
