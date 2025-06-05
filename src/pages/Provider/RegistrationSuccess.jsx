@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, ArrowRight } from 'lucide-react';
 import Navbar from '../../components/Shared/Navbar';
@@ -21,7 +21,7 @@ const RegistrationSuccess = () => {
       titleKey: 'complete_profile',
       descriptionKey: 'complete_profile_desc',
       actionKey: 'complete_profile_action',
-      link: '/provider/profile'
+      link: '/provider/account/profile'
     },
     {
       step: 2,

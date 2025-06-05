@@ -973,7 +973,7 @@ no_hours:"quite hours after 10 PM",
 
     registration_successful: "Registration Successful!",
     account_created_confirmation:
-      "Your provider account has been created. We've sent a confirmation email with additional details.",
+      "Your provider account has been created.",
     welcome_to_waureisen: "Welcome to Waureisen",
     thank_you_joining:
       "Thank you for joining our community of dog-friendly accommodations. We're excited to have you as a partner and are here to help you succeed.",
@@ -2618,7 +2618,7 @@ account_actions: "Kontoaktionen",
 
     registration_successful: "Registrierung erfolgreich!",
     account_created_confirmation:
-      "Ihr Anbieter-Konto wurde erstellt. Wir haben eine Bestätigungs-E-Mail mit weiteren Details gesendet.",
+      "Ihr Anbieter-Konto wurde erstellt.",
     welcome_to_waureisen: "Willkommen bei Waureisen",
     thank_you_joining:
       "Vielen Dank, dass Sie sich unserer Gemeinschaft hundefreundlicher Unterkünfte angeschlossen haben. Wir freuen uns, Sie als Partner zu haben und sind hier, um Ihnen zum Erfolg zu verhelfen.",

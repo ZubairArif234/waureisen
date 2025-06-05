@@ -51,7 +51,7 @@ navigate("/provider/dashboard")
 
         console.log(`✅ Total accommodations: ${items.length}`);
 
-        for (let i = 0; i < items?.length; i += batchSize) {
+        for (let i = 39000; i < 39686; i += batchSize) {
           const batch = items.slice(i, i + batchSize);
 
           console.log(`⏳ Processing batch ${i / batchSize + 1} (${batch.length} items)...`);
@@ -91,7 +91,7 @@ console.log(res2)
       }
     };
 
-    fetchDetailsInBatches();
+    // fetchDetailsInBatches();
   }, []);
   return (
     <main className="min-h-screen">

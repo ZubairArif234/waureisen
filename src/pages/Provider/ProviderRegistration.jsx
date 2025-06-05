@@ -8,6 +8,10 @@ import { useLanguage } from "../../utils/LanguageContext";
 import { connectToStripe, getStripeAccount } from "../../api/paymentAPI";
 import { changeMetaData } from "../../utils/extra";
 
+import Modal from "../../components/Auth/Modal";
+import TermsContent from "../../components/Auth/TermsContent";
+import PrivacyContent from "../../components/Auth/PrivacyContent";
+
 const ProviderRegistration = () => {
     useEffect(() => {
         
@@ -22,6 +26,9 @@ const ProviderRegistration = () => {
   // console.log(location , accountId);
 
   const savedCurrentStep = localStorage.getItem("currentStep");
+  
+  const [isTermsOpen, setIsTermsOpen] = useState(false);
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [stripeLoading, setStripeLoading] = useState(false);
   const [stripeAccount, setStripeAccount] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -937,16 +944,16 @@ console.log(response, "jffk");
                 <div>
                   <label htmlFor="terms" className="text-sm text-gray-700">
                     {t("agree_to")}{" "}
-                    <a href="/terms" className="text-brand hover:underline">
+                    <span onClick={()=>setIsTermsOpen(true)} className="text-brand hover:underline cursor-pointer">
                       {t("terms_and_conditions")}
-                    </a>{" "}
+                    </span>{" "}
                     {t("and")}{" "}
-                    <a
-                      href="/privacy-policy"
-                      className="text-brand hover:underline"
+                    <span
+                      onClick={()=> setIsPrivacyOpen(true)}
+                      className="text-brand hover:underline cursor-pointer"
                     >
                       {t("privacy_policy")}
-                    </a>
+                    </span>
                   </label>
                   {errors.terms && (
                     <p className="mt-1 text-sm text-red-600">{errors.terms}</p>
@@ -1132,6 +1139,22 @@ console.log(response, "jffk");
           </div>
         </div>
       </main>
+      <Modal
+                        isOpen={isTermsOpen}
+                        onClose={() => setIsTermsOpen(false)}
+                        title={t("terms_and_conditions")}
+                      >
+                        <TermsContent />
+                      </Modal>
+      
+                      {/* Privacy Policy Modal */}
+                      <Modal
+                        isOpen={isPrivacyOpen}
+                        onClose={() => setIsPrivacyOpen(false)}
+                        title={t("privacy_policy")}
+                      >
+                        <PrivacyContent />
+                      </Modal>
 
       {/* <Footer /> */}
     </div>
