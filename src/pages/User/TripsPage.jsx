@@ -239,7 +239,7 @@ const EditTripModal = ({ isOpen, onClose, trip, onSave, onCancel }) => {
 };
 
 // TripCard Component
-const TripCard = ({ trip, onEdit }) => {
+const TripCard = ({ trip, onEdit ,handleGetMyBooking}) => {
   const [activeModal, setActiveModal] = useState(false);
   const { t } = useLanguage();
   const navigate = useNavigate();
@@ -299,8 +299,12 @@ const TripCard = ({ trip, onEdit }) => {
   const handleCancelBooking = async () => {
     try {
       const res = await refundPayment(trip?._id);
+      console.log(res);
+      if (res?.success) handleGetMyBooking();
       toast.success(t("cancel_success"));
     } catch (err) {
+      console.log(err);
+      
       toast.error(t("cancel_failed"));
     }
   };
@@ -707,7 +711,8 @@ if(booking == "true"){
     </h2>
     <div className="space-y-4">
       {inProgressTrips.map((trip, i) => (
-        <TripCard key={i} trip={trip} onEdit={handleEditTrip} />
+        <TripCard key={i} trip={trip} onEdit={handleEditTrip} 
+    handleGetMyBooking={handleGetMyBooking}/>
       ))}
     </div>
     {/* <div className="flex justify-end">
@@ -740,7 +745,7 @@ if(booking == "true"){
                 </h2>
                 <div className="space-y-4">
                   {upcomingTrips.map((trip, i) => (
-                    <TripCard key={i} trip={trip} onEdit={handleEditTrip} />
+                    <TripCard key={i} trip={trip} onEdit={handleEditTrip}  handleGetMyBooking={handleGetMyBooking}/>
                   ))}
                 </div>
                 {/* <div className="flex justify-end">
@@ -771,7 +776,7 @@ if(booking == "true"){
    </h2>
    <div className="space-y-4">
      {completedTrips.map((trip, i) => (
-       <TripCard key={i} trip={trip} onEdit={handleEditTrip} />
+       <TripCard key={i} trip={trip} onEdit={handleEditTrip}  handleGetMyBooking={handleGetMyBooking}/>
      ))}
    </div>
    {/* <div className="flex justify-end">
@@ -801,7 +806,7 @@ if(booking == "true"){
                 </h2>
                 <div className="space-y-4">
                   {cancelledTrips.map((trip, i) => (
-                    <TripCard key={i} trip={trip} onEdit={handleEditTrip} />
+                    <TripCard key={i} trip={trip} onEdit={handleEditTrip}  handleGetMyBooking={handleGetMyBooking}/>
                   ))}
                 </div>
                 {/* <div className="flex justify-end">
@@ -841,7 +846,7 @@ if(booking == "true"){
       {/* Success Booking */}
       {isBookingModal && (
         <SuccessBooking
-          message={"kl kkklkl ioii mkkl"}
+          message={""}
           onClose={() =>{ seIsBookingModal(false) ; location.replace("/trips")}}
         />
       )}
