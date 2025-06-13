@@ -228,7 +228,7 @@ export const getStreamedListings = async (params) => {
       hasMore: response.data.hasMore !== undefined ? response.data.hasMore : (page < totalPages)
     };
   } catch (error) {
-    console.error('Error fetching listings:', error);
+    console.error('Error fetching listings:', error, error.message);
     return { listings: [], total: 0, page: 1, totalPages: 0, hasMore: false };
   }
 };

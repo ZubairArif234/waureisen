@@ -116,6 +116,7 @@ const SearchBarTwo = ({
   }, []);
 
   const handlePlaceSelect = (place) => {
+    console.log(place)
     if (!place) {
       console.warn("No place data received in handlePlaceSelect");
       return;
