@@ -58,14 +58,14 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
   });
 
   // Initialize selected state from searchFilters when component mounts
-  useEffect(() => {
-    if (searchFilters.selected) {
-      setSelected(prev => ({
-        ...prev,
-        ...searchFilters.selected
-      }));
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (searchFilters.selected) {
+  //     setSelected(prev => ({
+  //       ...prev,
+  //       ...searchFilters.selected
+  //     }));
+  //   }
+  // }, []);
 
   // Update local state when global filters change
   useEffect(() => {
@@ -124,9 +124,9 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
     setSelected(newSelected);
     
     // Then update global context in the next tick
-    setTimeout(() => {
-      updateFilters({ selected: newSelected });
-    }, 0);
+    // setTimeout(() => {
+      updateFilters({ranges:ranges, selected: newSelected });
+    // }, 0);
   };
 
   const handleApplyFilters = () => {
@@ -210,6 +210,8 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
 
   if (!isOpen || !filters) return null;
 
+  console.log(searchFilters , ranges);
+  
   return (
     <>
        <div 

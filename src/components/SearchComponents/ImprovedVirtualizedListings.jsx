@@ -59,6 +59,7 @@ const ImprovedVirtualizedListings = () => {
     if (containerRef.current) {
       containerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+window.scrollTo(0,0)
   };
   
   // Check if we should show empty state after a delay
@@ -201,7 +202,7 @@ const ImprovedVirtualizedListings = () => {
   provider={listing.provider || listing.ownerType || t('unknown')}
   listingSource={sourceDisplay}
   pricePerNight={listing.pricePerNight}
-  distance={distanceDisplay}
+  distance={listing.distanceInfo.distanceText}
 />
 
           );

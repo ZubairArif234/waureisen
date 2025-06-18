@@ -723,7 +723,7 @@ const getDisplayPrice = () => {
                 />
               </div>
             </section>
-{accommodation?.provider !== "Interhome" && (
+{accommodation?.provider  && (
 
 <div className="mb-10">
  <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
@@ -733,14 +733,14 @@ const getDisplayPrice = () => {
             {
               accommodation?.checkInTime && (
                 <div>
-                  <p className="font-medium">{t("checkin_time")} : <span className="font-thin">{moment(accommodation?.checkInTime).utc().format("hh:mm A")}</span></p>
+                  <p className="font-medium">{t("checkin_time")} :{typeof accommodation?.checkInTime == "string" ?<span className="font-thin">{moment(accommodation?.checkInTime).format("hh:mm A")}</span>: <span className="font-thin">{moment(accommodation?.checkInTime).utc().format("hh:mm A")}</span>}</p>
                 </div>
               )
             }
             {
               accommodation?.checkOutTime && (
                 <div> 
-                  <p className="font-medium">{t("checkout_time")} : <span className="font-thin">{moment(accommodation?.checkOutTime).utc().format("hh:mm A")}</span></p>
+                   <p className="font-medium">{t("checkout_time")} :{typeof accommodation?.checkOutTime == "string" ?<span className="font-thin">{moment(accommodation?.checkOutTime).format("hh:mm A")}</span>: <span className="font-thin">{moment(accommodation?.checkOutTime).utc().format("hh:mm A")}</span>}</p>
                 </div>
               )
             }
@@ -844,7 +844,7 @@ const getDisplayPrice = () => {
                       accommodation?.source?.name ||
                       "Provider"
                     }
-                    className="w-12 md:w-16 h-12 md:h-16 rounded-full object-cover"
+                    className="w-12 md:w-16 h-12 md:h-16 rounded-full bg-slate-300 aspect-square object-contain"
                   />
                   <div>
                     <h3 className="font-semibold md:text-base text-sm capitalize">
@@ -856,7 +856,7 @@ const getDisplayPrice = () => {
                         "Provider"}
                       .
                     </h3>
-                    <p className="text-gray-600 text-sm">
+                    <p className="text-gray-600 text-sm line-clamp-2">
                       {accommodation?.owner?.bio ||
                         "This is an accommodation from one of our valued partners."}
                     </p>

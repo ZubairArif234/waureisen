@@ -172,7 +172,7 @@ const SearchBarTwo = ({
 
     let guestParam = `&people=${guests.people}`;
   if (guests.dogs && guests.dogs > 0) {
-    guestParam += `||dogs=${guests.dogs}`;
+    guestParam += `&dogs=${guests.dogs}`;
   }
     searchUrl += `${dateParam}${guestParam}`;
     

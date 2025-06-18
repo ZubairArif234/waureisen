@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Globe,
   Menu,
@@ -32,6 +32,7 @@ import {
 } from "../../api/conversationAPI";
 
 const Navbar = () => {
+  const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLanguagePopupOpen, setIsLanguagePopupOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -46,24 +47,29 @@ const Navbar = () => {
   const user2 = localStorage.getItem("provider_user");
   const typeOfUser = localStorage.getItem("userType");
 
- useEffect(() => {
+  useEffect(() => {
+    if (location.pathname?.includes("/static/media")) {
+      navigate("/");
+    }
+  }, []);
+
+  useEffect(() => {
     const user = getCurrentUser();
     console.log(user);
-    
-  if (typeOfUser === "provider") {
-    const isProfileCompleted = user?.profileCompleted;
-    const isOnRegistration = location.pathname === "/provider/registration";
 
-    if (!isProfileCompleted && !isOnRegistration) {
-      navigate("/provider/registration");
+    if (typeOfUser === "provider") {
+      const isProfileCompleted = user?.profileCompleted;
+      const isOnRegistration = location.pathname === "/provider/registration";
+
+      if (!isProfileCompleted && !isOnRegistration) {
+        navigate("/provider/registration");
+      }
+
+      if (isProfileCompleted && isOnRegistration) {
+        navigate("/provider");
+      }
     }
-
-    if (isProfileCompleted && isOnRegistration) {
-      navigate("/provider");
-    }
-  }
-}, [typeOfUser, user2, location.pathname, navigate]);
-
+  }, [typeOfUser, user2, location.pathname, navigate]);
 
   // Extract fetchUnreadCount function outside of useEffect for reuse
   const fetchUnreadCount = async () => {

@@ -163,8 +163,10 @@ const getDisplaySource = () => {
         <img
           src={allImages[currentImageIndex]}
           alt={propertyLocation}
-          className="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
+          className="w-full h-48 object-cover hover:scale-105 transition-transform duration-300 bg-slate-100"
           onLoad={() => handleImageLoad(currentImageIndex)}
+          // loading="lazy"
+          
         />
 
         {/* Navigation arrows - only show if there are multiple images */}

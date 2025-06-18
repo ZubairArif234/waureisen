@@ -41,6 +41,9 @@ const GuestSelector = ({
     }
   };
 
+  console.log(guests);
+  
+
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-4">
       <div className="mb-4">
