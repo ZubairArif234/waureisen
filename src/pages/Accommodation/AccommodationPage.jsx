@@ -733,14 +733,14 @@ const getDisplayPrice = () => {
             {
               accommodation?.checkInTime && (
                 <div>
-                  <p className="font-medium">{t("checkin_time")} :{typeof accommodation?.checkInTime == "string" ?<span className="font-thin">{moment(accommodation?.checkInTime).format("hh:mm A")}</span>: <span className="font-thin">{moment(accommodation?.checkInTime).utc().format("hh:mm A")}</span>}</p>
+                  <p className="font-medium">{t("checkin_time")} :{typeof accommodation?.checkInTime == "string" ?<span className="font-thin">{moment(accommodation?.checkInTime).utc().format("hh:mm A")}</span>: <span className="font-thin">{moment(accommodation?.checkInTime).utc().format("hh:mm A")}</span>}</p>
                 </div>
               )
             }
             {
               accommodation?.checkOutTime && (
                 <div> 
-                   <p className="font-medium">{t("checkout_time")} :{typeof accommodation?.checkOutTime == "string" ?<span className="font-thin">{moment(accommodation?.checkOutTime).format("hh:mm A")}</span>: <span className="font-thin">{moment(accommodation?.checkOutTime).utc().format("hh:mm A")}</span>}</p>
+                   <p className="font-medium">{t("checkout_time")} :{typeof accommodation?.checkOutTime == "string" ?<span className="font-thin">{moment(accommodation?.checkOutTime).utc().format("hh:mm A")}</span>: <span className="font-thin">{moment(accommodation?.checkOutTime).utc().format("hh:mm A")}</span>}</p>
                 </div>
               )
             }

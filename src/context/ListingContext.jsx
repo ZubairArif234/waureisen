@@ -26,7 +26,7 @@ const initialState = {
   searchParams: {
     lat: null,
     lng: null,
-    radius: 500,
+    radius: 150,
     locationName: '',
     filters: {
       dateRange: { start: null, end: null },

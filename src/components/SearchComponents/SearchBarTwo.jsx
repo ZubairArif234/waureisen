@@ -39,10 +39,10 @@ const SearchBarTwo = ({
     if (initialLocation) {
       setPlaceData({
         address: initialLocation,
-        location: {
-          lat: 46.8182,
-          lng: 8.2275
-        }
+        // location: {
+        //   lat: 46.8182,
+        //   lng: 8.2275
+        // }
       });
     }
   }, [initialLocation, initialDateRange, initialGuests]);
@@ -116,7 +116,7 @@ const SearchBarTwo = ({
   }, []);
 
   const handlePlaceSelect = (place) => {
-    console.log(place)
+    console.log(place , "ye konsi hai")
     if (!place) {
       console.warn("No place data received in handlePlaceSelect");
       return;
@@ -155,13 +155,16 @@ const SearchBarTwo = ({
   };
 
   const handleSearch = () => {
+    const urlParams = new URLSearchParams(window.location.search);
     console.log("Place data before search:", placeData);  
     console.log("Current search filters from context:", searchFilters);
     
-    const coordinates = placeData?.location || { lat: 46.8182, lng: 8.2275 };
+    const coordinates = placeData?.location ;
+    let lat = urlParams.get("lat")
+    let lng = urlParams.get("lng")
 
-    let searchUrl = `/search?location=${encodeURIComponent(location || "Switzerland")}`;
-    searchUrl += `&lat=${coordinates.lat}&lng=${coordinates.lng}`;
+    let searchUrl = `/search?location=${encodeURIComponent(location)}`;
+    searchUrl += `&lat=${coordinates?.lat ? coordinates?.lat : lat}&lng=${coordinates?.lng ? coordinates?.lng : lng}`;
     
     let dateParam = '';
     if (dateRange.start && dateRange.end) {
@@ -177,7 +180,6 @@ const SearchBarTwo = ({
     searchUrl += `${dateParam}${guestParam}`;
     
     // Get filters from URL if they exist
-    const urlParams = new URLSearchParams(window.location.search);
     const urlFilters = urlParams.get('searchFilters');
     
     // Use filters from URL if available, otherwise use context

@@ -92,7 +92,7 @@ const handlePlaceSelect = (place) => {
 const handleSearch = () => {
   // Get coordinates from placeData
   console.log("Place data before search:", placeData);  
-  const coordinates = placeData?.location || { lat: 46.8182, lng: 8.2275 };
+  const coordinates = placeData?.location ;
 
   // Build search URL with coordinates
   let searchUrl = `/search?location=${encodeURIComponent(location || "Switzerland")}`;

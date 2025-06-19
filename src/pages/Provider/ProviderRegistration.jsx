@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import {  useLocation, useNavigate } from "react-router-dom";
+import {  Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, Check, HelpCircle } from "lucide-react";
 import Navbar from "../../components/Shared/Navbar";
 import Footer from "../../components/Shared/Footer";
@@ -162,7 +162,7 @@ console.log(name , value);
     }
 
     if (step === 3) {
-      if (!formData.stripeAccountId.trim()) {
+      if (!formData.stripeAccountId.trim() || !stripeAccount ) {
         newErrors.stripeAccountId = "Stripe ccount is required";
       }
     }
@@ -790,9 +790,18 @@ console.log(response, "jffk");
               </div>
             )}
            {accountId  && !stripeAccount && !stripeLoading ? (
-  <p className="text-red-500 text-center">
-    Failed to connect to stripe, Please try again!
+            <>
+  <p className="text-amber-500 text-center">
+    {t("restricted_stripe")}
+   </p>
+  <p className="text-sm">
+{t("stripe_click")} :- 
+  <Link className=" underline underline-offset-2 text-blue-500" to={"https://support.stripe.com/"}> Stripe Support </Link>
   </p>
+            </>
+  // <p className="text-red-500 text-center">
+  //   Failed to connect to stripe, Please try again!
+  // </p>
 ) : accountId !== null && accountId !== "failed" ? (
   !stripeLoading ? (
     <div>

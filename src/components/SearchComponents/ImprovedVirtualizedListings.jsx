@@ -182,12 +182,15 @@ window.scrollTo(0,0)
           }
           
           // Handle distance info properly
-          let distanceDisplay = null;
+          let distanceDisplay =  listing.distanceInfo;
           if (listing.distanceInfo) {
             if (typeof listing.distanceInfo === 'object' && listing.distanceInfo.distanceText) {
               distanceDisplay = listing.distanceInfo.distanceText;
             } else if (typeof listing.distanceInfo === 'string') {
               distanceDisplay = listing.distanceInfo;
+            }else{
+              distanceDisplay = listing.distanceInfo + " Km away";
+
             }
           }
           
@@ -202,7 +205,8 @@ window.scrollTo(0,0)
   provider={listing.provider || listing.ownerType || t('unknown')}
   listingSource={sourceDisplay}
   pricePerNight={listing.pricePerNight}
-  distance={listing.distanceInfo.distanceText}
+  distance={(listing.distanceInfo / 1000).toFixed(2) + " km away"}
+
 />
 
           );

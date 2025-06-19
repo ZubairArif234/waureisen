@@ -91,7 +91,7 @@ const SearchResultsContent = () => {
     if (lat === null || lng === null || isNaN(lat) || isNaN(lng) || 
         lat < -90 || lat > 90 || lng < -180 || lng > 180) {
       console.warn("Invalid or missing coordinates in URL, using defaults");
-      lat = 46.818188;
+      lat = 50.818188;
       lng = 8.227512;
     }
     
