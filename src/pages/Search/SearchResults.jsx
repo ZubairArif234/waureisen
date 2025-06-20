@@ -45,6 +45,9 @@ const SearchResultsContent = () => {
     isDraggingMap,
     setMapDragging
   } = useListings();
+
+  console.log(listings , "ye hain listings");
+  
   
   // Filter listings based on price range
   const filteredListings = listings.filter(listing => {
@@ -315,7 +318,7 @@ const SearchResultsContent = () => {
           
           {/* Results List - Simple container */}
           <div className="p-1">
-            <ImprovedVirtualizedListings listings={filteredListings} />
+            <ImprovedVirtualizedListings listings={listings} />
           </div>
         </main>
         

@@ -10,10 +10,10 @@ import { useLanguage } from '../../utils/LanguageContext';
  * Improved listings component with pagination
  * Uses the same AccommodationCard component as the home page
  */
-const ImprovedVirtualizedListings = () => {
+const ImprovedVirtualizedListings = ({listings}) => {
   const { t } = useLanguage();
   const { 
-    listings, 
+    // listings, 
     isLoading, 
     isInitialLoad,
     hasMore, 
@@ -83,7 +83,7 @@ window.scrollTo(0,0)
     return () => {
       if (timer) clearTimeout(timer);
     };
-  }, [isInitialLoad, isLoading, listings.length, isConnectionError, isDraggingMap]);
+  }, [isInitialLoad, isLoading, listings, isConnectionError, isDraggingMap]);
   
   // Connection error state
   if (isConnectionError) {
@@ -152,12 +152,14 @@ window.scrollTo(0,0)
     );
   }
   
+  console.log(listings , "is page me listings hain");
+  
   // Show listings with pagination
   return (
     <div ref={containerRef}>
       {/* Listings */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        {listings.map((listing) => {
+        {listings?.map((listing) => {
           // Handle possible object properties properly to avoid React rendering errors
           let sourceDisplay = t('unknown');
           if (listing.source) {
@@ -212,6 +214,7 @@ window.scrollTo(0,0)
           );
         })}
       </div>
+      <p>kkk</p>
       
       {/* Pagination Controls */}
       {totalAccommodationsInRadius > 0 && (

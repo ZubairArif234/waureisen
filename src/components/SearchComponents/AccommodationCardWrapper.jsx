@@ -89,9 +89,9 @@ console.log(price,pricePerNight,distance);
   }
 
   // If the listing price is outside the selected range, don't render it
-  if (!shouldShowListing()) {
-    return null;
-  }
+  // if (!shouldShowListing()) {
+  //   return null;
+  // }
 
   return (
     <div className="h-full">

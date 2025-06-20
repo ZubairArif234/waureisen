@@ -189,6 +189,9 @@ function generateCustomerNumber() {
 export const getProviderProfile = async () => {
   try {
     const response = await API.get("/providers/profile");
+    console.log(response , "profile data");
+    
+    localStorage.setItem("providerSignupData",response.data)
     return response.data;
   } catch (error) {
     console.error("Error fetching provider profile:", error);

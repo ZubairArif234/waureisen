@@ -135,10 +135,10 @@ const OptimizedMapWithClustering = () => {
           ''}
         
         <div style="margin: 0; font-size: 12px; color: #666; display: flex; align-items: center;">
-          <span>${listing.capacity ? `${listing.capacity.people} ${listing.capacity.people === 1 ? 'guest' : 'guests'}, ${listing.capacity.dogs || 0} ${listing.capacity.dogs === 1 ? 'dog' : 'dogs'}` : ''}</span>
+          <span>${listing.maxGuests ? `${listing.maxGuests} ${listing.maxGuests === 1 ? 'guest' : 'guests'}, ${listing.maxDogs || 0} ${listing.maxDogs === 1 ? 'dog' : 'dogs'}` : ''}</span>
         </div>
         ${listing.distanceInfo ? 
-          `<div style="margin: 5px 0; font-size: 13px; color: #333;">${listing.distanceInfo.distanceText}</div>` : 
+          `<div style="margin: 5px 0; font-size: 13px; color: #333;">${(listing.distanceInfo / 1000).toFixed(2) + " km away"}</div>` : 
           ''}
         <div style="margin-top: 10px; display: flex; justify-content: center;">
           <button id="view-details-${id}" 
@@ -158,12 +158,13 @@ const OptimizedMapWithClustering = () => {
       if (viewDetailsButton) {
         viewDetailsButton.addEventListener('click', () => {
           // Navigate to the accommodation details page with price info
-          navigate(`/accommodation/${id}`, {
-            state: {
-              pricePerNight: listing.pricePerNight || { price: 0, currency: "CHF" },
-              checkInDate: formattedStartDate
-            }
-          });
+           navigate(`/accommodation/${listing.title + "-"+ listing.Code}`, {
+      state: {
+        id:listing._id,
+        pricePerNight: listing.pricePerNight || { price, currency: "CHF" },
+        // checkInDate: formattedCheckInDate,
+      },
+    });
         });
       }
     });
@@ -269,7 +270,7 @@ const OptimizedMapWithClustering = () => {
       
       console.log("Initializing map with center:", center);
       
-      const zoom = mapViewport?.zoom || 6;
+      const zoom = mapViewport?.zoom || 8;
       
       const map = new window.google.maps.Map(mapRef.current, {
         center,
@@ -703,8 +704,8 @@ const OptimizedMapWithClustering = () => {
       
       {/* Improved loading state during dragging */}
       {isDraggingMap && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80 rounded-lg">
-          <div className="text-center p-4">
+        <div className="absolute inset-0 flex items-center justify-center bg-transparent  rounded-lg">
+          <div className="text-center p-4 bg-white/20">
             <div className="w-10 h-10 border-4 border-brand border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-base font-medium text-gray-800">Looking for accommodations in this area...</p>
           </div>

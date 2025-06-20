@@ -26,7 +26,7 @@ const ProviderRegistration = () => {
   // console.log(location , accountId);
 
   const savedCurrentStep = localStorage.getItem("currentStep");
-  
+  const profileData = JSON.parse(localStorage.getItem("provider_user"));
   const [isTermsOpen, setIsTermsOpen] = useState(false);
   const [isDataPolicyOpen, setIsDataPolicyOpen] = useState(false);
   const [stripeLoading, setStripeLoading] = useState(false);
@@ -36,7 +36,8 @@ const ProviderRegistration = () => {
   const [formData, setFormData] = useState(() => {
     // Try to get data from sessionStorage first (from signup flow)
     const savedData = sessionStorage.getItem("providerSignupData");
-    const parsedData = savedData ? JSON.parse(savedData) : null;
+    
+    const parsedData = profileData ? profileData : JSON.parse(savedData)  ;
 
     return {
       // Default form structure
@@ -75,6 +76,7 @@ const ProviderRegistration = () => {
       heardAboutUs: "",
       terms: false,
       newsletter: false,
+      ...parsedData,
 
       // Override with data from signup if available
       ...(parsedData && {
@@ -87,12 +89,36 @@ const ProviderRegistration = () => {
     };
   });
 
+  useEffect(() => {
+  console.log(profileData, "profileData");
+
+  if (profileData?._id) {
+    
+    if(profileData?.stripeAccountId){
+
+      setStripeAccount(profileData?.stripeAccountId)
+    }
+
+    setCurrentStep((prevStep) => {
+      console.log(prevStep ,profileData.step );
+      
+      if (prevStep !== profileData.step) {
+        return profileData.step + 1;
+      }
+      return prevStep + 1;
+    });
+  }
+}, [profileData?._id]);
+
+
   const savedData = useMemo(() => {
     return JSON.parse(localStorage.getItem("providerSignupData"));
   }, []);
 
   const handleConnectStripe = async () => {
-    const res = await connectToStripe({ email: formData.email });
+    const queryParams = new URLSearchParams(window.location.search);
+const accountId = queryParams.get('account');
+    const res = await connectToStripe({ email: formData.email ,accountId:accountId});
     console.log(res);
     window.location.href = res.url;
   };
@@ -117,7 +143,7 @@ console.log(name , value);
         [name]: value,
       });
     }
-    console.log(formData , "formData");
+    
   };
   const handleAddressChange = (e) => {
     const { name, value } = e.target;
@@ -132,6 +158,8 @@ console.log(name , value);
 
   const validateStep = (step) => {
     const newErrors = {};
+    console.log(formData);
+    
 
     if (step === 1) {
       if (!formData.firstName.trim())
@@ -143,11 +171,11 @@ console.log(name , value);
       } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
         newErrors.email = "Email is invalid";
       }
-      if (!formData.phone.trim()) newErrors.phone = "Phone number is required";
-      if (!formData.address.street.trim())
+      if (!formData?.phone) newErrors.phone = "Phone number is required";
+      if (!formData?.address?.street)
         newErrors.street = "Street address is required";
-      if (!formData.address.city.trim()) newErrors.city = "City is required";
-      if (!formData.address.postalCode.trim())
+      if (!formData?.address?.city) newErrors.city = "City is required";
+      if (!formData?.address?.postalCode)
         newErrors.postalCode = "Postal code is required";
     }
 
@@ -171,19 +199,125 @@ console.log(name , value);
     return Object.keys(newErrors).length === 0;
   };
 
-  const nextStep = () => {
+  const nextStep = async () => {
+    try{
+
+    
     const isValid = validateStep(currentStep);
 
-    if (isValid) {
+
+      const registrationData = {
+        step:currentStep,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phoneNumber: formData.phone,
+
+        // Address
+        address: formData.address,
+
+        // Business information
+        businessName: formData.businessName,
+        businessType: formData.businessType,
+        vatNumber: formData.vatNumber,
+        website: formData.website,
+
+        // Banking details
+        bankName: formData.bankName,
+        accountHolder: formData.accountHolder,
+        iban: formData.iban,
+        swift: formData.swift,
+
+        // stripe Account ID
+        stripeAccountId: formData?.stripeAccountId,
+
+        // Additional information
+        hostingExperience: formData.hostingExperience,
+        propertyCount: formData.propertyCount,
+        heardAboutUs: formData.heardAboutUs,
+
+        // Preferences
+        newsletter: formData.newsletter,
+
+        // Update registration status
+        registrationStatus: "complete",
+      };
+
+      // Call the API to complete registration
+let response ;
+if(isValid){
+
+  response = await completeProviderRegistration(registrationData);
+}
+console.log(response);
+
+localStorage.setItem("currentStep",response?.provider?.step)
+const savedData = sessionStorage.getItem("providerSignupData");
+    
+    const parsedData = savedData ? JSON.parse(savedData) : null;
+setFormData(
+  {
+      // Default form structure
+      firstName: response?.provider?.firstName || "",
+      lastName: response?.provider?.lastName || "",
+      email: response?.provider?.email || "",
+      password: "",
+      confirmPassword: "",
+      phone: response?.provider?.phoneNumber || "",
+      address: {
+        street: response?.provider?.address?.street || "",
+        city: response?.provider?.address?.city || "",
+        postalCode: response?.provider?.address?.postalCode || "",
+        country: response?.provider?.address?.country || "Switzerland",
+      },
+      dateOfBirth: "",
+
+      // Business Information
+      businessName:response?.provider?.businessName || "",
+      businessType: response?.provider?.businessType || "individual",
+      vatNumber: response?.provider?.vatNumber || "",
+      website: response?.provider?.website || "",
+
+      // Banking Details
+      bankName: response?.provider?.bankName || "",
+      accountHolder: response?.provider?.accountHolder || "",
+      iban: response?.provider?.iban || "",
+      swift: response?.provider?.swift || "",
+
+      // stripe account ID
+      stripeAccountId: response?.provider?.stripeAccountId || "",
+
+      // Additional Information
+      hostingExperience: response?.provider?.hostingExperience || "none",
+      propertyCount: response?.provider?.propertyCount || "1",
+      heardAboutUs: response?.provider?.heardAboutUs || "",
+      terms: response?.provider?.terms || false,
+      newsletter: response?.provider?.newsletter || false,
+
+      // Override with data from signup if available
+      ...(parsedData && {
+        firstName: parsedData.firstName || "",
+        lastName: parsedData.lastName || "",
+        email: parsedData.email || "",
+        phone: parsedData.phoneNumber || "",
+        // Don't pre-fill passwords for security
+      }),
+    }
+)
+
+    if (isValid && response?.provider?.id) {
       setCurrentStep(currentStep + 1);
       localStorage.setItem("providerSignupData", JSON.stringify(formData));
       localStorage.setItem("currentStep", currentStep + 1);
       window.scrollTo(0, 0);
     }
+  } catch(err){
+    console.log(err);
+    
+  }
   };
 
   const prevStep = () => {
-    setCurrentStep(currentStep - 1);
+    setCurrentStep((prev)=>prev - 1);
     window.scrollTo(0, 0);
   };
 
@@ -206,6 +340,7 @@ console.log(name , value);
     try {
       // Prepare the data for the API call
       const registrationData = {
+      step:currentStep,
         firstName: formData.firstName,
         lastName: formData.lastName,
         phoneNumber: formData.phone,
@@ -312,6 +447,8 @@ console.log(response, "jffk");
     }
   },[accountId])
 
+  console.log(currentStep , "current step");
+  
   const renderStep = () => {
     switch (currentStep) {
       case 1:
@@ -424,14 +561,14 @@ console.log(response, "jffk");
                 type="text"
                 id="street"
                 name="street"
-                value={formData.address.street}
+                value={formData?.address?.street}
                 onChange={handleAddressChange}
                 className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand ${
                   errors.street ? "border-red-500" : "border-gray-300"
                 }`}
               />
               {errors.street && (
-                <p className="mt-1 text-sm text-red-600">{errors.street}</p>
+                <p className="mt-1 text-sm text-red-600">{errors?.street}</p>
               )}
             </div>
 
@@ -447,14 +584,14 @@ console.log(response, "jffk");
                   type="text"
                   id="city"
                   name="city"
-                  value={formData.address.city}
+                  value={formData?.address?.city}
                   onChange={handleAddressChange}
                   className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand ${
                     errors.city ? "border-red-500" : "border-gray-300"
                   }`}
                 />
                 {errors.city && (
-                  <p className="mt-1 text-sm text-red-600">{errors.city}</p>
+                  <p className="mt-1 text-sm text-red-600">{errors?.city}</p>
                 )}
               </div>
 
@@ -469,15 +606,15 @@ console.log(response, "jffk");
                   type="text"
                   id="postalCode"
                   name="postalCode"
-                  value={formData.address.postalCode}
+                  value={formData?.address?.postalCode}
                   onChange={handleAddressChange}
                   className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand ${
-                    errors.postalCode ? "border-red-500" : "border-gray-300"
+                    errors?.postalCode ? "border-red-500" : "border-gray-300"
                   }`}
                 />
-                {errors.postalCode && (
+                {errors?.postalCode && (
                   <p className="mt-1 text-sm text-red-600">
-                    {errors.postalCode}
+                    {errors?.postalCode}
                   </p>
                 )}
               </div>
@@ -492,7 +629,7 @@ console.log(response, "jffk");
                 <select
                   id="country"
                   name="country"
-                  value={formData.address.country}
+                  value={formData?.address?.country}
                   onChange={handleAddressChange}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                 >
@@ -516,7 +653,7 @@ console.log(response, "jffk");
                 type="date"
                 id="dateOfBirth"
                 name="dateOfBirth"
-                value={formData.dateOfBirth}
+                value={formData?.dateOfBirth}
                 onChange={handleInputChange}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
               />
@@ -538,7 +675,7 @@ console.log(response, "jffk");
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div
                   className={`border rounded-lg p-4 cursor-pointer ${
-                    formData.businessType === "individual"
+                    formData?.businessType === "individual"
                       ? "border-brand bg-brand/5"
                       : "border-gray-200 hover:bg-gray-50"
                   }`}
@@ -790,19 +927,19 @@ console.log(response, "jffk");
               </div>
             )}
            {accountId  && !stripeAccount && !stripeLoading ? (
-            <>
+            <> 
   <p className="text-amber-500 text-center">
     {t("restricted_stripe")}
    </p>
   <p className="text-sm">
-{t("stripe_click")} :- 
-  <Link className=" underline underline-offset-2 text-blue-500" to={"https://support.stripe.com/"}> Stripe Support </Link>
+{t("click_here")} :- 
+  <Link target="_blank" className=" underline underline-offset-2 text-blue-500" to={"https://support.stripe.com/"}> Stripe Support </Link>
   </p>
             </>
   // <p className="text-red-500 text-center">
   //   Failed to connect to stripe, Please try again!
   // </p>
-) : accountId !== null && accountId !== "failed" ? (
+) : (accountId !== null && accountId !== "failed") || profileData?.stripeAccountId ? (
   !stripeLoading ? (
     <div>
       <p className="text-xl font-semibold">Account Connected</p>

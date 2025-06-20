@@ -148,7 +148,7 @@ export const getStreamedListings = async (params) => {
       skip = null,
       lat,
       lng,
-      radius = 500,
+      radius = 150,
       filters = {},
       priceMin,
       priceMax,
