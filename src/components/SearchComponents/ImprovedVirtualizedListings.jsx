@@ -214,7 +214,6 @@ window.scrollTo(0,0)
           );
         })}
       </div>
-      <p>kkk</p>
       
       {/* Pagination Controls */}
       {totalAccommodationsInRadius > 0 && (
