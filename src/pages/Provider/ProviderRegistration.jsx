@@ -1126,7 +1126,7 @@ console.log(response, "jffk");
               </div>
             </div>
 
-            <div className="bg-gray-50 p-6 rounded-lg mt-6">
+            {/* <div className="bg-gray-50 p-6 rounded-lg mt-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4">
                 {t("what_happens_next")}
               </h3>
@@ -1159,7 +1159,7 @@ console.log(response, "jffk");
                   </p>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {errors.form && (
               <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-4">
