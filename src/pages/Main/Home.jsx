@@ -40,7 +40,7 @@ navigate("/provider/dashboard")
   
   URL.revokeObjectURL(url);
 };
-    const url = 'http://localhost:5000/api/interhome/accommodation/all';
+    const url = 'https://waureisen-backend-rhp1.onrender.com/api/interhome/accommodation/all';
     const all = [];
     const batchSize = 10;
 
@@ -59,7 +59,7 @@ navigate("/provider/dashboard")
           await Promise.all(
             batch.map(async (acco) => {
               try {
-                const res2 = await axios.get(`http://localhost:5000/api/interhome/accommodation/detail/${acco?.code}`);
+                const res2 = await axios.get(`https://waureisen-backend-rhp1.onrender.com/api/interhome/accommodation/detail/${acco?.code}`);
                 const attributes = res2?.data?.data?.accommodation?.attributes?.attribute || [];
                 const descriptions = res2?.data?.data?.accommodation?.descriptions?.description;
 console.log(res2)

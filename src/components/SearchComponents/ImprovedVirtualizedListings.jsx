@@ -214,6 +214,10 @@ window.scrollTo(0,0)
           );
         })}
       </div>
+{/* <<<<<<< HEAD
+=======
+      
+>>>>>>> 9e467f48133fca6f8d617ce03d0346fe2b1070ff */}
       
       {/* Pagination Controls */}
       {totalAccommodationsInRadius > 0 && (
