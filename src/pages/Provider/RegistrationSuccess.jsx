@@ -25,25 +25,25 @@ const RegistrationSuccess = () => {
     },
     {
       step: 2,
+      titleKey: 'connect_payment',
+      descriptionKey: 'payment_desc',
+      actionKey: 'payment_setup_action',
+      link: '/provider/earnings'
+    },
+    {
+      step: 3,
       titleKey: 'create_first_listing',
       descriptionKey: 'create_listing_desc',
       actionKey: 'create_listing_action',
       link: '/provider/create-listing'
     },
     {
-      step: 3,
+      step: 4,
       titleKey: 'set_up_calendar',
       descriptionKey: 'calendar_desc',
       actionKey: 'set_calendar_action',
       link: '/provider/calendar'
     },
-    {
-      step: 4,
-      titleKey: 'connect_payment',
-      descriptionKey: 'payment_desc',
-      actionKey: 'payment_setup_action',
-      link: '/provider/earnings'
-    }
   ];
 
   return (
