@@ -163,6 +163,7 @@ const SearchResultsContent = () => {
     
     // Update search params in context
     updateSearchParams(newSearchParams);
+    updateSearchParams(newSearchParams);
   }, [location.search, updateSearchParams, searchFilters]);
 
   // Helper function to determine what to display for total count
