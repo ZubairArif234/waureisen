@@ -140,6 +140,9 @@ const OptimizedMapWithClustering = () => {
         ${listing.distanceInfo ? 
           `<div style="margin: 5px 0; font-size: 13px; color: #333;">${(listing.distanceInfo / 1000).toFixed(2) + " km away"}</div>` : 
           ''}
+        ${listing.price ? 
+          `<b style="margin: 5px 0; font-size: 13px; color: #333;">${(listing.price || listing?.pricePerNight.price).toFixed(1) + " " + listing?.pricePerNight.currency}</b>` : 
+          ''}
         <div style="margin-top: 10px; display: flex; justify-content: center;">
           <button id="view-details-${id}" 
             style="background-color: #B4A481; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 14px; cursor: pointer; width: 100%;">

@@ -49,7 +49,7 @@ const SubsectionIcon = ({ name }) => {
           </button>
         </div>
         
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className=" flex-col md:flex-row gap-4">
    
       {filterData &&
         filterData.subsections &&
@@ -64,16 +64,16 @@ const SubsectionIcon = ({ name }) => {
                       subsubsection &&
                       subsubsection.filters &&
                       subsubsection.filters.length > 0 && (
-                        <div key={subIndex} className='mb-4'>
+                        <div key={subIndex} className='mb-4 !w-full'>
                           <h3 className="text-[#4D484D] flex items-center gap-2 md:text-lg text-md font-semibold mb-2">
                           <SubsectionIcon name={subsubsection.name} />  {t(subsubsection.name) }
                           </h3>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="!w-full ">
                             {subsubsection.filters.map(
                               (filter, filterIndex) => (
                                 <div
                                   key={filterIndex}
-                                  className="flex items-center gap-3 px-3 py-1 rounded-lg"
+                                  className="  px-3 py-5 border-b border-slate-300"
                                 >
                                   {/* {React.createElement(
                                     getAmenityIcon(filter.name?.toLowerCase()),

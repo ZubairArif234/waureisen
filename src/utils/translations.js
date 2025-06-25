@@ -1,5 +1,12 @@
 const translations = {
   en: {
+    switzerland:"Switzerland",
+    germany:"Germany",
+    austria:"Austria",
+    france:"France",
+    italy:"Italy",
+    upto:"Up to ",
+    view_all:"View all",
     restricted_stripe:
       " Your account has been restricted by the stripe. Please contact stripe support team and get unlocked your account.",
     click_here: "Click the link to contact",
@@ -268,7 +275,7 @@ const translations = {
       "Book easily on your own or reach out for help anytime - we're here for your questions and requests.",
     all_in_one_place: "All in One Place",
     all_in_one_place_desc:
-      "Explore our travel blog for tips on dog-friendly destinations and book travel gear conveniently.",
+      "Explore our travel magazine for tips on dog-friendly destinations and book travel gear conveniently.",
     transparent_pricing: "Transparent Pricing",
     transparent_pricing_desc:
       "No hidden fees - pay the same as booking directly with the accommodation.",
@@ -1379,6 +1386,13 @@ const translations = {
   },
 
   de: {
+     switzerland:"scheweiz",
+    germany:"Deutschland",
+    austria:"Österreich",
+    france:"Frankreich",
+    italy:"Italien",
+    upto:"Bis zu ",
+    view_all:"Alle Bilder",
     connection_error: "Verbindungsfehler",
     connection_error_description:
       "Wir können derzeit keine Verbindung zum Server herstellen. Dies könnte folgende Ursachen haben:",

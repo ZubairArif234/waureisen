@@ -28,6 +28,8 @@ const AboutUs = () => {
         <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h1 className="text-3xl md:text-5xl font-bold text-center mb-10">{t('about_us')}</h1>
 
+{/* <div className='grid grid-cols-2'> */}
+
         {/* About Text */}
         <div className="prose prose-lg mx-auto mb-12 text-gray-700">
           <p className="text-center mb-6">
@@ -40,9 +42,10 @@ const AboutUs = () => {
             <img 
               src={together} 
               alt="Simone and Charlie together" 
-              className="rounded-lg shadow-md max-w-full md:max-w-2xl"
+              className="rounded-lg  max-w-full md:max-w-md"
             />
           </div>
+{/* </div> */}
           
           {/* Team Section */}
           <h2 className="text-2xl md:text-4xl font-bold text-center mb-10">{t('the_team')}</h2>
