@@ -633,11 +633,11 @@ console.log(response, "jffk");
                   onChange={handleAddressChange}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                 >
-                  <option value="Switzerland">Switzerland</option>
-                  <option value="Germany">Germany</option>
-                  <option value="Austria">Austria</option>
-                  <option value="France">France</option>
-                  <option value="Italy">Italy</option>
+                  <option value="Switzerland">{t("switzerland")}</option>
+                  <option value="Germany">{t("germany")}</option>
+                  <option value="Austria">{t("austria")}</option>
+                  <option value="France">{t("france")}</option>
+                  <option value="Italy">{t("italy")}</option>
                 </select>
               </div>
             </div>

@@ -162,7 +162,7 @@ const AccommodationDetails = ({ accommodation }) => {
         })}
         </div>
         {allFilters?.length > 6 && 
-        <button onClick={() => setIsFilterOpen(true)} className="bg-brand text-white px-8 py-2 rounded-lg font-medium hover:bg-brand-dark transition-colors">See All</button>
+        <button onClick={() => setIsFilterOpen(true)} className="bg-brand text-white px-8 py-2 rounded-lg font-medium hover:bg-brand-dark transition-colors">Show All</button>
         }
        {filterData && (
   <div className="absolute z-10 mt-2 w-full">

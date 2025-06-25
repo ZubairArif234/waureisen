@@ -43,7 +43,7 @@ const PlaceOffer = ({ icon: Icon, text, value }) => (
   <div className="flex-1 flex flex-col items-center text-center p-4 border-r border-[#767676] last:border-r-0 md:p-4 p-2">
     <Icon className="w-6 h-6 md:w-6 md:h-6 w-5 h-5 text-[#767676] mb-2" />
     <div className="text-[#767676] text-sm">
-      <p className="font-medium md:text-sm text-xs">{text}</p>
+      <p className="font-medium md:text-sm text-xs capitalize">{text}</p>
       {value && <p className="md:text-sm text-xs"> {value}</p>}
     </div>
   </div>
@@ -58,6 +58,7 @@ const Detail = ({ icon: Icon, text }) => (
 
 // Update ImageGrid to use dynamic images
 const ImageGrid = ({ images = [s1, s2, s3, s4, s5] }) => {
+  const { t } = useLanguage();
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   // Use default images if no images are provided
   const displayImages = images.length > 0 ? images : [s1, s2, s3, s4, s5];
@@ -105,7 +106,8 @@ const ImageGrid = ({ images = [s1, s2, s3, s4, s5] }) => {
               onClick={() => setIsGalleryOpen(true)}
               className="absolute bottom-4 right-4 px-4 py-2 bg-white rounded-lg text-sm font-medium shadow-md hover:bg-gray-50 transition-colors"
             >
-              View all
+             { t("view_all")}
+              
             </button>
           </div>
         </div>
@@ -450,7 +452,7 @@ console.log(availableDates , maxGuests , "ye hai na");
       icon: Users,
       text: t("people"),
       value:
-      "Up to " +
+      t("upto") +
        
         accommodation?.maxGuests?.toString() ||
         "6 ", // Default
@@ -458,7 +460,7 @@ console.log(availableDates , maxGuests , "ye hai na");
     {
       icon: Dog,
       text: t("dog"),
-      value: "Up to " + accommodation?.maxDogs?.toString() || "1",
+      value: t("upto") + accommodation?.maxDogs?.toString() || "1",
     },
     {
       icon: Home,

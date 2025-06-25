@@ -210,7 +210,7 @@ const [searchParams] = useSearchParams();
           if (response.provider) {
             localStorage.setItem(
               "provider_user",
-              JSON.stringify(response.provider)
+              JSON.stringify(userData)
             );
           }
   

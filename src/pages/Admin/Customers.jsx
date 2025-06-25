@@ -494,8 +494,8 @@ const CustomerRow = ({ customer, onAction }) => {
         #{customer.customerNumber || "N/A"}
       </td>
       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${customer.newsletter === 'on' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-          {customer.newsletter === 'on' ? 'On' : 'Off'}
+        <span className={`px-2 py-1 rounded-full text-xs font-medium ${customer.newsletter  ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+          {customer.newsletter  ? 'On' : 'Off'}
         </span>
       </td>
       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600 text-center">

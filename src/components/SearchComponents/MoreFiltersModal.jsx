@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Users, Dog, Lock, Bath, DollarSign, Tv, ChefHat, Eclipse,
-  Baby, Waves, UtensilsCrossed, Car, Mountain, Dumbbell, Cigarette,
-  Accessibility, X
+  Users, Lock, Bath, DollarSign, X,Baby, Car, Coffee, Dog, Dumbbell, Eye, Filter, Flame, Home, MapPin 
 } from 'lucide-react';
+// import { Baby, Car, Coffee, Dog, Dumbbell, Eye, Filter, Flame, Home, MapPin } from 'lucide-react';
+
 import RangeSlider from './RangeSlider';
 import * as filterData from './moreFiltersData';
 import { useLanguage } from '../../utils/LanguageContext';
@@ -11,6 +11,33 @@ import { usePriceFilter } from '../../context/PriceFilterContext';
 import { useSearchFilters } from '../../context/SearchFiltersContext';
 import API from "../../api/config";
 
+ const getSubsectionIcon = (subsectionName) => {
+  const iconMap = {
+    'Dog Facilities': Dog,
+    'Facilities Parking': Car,
+    'Facilities Wellness': Dumbbell,
+    'Facilities Accommodation Features': Home,
+    'Facilities Kids': Baby,
+    'Facilities Kitchen': Coffee,
+    'Facilities Main Filters': Filter,
+    'Facilities Smoking': Flame,
+    'Facilities Sport': Dumbbell,
+    'Facilities To Do Nearby': MapPin,
+    'Facilities View': Eye,
+  };
+
+  return iconMap[subsectionName]  || ""; // Default to Lock if no match
+};
+const SubsectionIcon = ({ name }) => {
+  const Icon = getSubsectionIcon(name);
+  if (Icon !== ""){
+
+    return <Icon className="w-4 h-4 text-[#767676]" />;
+  }
+  else{
+    return;
+  }
+};
 const FilterSection = ({ icon, title, options, selected, onChange }) => (
   <div className="mb-8">
     <div className="flex items-center gap-2 mb-4">
@@ -279,7 +306,8 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
           {/* Dynamic Filters */}
           {filters.subsubsections?.map(subsection => (
             <div key={subsection._id} className="mb-8">
-              <h3 className="text-gray-700 font-medium mb-4">{t(subsection.name)}</h3>
+              {/* {getSubsectionIcon(subsection.name)} */}
+              <h3 className="text-gray-700 font-medium mb-4 flex items-center"><span className='me-2'><SubsectionIcon name={subsection.name} /> </span> {t(subsection.name)}</h3>
               <div className="space-y-3">
                 {subsection.filters?.map(filter => {
                   const category = subsection.name.toLowerCase();
