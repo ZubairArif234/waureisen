@@ -124,7 +124,7 @@ const Register = () => {
             <img 
               src={dogImage} 
               alt="Cozy dog under blanket" 
-              className=" object-cover  h-full"
+              className=" object-cover w-full  h-full"
             />
           </div>
         </div>
