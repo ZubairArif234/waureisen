@@ -25,27 +25,27 @@ const AboutUs = () => {
       
       <main className="pt-20 pb-16">
         {/* About Us Section */}
-        <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h1 className="text-3xl md:text-5xl font-bold text-center mb-10">{t('about_us')}</h1>
 
-{/* <div className='grid grid-cols-2'> */}
+<div className='grid grid-cols-2 items-start '>
 
         {/* About Text */}
-        <div className="prose prose-lg mx-auto mb-12 text-gray-700">
-          <p className="text-center mb-6">
+        <div className=" mx-auto mb-12 text-gray-700">
+          <p className="text-justify mb-6 text-sm">
             {t('about_text')}
           </p>
         </div>
           
           {/* Together Image */}
-          <div className="flex justify-center mb-20">
+          <div className="flex justify-center items-center ">
             <img 
               src={together} 
               alt="Simone and Charlie together" 
-              className="rounded-lg  max-w-full md:max-w-md"
+              className="rounded-lg  max-w-full md:max-w-sm"
             />
           </div>
-{/* </div> */}
+</div>
           
           {/* Team Section */}
           <h2 className="text-2xl md:text-4xl font-bold text-center mb-10">{t('the_team')}</h2>

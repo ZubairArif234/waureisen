@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Calendar, MapPin, Dog, Edit, X, AlertTriangle, ArrowLeft, UsersRound } from "lucide-react";
+import {
+  Calendar,
+  MapPin,
+  Dog,
+  Edit,
+  X,
+  AlertTriangle,
+  ArrowLeft,
+  UsersRound,
+} from "lucide-react";
 import Navbar from "../../components/Shared/Navbar";
 import Footer from "../../components/Shared/Footer";
 import DateRangePicker from "../../components/HomeComponents/DateRangePicker";
@@ -48,8 +57,18 @@ const EditTripModal = ({ isOpen, onClose, trip, onSave, onCancel }) => {
         if (parts.length < 3) return new Date();
 
         const monthMap = {
-          Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
-          Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
+          Jan: 0,
+          Feb: 1,
+          Mar: 2,
+          Apr: 3,
+          May: 4,
+          Jun: 5,
+          Jul: 6,
+          Aug: 7,
+          Sep: 8,
+          Oct: 9,
+          Nov: 10,
+          Dec: 11,
         };
 
         const month = monthMap[parts[0]];
@@ -90,10 +109,22 @@ const EditTripModal = ({ isOpen, onClose, trip, onSave, onCancel }) => {
 
     const formatDate = (date) => {
       const months = [
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
       ];
-      return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+      return `${
+        months[date.getMonth()]
+      } ${date.getDate()}, ${date.getFullYear()}`;
     };
 
     return `${formatDate(range.start)}-${formatDate(range.end)}`;
@@ -102,7 +133,9 @@ const EditTripModal = ({ isOpen, onClose, trip, onSave, onCancel }) => {
   const handleSave = () => {
     onSave(trip.id, {
       dates: formatDateRange(dateRange),
-      guests: `${guests.people} people, ${guests.dogs} ${guests.dogs === 1 ? "dog" : "dogs"}`,
+      guests: `${guests.people} people, ${guests.dogs} ${
+        guests.dogs === 1 ? "dog" : "dogs"
+      }`,
     });
   };
 
@@ -120,7 +153,10 @@ const EditTripModal = ({ isOpen, onClose, trip, onSave, onCancel }) => {
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-semibold">{t("edit_trip")}</h2>
-            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full">
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 rounded-full"
+            >
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -160,7 +196,11 @@ const EditTripModal = ({ isOpen, onClose, trip, onSave, onCancel }) => {
               <div className="flex items-center gap-2">
                 <Dog className="text-gray-400 w-5 h-5" />
                 <span>
-                  {`${guests.people} ${guests.people === 1 ? t("person") : t("people")}, ${guests.dogs} ${guests.dogs === 1 ? t("dog") : t("dogs")}`}
+                  {`${guests.people} ${
+                    guests.people === 1 ? t("person") : t("people")
+                  }, ${guests.dogs} ${
+                    guests.dogs === 1 ? t("dog") : t("dogs")
+                  }`}
                 </span>
               </div>
             </button>
@@ -193,9 +233,13 @@ const EditTripModal = ({ isOpen, onClose, trip, onSave, onCancel }) => {
             <div className="flex items-start gap-4 mb-4">
               <AlertTriangle className="w-6 h-6 text-red-500 flex-shrink-0 mt-1" />
               <div>
-                <h3 className="text-lg font-medium mb-2">{t("cancel_confirmation")}</h3>
+                <h3 className="text-lg font-medium mb-2">
+                  {t("cancel_confirmation")}
+                </h3>
                 <p className="text-gray-600 mb-2">{t("cancel_warning")}</p>
-                <p className="text-red-500 font-medium">{t("cancellation_fee_notice")}</p>
+                <p className="text-red-500 font-medium">
+                  {t("cancellation_fee_notice")}
+                </p>
               </div>
             </div>
             <div className="flex justify-end gap-3 mt-6">
@@ -239,23 +283,25 @@ const EditTripModal = ({ isOpen, onClose, trip, onSave, onCancel }) => {
 };
 
 // TripCard Component
-const TripCard = ({ trip, onEdit ,handleGetMyBooking}) => {
+const TripCard = ({ trip, onEdit, handleGetMyBooking }) => {
   const [activeModal, setActiveModal] = useState(false);
   const { t } = useLanguage();
   const navigate = useNavigate();
-  
+
   const start = moment(trip?.checkInDate);
   const end = moment(trip?.checkOutDate);
-  const currentDate = moment().startOf('day');
-  const checkInDate = moment(trip?.checkInDate).startOf('day');
-  const checkOutDate = moment(trip?.checkOutDate).startOf('day');
+  const currentDate = moment().startOf("day");
+  const checkInDate = moment(trip?.checkInDate).startOf("day");
+  const checkOutDate = moment(trip?.checkOutDate).startOf("day");
 
   const formattedDate = `${start.format("MMM D")}-${end.format("D, YYYY")}`;
 
   const canBeCanceled = () => {
     if (trip.status === "canceled") return false;
-    const daysUntilCheckIn = checkInDate.diff(currentDate, 'days');
-    const isInProgress = checkInDate.isSameOrBefore(currentDate) && checkOutDate.isAfter(currentDate);
+    const daysUntilCheckIn = checkInDate.diff(currentDate, "days");
+    const isInProgress =
+      checkInDate.isSameOrBefore(currentDate) &&
+      checkOutDate.isAfter(currentDate);
     return daysUntilCheckIn >= 1 && !isInProgress;
   };
 
@@ -263,36 +309,43 @@ const TripCard = ({ trip, onEdit ,handleGetMyBooking}) => {
     if (trip.status === "canceled") {
       return t("cancelled");
     }
-    
+
     if (trip.status === "pending") {
       return t("awaiting_confirmation") || "Awaiting Provider Confirmation";
     }
-    
+
     if (trip.status === "confirmed") {
       if (checkOutDate.isBefore(currentDate)) {
         return t("completed");
       }
-      
-      if (checkInDate.isSameOrBefore(currentDate) && checkOutDate.isAfter(currentDate)) {
+
+      if (
+        checkInDate.isSameOrBefore(currentDate) &&
+        checkOutDate.isAfter(currentDate)
+      ) {
         return t("in_progress") || "In Progress";
       }
-      
+
       return t("confirmed_by_provider") || "Confirmed by Provider";
     }
-    
+
     return t("upcoming");
   };
 
   const getStatusColorClass = () => {
     if (trip.status === "canceled") return "text-red-500";
     if (trip.status === "pending") return "text-yellow-600";
-    
+
     if (trip.status === "confirmed") {
       if (checkOutDate.isBefore(currentDate)) return "text-green-500";
-      if (checkInDate.isSameOrBefore(currentDate) && checkOutDate.isAfter(currentDate)) return "text-blue-500";
+      if (
+        checkInDate.isSameOrBefore(currentDate) &&
+        checkOutDate.isAfter(currentDate)
+      )
+        return "text-blue-500";
       return "text-green-600";
     }
-    
+
     return "text-brand";
   };
 
@@ -304,7 +357,7 @@ const TripCard = ({ trip, onEdit ,handleGetMyBooking}) => {
       toast.success(t("cancel_success"));
     } catch (err) {
       console.log(err);
-      
+
       toast.error(t("cancel_failed"));
     }
   };
@@ -336,7 +389,7 @@ const TripCard = ({ trip, onEdit ,handleGetMyBooking}) => {
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
                   {trip?.listing?.title}
                 </h3>
-                
+
                 {canBeCanceled() && (
                   <button
                     onClick={handleOpenModal}
@@ -346,7 +399,6 @@ const TripCard = ({ trip, onEdit ,handleGetMyBooking}) => {
                   </button>
                 )}
               </div>
-
             </div>
 
             <div className="space-y-3 mb-4 flex-grow">
@@ -366,51 +418,59 @@ const TripCard = ({ trip, onEdit ,handleGetMyBooking}) => {
               </div>
 
               <div className="flex items-center gap-2 text-gray-600">
-              <div className="flex items-center gap-2 text-gray-600">
-                <UsersRound className="w-5 h-5" />
-                <span className="capitalize">{trip?.capacity?.people} {t('guests')}</span>
-              </div>
-              <div className="flex items-center gap-2 text-gray-600">
-                <Dog className="w-5 h-5" />
-                <span className="capitalize">{trip?.capacity?.dogs} {t('dogs')}</span>
-              </div>
+                <div className="flex items-center gap-2 text-gray-600">
+                  <UsersRound className="w-5 h-5" />
+                  <span className="capitalize">
+                    {trip?.capacity?.people} {t("guests")}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-600">
+                  <Dog className="w-5 h-5" />
+                  <span className="capitalize">
+                    {trip?.capacity?.dogs} {t("dogs")}
+                  </span>
+                </div>
               </div>
             </div>
 
             <div className="flex items-center justify-between mt-auto pt-4 border-t">
               <div className="text-gray-600">
-                {t("host")} <span className="font-medium">{trip.listing?.provider}</span>
+                {t("host")}{" "}
+                <span className="font-medium">{trip.listing?.provider}</span>
               </div>
               <div className={`font-medium ${getStatusColorClass()}`}>
                 {getDisplayStatus()}
               </div>
             </div>
-            
+
             {trip.status === "pending" && (
               <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-md">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
                   <span className="text-sm text-yellow-700">
-                    {t("waiting_provider_response") || "Waiting for provider response"}
+                    {t("waiting_provider_response") ||
+                      "Waiting for provider response"}
                   </span>
                 </div>
               </div>
             )}
-            
-            {trip.status === "confirmed" && checkInDate.isAfter(currentDate) && (
-              <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-md">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-sm text-green-700">
-                    {t("booking_confirmed") || "Booking confirmed by provider"}
-                  </span>
+
+            {trip.status === "confirmed" &&
+              checkInDate.isAfter(currentDate) && (
+                <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-md">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-sm text-green-700">
+                      {t("booking_confirmed") ||
+                        "Booking confirmed by provider"}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
           </div>
         </div>
       </div>
-      
+
       <CancelBookingModal
         isOpen={activeModal}
         onClose={() => setActiveModal(false)}
@@ -472,7 +532,10 @@ const SuccessMessage = ({ message, onClose }) => {
         </div>
         <p>{message}</p>
       </div>
-      <button onClick={onClose} className="ml-4 text-gray-500 hover:text-gray-800">
+      <button
+        onClick={onClose}
+        className="ml-4 text-gray-500 hover:text-gray-800"
+      >
         <X className="h-5 w-5" />
       </button>
     </div>
@@ -480,7 +543,7 @@ const SuccessMessage = ({ message, onClose }) => {
 };
 
 const SuccessBooking = ({ message, onClose }) => {
-  const {t} = useLanguage()
+  const { t } = useLanguage();
   // useEffect(() => {
   //   const timer = setTimeout(() => {
   //     onClose();
@@ -507,12 +570,18 @@ const SuccessBooking = ({ message, onClose }) => {
           </svg>
         </div>
         <p>
-
-        <p className="text-lg font-semibold text-center">{t("booking_created")}</p>
-        <p className="text-slate-600 text-center">{t("booking_created_msg")}</p>
+          <p className="text-lg font-semibold text-center">
+            {t("booking_created")}
+          </p>
+          <p className="text-slate-600 text-center">
+            {t("booking_created_msg")}
+          </p>
         </p>
       </div>
-      <button onClick={onClose} className="absolute top-2 right-2 ml-4 text-gray-500 hover:text-gray-800">
+      <button
+        onClick={onClose}
+        className="absolute top-2 right-2 ml-4 text-gray-500 hover:text-gray-800"
+      >
         <X className="h-5 w-5" />
       </button>
     </div>
@@ -542,17 +611,17 @@ const TripsPage = () => {
 
   const itemPerPage = 5;
 
-  const queryString = window.location.search; 
-const params = new URLSearchParams(queryString);
+  const queryString = window.location.search;
+  const params = new URLSearchParams(queryString);
 
-const booking = params.get('booking'); 
-console.log(booking);
+  const booking = params.get("booking");
+  console.log(booking);
 
-useEffect(()=>{
-if(booking == "true"){
-  seIsBookingModal(true)
-}
-},[booking])
+  useEffect(() => {
+    if (booking == "true") {
+      seIsBookingModal(true);
+    }
+  }, [booking]);
 
   useEffect(() => {
     changeMetaData("Trips - Waureisen");
@@ -585,13 +654,13 @@ if(booking == "true"){
   useEffect(() => {
     const startUpcoming = (currentUpcomingPage - 1) * itemPerPage;
     const endUpcoming = startUpcoming + itemPerPage;
-    
+
     const startInProgress = (currentInProgressPage - 1) * itemPerPage;
     const endInProgress = startInProgress + itemPerPage;
-    
+
     const startCompleted = (currentCompletedPage - 1) * itemPerPage;
     const endCompleted = startCompleted + itemPerPage;
-    
+
     const startCanceled = (currentCanceledPage - 1) * itemPerPage;
     const endCanceled = startCanceled + itemPerPage;
 
@@ -600,43 +669,57 @@ if(booking == "true"){
       currentDate.setHours(0, 0, 0, 0);
 
       // Upcoming: check-in date is in the future
-      const upcomingTripsFiltered = trips.filter(trip => {
+      const upcomingTripsFiltered = trips.filter((trip) => {
         const checkInDate = new Date(trip.checkInDate);
         checkInDate.setHours(0, 0, 0, 0);
         return trip.status !== "canceled" && checkInDate > currentDate;
       });
 
       // In Progress: check-in date has passed, but check-out date hasn't
-      const inProgressTripsFiltered = trips.filter(trip => {
+      const inProgressTripsFiltered = trips.filter((trip) => {
         const checkInDate = new Date(trip.checkInDate);
         const checkOutDate = new Date(trip.checkOutDate);
         checkInDate.setHours(0, 0, 0, 0);
         checkOutDate.setHours(23, 59, 59, 999);
-        
-        return trip.status !== "canceled" && 
-               checkInDate <= currentDate && 
-               checkOutDate >= currentDate;
+
+        return (
+          trip.status !== "canceled" &&
+          checkInDate <= currentDate &&
+          checkOutDate >= currentDate
+        );
       });
 
       // Completed: check-out date has passed
-      const completedTripsFiltered = trips.filter(trip => {
+      const completedTripsFiltered = trips.filter((trip) => {
         const checkOutDate = new Date(trip.checkOutDate);
         checkOutDate.setHours(23, 59, 59, 999);
         return trip.status !== "canceled" && checkOutDate < currentDate;
       });
 
       // Canceled: status is canceled
-      const canceledTripsFiltered = trips.filter(trip => {
+      const canceledTripsFiltered = trips.filter((trip) => {
         return trip.status === "canceled";
       });
 
       // Apply pagination
       setUpcomingTrips(upcomingTripsFiltered.slice(startUpcoming, endUpcoming));
-      setInProgressTrips(inProgressTripsFiltered.slice(startInProgress, endInProgress));
-      setCompletedTrips(completedTripsFiltered.slice(startCompleted, endCompleted));
-      setCancelledTrips(canceledTripsFiltered.slice(startCanceled, endCanceled));
+      setInProgressTrips(
+        inProgressTripsFiltered.slice(startInProgress, endInProgress)
+      );
+      setCompletedTrips(
+        completedTripsFiltered.slice(startCompleted, endCompleted)
+      );
+      setCancelledTrips(
+        canceledTripsFiltered.slice(startCanceled, endCanceled)
+      );
     }
-  }, [currentUpcomingPage, currentInProgressPage, currentCompletedPage, currentCanceledPage, trips]);
+  }, [
+    currentUpcomingPage,
+    currentInProgressPage,
+    currentCompletedPage,
+    currentCanceledPage,
+    trips,
+  ]);
 
   const handleEditTrip = (trip) => {
     setSelectedTrip(trip);
@@ -686,15 +769,17 @@ if(booking == "true"){
           </h1>
           <div className="space-y-3">
             <p className="text-gray-600">{t("manage_trips")}</p>
-            <div className="flex items-center gap-2 text-sm text-gray-600 bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
-              <span>{t("cant_find_reservation")}</span>
-              <a
-                href="mailto:hallo@waureisen.com"
-                className="text-[#B4A481] hover:underline font-medium"
-              >
-                {t("contact_us_email")}
-              </a>
-            </div>
+            {trips?.length === 0 && (
+              <div className="flex items-center gap-2 text-sm text-gray-600 bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
+                <span>{t("cant_find_reservation")}</span>
+                <a
+                  href="mailto:hallo@waureisen.com"
+                  className="text-[rgb(180,164,129)] hover:underline font-medium"
+                >
+                  {t("contact_us_email")}
+                </a>
+              </div>
+            )}
           </div>
         </div>
 
@@ -702,20 +787,23 @@ if(booking == "true"){
           <NoTrips />
         ) : (
           <div className="space-y-12">
-
             {/* In Progress Trips */}
-{inProgressTrips?.length > 0 && (
-  <div>
-    <h2 className="text-xl font-semibold text-gray-900 mb-4">
-      {t("in_progress_trips") || "In Progress Trips"}
-    </h2>
-    <div className="space-y-4">
-      {inProgressTrips.map((trip, i) => (
-        <TripCard key={i} trip={trip} onEdit={handleEditTrip} 
-    handleGetMyBooking={handleGetMyBooking}/>
-      ))}
-    </div>
-    {/* <div className="flex justify-end">
+            {inProgressTrips?.length > 0 && (
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                  {t("in_progress_trips") || "In Progress Trips"}
+                </h2>
+                <div className="space-y-4">
+                  {inProgressTrips.map((trip, i) => (
+                    <TripCard
+                      key={i}
+                      trip={trip}
+                      onEdit={handleEditTrip}
+                      handleGetMyBooking={handleGetMyBooking}
+                    />
+                  ))}
+                </div>
+                {/* <div className="flex justify-end">
       <Pagination
         type="inprogress"
         currentPage={currentInProgressPage}
@@ -735,8 +823,8 @@ if(booking == "true"){
         onPageChange={handlePageChange}
       />
     </div> */}
-  </div>
-)}
+              </div>
+            )}
             {/* Upcoming Trips */}
             {upcomingTrips?.length > 0 && (
               <div>
@@ -745,7 +833,12 @@ if(booking == "true"){
                 </h2>
                 <div className="space-y-4">
                   {upcomingTrips.map((trip, i) => (
-                    <TripCard key={i} trip={trip} onEdit={handleEditTrip}  handleGetMyBooking={handleGetMyBooking}/>
+                    <TripCard
+                      key={i}
+                      trip={trip}
+                      onEdit={handleEditTrip}
+                      handleGetMyBooking={handleGetMyBooking}
+                    />
                   ))}
                 </div>
                 {/* <div className="flex justify-end">
@@ -767,19 +860,23 @@ if(booking == "true"){
               </div>
             )}
 
-
             {/* Completed Trips */}
-{completedTrips?.length > 0 && (
- <div>
-   <h2 className="text-xl font-semibold text-gray-900 mb-4">
-     {t("completed_trips") || "Completed Trips"}
-   </h2>
-   <div className="space-y-4">
-     {completedTrips.map((trip, i) => (
-       <TripCard key={i} trip={trip} onEdit={handleEditTrip}  handleGetMyBooking={handleGetMyBooking}/>
-     ))}
-   </div>
-   {/* <div className="flex justify-end">
+            {completedTrips?.length > 0 && (
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                  {t("completed_trips") || "Completed Trips"}
+                </h2>
+                <div className="space-y-4">
+                  {completedTrips.map((trip, i) => (
+                    <TripCard
+                      key={i}
+                      trip={trip}
+                      onEdit={handleEditTrip}
+                      handleGetMyBooking={handleGetMyBooking}
+                    />
+                  ))}
+                </div>
+                {/* <div className="flex justify-end">
      <Pagination
        type="completed"
        currentPage={currentCompletedPage}
@@ -795,8 +892,8 @@ if(booking == "true"){
        onPageChange={handlePageChange}
      />
    </div> */}
- </div>
-)}
+              </div>
+            )}
 
             {/* Cancelled Trips */}
             {cancelledTrips?.length > 0 && (
@@ -806,7 +903,12 @@ if(booking == "true"){
                 </h2>
                 <div className="space-y-4">
                   {cancelledTrips.map((trip, i) => (
-                    <TripCard key={i} trip={trip} onEdit={handleEditTrip}  handleGetMyBooking={handleGetMyBooking}/>
+                    <TripCard
+                      key={i}
+                      trip={trip}
+                      onEdit={handleEditTrip}
+                      handleGetMyBooking={handleGetMyBooking}
+                    />
                   ))}
                 </div>
                 {/* <div className="flex justify-end">
@@ -847,7 +949,10 @@ if(booking == "true"){
       {isBookingModal && (
         <SuccessBooking
           message={""}
-          onClose={() =>{ seIsBookingModal(false) ; location.replace("/trips")}}
+          onClose={() => {
+            seIsBookingModal(false);
+            location.replace("/trips");
+          }}
         />
       )}
 

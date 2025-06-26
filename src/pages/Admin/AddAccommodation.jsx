@@ -25,8 +25,10 @@ import { updateListing } from "../../api/listingAPI";
 import moment from "moment";
 import { changeMetaData } from "../../utils/extra";
 import { ensureCloudinaryUrl, uploadImageToCloudinary } from "../../utils/cloudinaryUtils";
+import { useLanguage } from "../../utils/LanguageContext";
 
 const AddAccommodation = (props) => {
+  const {t} = useLanguage()
   const { id } = useParams();
     useEffect(() => {
           
@@ -264,7 +266,6 @@ const isoCheckOut = "2025-06-02T06:00:00.000Z";
 const checkIn = convertFromISOString(listingData?.checkInTime);
 const checkOut = convertFromISOString(listingData?.checkOutTime);
 
-console.log(checkIn , checkOut ,"klkkkkkkkkkkkkkkkkkkkkkk");
 
           
           // Map basic listing data to form structure
@@ -451,7 +452,6 @@ console.log(checkIn , checkOut ,"klkkkkkkkkkkkkkkkkkkkkkk");
   };
 
   
-console.log(formData?.availability , "availibility");
 
   const handleSubmit = async () => {
     try {
@@ -1318,7 +1318,6 @@ console.log(findIndex, "find index");
   const handleBack =() => {
     const findIndex = availableTabs.findIndex(tab => tab.id === activeTab);
 
-console.log(findIndex, "find index");
     if (findIndex !== -1 || findIndex !== availableTabs.length - 1) {
       setActiveTab(availableTabs[findIndex-1]?.id );}
   }
@@ -1410,7 +1409,7 @@ console.log(subsection , "kln");
           <ArrowLeft className="w-5 h-5 text-gray-600" />
         </button>
         <h1 className="text-2xl font-semibold text-gray-900">
-          {isEditMode ? "Edit Listing" : "Add New Listing"}
+          {isEditMode ? t("edit_listing")  :t("add_listing") }
         </h1>
       </div>
 

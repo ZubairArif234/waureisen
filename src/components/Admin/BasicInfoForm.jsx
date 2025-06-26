@@ -160,8 +160,8 @@ const BasicInfoForm = ({ formData, handleInputChange,isDiscount, handleNestedInp
                 onChange={(e) => handleNestedInputChange('capacity', 'dogs', parseInt(e.target.value))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
               >
-                {[...Array(10)].map((_, i) => (
-                  <option key={i} value={i}>{i}</option>
+                {[...Array(25)].map((_, i) => (
+                  <option key={i+1} value={i+1}>{i+1}</option>
                 ))}
               </select>
             </div>
@@ -176,8 +176,8 @@ const BasicInfoForm = ({ formData, handleInputChange,isDiscount, handleNestedInp
                 onChange={(e) => handleNestedInputChange('capacity', 'bedrooms', parseInt(e.target.value))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
               >
-                {[...Array(10)].map((_, i) => (
-                  <option key={i} value={i}>{i}</option>
+                {[...Array(25)].map((_, i) => (
+                  <option key={i+1} value={i+1}>{i+1}</option>
                 ))}
               </select>
             </div>
@@ -192,7 +192,7 @@ const BasicInfoForm = ({ formData, handleInputChange,isDiscount, handleNestedInp
                 onChange={(e) => handleNestedInputChange('capacity', 'rooms', parseInt(e.target.value))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
               >
-                {[...Array(15)].map((_, i) => (
+                {[...Array(25)].map((_, i) => (
                   <option key={i+1} value={i+1}>{i+1}</option>
                 ))}
               </select>
@@ -208,7 +208,7 @@ const BasicInfoForm = ({ formData, handleInputChange,isDiscount, handleNestedInp
                 onChange={(e) => handleNestedInputChange('capacity', 'washrooms', parseInt(e.target.value))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
               >
-                {[...Array(8)].map((_, i) => (
+                {[...Array(25)].map((_, i) => (
                   <option key={i+1} value={i+1}>{i+1}</option>
                 ))}
               </select>

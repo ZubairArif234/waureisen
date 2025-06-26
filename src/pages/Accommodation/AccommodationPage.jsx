@@ -280,6 +280,8 @@ handleGetBooking()
 
         // Check if we have price data in the location state (passed from search results)
         const searchState = window.history.state?.usr || {};
+        console.log("Search state from history:", searchState, urlParams);
+        
         const priceFromSearch = searchState.pricePerNight;
         const dateFromSearch = searchState.checkInDate || searchDateParam;
 
@@ -770,7 +772,7 @@ const getDisplayPrice = () => {
             )}
 
             {/* Cancellation Policy */}
-            {accommodation?.customRefundPolicies?.length > 0 && accommodation?.legal?.cancellationPolicy == "custom" ? (
+            {accommodation?.customRefundPolicies?.length > 0 && accommodation?.legal?.cancellationPolicy == "custom"  && accommodation?.provider !== "Interhome" ? (
 
             <section className="mb-10">
               <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
@@ -789,19 +791,27 @@ const getDisplayPrice = () => {
                   <h3 className="text-[#4D484D] text-base font-medium mb-2">
                     {t("terms_and_conditions")}
                   </h3>
-                  <Link to={"https://www.interhome.de/kundenservice/agb/"} className="text-gray-600 text-sm whitespace-pre-line">
+                  <Link to={"https://images.interhome.group/documents/agb/AGB_5059_DE_20241101_neu.pdf#_ga=2.113422919.1775548596.1750775640-162054315.1750775640"} className="text-gray-600 text-sm whitespace-pre-line">
                   https://www.interhome.de/kundenservice/agb/
                   </Link>
-                </div>
+                  </div>
               )}
             </section>
             ) :(
-               <section className="mb-10">
-              <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
-                {t("cancellation_policy")}
-              </h2>
-              <p  className="text-gray-600 text-sm whitespace-pre-line">{accommodation?.legal?.cancellationPolicy}</p>
-              </section>
+              //  <section className="mb-10">
+              // <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
+              //   {t("cancellation_policy")}
+              // </h2>
+              // <p  className="text-gray-600 text-sm whitespace-pre-line">{accommodation?.legal?.cancellationPolicy}</p>
+              // </section>
+              <div className="mb-10">
+                  <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
+                    {t("terms_and_conditions")}
+                  </h2>
+                  <Link target="_blank" to={"https://images.interhome.group/documents/agb/AGB_5059_DE_20241101_neu.pdf#_ga=2.113422919.1775548596.1750775640-162054315.1750775640"} className="text-gray-600 text-sm whitespace-pre-line">
+                  https://images.interhome.group/documents/agb...
+                  </Link>
+                  </div>
             )}
 
             {/* additional files */}
@@ -859,8 +869,7 @@ const getDisplayPrice = () => {
                       .
                     </h3>
                     <p className="text-gray-600 text-sm line-clamp-2">
-                      {accommodation?.owner?.bio ||
-                        "This is an accommodation from one of our valued partners."}
+                      {accommodation?.owner?.bio || t("interhome_bio")}
                     </p>
                   </div>
                 </div>
@@ -906,6 +915,7 @@ const getDisplayPrice = () => {
   {accommodation?.pricePerNight?.currency || "CHF"}
 </div>
               </div>
+{console.log(dateRange , "date range")}
 
               {/* Date Picker */}
               <div className="mb-4 relative">

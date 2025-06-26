@@ -282,7 +282,7 @@ console.log(state?.data);
             {state?.data?.role !== "admin" && 
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">
-                {t("about_you")}
+                {t("about_provider")}
               </label>
               <textarea
                 name="aboutYou" // Changed from bio to aboutYou
@@ -292,7 +292,7 @@ console.log(state?.data);
                 placeholder={t("bio_placeholder")}
                 className="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-brand/20 focus:border-brand disabled:bg-gray-50 disabled:text-gray-500 min-h-[120px] resize-none"
               />
-              <p className="text-sm text-gray-500">{t("relationship_text")}</p>
+              {/* <p className="text-sm text-gray-500">{t("relationship_text")}</p> */}
             </div>
             }
 
