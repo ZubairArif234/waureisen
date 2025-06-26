@@ -124,7 +124,7 @@ const Register = () => {
             <img 
               src={dogImage} 
               alt="Cozy dog under blanket" 
-              className=" object-cover w-full  h-full"
+              className="aspect-auto  object-fill w-full  h-full"
             />
           </div>
         </div>

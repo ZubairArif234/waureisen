@@ -46,7 +46,9 @@ const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates,boo
 
   const isDateInRange = (day) => {
     if (!selectedRange.start || !selectedRange.end) return false;
+    
     const date = new Date(year, month, day);
+    console.log(selectedRange.start, selectedRange.end, "selectedRange" , date);
     return date >= selectedRange.start && date <= selectedRange.end;
   };
 
@@ -69,7 +71,7 @@ const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates,boo
       return date >= today;
     }
     
-    const currentDate = moment({ year, month:month-1, day });
+    const currentDate = moment({ year, month:month, day });
     return currentDate.isSameOrAfter(moment(), 'day') && availableMoments.some(availableMoment => {
       const startDate = availableMoment;
       const endDate = availableMoment;
@@ -110,11 +112,12 @@ const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates,boo
             
              const date = new Date(year, month, day);
             const isToday = date.getTime() === today.getTime();
-            const isSelected = isDateInRange(day);
+            const isSelected = isDateInRange(day+1);
             const isStart = isStartDate(day);
             const isEnd = isEndDate(day);
             const isPast = date < today;
             const isAvailable = isDateAvailable(day)
+            // console.log(isSelected ,day);
             
             return (
               <button

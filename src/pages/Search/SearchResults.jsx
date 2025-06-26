@@ -46,7 +46,7 @@ const SearchResultsContent = () => {
     setMapDragging
   } = useListings();
 
-  console.log(listings , "ye hain listings");
+  console.log(searchParams , "ye search params hai");
   
   
   // Filter listings based on price range
@@ -67,6 +67,7 @@ const SearchResultsContent = () => {
     return price >= min && price <= max;
   });
   
+  const urlParams = new URLSearchParams(location.search);
   useEffect(() => {
     // Prevent re-processing the same URL
     if (lastLocationRef.current === location.search) {
@@ -75,7 +76,6 @@ const SearchResultsContent = () => {
     
     lastLocationRef.current = location.search;
     
-    const urlParams = new URLSearchParams(location.search);
     
     // Extract location and coordinates
     const locationName = urlParams.get("location") || "";
@@ -107,7 +107,8 @@ const SearchResultsContent = () => {
     
     // Extract guest counts
     const people = parseInt(urlParams.get("people")) || 1;
-    const dogs = parseInt(urlParams.get("dogs")) || 0;
+    const dogs = parseInt(urlParams.get("people")?.split("=")[1]) ;
+    console.log(dogs , urlParams.get("people")?.split("=")[1] , "jkkko kkk jhj ");
     
     // Extract filters
     const filtersParam = urlParams.get("filters");
@@ -261,7 +262,7 @@ const SearchResultsContent = () => {
             initialDateRange={searchParams.filters.dateRange || { start: null, end: null }}
             initialGuests={{
               people: searchParams.filters.guestCount || 1,
-              dogs: searchParams.filters.dogCount || 0
+              dogs: urlParams.get("dogs") ? parseInt(urlParams.get("dogs")) : 0
             }}
             onSearch={handleSearch}
           />

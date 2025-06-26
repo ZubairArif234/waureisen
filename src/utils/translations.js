@@ -1,5 +1,9 @@
 const translations = {
   en: {
+    add_listing:"Add new listings",
+    edit_listing:"Edit listings",
+    about_provider:"About the provider",
+    interhome_bio:"This is an accommodation from one of our valued partners.",
     switzerland:"Switzerland",
     germany:"Germany",
     austria:"Austria",
@@ -176,7 +180,7 @@ const translations = {
     great_to_see_you_again:
       "Great to see you again! Click on the button to continue.",
     account_created:
-      "Thank you for registering! Welcome to Waureisen – the dog-friendly hotel booking app.",
+      "Thank you for your registration! Welcome to Waureisen - the first Swiss booking platform for dog-friendly travel.",
 
     name: "Name",
     customer_number: "Customer number",
@@ -434,8 +438,8 @@ const translations = {
 
     your_trips: "Your trips",
     manage_trips: "View and manage your upcoming and past trips",
-    cant_find_reservation: "Can't find your reservation here?",
-    contact_us_email: "Contact us via email hallo@waureisen.com",
+    cant_find_reservation: "Can't find your reservation here? Contact us via email",
+    contact_us_email: "hallo@waureisen.com",
     upcoming_trips: "Upcoming trips",
     past_trips: "Past trips",
     help_center: "Visit the Help Center",
@@ -1386,6 +1390,10 @@ const translations = {
   },
 
   de: {
+     add_listing:"Neuen Eintrag hinzufügen",
+    edit_listing:"Eintrag bearbeiten",
+  about_provider:"Über den Anbieter",
+    interhome_bio:"Dies ist eine Unterkunft von einem unserer geschätzten Partner.",
      switzerland:"scheweiz",
     germany:"Deutschland",
     austria:"Österreich",
@@ -1584,7 +1592,7 @@ const translations = {
     great_to_see_you_again:
       "Schön, Sie wiederzusehen! Klicken Sie auf die Schaltfläche, um fortzufahren.",
     account_created:
-      "Danke für Ihre Registrierung! Willkommen bei Waureisen – der App für hundefreundliche Hotelbuchungen.",
+      "Vielen Dank für Ihre Registrierung! Wir heissen Sie herzlich Willkommen bei Waureisen - der ersten Schweizer Buchungsplattform für hundefreundliches Reisen.",
     name: "Name",
     customer_number: "Kundennummer",
     customer_number_desc: "Kundennummer bez",
@@ -1936,7 +1944,7 @@ const translations = {
       "Buchen Sie in wenigen Schritten die passende Unterkunft oder vereinbaren Sie mit uns ein Gespräch. Wir sind gerne für Sie da.",
     all_in_one_place: "Alles an einem Ort",
     all_in_one_place_desc:
-      "Entdecken Sie unseren Reisemagazin für Tipps zu hundefreundlichen Reisezielen und buchen Sie Reisezubehör bequem.",
+      "Entdecken Sie unseren Reisemagazin für Tipps zu hundefreundlichen Reisezielen und kaufen Sie passendes Zubehör direkt in unserem Reiseshop.",
     transparent_pricing: "Transparente Preise",
     transparent_pricing_desc:
       "Keine versteckten Gebühren - Sie zahlen das Gleiche wie bei einer direkten Buchung bei der Unterkunft.",
@@ -2095,8 +2103,8 @@ const translations = {
     your_trips: "Ihre Reisen",
     manage_trips:
       "Sehen und verwalten Sie Ihre kommenden und vergangenen Reisen",
-    cant_find_reservation: "Können Sie Ihre Reservierung hier nicht finden?",
-    contact_us_email: "Kontaktieren Sie uns per E-Mail hallo@waureisen.com",
+    cant_find_reservation: "Können Sie Ihre Reservierung hier nicht finden? Kontaktieren Sie uns per E-Mail",
+    contact_us_email: "hallo@waureisen.com",
     upcoming_trips: "Kommende Reisen",
     past_trips: "Vergangene Reisen",
     help_center: "Besuchen Sie das Hilfezentrum",
