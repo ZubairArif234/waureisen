@@ -165,6 +165,7 @@ function App() {
 
               {/* Provider Routes - Already protected in the ProviderLayout component */}
               <Route path="/provider/*" element={<ProviderLayout />} />
+                <Route path="*" element={<Home />} />
             </Routes>
           </div>
         </SocketProvider>
