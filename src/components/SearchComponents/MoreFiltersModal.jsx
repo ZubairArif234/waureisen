@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Users, Lock, Bath, DollarSign, X,Baby, Car, Coffee, Dog, Dumbbell, Eye, Filter, Flame, Home, MapPin 
+  Users, Lock, Bath, DollarSign, X,Baby, Car, Coffee, Dog, Dumbbell, Eye, Filter, Flame, Home, MapPin, 
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 // import { Baby, Car, Coffee, Dog, Dumbbell, Eye, Filter, Flame, Home, MapPin } from 'lucide-react';
 
@@ -67,6 +69,7 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
   const { priceRange, setPriceRange, setIsPriceFilterActive } = usePriceFilter();
   const { searchFilters, updateFilters } = useSearchFilters();
   const [filters, setFilters] = useState([]);
+  const [openFilter, setOpenFilter] = useState(null);
   const { t } = useLanguage();
   const [ranges, setRanges] = useState(searchFilters.ranges);
   const [selected, setSelected] = useState({
@@ -305,10 +308,17 @@ const MoreFiltersModal = ({ isOpen, onClose }) => {
 
           {/* Dynamic Filters */}
           {filters.subsubsections?.map(subsection => (
-            <div key={subsection._id} className="mb-8">
+            <div key={subsection._id} className="mb-2">
               {/* {getSubsectionIcon(subsection.name)} */}
+              <div className='flex justify-between items-start'>
+
               <h3 className="text-gray-700 font-medium mb-4 flex items-center"><span className='me-2'><SubsectionIcon name={subsection.name} /> </span> {t(subsection.name)}</h3>
-              <div className="space-y-3">
+              {openFilter === subsection._id ? 
+              (<ChevronUp className='cursor-pointer' onClick={()=> setOpenFilter(null)}/>):
+              (<ChevronDown  className='cursor-pointer' onClick={()=> setOpenFilter( subsection._id)}/>
+              )}
+              </div>
+              <div className={`space-y-3  ${openFilter === subsection._id ? 'block' : 'hidden'}`}>
                 {subsection.filters?.map(filter => {
                   const category = subsection.name.toLowerCase();
                   // Ensure the category exists in selected state
