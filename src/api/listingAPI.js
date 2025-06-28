@@ -283,6 +283,17 @@ export const getListingById = async (id) => {
   }
 };
 
+
+export const getListingUnavailableDates = async (id) => {
+  try {
+    const response = await API.get(`/listings/unavailable-dates/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching listing ${id}:`, error);
+    throw error;
+  }
+};
+
 export const searchListings = async (params) => {
   try {
     const { lat, lng, page, pageSize, radius, searchFilters } = params;

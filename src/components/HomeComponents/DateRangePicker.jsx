@@ -1,84 +1,205 @@
-import React from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import ReactDOM from 'react-dom';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
-import moment from 'moment'; // Import moment for date comparison
+import { BadgeInfo, Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import moment from 'moment';
 import { useLanguage } from '../../utils/LanguageContext';
 
-const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates,bookedDates }) => {
+const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates, bookedDates, vacanciesDate, setMinStayText }) => {
   const { t } = useLanguage();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   
-  // Parse availableDates strings into moment objects for comparison
-  const availableMoments = availableDates?.map(dateStr => moment(dateStr, 'YYYY-MM-DD'));
-
-  const days = Array(daysInMonth).fill().map((_, i) => i + 1);
-  const weeks = [];
-  let week = Array(7).fill(null);
-  
-  // Get the weekday of the first day of the month (0=Sunday, 1=Monday, ...)
-  let firstDayOfMonth = new Date(year, month, 1).getDay();
-  firstDayOfMonth = (firstDayOfMonth + 6) % 7; // Shift so Monday=0, Sunday=6
-  
-  // Fill in the blank days at the start
-  for (let i = 0; i < firstDayOfMonth; i++) {
-    week[i] = null;
-  }
-  
-  // Fill in the days
-  days.forEach((day, index) => {
-    const weekDay = (firstDayOfMonth + index) % 7;
-    week[weekDay] = day;
+  // Memoize expensive calculations
+  const memoizedData = useMemo(() => {
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const days = Array(daysInMonth).fill().map((_, i) => i + 1);
     
-    if (weekDay === 6 || index === days.length - 1) {
-      weeks.push([...week]);
-      week = Array(7).fill(null);
+    // Pre-calculate week structure
+    const weeks = [];
+    let week = Array(7).fill(null);
+    let firstDayOfMonth = new Date(year, month, 1).getDay();
+    firstDayOfMonth = (firstDayOfMonth + 6) % 7;
+    
+    for (let i = 0; i < firstDayOfMonth; i++) {
+      week[i] = null;
     }
-  });
+    
+    days.forEach((day, index) => {
+      const weekDay = (firstDayOfMonth + index) % 7;
+      week[weekDay] = day;
+      
+      if (weekDay === 6 || index === days.length - 1) {
+        weeks.push([...week]);
+        week = Array(7).fill(null);
+      }
+    });
 
-  const monthNames = [
+    // Pre-calculate availability data for this month
+    const monthAvailability = {};
+    const monthMinStay = {};
+    const bookedSet = new Set();
+    
+    // Convert booked dates to Set for O(1) lookup
+    if (bookedDates) {
+      bookedDates.forEach(item => {
+        bookedSet.add(moment(item).format("YYYY-MM-DD"));
+      });
+    }
+    
+    // Pre-calculate all dates for this month
+    days.forEach(day => {
+      const paddedMonth = (month + 1).toString().padStart(2, "0");
+      const paddedDay = day.toString().padStart(2, "0");
+      const targetDate = `${year}-${paddedMonth}-${paddedDay}`;
+      
+      const currentDate = moment({ year, month, day });
+      const isPast = currentDate.isBefore(moment(), 'day');
+      const isBooked = bookedSet.has(targetDate);
+      
+      if (isPast || isBooked) {
+        monthAvailability[day] = false;
+        monthMinStay[day] = 1;
+        return;
+      }
+      
+      if (!vacanciesDate || vacanciesDate?.day?.length === 0) {
+        monthAvailability[day] = true;
+        monthMinStay[day] = 1;
+        return;
+      }
+      
+      const dayData = vacanciesDate.day.find(d => d.date === targetDate);
+      if (!dayData) {
+        monthAvailability[day] = false;
+        monthMinStay[day] = 1;
+        return;
+      }
+      
+      const isAvailable = (dayData.state === "Y" && dayData.allotment > 0 && dayData.change !== "X") || 
+                         (dayData.state === "N" && dayData.allotment === 0 && dayData.change === "O") && 
+                         !(dayData.state === "Y" && dayData.allotment > 0 && dayData.change === "O");
+      
+      monthAvailability[day] = isAvailable;
+      monthMinStay[day] = dayData.minimumStay || 1;
+    });
+
+    return { weeks, monthAvailability, monthMinStay, bookedSet };
+  }, [month, year, vacanciesDate, bookedDates]);
+
+  const monthNames = useMemo(() => [
     t('January'), t('February'), t('March'), t('April'), t('May'), t('June'),
     t('July'), t('August'), t('September'), t('October'), t('November'), t('December')
-  ];
+  ], [t]);
 
-  const dayNames = [t('Mo'), t('Tu'), t('We'), t('Th'), t('Fr'), t('Sa'), t('Su')];
+  const dayNames = useMemo(() => [t('Mo'), t('Tu'), t('We'), t('Th'), t('Fr'), t('Sa'), t('Su')], [t]);
 
-  const isDateInRange = (day) => {
+  // Optimized helper functions using memoized data
+  const isDateInRange = useCallback((day) => {
     if (!selectedRange.start || !selectedRange.end) return false;
-    
     const date = new Date(year, month, day);
-    console.log(selectedRange.start, selectedRange.end, "selectedRange" , date);
     return date >= selectedRange.start && date <= selectedRange.end;
-  };
+  }, [selectedRange.start, selectedRange.end, year, month]);
 
-  const isStartDate = (day) => {
+  const isStartDate = useCallback((day) => {
     if (!selectedRange.start) return false;
     const date = new Date(year, month, day);
     return date.getTime() === selectedRange.start.getTime();
-  };
+  }, [selectedRange.start, year, month]);
 
-  const isEndDate = (day) => {
+  const isEndDate = useCallback((day) => {
     if (!selectedRange.end) return false;
     const date = new Date(year, month, day);
     return date.getTime() === selectedRange.end.getTime();
-  };
+  }, [selectedRange.end, year, month]);
 
-  const isDateAvailable = (day) => {
-    // If no availability data, all future dates are available
-    if (!availableMoments || availableMoments.length === 0) {
-      const date = new Date(year, month, day);
-      return date >= today;
+  const isDateAvailable = useCallback((day) => {
+    return memoizedData.monthAvailability[day] || false;
+  }, [memoizedData.monthAvailability]);
+
+  const canBeStartDate = useCallback((day) => {
+    if (!isDateAvailable(day)) return false;
+    
+    const minStay = memoizedData.monthMinStay[day];
+    if (minStay <= 1) return true;
+    
+    // Quick check for consecutive dates
+    const paddedMonth = (month + 1).toString().padStart(2, "0");
+    const paddedDay = day.toString().padStart(2, "0");
+    const targetDate = `${year}-${paddedMonth}-${paddedDay}`;
+    const startMoment = moment(targetDate);
+    
+    for (let i = 1; i < minStay; i++) {
+      const nextDate = startMoment.clone().add(i, 'days');
+      const nextYear = nextDate.year();
+      const nextMonth = nextDate.month();
+      const nextDay = nextDate.date();
+      
+      // If checking dates in different months, use original logic
+      if (nextMonth !== month || nextYear !== year) {
+        const nextDateStr = nextDate.format('YYYY-MM-DD');
+        const nextDayData = vacanciesDate?.day?.find(d => d.date === nextDateStr);
+        
+        if (!nextDayData || 
+            nextDayData.state !== "Y" || 
+            nextDayData.allotment <= 0 || 
+            nextDayData.change === "X") {
+          return false;
+        }
+      } else {
+        // Use memoized data for same month
+        if (!memoizedData.monthAvailability[nextDay]) {
+          return false;
+        }
+      }
     }
     
-    const currentDate = moment({ year, month:month, day });
-    return currentDate.isSameOrAfter(moment(), 'day') && availableMoments.some(availableMoment => {
-      const startDate = availableMoment;
-      const endDate = availableMoment;
-      return currentDate.isBetween(startDate, endDate, 'day', '[]');
-    });
-  };
-  
+    return true;
+  }, [isDateAvailable, memoizedData.monthMinStay, memoizedData.monthAvailability, month, year, vacanciesDate]);
+
+  const minStayRangeDates = useMemo(() => {
+    if (!vacanciesDate || !vacanciesDate.day) return new Set();
+    
+    const rangeDates = new Set();
+    
+    // Only process dates for current month to avoid expensive calculations
+    for (let day = 1; day <= new Date(year, month + 1, 0).getDate(); day++) {
+      const minStay = memoizedData.monthMinStay[day];
+      
+      if (minStay > 1 && canBeStartDate(day)) {
+        const paddedMonth = (month + 1).toString().padStart(2, "0");
+        const paddedDay = day.toString().padStart(2, "0");
+        const targetDate = `${year}-${paddedMonth}-${paddedDay}`;
+        const startMoment = moment(targetDate);
+        
+        for (let i = 0; i < minStay + 1; i++) {
+          const rangeDate = startMoment.clone().add(i, 'days').format('YYYY-MM-DD');
+          rangeDates.add(rangeDate);
+        }
+      }
+    }
+    
+    return rangeDates;
+  }, [memoizedData.monthMinStay, canBeStartDate, month, year]);
+
+  const isMinStayRangeDate = useCallback((day) => {
+    const paddedMonth = (month + 1).toString().padStart(2, "0");
+    const paddedDay = day.toString().padStart(2, "0");
+    const fullDate = `${year}-${paddedMonth}-${paddedDay}`;
+    
+    return minStayRangeDates.has(fullDate) && !canBeStartDate(day);
+  }, [minStayRangeDates, canBeStartDate, month, year]);
+
+  const handleMinStayText = useCallback((day) => {
+    const isMinStayRange = isMinStayRangeDate(day);
+    if (isMinStayRange) return false;
+    
+    const minStay = memoizedData.monthMinStay[day];
+    if (minStay && minStay > 1) {
+      setMinStayText(`Possible date of arrival. Minimum stay is ${minStay} nights.`);
+      return true;
+    }
+    return false;
+  }, [isMinStayRangeDate, memoizedData.monthMinStay, setMinStayText]);
 
   return (
     <div className="bg-white rounded-xl p-6 max-w-sm w-full">
@@ -97,42 +218,78 @@ const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates,boo
       </div>
       
       <div className="grid grid-cols-7 gap-1">
-        {weeks.map((week, weekIndex) =>
-          week.map((day, dayIndex) => {
-            // // console.log(today?.getMonth(), day  "cheezain");
-            
+        {memoizedData?.weeks.map((week, weekIndex) =>
+          week?.map((day, dayIndex) => {
             if (day === null) return <div key={`${weekIndex}-${dayIndex}`} />;
-            const isBooked = bookedDates?.some(item => {
-              const m = moment(item, "YYYY-MM-DD");
-              console.log(m.month(),today?.getMonth(),m.date(), day ,"hain");
-              
-              return monthNames[m.month()]  == monthNames[month]  && m.date() == day;
-            });
-            
-            
-             const date = new Date(year, month, day);
-            const isToday = date.getTime() === today.getTime();
-            const isSelected = isDateInRange(day+1);
+
+            const date = new Date(year, month, day);
+            const paddedMonth = (month + 1).toString().padStart(2, "0");
+            const paddedDay = day.toString().padStart(2, "0");
+            const fullDate = `${year}-${paddedMonth}-${paddedDay}`;
+
+            const isBooked = memoizedData.bookedSet.has(fullDate);
+            const isToday = date.toDateString() === today.toDateString();
+            const isPast = date < today;
+
+            const isAvailable = isDateAvailable(day);
+            const canStart = canBeStartDate(day);
+            const isMinStayRange = isMinStayRangeDate(day);
+
+            const isSelected = isDateInRange(day);
             const isStart = isStartDate(day);
             const isEnd = isEndDate(day);
-            const isPast = date < today;
-            const isAvailable = isDateAvailable(day)
-            // console.log(isSelected ,day);
-            
+
+            let dayClass = "w-full aspect-square flex items-center justify-center rounded-lg text-sm";
+            let clickable = false;
+
+            // Determine styling and clickability
+            if (!isAvailable || isPast || isBooked) {
+              dayClass += " text-gray-300 cursor-not-allowed";
+            } else if (canStart) {
+              dayClass += " text-yellow-600 font-semibold hover:bg-gray-100 cursor-pointer";
+              clickable = true;
+            } else if (isMinStayRange) {
+              dayClass += " bg-amber-50 text-slate-400 cursor-pointer";
+              clickable = true;
+            } else if (isAvailable) {
+              dayClass += " text-brand hover:bg-gray-100 cursor-pointer";
+              clickable = true;
+            }
+
+            // Selected, Start, End, Today styling (only on clickable days)
+            if (clickable) {
+              if (isSelected) {
+                dayClass += " !bg-brand-300 !text-white";
+              }
+              if (isStart) {
+                dayClass += " bg-brand text-white hover:bg-brand";
+              }
+              if (isEnd) {
+                dayClass += " bg-brand text-white hover:bg-brand";
+              }
+              
+            }
+
+            const handleClick = () => {
+              if (!clickable) return;
+              const isMinStayRange = isMinStayRangeDate(day);
+              if (!selectedRange.start && isMinStayRange) return;
+              onDateSelect(new Date(year, month, day));
+            };
+
             return (
               <button
+                onMouseEnter={() => handleMinStayText(day)}
+                onMouseLeave={() => setMinStayText("")}
                 key={`${weekIndex}-${dayIndex}`}
-                onClick={() => !isPast  && !isBooked && isAvailable && onDateSelect(new Date(year, month, day))}
-                disabled={isPast || isBooked || !isAvailable}
-                className={`
-                  w-full aspect-square flex items-center justify-center rounded-lg text-sm
-                   ${!isAvailable ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-gray-100'} // Style disabled dates
-                  ${isPast || isBooked  ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-gray-100 cursor-pointer'}
-                  ${isSelected && isAvailable ? 'bg-brand/10 text-brand' : ''}
-                  ${isStart && isAvailable ? 'bg-brand text-white hover:bg-brand' : ''}
-                  ${isEnd && isAvailable ? 'bg-brand text-white hover:bg-brand' : ''}
-                  ${isToday  && isAvailable? 'border border-brand' : ''}
-                `}
+                onClick={handleClick}
+                disabled={!clickable}
+                className={dayClass}
+                title={
+                  canStart ? "Available as start date" :
+                  isMinStayRange ? "Available for end date selection" :
+                  !isAvailable ? "Not available" : "Available"
+                }
               >
                 {day}
               </button>
@@ -144,35 +301,148 @@ const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates,boo
   );
 };
 
-const DateRangePicker = ({ isOpen, onClose, selectedRange, onRangeSelect, availableDates,bookedDates }) => {
+const DateRangePicker = ({ isOpen, onClose, selectedRange, onRangeSelect, availableDates, bookedDates, vacanciesDate }) => {
   const { t } = useLanguage();
   if (!isOpen) return null;
 
   const today = new Date();
-  const [leftMonth, setLeftMonth] = React.useState(today.getMonth());
-  const [leftYear, setLeftYear] = React.useState(today.getFullYear());
+  
+  const [minStayText, setMinStayText] = useState("");
+  const [leftMonth, setLeftMonth] = useState(today.getMonth());
+  const [leftYear, setLeftYear] = useState(today.getFullYear());
 
-  const handleDateSelect = (date) => {
-    // If we have both dates selected, clicking any new date should start a new selection
+  // Calculate right calendar month/year
+  const rightMonth = (leftMonth + 1) % 12;
+  const rightYear = leftMonth === 11 ? leftYear + 1 : leftYear;
+
+  // Memoize the minimum stay lookup
+  const getMinimumStayForDate = useCallback((date) => {
+    const paddedMonth = (date.getMonth() + 1).toString().padStart(2, "0");
+    const paddedDay = date.getDate().toString().padStart(2, "0");
+    const targetDate = `${date.getFullYear()}-${paddedMonth}-${paddedDay}`;
+    
+    const dayData = vacanciesDate?.day?.find(d => d.date === targetDate);
+    return dayData?.minimumStay || 1;
+  }, [vacanciesDate]);
+
+  const handleDateSelect = useCallback((date) => {
+    // Deselection logic
     if (selectedRange.start && selectedRange.end) {
+      if (date.getTime() === selectedRange.start.getTime()) {
+        onRangeSelect({ start: selectedRange.end, end: null });
+        return;
+      }
+      if (date.getTime() === selectedRange.end.getTime()) {
+        onRangeSelect({ start: selectedRange.start, end: null });
+        return;
+      }
       onRangeSelect({ start: date, end: null });
       return;
     }
 
-    // If we only have a start date, clicking a date before it should start a new selection
+    if (selectedRange.start && !selectedRange.end) {
+      if (date.getTime() === selectedRange.start.getTime()) {
+        onRangeSelect({ start: null, end: null });
+        setMinStayText("");
+        return;
+      }
+    }
+
+    if (!selectedRange.start) {
+      onRangeSelect({ start: date, end: null });
+      return;
+    }
+
     if (selectedRange.start && !selectedRange.end) {
       if (date < selectedRange.start) {
         onRangeSelect({ start: date, end: null });
         return;
       }
+      
+      const minStay = getMinimumStayForDate(selectedRange.start);
+      const minEndDate = moment(selectedRange.start).add(minStay - 1, 'days').toDate();
+      
+      if (date < minEndDate) {
+        setMinStayText(`Minimum stay is ${minStay} days. Please select a later end date.`);
+        return;
+      }
+
+      // Optimized availability check - only check if we have vacancy data
+      if (vacanciesDate && vacanciesDate.day && vacanciesDate.day.length > 0) {
+        const startMoment = moment(selectedRange.start);
+        const endMoment = moment(date);
+        let allDatesAvailable = true;
+        let unavailableDate = null;
+
+        for (let checkDate = startMoment.clone(); checkDate.isSameOrBefore(endMoment); checkDate.add(1, 'day')) {
+          const targetDate = checkDate.format('YYYY-MM-DD');
+          
+          // Quick past date check
+          if (checkDate.isBefore(moment(), 'day')) {
+            allDatesAvailable = false;
+            unavailableDate = targetDate;
+            break;
+          }
+
+          // Quick booked date check
+          const isBooked = bookedDates?.some(item => moment(item).format("YYYY-MM-DD") === targetDate);
+          if (isBooked) {
+            allDatesAvailable = false;
+            unavailableDate = targetDate;
+            break;
+          }
+
+          const dayData = vacanciesDate.day.find(d => d.date === targetDate);
+          if (!dayData) {
+            allDatesAvailable = false;
+            unavailableDate = targetDate;
+            break;
+          }
+          
+          const isAvailable = (dayData.state === "Y" && dayData.allotment > 0 && dayData.change !== "X") || 
+                             (dayData.state === "N" && dayData.allotment === 0 && dayData.change === "O") && 
+                             !(dayData.state === "Y" && dayData.allotment > 0 && dayData.change === "O");
+          
+          if (!isAvailable) {
+            allDatesAvailable = false;
+            unavailableDate = targetDate;
+            break;
+          }
+        }
+
+        if (!allDatesAvailable) {
+          setMinStayText(`Cannot select this date range. Date ${unavailableDate} is not available.`);
+          return;
+        }
+      }
+
       onRangeSelect({ start: selectedRange.start, end: date });
       return;
     }
+  }, [selectedRange, onRangeSelect, getMinimumStayForDate, setMinStayText, vacanciesDate, bookedDates]);
 
-    // If we have no dates selected, start a new selection
-    onRangeSelect({ start: date, end: null });
-  };
-// console.log(bookedDates , "booked");
+  const handlePrevMonth = useCallback(() => {
+    if (leftMonth === 0) {
+      setLeftMonth(11);
+      setLeftYear(leftYear - 1);
+    } else {
+      setLeftMonth(leftMonth - 1);
+    }
+  }, [leftMonth, leftYear]);
+
+  const handleNextMonth = useCallback(() => {
+    if (leftMonth === 11) {
+      setLeftMonth(0);
+      setLeftYear(leftYear + 1);
+    } else {
+      setLeftMonth(leftMonth + 1);
+    }
+  }, [leftMonth, leftYear]);
+
+  const clearSelection = useCallback(() => {
+    onRangeSelect({ start: null, end: null });
+    setMinStayText("");
+  }, [onRangeSelect, setMinStayText]);
 
   return ReactDOM.createPortal(
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -190,45 +460,43 @@ const DateRangePicker = ({ isOpen, onClose, selectedRange, onRangeSelect, availa
             year={leftYear}
             selectedRange={selectedRange}
             onDateSelect={handleDateSelect}
-            availableDates={availableDates} // Pass availableDates down
+            availableDates={availableDates}
             bookedDates={bookedDates}
+            vacanciesDate={vacanciesDate}
+            setMinStayText={setMinStayText}
           />
           <Calendar
-            month={(leftMonth + 1) % 12}
-            year={leftMonth === 11 ? leftYear + 1 : leftYear}
+            month={rightMonth}
+            year={rightYear}
             selectedRange={selectedRange}
             onDateSelect={handleDateSelect}
-            availableDates={availableDates} // Pass availableDates down
+            availableDates={availableDates}
             bookedDates={bookedDates}
+            vacanciesDate={vacanciesDate}
+            setMinStayText={setMinStayText}
           />
         </div>
 
+        <div className={`${minStayText ? 'opacity-100' : 'opacity-0'} flex items-center gap-4 bg-amber-100 border border-amber-300 text-amber-700 px-4 py-3 rounded transition-opacity duration-200`}>
+          <BadgeInfo className='text-amber-700' />
+          <p>{minStayText}</p>
+        </div>
+
         <div className="flex justify-between items-center mt-4">
-          <button
-            onClick={() => {
-              if (leftMonth === 0) {
-                setLeftMonth(11);
-                setLeftYear(leftYear - 1);
-              } else {
-                setLeftMonth(leftMonth - 1);
-              }
-            }}
-            className="p-2 hover:bg-gray-100 rounded-full"
-          >
+          <button onClick={handlePrevMonth} className="p-2 hover:bg-gray-100 rounded-full">
             <ChevronLeft className="w-5 h-5" />
           </button>
           
-          <button
-            onClick={() => {
-              if (leftMonth === 11) {
-                setLeftMonth(0);
-                setLeftYear(leftYear + 1);
-              } else {
-                setLeftMonth(leftMonth + 1);
-              }
-            }}
-            className="p-2 hover:bg-gray-100 rounded-full"
-          >
+          {(selectedRange.start || selectedRange.end) && (
+            <button
+              onClick={clearSelection}
+              className="px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg border border-red-200 hover:border-red-300 transition-colors"
+            >
+              Clear Selection
+            </button>
+          )}
+          
+          <button onClick={handleNextMonth} className="p-2 hover:bg-gray-100 rounded-full">
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>

@@ -27,10 +27,11 @@ import logo from "../../assets/logo.png";
 import Footer from "../../components/Shared/Footer";
 import ImageGalleryModal from "../../components/Shared/ImageGalleryModal";
 import { useLanguage } from "../../utils/LanguageContext";
-import { getListingById } from "../../api/listingAPI";
+import { getListingById, getListingUnavailableDates } from "../../api/listingAPI";
 import {
   fetchInterhomePrices,
   fetchInterhomeAvailability,
+  fetchInterhomeVacancies,
 } from "../../api/interhomeAPI"; // Import fetchInterhomeAvailability
 import moment from "moment";
 import AccommodationDetails from "../../components/AccommodationDetails";
@@ -38,6 +39,8 @@ import API from "../../api/config";
 import toast from "react-hot-toast";
 import { getBookingByListing } from "../../api/bookingApi";
 import { changeMetaData } from "../../utils/extra";
+import OurDateRangePicker from "../../components/HomeComponents/OurDateRangePicker";
+import { set } from "lodash";
 
 const PlaceOffer = ({ icon: Icon, text, value }) => (
   <div className="flex-1 flex flex-col items-center text-center p-4 border-r border-[#767676] last:border-r-0 md:p-4 p-2">
@@ -137,6 +140,7 @@ const AccommodationPage = () => {
           
             changeMetaData(`${id?.replace(/-/g , " ")} - Waureisen`);
           }, []);
+  const [isOurDatePickerOpen, setIsOurDatePickerOpen] = useState(false);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [bookedDates, setBookedDates] = useState([]);
   const [isGuestSelectorOpen, setIsGuestSelectorOpen] = useState(false);
@@ -178,9 +182,25 @@ const handleGetBooking = async() =>{
   
  })
 }
+const handleGetListingAvailable = async() => {
+  const res = await getListingUnavailableDates(location.state?.id)
+  console.log(res , "listing unavailable dates");
+   res?.data?.map((item)=>{
+  const result = moment(item?.date).format("YYYY-MM-DD")
+  // console.log(result , "result");
+  
+  setBookedDates(prev => {
+    const combined = [...prev, result];
+    const uniqueDates = Array.from(new Set(combined));
+    return uniqueDates;
+  });
+  
+ })
+}
 
 useEffect(()=>{
 handleGetBooking()
+handleGetListingAvailable()
 },[])
 
   // Add maxGuests state to track the maximum allowed guests
@@ -191,6 +211,7 @@ handleGetBooking()
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [availableDates, setAvailableDates] = useState([]); // Add state for available dates
+  const [vacancies, setVacancies] = useState([]); // Add state for available dates
 
   // Check if we came from admin panel
   const isFromAdmin = location.state?.from === 'admin' || location.pathname.includes('/admin/');
@@ -314,6 +335,16 @@ handleGetBooking()
             const availabilityData = await fetchInterhomeAvailability(
               data.Code
             );
+
+            // ---------> new vacancies code start <----------
+            const vacanciesDate = await fetchInterhomeVacancies(data.Code);
+            // console.log(vacanciesDate , "vacanciesDate");
+            if (vacanciesDate && vacanciesDate.calendar) {
+              setVacancies(vacanciesDate.calendar);
+            }
+            // ---------> new vacancies code end <----------
+
+
             if (availabilityData && availabilityData.availableDates) {
               setAvailableDates(
                 availabilityData.availableDates.map((d) => d.checkInDate)
@@ -920,7 +951,7 @@ const getDisplayPrice = () => {
               {/* Date Picker */}
               <div className="mb-4 relative">
                 <button
-                  onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
+                  onClick={() =>{accommodation?.provider == "Interhome" ? setIsDatePickerOpen(!isDatePickerOpen) : setIsOurDatePickerOpen(!isOurDatePickerOpen)}}
                   className="w-full flex items-center justify-between border border-gray-300 rounded-lg p-3 text-left"
                 >
                   <span className="text-sm">
@@ -937,6 +968,7 @@ const getDisplayPrice = () => {
                       onRangeChange={setDateRange}
                       onClose={() => setIsDatePickerOpen(false)}
                       availableDates={availableDates} // Pass available dates
+                      // vacanciesDate={vacancies} // Pass vacancies dates
                       bookedDates={bookedDates}
                     />
                   </div>
@@ -1058,8 +1090,22 @@ const getDisplayPrice = () => {
         }}
         bookedDates={bookedDates}
         availableDates={availableDates} // Pass available dates
+        vacanciesDate={vacancies}
       />
 
+<OurDateRangePicker
+        isOpen={isOurDatePickerOpen}
+        onClose={() => setIsOurDatePickerOpen(false)}
+        selectedRange={dateRange}
+        onRangeSelect={(range) => {
+          setDateRange(range);
+          if (range.start && range.end) {
+            setIsOurDatePickerOpen(false);
+          }
+        }}
+        bookedDates={bookedDates}
+        // availableDates={availableDates/
+      />
       {/* Remove the redundant date picker and guest selector modals */}
       <Footer />
     </div>
