@@ -255,7 +255,6 @@ const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates, bo
               dayClass += " text-brand hover:bg-gray-100 cursor-pointer";
               clickable = true;
             }
-
             // Selected, Start, End, Today styling (only on clickable days)
             if (clickable) {
               if (isSelected) {
