@@ -202,11 +202,11 @@ window.scrollTo(0,0)
   id={listing._id}
   Code={listing.Code} // ✅ Add this line
   images={listing.images || []}
-  price={(listing.pricePerNight?.isDiscountActivate && listing.pricePerNight?.discount) || listing.pricePerNight?.price || 0}
+  price={listing?.price || ( listing.pricePerNight?.isDiscountActivate && listing.pricePerNight?.discount) || listing.pricePerNight?.price || 0}
   location={locationDisplay}
   provider={listing.provider || listing.ownerType || t('unknown')}
   listingSource={sourceDisplay}
-  pricePerNight={listing.pricePerNight}
+  pricePerNight={listing?.price || listing.pricePerNight}
   distance={(listing.distanceInfo / 1000).toFixed(2) + " km away"}
 
 />
