@@ -259,7 +259,7 @@ const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates, bo
             // Selected, Start, End, Today styling (only on clickable days)
             if (clickable) {
               if (isSelected) {
-                dayClass += " !bg-brand-300 !text-white";
+                dayClass += " bg-brand !text-white";
               }
               if (isStart) {
                 dayClass += " bg-brand text-white hover:bg-brand";

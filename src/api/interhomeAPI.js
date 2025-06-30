@@ -37,6 +37,19 @@ export const fetchInterhomeListingPrices = async (data) => {
   }
 };
 
+export const checkBookingPossible = async (data) => {
+  try {
+    const response = await API.post(`/interhome/booking/check`, data
+     
+    );
+
+    return response.data;
+  } catch (error) {
+    console.warn(`Failed to fetch Interhome booking check: ${error.message}`);
+    throw error;
+  }
+};
+
 // Add this function to your existing interhomeAPI.js file
 
 export const fetchInterhomeAvailability = async (accommodationCode) => {

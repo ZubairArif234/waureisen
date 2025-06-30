@@ -3,7 +3,14 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../components/Shared/Navbar";
 import DateRangePicker from "../../components/HomeComponents/DateRangePicker";
 import GuestSelector from "../../components/HomeComponents/GuestSelector";
-import { Check, ChevronDown, AlertTriangle, ArrowLeft, Dot,FileText } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  AlertTriangle,
+  ArrowLeft,
+  Dot,
+  FileText,
+} from "lucide-react";
 import {
   Users,
   Home,
@@ -27,11 +34,16 @@ import logo from "../../assets/logo.png";
 import Footer from "../../components/Shared/Footer";
 import ImageGalleryModal from "../../components/Shared/ImageGalleryModal";
 import { useLanguage } from "../../utils/LanguageContext";
-import { getListingById, getListingUnavailableDates } from "../../api/listingAPI";
+import {
+  getListingById,
+  getListingUnavailableDates,
+} from "../../api/listingAPI";
 import {
   fetchInterhomePrices,
   fetchInterhomeAvailability,
   fetchInterhomeVacancies,
+  fetchInterhomeListingPrices,
+  checkBookingPossible,
 } from "../../api/interhomeAPI"; // Import fetchInterhomeAvailability
 import moment from "moment";
 import AccommodationDetails from "../../components/AccommodationDetails";
@@ -109,8 +121,7 @@ const ImageGrid = ({ images = [s1, s2, s3, s4, s5] }) => {
               onClick={() => setIsGalleryOpen(true)}
               className="absolute bottom-4 right-4 px-4 py-2 bg-white rounded-lg text-sm font-medium shadow-md hover:bg-gray-50 transition-colors"
             >
-             { t("view_all")}
-              
+              {t("view_all")}
             </button>
           </div>
         </div>
@@ -137,71 +148,143 @@ const AccommodationPage = () => {
   const location = useLocation();
   const { id } = useParams(); // Get the accommodation ID from URL
   useEffect(() => {
-          
-            changeMetaData(`${id?.replace(/-/g , " ")} - Waureisen`);
-          }, []);
+    changeMetaData(`${id?.replace(/-/g, " ")} - Waureisen`);
+  }, []);
   const [isOurDatePickerOpen, setIsOurDatePickerOpen] = useState(false);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [bookingCheckLoading, setBookingCheckLoading] = useState(false);
   const [bookedDates, setBookedDates] = useState([]);
+  const [interhomePrice, setInterhomePrice] = useState(0);
   const [isGuestSelectorOpen, setIsGuestSelectorOpen] = useState(false);
+   const [vacancies, setVacancies] = useState([]); // Add state for available dates
   const { t } = useLanguage();
   const [dateRange, setDateRange] = useState({ start: null, end: null });
   const [guests, setGuests] = useState({
     people: 1,
     dogs: 1,
   });
-// // console.log(dateRange , "jkikkl");
+console.log(dateRange,"vacanciess");
 
+  const handleInterhomeReservation = async () => {
+    let paramList = id?.split("-");
 
-const getAllDates = (startDate, endDate) => {
-  const start = moment(startDate).startOf('day');
-  const end = moment(endDate).startOf('day');
-  const dates = [];
+    setBookingCheckLoading(true);
+    const data = {
+      SalesOffice: "0505",
+      AccommodationCode: paramList[paramList?.length - 1],
+      CheckIn: dateRange?.start
+        ? moment(dateRange?.start).format("YYYY-MM-DD")
+        : "2025-08-01",
+      CheckOut: dateRange?.end
+        ? moment(dateRange?.end).format("YYYY-MM-DD")
+        : "2025-08-08",
+    };
+    const res = await checkBookingPossible(data);
+    if (res?.message == "API successful"){
+      setBookingCheckLoading(false)
+      return true
+    }
+    setBookingCheckLoading(false)
+    return false
+  };
 
-  while (start.isSameOrBefore(end)) {
-    dates.push(start.format("YYYY-MM-DD"));
-    start.add(1, 'day');
-  }
+  const handleInterhomePrice = async () => {
+    let paramList = id?.split("-");
+    const defaultDate = vacancies?.day?.length > 0 ? vacancies?.day?.find((item)=>(item?.state  == "Y" && item?.allotment > 0)) : []
+console.log(defaultDate ,"default");
 
-  return dates;
-};
-console.log(bookedDates , "state dates");
-
-const handleGetBooking = async() =>{
- const res = await getBookingByListing(location.state?.id)
-
- res.map((item)=>{
-  const result = getAllDates(item?.checkInDate, item?.checkOutDate);
-  console.log(result , "result");
+    const firstDate = defaultDate?.date; 
   
-  setBookedDates(prev => {
-    const combined = [...prev, ...result];
-    const uniqueDates = Array.from(new Set(combined));
-    return uniqueDates;
-  });
-  
- })
+  const secondDate = new Date(defaultDate?.date);
+  secondDate.setDate(secondDate?.getDate() + defaultDate?.minimumStay);
+  const secondDateFormatted = secondDate?.toISOString()?.split('T')[0];
+if(!dateRange?.start && !dateRange?.end){
+
+  setDateRange({start : new Date(firstDate) , end: new Date(secondDateFormatted)})
 }
-const handleGetListingAvailable = async() => {
-  const res = await getListingUnavailableDates(location.state?.id)
-  console.log(res , "listing unavailable dates");
-   res?.data?.map((item)=>{
-  const result = moment(item?.date).format("YYYY-MM-DD")
-  // console.log(result , "result");
-  
-  setBookedDates(prev => {
-    const combined = [...prev, result];
-    const uniqueDates = Array.from(new Set(combined));
-    return uniqueDates;
-  });
-  
- })
-}
+    console.log(
+      dateRange,
+      guests,
+      paramList[paramList?.length - 1],
+      firstDate,
+      secondDateFormatted,
+      "payload data"
+    );
 
-useEffect(()=>{
-handleGetBooking()
-handleGetListingAvailable()
-},[])
+    const data = {
+      BookingHeader: {
+        SalesOffice: "0505",
+        AccommodationCode: paramList[paramList?.length - 1],
+        Adults: guests?.people,
+        CheckIn: dateRange?.start
+          ? moment(dateRange?.start).format("YYYY-MM-DD")
+          : firstDate,
+        CheckOut: dateRange?.end
+          ? moment(dateRange?.end).format("YYYY-MM-DD")
+          : secondDateFormatted,
+        Language: "EN",
+        Currency: "CHF",
+      },
+    };
+    const res = await fetchInterhomeListingPrices(data);
+    if (res?.data?.stateCode == "OK") {
+      console.log(res, "prices list ok");
+      setInterhomePrice(res?.data);
+    }
+    console.log(res, "prices list ");
+  };
+
+  useEffect(() => {
+    handleInterhomePrice();
+  }, [id , vacancies, dateRange, guests]);
+
+  const getAllDates = (startDate, endDate) => {
+    const start = moment(startDate).startOf("day");
+    const end = moment(endDate).startOf("day");
+    const dates = [];
+
+    while (start.isSameOrBefore(end)) {
+      dates.push(start.format("YYYY-MM-DD"));
+      start.add(1, "day");
+    }
+
+    return dates;
+  };
+  console.log(bookedDates, "state dates");
+
+  const handleGetBooking = async () => {
+    const res = await getBookingByListing(location.state?.id);
+
+    res.map((item) => {
+      const result = getAllDates(item?.checkInDate, item?.checkOutDate);
+      console.log(result, "result");
+
+      setBookedDates((prev) => {
+        const combined = [...prev, ...result];
+        const uniqueDates = Array.from(new Set(combined));
+        return uniqueDates;
+      });
+    });
+  };
+  const handleGetListingAvailable = async () => {
+    const res = await getListingUnavailableDates(location.state?.id);
+    console.log(res, "listing unavailable dates");
+    res?.data?.map((item) => {
+      const result = moment(item?.date).format("YYYY-MM-DD");
+      // console.log(result , "result");
+
+      setBookedDates((prev) => {
+        const combined = [...prev, result];
+        const uniqueDates = Array.from(new Set(combined));
+        return uniqueDates;
+      });
+    });
+  };
+
+  useEffect(() => {
+    handleGetBooking();
+    handleGetListingAvailable();
+  }, []);
 
   // Add maxGuests state to track the maximum allowed guests
   const [maxGuests, setMaxGuests] = useState(6); // Default to 6 if not specified
@@ -211,10 +294,11 @@ handleGetListingAvailable()
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [availableDates, setAvailableDates] = useState([]); // Add state for available dates
-  const [vacancies, setVacancies] = useState([]); // Add state for available dates
+ 
 
   // Check if we came from admin panel
-  const isFromAdmin = location.state?.from === 'admin' || location.pathname.includes('/admin/');
+  const isFromAdmin =
+    location.state?.from === "admin" || location.pathname.includes("/admin/");
 
   // Add function to fetch price for new dates with optional pax parameter
   const fetchPriceForDates = async (startDate, paxValue = null) => {
@@ -302,7 +386,7 @@ handleGetListingAvailable()
         // Check if we have price data in the location state (passed from search results)
         const searchState = window.history.state?.usr || {};
         console.log("Search state from history:", searchState, urlParams);
-        
+
         const priceFromSearch = searchState.pricePerNight;
         const dateFromSearch = searchState.checkInDate || searchDateParam;
 
@@ -343,7 +427,6 @@ handleGetListingAvailable()
               setVacancies(vacanciesDate.calendar);
             }
             // ---------> new vacancies code end <----------
-
 
             if (availabilityData && availabilityData.availableDates) {
               setAvailableDates(
@@ -451,7 +534,7 @@ handleGetListingAvailable()
             );
           }
         }
-console.log(availableDates , maxGuests , "ye hai na");
+        console.log(availableDates, maxGuests, "ye hai na");
 
         setAccommodation(data);
 
@@ -484,11 +567,7 @@ console.log(availableDates , maxGuests , "ye hai na");
     {
       icon: Users,
       text: t("people"),
-      value:
-      t("upto") +
-       
-        accommodation?.maxGuests?.toString() ||
-        "6 ", // Default
+      value: t("upto") + accommodation?.maxGuests?.toString() || "6 ", // Default
     },
     {
       icon: Dog,
@@ -581,18 +660,21 @@ console.log(availableDates , maxGuests , "ye hai na");
   }
 
   const getBookingPrice = () => {
-  // If discount is active, use discounted price for booking
-  if (accommodation?.pricePerNight?.isDiscountActivate && accommodation?.pricePerNight?.discount) {
-    return accommodation?.pricePerNight?.discount;
-  }
-  // Otherwise, use the original price
-  return accommodation?.pricePerNight?.price || 0;
-};
+    // If discount is active, use discounted price for booking
+    if (
+      accommodation?.pricePerNight?.isDiscountActivate &&
+      accommodation?.pricePerNight?.discount
+    ) {
+      return accommodation?.pricePerNight?.discount;
+    }
+    // Otherwise, use the original price
+    return accommodation?.pricePerNight?.price || 0;
+  };
 
-// Helper function to get display price (same as booking price in this case)
-const getDisplayPrice = () => {
-  return getBookingPrice();
-};
+  // Helper function to get display price (same as booking price in this case)
+  const getDisplayPrice = () => {
+    return getBookingPrice();
+  };
   const getNoOfDays = (startDate, endDate) => {
     const start = moment(startDate);
     const end = moment(endDate);
@@ -602,55 +684,71 @@ const getDisplayPrice = () => {
   };
 
   const handleReserved = () => {
-  console.log("Reserved button clicked : ", accommodation?.provider);
-  if (!dateRange?.start || !dateRange?.end) {
-    toast.error("Please select both check-in and check-out dates before reserving.")
-    return;
-  }
-  
-  if (accommodation?.provider === "Interhome") {
-    const checkInDate = moment(dateRange.start).format("YYYY-MM-DD");
-    const duration = moment(dateRange.end).diff(
-      moment(dateRange.start),
-      "days"
-    );
-    
-    const partnerId = import.meta.env.VITE_INTERHOME_PARTNER_ID;
-    const iframeUrl = `https://www.interhome.com/Forward.aspx?navigationid=12&aCode=${accommodation.Code}&dtCheckin=${checkInDate}&duration=${duration}&partnerid=${partnerId}&adrAdults=${guests.people}&iniframe=1`;
-    window.location.href = iframeUrl;
-  } else {
-    console.log(dateRange.start, dateRange.end, getNoOfDays(dateRange.start, dateRange.end));
-    let days = getNoOfDays(dateRange.start, dateRange.end);
-    
-    // Create updated accommodation object with correct pricing
-    const updatedAccommodation = {
-      ...accommodation,
-      pricePerNight: {
-        ...accommodation.pricePerNight,
-        // Use the booking price (either discounted or original based on isDiscountActivate)
-        finalBookingPrice: getBookingPrice(),
-        currency: accommodation?.pricePerNight?.currency || "CHF"
-      }
-    };
-    
-    navigate("/payment", {
-      state: {
-        price: location.state,
-        data: updatedAccommodation, // Pass updated accommodation with correct pricing
-        details: {
-          noOfDays: days,
-          startDate: dateRange?.start,
-          endDate: dateRange?.end,
-          guests: guests,
-          totalAmount: getBookingPrice() * days, // Total before service charge
-          serviceCharge: (getBookingPrice() * days) * 0.029, // 2.9% service charge
-          finalAmount: (getBookingPrice() * days) + ((getBookingPrice() * days) * 0.029) // Total with service charge
-        },
-      },
-    });
-  }
-};
+    console.log("Reserved button clicked : ", accommodation?.provider);
+    if (!dateRange?.start || !dateRange?.end) {
+      toast.error(
+        "Please select both check-in and check-out dates before reserving."
+      );
+      return;
+    }
 
+    if (accommodation?.provider === "Interhome") {
+     const bookingCheck = handleInterhomeReservation()
+      const checkInDate = moment(dateRange.start).format("YYYY-MM-DD");
+      const duration = moment(dateRange.end).diff(
+        moment(dateRange.start),
+        "days"
+      );
+
+      const partnerId = import.meta.env.VITE_INTERHOME_PARTNER_ID;
+      const iframeUrl = `https://www.interhome.com/Forward.aspx?navigationid=12&aCode=${accommodation.Code}&dtCheckin=${checkInDate}&duration=${duration}&partnerid=${partnerId}&adrAdults=${guests.people}&iniframe=1`;
+     if(bookingCheck){
+
+       window.location.href = iframeUrl;
+      }else{
+        toast.error("Booking not possible of the selected dates!")
+      }
+    } else {
+      console.log(
+        dateRange.start,
+        dateRange.end,
+        getNoOfDays(dateRange.start, dateRange.end)
+      );
+      let days = getNoOfDays(dateRange.start, dateRange.end);
+
+      // Create updated accommodation object with correct pricing
+      const updatedAccommodation = {
+        ...accommodation,
+        pricePerNight: {
+          ...accommodation.pricePerNight,
+          // Use the booking price (either discounted or original based on isDiscountActivate)
+          finalBookingPrice: getBookingPrice(),
+          currency: accommodation?.pricePerNight?.currency || "CHF",
+        },
+      };
+
+      navigate("/payment", {
+        state: {
+          price: location.state,
+          data: updatedAccommodation, // Pass updated accommodation with correct pricing
+          details: {
+            noOfDays: days,
+            startDate: dateRange?.start,
+            endDate: dateRange?.end,
+            guests: guests,
+            totalAmount: getBookingPrice() * days, // Total before service charge
+            serviceCharge: getBookingPrice() * days * 0.029, // 2.9% service charge
+            finalAmount:
+              getBookingPrice() * days + getBookingPrice() * days * 0.029, // Total with service charge
+          },
+        },
+      });
+    }
+  };
+
+  const petService = interhomePrice?.services?.service?.find(
+    (item) => item?.code === "PET"
+  );
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
@@ -660,7 +758,7 @@ const getDisplayPrice = () => {
         <div className="flex flex-col gap-4 mb-6">
           {isFromAdmin && (
             <button
-              onClick={() => navigate('/admin/accommodations')}
+              onClick={() => navigate("/admin/accommodations")}
               className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors w-fit"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -758,77 +856,119 @@ const getDisplayPrice = () => {
                 />
               </div>
             </section>
-{accommodation?.provider  && (
-
-<div className="mb-10">
- <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
-                {t("timing")}
-                
-              </h2>
-            {
-              accommodation?.checkInTime && (
-                <div>
-                  <p className="font-medium">{t("checkin_time")} :{typeof accommodation?.checkInTime == "string" ?<span className="font-thin">{moment(accommodation?.checkInTime).utc().format("hh:mm A")}</span>: <span className="font-thin">{moment(accommodation?.checkInTime).utc().format("hh:mm A")}</span>}</p>
-                </div>
-              )
-            }
-            {
-              accommodation?.checkOutTime && (
-                <div> 
-                   <p className="font-medium">{t("checkout_time")} :{typeof accommodation?.checkOutTime == "string" ?<span className="font-thin">{moment(accommodation?.checkOutTime).utc().format("hh:mm A")}</span>: <span className="font-thin">{moment(accommodation?.checkOutTime).utc().format("hh:mm A")}</span>}</p>
-                </div>
-              )
-            }
-            </div>
-)}
-
-            {/* house rules */}
-            {accommodation?.houseRules && accommodation?.provider !== "Interhome" &&  (
-                  <section className="mb-10">
-              <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
-                {/* {t("cancellation_policy")} */}
-                House Rules
-              </h2>
-          
-              <ul className="list-disc text-gray-600 text-sm mt-2">
-                
-               {accommodation?.houseRules?.noSmoking && <ol className="flex gap-2 items-center capitalize"><Dot />{t("no_smoking")}  </ol>}
-               {accommodation?.houseRules?.noParties && <ol className="flex gap-2 items-center capitalize"><Dot /> {t("no_event")} </ol>}
-               {accommodation?.houseRules?.quietHours && <ol className="flex gap-2 items-center "><Dot /> {t("no_hours")}</ol>}
-              
-              </ul>
-
-           
-            </section>
+            {accommodation?.provider && (
+              <div className="mb-10">
+                <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
+                  {t("timing")}
+                </h2>
+                {accommodation?.checkInTime && (
+                  <div>
+                    <p className="font-medium">
+                      {t("checkin_time")} :
+                      {typeof accommodation?.checkInTime == "string" ? (
+                        <span className="font-thin">
+                          {moment(accommodation?.checkInTime)
+                            .utc()
+                            .format("hh:mm A")}
+                        </span>
+                      ) : (
+                        <span className="font-thin">
+                          {moment(accommodation?.checkInTime)
+                            .utc()
+                            .format("hh:mm A")}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                )}
+                {accommodation?.checkOutTime && (
+                  <div>
+                    <p className="font-medium">
+                      {t("checkout_time")} :
+                      {typeof accommodation?.checkOutTime == "string" ? (
+                        <span className="font-thin">
+                          {moment(accommodation?.checkOutTime)
+                            .utc()
+                            .format("hh:mm A")}
+                        </span>
+                      ) : (
+                        <span className="font-thin">
+                          {moment(accommodation?.checkOutTime)
+                            .utc()
+                            .format("hh:mm A")}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                )}
+              </div>
             )}
 
-            {/* Cancellation Policy */}
-            {accommodation?.customRefundPolicies?.length > 0 && accommodation?.legal?.cancellationPolicy == "custom"  && accommodation?.provider !== "Interhome" ? (
+            {/* house rules */}
+            {accommodation?.houseRules &&
+              accommodation?.provider !== "Interhome" && (
+                <section className="mb-10">
+                  <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
+                    {/* {t("cancellation_policy")} */}
+                    House Rules
+                  </h2>
 
-            <section className="mb-10">
-              <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
-                {t("cancellation_policy")}
-              </h2>
-          
-              <ul className="list-disc text-gray-600 text-sm mt-2">
-                {accommodation?.customRefundPolicies?.map((policy, index) => (
-
-                <ol key={index} className="flex gap-2 items-center"><Dot /> Cancellations made before {policy?.days} days: {policy?.refundAmount}% refund.</ol>
-                ))}
-              </ul>
-
-              {accommodation?.legal?.termsAndConditions && (
-                <div className="mt-4">
-                  <h3 className="text-[#4D484D] text-base font-medium mb-2">
-                    {t("terms_and_conditions")}
-                  </h3>
-                  <Link to={"https://images.interhome.group/documents/agb/AGB_5059_DE_20241101_neu.pdf#_ga=2.113422919.1775548596.1750775640-162054315.1750775640"} className="text-gray-600 text-sm whitespace-pre-line">
-                  https://www.interhome.de/kundenservice/agb/
-                  </Link>
-                  </div>
+                  <ul className="list-disc text-gray-600 text-sm mt-2">
+                    {accommodation?.houseRules?.noSmoking && (
+                      <ol className="flex gap-2 items-center capitalize">
+                        <Dot />
+                        {t("no_smoking")}{" "}
+                      </ol>
+                    )}
+                    {accommodation?.houseRules?.noParties && (
+                      <ol className="flex gap-2 items-center capitalize">
+                        <Dot /> {t("no_event")}{" "}
+                      </ol>
+                    )}
+                    {accommodation?.houseRules?.quietHours && (
+                      <ol className="flex gap-2 items-center ">
+                        <Dot /> {t("no_hours")}
+                      </ol>
+                    )}
+                  </ul>
+                </section>
               )}
-            </section>
-            ) :(
+
+            {/* Cancellation Policy */}
+            {accommodation?.customRefundPolicies?.length > 0 &&
+            accommodation?.legal?.cancellationPolicy == "custom" &&
+            accommodation?.provider !== "Interhome" ? (
+              <section className="mb-10">
+                <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
+                  {t("cancellation_policy")}
+                </h2>
+
+                <ul className="list-disc text-gray-600 text-sm mt-2">
+                  {accommodation?.customRefundPolicies?.map((policy, index) => (
+                    <ol key={index} className="flex gap-2 items-center">
+                      <Dot /> Cancellations made before {policy?.days} days:{" "}
+                      {policy?.refundAmount}% refund.
+                    </ol>
+                  ))}
+                </ul>
+
+                {accommodation?.legal?.termsAndConditions && (
+                  <div className="mt-4">
+                    <h3 className="text-[#4D484D] text-base font-medium mb-2">
+                      {t("terms_and_conditions")}
+                    </h3>
+                    <Link
+                      to={
+                        "https://images.interhome.group/documents/agb/AGB_5059_DE_20241101_neu.pdf#_ga=2.113422919.1775548596.1750775640-162054315.1750775640"
+                      }
+                      className="text-gray-600 text-sm whitespace-pre-line"
+                    >
+                      https://www.interhome.de/kundenservice/agb/
+                    </Link>
+                  </div>
+                )}
+              </section>
+            ) : (
               //  <section className="mb-10">
               // <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
               //   {t("cancellation_policy")}
@@ -836,34 +976,46 @@ const getDisplayPrice = () => {
               // <p  className="text-gray-600 text-sm whitespace-pre-line">{accommodation?.legal?.cancellationPolicy}</p>
               // </section>
               <div className="mb-10">
-                  <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
-                    {t("terms_and_conditions")}
-                  </h2>
-                  <Link target="_blank" to={"https://images.interhome.group/documents/agb/AGB_5059_DE_20241101_neu.pdf#_ga=2.113422919.1775548596.1750775640-162054315.1750775640"} className="text-gray-600 text-sm whitespace-pre-line">
+                <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
+                  {t("terms_and_conditions")}
+                </h2>
+                <Link
+                  target="_blank"
+                  to={
+                    "https://images.interhome.group/documents/agb/AGB_5059_DE_20241101_neu.pdf#_ga=2.113422919.1775548596.1750775640-162054315.1750775640"
+                  }
+                  className="text-gray-600 text-sm whitespace-pre-line"
+                >
                   https://images.interhome.group/documents/agb...
-                  </Link>
-                  </div>
+                </Link>
+              </div>
             )}
 
             {/* additional files */}
-{accommodation.additionalDoc && 
- <section className="mb-10">
-              <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
-                {t("additional_file")}
-              </h2>
-               <div className="flex items-center gap-3">
-                    <FileText className="w-8 h-8 text-brand" />
-                    <Link
-                      className="text-slate-700 line-clamp-1"
-                     to={accommodation.additionalDoc?.includes(".docx") ? `https://docs.google.com/gview?url=${encodeURIComponent(accommodation.additionalDoc)}&embedded=true` : accommodation.additionalDoc}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {accommodation.additionalDoc}
-                    </Link>
-                  </div>
+            {accommodation.additionalDoc && (
+              <section className="mb-10">
+                <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
+                  {t("additional_file")}
+                </h2>
+                <div className="flex items-center gap-3">
+                  <FileText className="w-8 h-8 text-brand" />
+                  <Link
+                    className="text-slate-700 line-clamp-1"
+                    to={
+                      accommodation.additionalDoc?.includes(".docx")
+                        ? `https://docs.google.com/gview?url=${encodeURIComponent(
+                            accommodation.additionalDoc
+                          )}&embedded=true`
+                        : accommodation.additionalDoc
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {accommodation.additionalDoc}
+                  </Link>
+                </div>
               </section>
-}
+            )}
 
             {/* Reviews */}
             {/* <section className="mb-10">
@@ -904,17 +1056,18 @@ const getDisplayPrice = () => {
                     </p>
                   </div>
                 </div>
-                {accommodation?.provider !== "Interhome" &&
-                <div className="flex gap-4">
-                  <Link to={"/public-profile"}
-                  // state={{ user: { name: "John", age: 30 } }}
-                  state={{data:{...accommodation?.owner}}} 
-                  className="text-brand hover:underline text-sm">
-                    {t("view_profile")}
-                  </Link>
-                
-                </div>
-                  }
+                {accommodation?.provider !== "Interhome" && (
+                  <div className="flex gap-4">
+                    <Link
+                      to={"/public-profile"}
+                      // state={{ user: { name: "John", age: 30 } }}
+                      state={{ data: { ...accommodation?.owner } }}
+                      className="text-brand hover:underline text-sm"
+                    >
+                      {t("view_profile")}
+                    </Link>
+                  </div>
+                )}
               </div>
             </section>
           </div>
@@ -923,35 +1076,87 @@ const getDisplayPrice = () => {
           <div className="md:w-[360px] w-full md:flex-shrink-0 md:ml-auto">
             <div className="sticky top-24 bg-white border border-gray-200 rounded-xl shadow-md p-6">
               {/* Price Display */}
+              {accommodation?.provider == "Interhome" ? 
               <div className="flex flex-col mb-6">
                 <div className="flex items-baseline">
-  <span className="text-gray-600 mr-2 font-bold">
-   {t('total_price')} :
-  </span>
-  <span className="text-xl font-semibold">
-    {isPriceLoading ? (
-      <div className="w-16 h-8 bg-gray-200 animate-pulse rounded"></div>
-    ) : (
-      `${getBookingPrice()} X ${
-        getNoOfDays(dateRange?.start, dateRange?.end) || 1
-      } = ${
-        getBookingPrice() * (getNoOfDays(dateRange?.start, dateRange?.end) || 1)
-      } ${accommodation?.pricePerNight?.currency || "CHF"}`
-    )}
-  </span>
-</div>
+                  <span className="text-gray-600 mr-2 font-bold">
+                    {t("total_price")} :
+                  </span>
+                  <span className="text-xl font-semibold">
+                    {isPriceLoading ? (
+                      <div className="w-16 h-8 bg-gray-200 animate-pulse rounded"></div>
+                    ) : (
+                      `${(
+                        Number(interhomePrice?.price?.regularRentalPrice) / getNoOfDays(dateRange?.start, dateRange?.end)
+                      ).toFixed(1)} X ${
+                        getNoOfDays(dateRange?.start, dateRange?.end) || 1
+                      } = ${Math.round(
+                        (Number(interhomePrice?.price?.regularRentalPrice) /
+                          getNoOfDays(dateRange?.start, dateRange?.end)) *
+                          (getNoOfDays(dateRange?.start, dateRange?.end) || 1)
+                      )} ${accommodation?.pricePerNight?.currency || "CHF"}`
+                    )}
+                  </span>
+                </div>
                 <div className="text-sm text-gray-600 mt-2">
-  {t("price_per_person_per_night")}:{" "}
-  {getBookingPrice() / (guests?.people || 1)}{" "}
-  {accommodation?.pricePerNight?.currency || "CHF"}
-</div>
+                  {t("price_per_person_per_night")}:{" "}
+                  {(
+                    Number(interhomePrice?.price?.regularRentalPrice) / getNoOfDays(dateRange?.start, dateRange?.end)
+                  ).toFixed(2)}{" "}
+                  {accommodation?.pricePerNight?.currency || "CHF"}
+                </div>
+                {petService && (
+                  <div className="text-sm text-gray-600 mt-2">
+                    <p>
+                      Pet charges : {petService?.amount} {petService?.currency}
+                    </p>
+                  </div>
+                )}
+                {/* {!handleInterhomeReservation() == (
+                  <div>
+                    <p>Booking not possible of the selected dates!</p>
+                  </div>
+
+                )} */}
               </div>
-{console.log(dateRange , "date range")}
+              :
+              <div className="flex flex-col mb-6">
+                <div className="flex items-baseline">
+                  <span className="text-gray-600 mr-2 font-bold">
+                    {t("total_price")} :
+                  </span>
+                  <span className="text-xl font-semibold">
+                    {isPriceLoading ? (
+                      <div className="w-16 h-8 bg-gray-200 animate-pulse rounded"></div>
+                    ) : (
+                      `${(
+                        accommodation?.pricePerNight?.price )}X ${
+                        getNoOfDays(dateRange?.start, dateRange?.end) || 1
+                      } = ${Math.round(
+                         accommodation?.pricePerNight?.price *
+                          (getNoOfDays(dateRange?.start, dateRange?.end) || 1)
+                      )} ${accommodation?.pricePerNight?.currency || "CHF"}`
+                    )}
+                  </span>
+                </div>
+                <div className="text-sm text-gray-600 mt-2">
+                  {t("price_per_person_per_night")}:{" "}
+                  {(
+                   accommodation?.pricePerNight?.price)}{" "}
+                  {accommodation?.pricePerNight?.currency || "CHF"}
+                </div>
+                
+              </div>
+              }
 
               {/* Date Picker */}
               <div className="mb-4 relative">
                 <button
-                  onClick={() =>{accommodation?.provider == "Interhome" ? setIsDatePickerOpen(!isDatePickerOpen) : setIsOurDatePickerOpen(!isOurDatePickerOpen)}}
+                  onClick={() => {
+                    accommodation?.provider == "Interhome"
+                      ? setIsDatePickerOpen(!isDatePickerOpen)
+                      : setIsOurDatePickerOpen(!isOurDatePickerOpen);
+                  }}
                   className="w-full flex items-center justify-between border border-gray-300 rounded-lg p-3 text-left"
                 >
                   <span className="text-sm">
@@ -1017,47 +1222,50 @@ const getDisplayPrice = () => {
 
               {accommodation?.provider !== "Interhome" && (
                 <div className="mb-4">
-                 <div className="flex justify-between items-center">
-  <p className="text-sm text-gray-700">
-    {getBookingPrice()} x{" "}
-    {getNoOfDays(dateRange?.start, dateRange?.endDate) > 0
-      ? getNoOfDays(dateRange?.start, dateRange?.endDate)
-      : "1"}
-  </p>
-  {(() => {
-    const days = getNoOfDays(dateRange?.start, dateRange?.end) || 0;
-    const unitPrice = getBookingPrice();
-    const total = days > 0 ? unitPrice * days : unitPrice;
-    return <p className="text-sm text-gray-700">{total}</p>;
-  })()}
-</div>
-                <div className="flex justify-between items-center">
-  <p className="text-sm text-gray-700">
-   {t("service_charge")} (2.9%)
-  </p>
-  <p className="text-sm text-gray-700">
-    {(() => {
-      const days = getNoOfDays(dateRange?.start, dateRange?.end) || 0;
-      const unitPrice = getBookingPrice();
-      const baseAmount = days * unitPrice;
-      const totalWithStripe = baseAmount * 0.029;
-      return totalWithStripe.toFixed(2);
-    })()}
-  </p>
-</div>
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm text-gray-700">
+                      { accommodation?.pricePerNight?.price} x{" "}
+                      {getNoOfDays(dateRange?.start, dateRange?.endDate) > 0
+                        ? getNoOfDays(dateRange?.start, dateRange?.endDate)
+                        : "1"}
+                    </p>
+                    {(() => {
+                      const days =
+                        getNoOfDays(dateRange?.start, dateRange?.end) || 0;
+                      const unitPrice =  accommodation?.pricePerNight?.price;
+                      const total = days > 0 ? unitPrice * days : unitPrice;
+                      return <p className="text-sm text-gray-700">{total}</p>;
+                    })()}
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm text-gray-700">
+                      {t("service_charge")} (2.9%)
+                    </p>
+                    <p className="text-sm text-gray-700">
+                      {(() => {
+                        const days =
+                          getNoOfDays(dateRange?.start, dateRange?.end) || 0;
+                        const unitPrice =  accommodation?.pricePerNight?.price;
+                        const baseAmount = days * unitPrice;
+                        const totalWithStripe = baseAmount * 0.029;
+                        return totalWithStripe.toFixed(2);
+                      })()}
+                    </p>
+                  </div>
                   <div className="border-t border-gray-200 my-4"></div>
-               <div className="flex justify-between font-semibold">
-  <span>{t("total")}</span>
-  <span>
-    {(() => {
-      const days = getNoOfDays(dateRange?.start, dateRange?.end) || 0;
-      const unitPrice = getBookingPrice();
-      const baseAmount = days * unitPrice;
-      const totalWithStripe = baseAmount + baseAmount * 0.029;
-      return totalWithStripe.toFixed(2);
-    })()}
-  </span>
-</div>
+                  <div className="flex justify-between font-semibold">
+                    <span>{t("total")}</span>
+                    <span>
+                      {(() => {
+                        const days =
+                          getNoOfDays(dateRange?.start, dateRange?.end) || 0;
+                        const unitPrice =  accommodation?.pricePerNight?.price;
+                        const baseAmount = days * unitPrice;
+                        const totalWithStripe = baseAmount + baseAmount * 0.029;
+                        return totalWithStripe.toFixed(2);
+                      })()}
+                    </span>
+                  </div>
                 </div>
               )}
 
@@ -1093,7 +1301,7 @@ const getDisplayPrice = () => {
         vacanciesDate={vacancies}
       />
 
-<OurDateRangePicker
+      <OurDateRangePicker
         isOpen={isOurDatePickerOpen}
         onClose={() => setIsOurDatePickerOpen(false)}
         selectedRange={dateRange}
