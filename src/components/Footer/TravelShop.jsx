@@ -150,8 +150,10 @@ const TravelShop = () => {
     {
       title:  t("travel_bags"),
       products: [
+        { id: 11, image: tb11, url: "https://kitsuneandjo.ch/de/products/schleifen-leit-mittnacht-2?ref=waureisen " },
+        { id: 12, image: tb12, url: "https://kitsuneandjo.ch/de/products/schleifen-leit-mittnacht-3?ref=waureisen" },
         { id: 1, image: tb1, url: "https://petandco.ch/products/lucky-canvas-luxury-dog-bag-in-gray?_pos=7&_sid=d80c23648&_ss=r&ref=waureisen " },
-        { id: 2, image: tb2, url: "https://kitsuneandjo.ch/products/olla-petite-dog-carrier?ref=waureisen" },
+        // { id: 2, image: tb2, url: "https://kitsuneandjo.ch/products/olla-petite-dog-carrier?ref=waureisen" },
         { id: 3, image: tb3, url: "https://hundelicious.ch/product/the-canvas-bag-tragetasche-fuer-kleine-hunde/?ref=waureisen" },
         { id: 4, image: tb4, url: "https://petandco.ch/products/lucky-canvas-dark-olive?ref=waureisen" },
         { id: 5, image: tb5, url: "https://petandco.ch/products/lucky-luxury-dog-bag-in-brown?ref=waureisen " },
@@ -160,8 +162,6 @@ const TravelShop = () => {
         { id: 8, image: tb8, url: "https://petandco.ch/products/lucky-dog-bag-khaki?ref=waureisen" },
         { id: 9, image: tb9, url: "https://kitsuneandjo.ch/de/products/eco-packable-sling-dog-carrier?ref=waureisen" },
         { id: 10, image: tb10, url: "https://petandco.ch/products/lucky-paper-luxury-dog-bag-in-black?ref=waureisen " },
-        { id: 11, image: tb11, url: "https://kitsuneandjo.ch/de/products/schleifen-leit-mittnacht-2?ref=waureisen " },
-        { id: 12, image: tb12, url: "https://kitsuneandjo.ch/de/products/schleifen-leit-mittnacht-3?ref=waureisen" }
       ]
     },
     {

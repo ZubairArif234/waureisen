@@ -150,6 +150,8 @@ const AccommodationPage = () => {
   useEffect(() => {
     changeMetaData(`${id?.replace(/-/g, " ")} - Waureisen`);
   }, []);
+  
+  const [isPriceLoading, setIsPriceLoading] = useState(false);
   const [isOurDatePickerOpen, setIsOurDatePickerOpen] = useState(false);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [bookingCheckLoading, setBookingCheckLoading] = useState(false);
@@ -189,6 +191,8 @@ console.log(dateRange,"vacanciess");
   };
 
   const handleInterhomePrice = async () => {
+    if (dateRange?.start == "" || dateRange?.end == "") return
+    setIsPriceLoading(true)
     let paramList = id?.split("-");
     const defaultDate = vacancies?.day?.length > 0 ? vacancies?.day?.find((item)=>(item?.state  == "Y" && item?.allotment > 0)) : []
 console.log(defaultDate ,"default");
@@ -226,11 +230,17 @@ if(!dateRange?.start && !dateRange?.end){
         Currency: "CHF",
       },
     };
-    const res = await fetchInterhomeListingPrices(data);
+    let res;
+    if(dateRange?.start && dateRange?.end && dateRange?.start !== dateRange?.end){
+
+     res = await fetchInterhomeListingPrices(data);
+    }
     if (res?.data?.stateCode == "OK") {
       console.log(res, "prices list ok");
       setInterhomePrice(res?.data);
+      setIsPriceLoading(false)
     }
+    setIsPriceLoading(false)
     console.log(res, "prices list ");
   };
 
@@ -289,7 +299,6 @@ if(!dateRange?.start && !dateRange?.end){
   // Add maxGuests state to track the maximum allowed guests
   const [maxGuests, setMaxGuests] = useState(6); // Default to 6 if not specified
 
-  const [isPriceLoading, setIsPriceLoading] = useState(false);
   const [accommodation, setAccommodation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -1087,21 +1096,21 @@ if(!dateRange?.start && !dateRange?.end){
                       <div className="w-16 h-8 bg-gray-200 animate-pulse rounded"></div>
                     ) : (
                       `${(
-                        Number(interhomePrice?.price?.regularRentalPrice) / getNoOfDays(dateRange?.start, dateRange?.end)
+                      accommodation?.price ||  Number( interhomePrice?.price?.regularRentalPrice) / getNoOfDays(dateRange?.start, dateRange?.end)
                       ).toFixed(1)} X ${
                         getNoOfDays(dateRange?.start, dateRange?.end) || 1
                       } = ${Math.round(
-                        (Number(interhomePrice?.price?.regularRentalPrice) /
-                          getNoOfDays(dateRange?.start, dateRange?.end)) *
+                        (accommodation?.price || (Number( interhomePrice?.price?.regularRentalPrice) /
+                          getNoOfDays(dateRange?.start, dateRange?.end)) )*
                           (getNoOfDays(dateRange?.start, dateRange?.end) || 1)
-                      )} ${accommodation?.pricePerNight?.currency || "CHF"}`
+                      )} ${ accommodation?.pricePerNight?.currency || "CHF"}`
                     )}
                   </span>
                 </div>
                 <div className="text-sm text-gray-600 mt-2">
                   {t("price_per_person_per_night")}:{" "}
                   {(
-                    Number(interhomePrice?.price?.regularRentalPrice) / getNoOfDays(dateRange?.start, dateRange?.end)
+                   accommodation?.price || Number( interhomePrice?.price?.regularRentalPrice) / getNoOfDays(dateRange?.start, dateRange?.end)
                   ).toFixed(2)}{" "}
                   {accommodation?.pricePerNight?.currency || "CHF"}
                 </div>

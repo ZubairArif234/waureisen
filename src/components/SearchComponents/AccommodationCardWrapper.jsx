@@ -98,12 +98,12 @@ console.log(price,pricePerNight,distance);
       <OriginalAccommodationCard
         id={id}
         images={images || []}
-        price={ formattedPricePerNight?.price || 0}
+        price={price || formattedPricePerNight?.price || 0}
         location={location || "Accommodation"}
         provider={provider || "Unknown"}
         listingSource={listingSource}
         isFavorited={isFavorited || false}
-        pricePerNight={ formattedPricePerNight}
+        pricePerNight={price || formattedPricePerNight}
         code={Code}
       />
       {distance && (
