@@ -107,8 +107,8 @@ const SearchResultsContent = () => {
     
     // Extract guest counts
     const people = parseInt(urlParams.get("people")) || 1;
-    const dogs = parseInt(urlParams.get("people")?.split("=")[1]) ;
-    console.log(dogs , urlParams.get("people")?.split("=")[1] , "jkkko kkk jhj ");
+    const dogs = parseInt(urlParams.get("dogs")) || 1;
+    console.log(dogs , urlParams.get("dogs") , "jkkko kkk jhj ");
     
     // Extract filters
     const filtersParam = urlParams.get("filters");
@@ -134,7 +134,7 @@ const SearchResultsContent = () => {
       max: parseInt(urlParams.get("priceMax")) || 10000
     };
     
-   
+   console.log(searchParams , "search")
     // Create search param object
     const newSearchParams = {
       lat, 
@@ -201,6 +201,8 @@ const SearchResultsContent = () => {
   
   // Handle search updates
   const handleSearch = useCallback((searchUrl, filters) => {
+    console.log(filters);
+    
     // Reset URL processed flag when user performs a new search
     urlProcessedRef.current = false;
     
@@ -213,11 +215,12 @@ const SearchResultsContent = () => {
         ...prev,
         filters: {
           ...prev.filters,
+          dogCount:urlParams.get("dogs"),
           searchFilters: filters
         }
       }));
     }
-  }, [navigate, updateSearchParams]);
+  }, [navigate, updateSearchParams , urlParams]);
   
   // Clear error on dismount
   useEffect(() => {
@@ -262,7 +265,7 @@ const SearchResultsContent = () => {
             initialDateRange={searchParams.filters.dateRange || { start: null, end: null }}
             initialGuests={{
               people: searchParams.filters.guestCount || 1,
-              dogs: urlParams.get("dogs") ? parseInt(urlParams.get("dogs")) : 0
+              dogs:  urlParams.get("dogs") ? parseInt(urlParams.get("dogs")) : 0
             }}
             onSearch={handleSearch}
           />
