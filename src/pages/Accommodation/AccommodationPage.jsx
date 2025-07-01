@@ -191,7 +191,11 @@ console.log(dateRange,"vacanciess");
   };
 
   const handleInterhomePrice = async () => {
-    if (dateRange?.start == "" || dateRange?.end == "") return
+    if (dateRange?.start == "" || dateRange?.end == "" || accommodation?.price !== 0) {
+      setIsPriceLoading(false)
+      return false
+      
+    }
     setIsPriceLoading(true)
     let paramList = id?.split("-");
     const defaultDate = vacancies?.day?.length > 0 ? vacancies?.day?.find((item)=>(item?.state  == "Y" && item?.allotment > 0)) : []
@@ -1135,17 +1139,15 @@ if(!dateRange?.start && !dateRange?.end){
                     {t("total_price")} :
                   </span>
                   <span className="text-xl font-semibold">
-                    {isPriceLoading ? (
-                      <div className="w-16 h-8 bg-gray-200 animate-pulse rounded"></div>
-                    ) : (
-                      `${(
+                    
+                     {( `${(
                         accommodation?.pricePerNight?.price )}X ${
                         getNoOfDays(dateRange?.start, dateRange?.end) || 1
                       } = ${Math.round(
                          accommodation?.pricePerNight?.price *
                           (getNoOfDays(dateRange?.start, dateRange?.end) || 1)
-                      )} ${accommodation?.pricePerNight?.currency || "CHF"}`
-                    )}
+                      )} ${accommodation?.pricePerNight?.currency || "CHF"}`)}
+                    
                   </span>
                 </div>
                 <div className="text-sm text-gray-600 mt-2">

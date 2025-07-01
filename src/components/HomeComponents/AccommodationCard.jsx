@@ -207,9 +207,9 @@ const getDisplaySource = () => {
         </button>
 
         {/* Source badge */}
-        <div className="absolute bottom-3 right-3 px-2 py-1 bg-black/80 text-white text-xs font-semibold rounded-md shadow">
+        {/* <div className="absolute bottom-3 right-3 px-2 py-1 bg-black/80 text-white text-xs font-semibold rounded-md shadow">
           {displaySource}
-        </div>
+        </div> */}
       </div>
 
       <div className="space-y-1 cursor-pointer" onClick={()=>handleClick(propertyLocation)}>
