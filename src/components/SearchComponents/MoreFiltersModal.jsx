@@ -24,7 +24,7 @@ import API from "../../api/config";
     'Facilities Main Filters': Filter,
     'Facilities Smoking': Flame,
     'Facilities Sport': Dumbbell,
-    'Facilities To Do Nearby': MapPin,
+    'Water To Do Nearby': MapPin,
     'Facilities View': Eye,
   };
 

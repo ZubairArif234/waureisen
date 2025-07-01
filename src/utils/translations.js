@@ -160,7 +160,7 @@ const translations = {
     "Table Tennis": "Table Tennis",
     "Sup Rental": "Sup Rental",
 
-    "Facilities To Do Nearby": "Facilities To Do Nearby",
+    "Water To Do Nearby": "Water To Do Nearby",
     Sea: "Sea",
     Lake: "Lake",
     River: "River",
@@ -1572,7 +1572,7 @@ const translations = {
     "Table Tennis": "Tischtennis",
     "Sup Rental": "Sup-Verleih",
 
-    "Facilities To Do Nearby": "Freizeitmöglichkeiten in der Nähe",
+    "Water To Do Nearby": "Wasseraktivitäten in der Nähe",
     Sea: "Meer",
     Lake: "See",
     River: "Fluss",
@@ -1944,7 +1944,7 @@ const translations = {
       "Buchen Sie in wenigen Schritten die passende Unterkunft oder vereinbaren Sie mit uns ein Gespräch. Wir sind gerne für Sie da.",
     all_in_one_place: "Alles an einem Ort",
     all_in_one_place_desc:
-      "Entdecken Sie unseren Reisemagazin für Tipps zu hundefreundlichen Reisezielen und kaufen Sie passendes Zubehör direkt in unserem Reiseshop.",
+      "Entdecken Sie unser Reisemagazin für Tipps zu hundefreundlichen Reisezielen und kaufen Sie passendes Zubehör direkt in unserem Reiseshop.",
     transparent_pricing: "Transparente Preise",
     transparent_pricing_desc:
       "Keine versteckten Gebühren - Sie zahlen das Gleiche wie bei einer direkten Buchung bei der Unterkunft.",
