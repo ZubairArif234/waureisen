@@ -97,9 +97,9 @@ const ListingCard = ({ listing, onEdit, onDelete, onView }) => {
         </div>
 
         {/* Source badge */}
-        <div className="absolute bottom-3 right-3 px-2 py-1 bg-black/60 text-white text-xs rounded-md">
+        {/* <div className="absolute bottom-3 right-3 px-2 py-1 bg-black/60 text-white text-xs rounded-md">
           {listing.listingSource || "Provider"}
-        </div>
+        </div> */}
       </div>
 
       {/* Card body */}

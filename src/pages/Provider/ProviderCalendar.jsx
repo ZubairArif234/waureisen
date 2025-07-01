@@ -94,6 +94,7 @@ const Calendar = ({ currentDate, bookings, listings, unavailableDates, selectedL
   const [year, setYear] = useState(currentDate.getFullYear());
   const [month, setMonth] = useState(currentDate.getMonth());
   const calendarDays = generateCalendarDays(year, month);
+  console.log(unavailableDates ,"unavailable");
   
   const monthNames = [
     t('January'), t('February'), t('March'), t('April'), t('May'), t('June'),
@@ -141,6 +142,12 @@ const Calendar = ({ currentDate, bookings, listings, unavailableDates, selectedL
       unavailableDate.date === dateString
     );
   };
+  const getDateUnavailableListing = (date) => {
+    const dateString = formatDate(date);
+    return filteredUnavailableDates.find(unavailableDate => 
+      unavailableDate.date === dateString
+    );
+  };
   
 
 const renderCellContent = (day) => {
@@ -152,6 +159,7 @@ const renderCellContent = (day) => {
   const bookingsForDay = getBookingsForDate(day.date);
   const isBooked = bookingsForDay.length > 0;
   const isUnavailable = isDateUnavailable(day.date);
+  const listingUnavailable = getDateUnavailableListing(day.date);
   let baseCellClass = day.isCurrentMonth ? 'bg-white' : 'bg-gray-50';
   let statusClass = '';
   if (isPastDate) {
@@ -167,7 +175,7 @@ const renderCellContent = (day) => {
   return (
     <div 
       className={`h-full w-full rounded-lg p-1 ${baseCellClass} ${statusClass}`}
-      onClick={() => day.isCurrentMonth && !isPastDate && !isBooked && onDateClick(dateString)}
+      onClick={() => day.isCurrentMonth && !isPastDate && !isBooked && onDateClick(dateString ,listingUnavailable)}
     >
       <div className="text-right p-1">
         <span className={`text-sm ${
@@ -183,8 +191,8 @@ const renderCellContent = (day) => {
       
       <div className="mt-1 space-y-1">
         {isUnavailable && (
-          <div className="h-5 rounded bg-red-200 text-xs flex items-center justify-center text-red-600 font-medium">
-            {t('unavailable')}
+          <div className=" px-1 rounded bg-red-200 text-xs flex items-center justify-center text-red-600 font-medium">
+           {listingUnavailable?.listingTitle} {t('unavailable')}
           </div>
         )}
         
@@ -272,6 +280,7 @@ const renderCellContent = (day) => {
             } ${i >= 35 ? 'border-b' : ''}`}
           >
             {renderCellContent(day)}
+            
           </div>
         ))}
       </div>
@@ -393,7 +402,9 @@ const BookingDetailsModal = ({ booking, onClose }) => {
   );
 };
 
-const BlockDateModal = ({ isOpen, onClose, listings, selectedDate, onSave, bookings }) => {
+const BlockDateModal = ({unavailableDates,selectedBooking,selectedListingForBlock, isOpen, onClose, listings, selectedDate, onSave, bookings }) => {
+  console.log(unavailableDates ,selectedBooking);
+  
   const { t } = useLanguage();
   const [selectedListing, setSelectedListing] = useState('');
   const [reason, setReason] = useState('maintenance');
@@ -498,7 +509,7 @@ const BlockDateModal = ({ isOpen, onClose, listings, selectedDate, onSave, booki
               </label>
               <select
                 id="listing"
-                value={selectedListing}
+                value={selectedListing || selectedListingForBlock?.listingId}
                 onChange={(e) => setSelectedListing(e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                 required
@@ -624,6 +635,7 @@ const ProviderCalendar = () => {
   const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
   const [isUnblockModalOpen, setIsUnblockModalOpen] = useState(false);
   const [selectedDateForBlock, setSelectedDateForBlock] = useState(null);
+  const [selectedListingForBlock, setSelectedListingForBlock] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -645,19 +657,19 @@ const ProviderCalendar = () => {
     try {
       const { startDate, endDate } = getWiderDateRange();
       
-      console.log(`Fetching unavailable dates for wider range: ${startDate} to ${endDate}`);
+      console.log(`Fetching unavailable dates for wider range: ${startDate} to ${endDate}` );
       
-      const unavailableDatesData = await getUnavailableDates({
-        listingId: selectedListing !== 'all' ? selectedListing : undefined,
+      const unavailableDatesData =  await getUnavailableDates({
+        listingId: selectedListing !== 'all' ? selectedListing : listings?.map((item)=>item?._id),
         startDate: startDate,
         endDate: endDate
       });
       
       console.log('Unavailable dates from API:', unavailableDatesData);
       
-      const formattedUnavailableDates = unavailableDatesData.map(date => ({
+      const formattedUnavailableDates = unavailableDatesData?.map(date => ({
         date: typeof date.date === 'string' ? date.date : new Date(date.date).toISOString().split('T')[0],
-        listingId: date.listing?._id || date.listing || date.listingId,
+        listingId:  date.listingId ,
         listingTitle: date.listingTitle || '',
         reason: date.reason || 'unavailable'
       }));
@@ -703,7 +715,7 @@ const ProviderCalendar = () => {
         
         setBookings(formattedBookings);
       
-        await fetchUnavailableDates();
+       
         
       } catch (err) {
         console.error('Error fetching calendar data:', err);
@@ -714,9 +726,19 @@ const ProviderCalendar = () => {
     };
     
     fetchCalendarData();
-  }, [selectedListing, activeTab]);
+  }, [selectedListing, activeTab ]);
+
+  useEffect(()=>{
+    if ( listings?.length > 0){
+
+      fetchUnavailableDates();
+    }
+  } , [selectedListing, activeTab , listings?.length])
   
-  const handleOpenBlockModal = (date) => {
+  const handleOpenBlockModal = (date, listing) => {
+   
+    
+    setSelectedListingForBlock(listing)
     setSelectedDateForBlock(date);
     setIsBlockModalOpen(true);
   };
@@ -910,6 +932,9 @@ const ProviderCalendar = () => {
         listings={listings}
         bookings={bookings}
         selectedDate={selectedDateForBlock ? formatDate(selectedDateForBlock) : null}
+        selectedListingForBlock={selectedListingForBlock}
+         unavailableDates={unavailableDates}
+         selectedBooking={selectedBooking}
         onSave={handleBlockDates}
       />
       

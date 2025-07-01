@@ -155,7 +155,7 @@ function App() {
               <Route path="/star-membership" element={<StarMembership />} />
               <Route path="/host" element={<HostRegistration />} />
               <Route path="/travel-magazine" element={<TravelMagazine />} />
-              <Route path="/:prefix/travel-magazine" element={<TravelMagazine />} />
+              {/* <Route path="/:prefix/travel-magazine" element={<TravelMagazine />} /> */}
               <Route path="/travelshop" element={<TravelShop />} />
               <Route path="/:prefix/travelshop" element={<TravelShop />} />
               <Route path="/travel-magazine/:country?/:category/:title" element={<TravelMagazineDetail />} />

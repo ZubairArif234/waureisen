@@ -490,7 +490,7 @@ const getSubsectionIcon = (subsectionName) => {
     'Facilities Main Filters': Filter,
     'Facilities Smoking': Flame,
     'Facilities Sport': Dumbbell,
-    'Facilities To Do Nearby': MapPin,
+    'Water To Do Nearby': MapPin,
     'Facilities View': Eye,
   };
 

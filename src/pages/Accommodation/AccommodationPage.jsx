@@ -1141,10 +1141,10 @@ if(!dateRange?.start && !dateRange?.end){
                   <span className="text-xl font-semibold">
                     
                      {( `${(
-                        accommodation?.pricePerNight?.price )}X ${
+                       (accommodation.pricePerNight?.isDiscountActivate && accommodation.pricePerNight?.discount) || accommodation?.pricePerNight?.price )}X ${
                         getNoOfDays(dateRange?.start, dateRange?.end) || 1
                       } = ${Math.round(
-                         accommodation?.pricePerNight?.price *
+                       (accommodation.pricePerNight?.isDiscountActivate && accommodation.pricePerNight?.discount) || accommodation?.pricePerNight?.price  *
                           (getNoOfDays(dateRange?.start, dateRange?.end) || 1)
                       )} ${accommodation?.pricePerNight?.currency || "CHF"}`)}
                     
@@ -1153,7 +1153,7 @@ if(!dateRange?.start && !dateRange?.end){
                 <div className="text-sm text-gray-600 mt-2">
                   {t("price_per_person_per_night")}:{" "}
                   {(
-                   accommodation?.pricePerNight?.price)}{" "}
+                  (accommodation.pricePerNight?.isDiscountActivate && accommodation.pricePerNight?.discount) || accommodation?.pricePerNight?.price )}{" "}
                   {accommodation?.pricePerNight?.currency || "CHF"}
                 </div>
                 
