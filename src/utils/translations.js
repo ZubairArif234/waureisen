@@ -1,5 +1,10 @@
 const translations = {
   en: {
+    cannot_select:"Cannot select this date range. Date",
+    not_available:"is not available",
+    possible_dates:"Possible date of arrival. Minimum stay is",
+    nights:"nights",
+    "clear-selection":"Clear Selection",
     add_listing:"Add new listings",
     edit_listing:"Edit listings",
     about_provider:"About the provider",
@@ -1390,6 +1395,11 @@ const translations = {
   },
 
   de: {
+    cannot_select:"Dieser Datumsbereich kann nicht ausgewählt werden. Datum",
+    not_available:"ist nicht verfügbar",
+     possible_dates:"Mögliches Anreisedatum. Mindestaufenthalt ist",
+    nights:"Nächte",
+  "clear-selection":"Auswahl löschen",
      add_listing:"Neuen Eintrag hinzufügen",
     edit_listing:"Eintrag bearbeiten",
   about_provider:"Über den Anbieter",
@@ -1958,7 +1968,7 @@ const translations = {
 
     // Travelers
     travelers_love: "Reisende lieben Waureisen",
-    testimonials: "Lesen Sie, was unsere Kunden über ihre Erfahrungen sagen",
+    testimonials: "Das sagen unsere Kunden über uns",
 
     // Calendly
     talk_with_us: "Sprechen Sie mit uns",

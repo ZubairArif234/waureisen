@@ -120,9 +120,7 @@ const Footer = () => {
               </a> */}
 
             </div>
-            <p className="text-gray-500 text-sm ml-2">
-              {t('copyright')}
-            </p>
+            
           </div>
 
          {/* Right Columns */}
@@ -141,6 +139,9 @@ const Footer = () => {
               </div>
             </div>
           </div>
+        <p className="text-gray-500 text-sm  mt-2">
+              {t('copyright')}
+            </p>
         </div>
       </footer>
 
