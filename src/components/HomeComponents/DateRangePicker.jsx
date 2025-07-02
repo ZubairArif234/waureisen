@@ -195,7 +195,7 @@ const Calendar = ({ month, year, selectedRange, onDateSelect, availableDates, bo
     
     const minStay = memoizedData.monthMinStay[day];
     if (minStay && minStay > 1) {
-      setMinStayText(`Possible date of arrival. Minimum stay is ${minStay} nights.`);
+      setMinStayText(`${t("possible_dates")} ${minStay} ${t("nights")}.`);
       return true;
     }
     return false;
@@ -411,7 +411,7 @@ const DateRangePicker = ({ isOpen, onClose, selectedRange, onRangeSelect, availa
         }
 
         if (!allDatesAvailable) {
-          setMinStayText(`Cannot select this date range. Date ${unavailableDate} is not available.`);
+          setMinStayText(`${t("cannot_select")} ${unavailableDate} ${t("not_available")}.`);
           return;
         }
       }
@@ -492,7 +492,8 @@ const DateRangePicker = ({ isOpen, onClose, selectedRange, onRangeSelect, availa
               onClick={clearSelection}
               className="px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg border border-red-200 hover:border-red-300 transition-colors"
             >
-              Clear Selection
+              {t("clear-selection")}
+              
             </button>
           )}
           
