@@ -453,12 +453,12 @@ if(!dateRange?.start && !dateRange?.end){
                     (date) => date.paxUpTo || 0
                   )
                 );
-                if (maxPaxUpTo > 0) {
+                // if (maxPaxUpTo > 0) {
                   //console.log(`Setting maximum guests to ${maxPaxUpTo} based on availability data`);
-                  setMaxGuests(maxPaxUpTo);
+                  // setMaxGuests(maxPaxUpTo);
                   // Also set it on the accommodation object for reference
-                  data.maxGuests = maxPaxUpTo;
-                }
+                  // data.maxGuests = maxPaxUpTo;
+                // }
               }
             }
           } catch (availabilityError) {
@@ -580,7 +580,7 @@ if(!dateRange?.start && !dateRange?.end){
     {
       icon: Users,
       text: t("people"),
-      value: t("upto") + accommodation?.maxGuests?.toString() || "6 ", // Default
+      value: t("upto") + accommodation?.maxGuests || "2", // Default
     },
     {
       icon: Dog,
