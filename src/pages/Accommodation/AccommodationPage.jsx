@@ -161,6 +161,7 @@ const AccommodationPage = () => {
    const [vacancies, setVacancies] = useState([]); // Add state for available dates
   const { t } = useLanguage();
   const [dateRange, setDateRange] = useState({ start: null, end: null });
+  const [checkInMinStay, setCheckInMinStay] = useState(null );
   const [guests, setGuests] = useState({
     people: 1,
     dogs: 1,
@@ -404,7 +405,7 @@ if(!dateRange?.start && !dateRange?.end){
         const dateFromSearch = searchState.checkInDate || searchDateParam;
 
         console.log("Search state:", searchState);
-        console.log("Date from search:", dateFromSearch);
+        console.log("Date from search:", dateFromSearch ,location?.state?.checkOutDate);
 
         const data = await getListingById(location.state?.id);
 
@@ -438,6 +439,12 @@ if(!dateRange?.start && !dateRange?.end){
             // console.log(vacanciesDate , "vacanciesDate");
             if (vacanciesDate && vacanciesDate.calendar) {
               setVacancies(vacanciesDate.calendar);
+              console.log(vacanciesDate?.calendar?.day , location?.state?.checkOutDate);
+              
+              const checkInDateMinStay = vacanciesDate?.calendar?.day?.find((item)=>{
+                return item?.date == location?.state?.checkOutDate
+              })
+              setCheckInMinStay(checkInDateMinStay)
             }
             // ---------> new vacancies code end <----------
 
@@ -554,8 +561,8 @@ if(!dateRange?.start && !dateRange?.end){
         // Update date range if we have a date from search
         if (dateFromSearch) {
           const startDate = new Date(dateFromSearch);
-          const endDate = new Date(startDate);
-          endDate.setDate(endDate.getDate() + 7); // Default to 7-day stay
+          const endDate = new Date(location?.state?.checkOutDate);
+          // endDate.setDate(endDate); // Default to 7-day stay
 
           setDateRange({
             start: startDate,
@@ -758,6 +765,7 @@ if(!dateRange?.start && !dateRange?.end){
       });
     }
   };
+console.log(checkInMinStay);
 
   const petService = interhomePrice?.services?.service?.find(
     (item) => item?.code === "PET"
@@ -1279,6 +1287,10 @@ if(!dateRange?.start && !dateRange?.end){
                   </div>
                 </div>
               )}
+
+<div className="bg-amber-100 border border-amber-200 rounded-md p-1 mb-2 text-justify">
+  <p className="text-xs text-amber-700">{t("check_dates")} {checkInMinStay?.minimumStay} {t("nights")}.</p>
+</div>
 
               {/* Reserve Button */}
               <button

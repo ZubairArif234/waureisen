@@ -25,6 +25,7 @@ const AccommodationCard = ({
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const checkInDate = searchParams.get("dates")?.split(" - ")[0] || "";
+  const checkOutDate = searchParams.get("dates")?.split(" - ")[1] || "";
   const { t } = useLanguage();
 
   // Combine single image with images array, avoiding duplicates
@@ -76,6 +77,7 @@ const AccommodationCard = ({
   };
 
   const formattedCheckInDate = formatDate(checkInDate);
+  const formattedCheckOutDate = formatDate(checkOutDate);
 
   const handleClick = (title) => {
     console.log(code)
@@ -84,6 +86,7 @@ const AccommodationCard = ({
         id:id,
         pricePerNight: pricePerNight || { price, currency: "CHF" },
         checkInDate: formattedCheckInDate,
+        checkOutDate: formattedCheckOutDate,
       },
     });
   };
