@@ -11,6 +11,7 @@ import { changeMetaData } from "../../utils/extra";
 import Modal from "../../components/Auth/Modal";
 import TermsContent from "../../components/Auth/TermsContent";
 import DataPolicy from "../../components/Footer/DataPolicy";
+import { getProviderProfile } from "../../api/providerAPI";
 
 const ProviderRegistration = () => {
     useEffect(() => {
@@ -88,6 +89,17 @@ const ProviderRegistration = () => {
       }),
     };
   });
+
+  const handleGetProviderProfile = async () => {
+    const profile =  getProviderProfile()
+    console.log(profile , "provider profile");
+    
+
+  }
+
+  useEffect(()=>{
+    handleGetProviderProfile()
+  },[])
 
   useEffect(() => {
   console.log(profileData, "profileData");
@@ -250,7 +262,7 @@ if(isValid){
 }
 console.log(response);
 
-localStorage.setItem("currentStep",response?.provider?.step)
+// localStorage.setItem("currentStep",response?.provider?.step)
 const savedData = sessionStorage.getItem("providerSignupData");
     
     const parsedData = savedData ? JSON.parse(savedData) : null;
@@ -306,8 +318,8 @@ setFormData(
 
     if (isValid && response?.provider?.id) {
       setCurrentStep(currentStep + 1);
-      localStorage.setItem("providerSignupData", JSON.stringify(formData));
-      localStorage.setItem("currentStep", currentStep + 1);
+      // localStorage.setItem("providerSignupData", JSON.stringify(formData));
+      // localStorage.setItem("currentStep", currentStep + 1);
       window.scrollTo(0, 0);
     }
   } catch(err){
@@ -383,7 +395,7 @@ const prevUserStr = localStorage.getItem("provider_user");
 if (prevUserStr) {
   const prevUser = JSON.parse(prevUserStr);
   const updatedUser = { ...prevUser, profileCompleted: true };
-  localStorage.setItem("provider_user", JSON.stringify(updatedUser));
+  // localStorage.setItem("provider_user", JSON.stringify(updatedUser));
 } else {
   console.warn("No provider_user found in localStorage.");
 }
