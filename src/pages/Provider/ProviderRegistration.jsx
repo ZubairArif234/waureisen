@@ -445,23 +445,29 @@ console.log(response, "jffk");
         }
   }, [savedData ]);
 
-  const handleGetStripeAccount = async ()=>{
-    setStripeLoading(true)
-    const res= await getStripeAccount(accountId)
-    // console.log(res)
-    if (res){
-      setStripeAccount(res?.data?.details_submitted && res?.data?.charges_enabled && res?.data?.payouts_enabled)
-      setStripeLoading(false)
+const handleGetStripeAccount = async () => {
+  setStripeLoading(true);
+  try {
+    const res = await getStripeAccount(accountId);
+    if (res) {
+      setStripeAccount(
+        res?.data?.details_submitted &&
+        res?.data?.charges_enabled &&
+        res?.data?.payouts_enabled
+      );
     }
-    setStripeLoading(false)
-
+  } catch (error) {
+    console.error("Error fetching Stripe account:", error);
+  } finally {
+    setStripeLoading(false); // Will run regardless of success or error
   }
+};
 
-  useEffect(()=>{
-    if(accountId){
-      handleGetStripeAccount(accountId)
-    }
-  },[accountId])
+useEffect(() => {
+  if (accountId) {
+    handleGetStripeAccount();
+  }
+}, [accountId]);
 
   console.log(currentStep , "current step");
   
