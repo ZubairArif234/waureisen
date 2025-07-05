@@ -146,6 +146,7 @@ const Amenity = ({ icon, text }) => (
 const AccommodationPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+   const searchParams = new URLSearchParams(location.search);
   const { id } = useParams(); // Get the accommodation ID from URL
   useEffect(() => {
     changeMetaData(`${id?.replace(/-/g, " ")} - Waureisen`);
@@ -265,10 +266,10 @@ if(!dateRange?.start && !dateRange?.end){
 
     return dates;
   };
-  console.log(bookedDates, "state dates");
+  console.log(location, "state dates");
 
   const handleGetBooking = async () => {
-    const res = await getBookingByListing(location.state?.id);
+    const res = await getBookingByListing(searchParams.get("listing") || location.state?.id);
 
     res.map((item) => {
       const result = getAllDates(item?.checkInDate, item?.checkOutDate);
@@ -282,7 +283,7 @@ if(!dateRange?.start && !dateRange?.end){
     });
   };
   const handleGetListingAvailable = async () => {
-    const res = await getListingUnavailableDates(location.state?.id);
+    const res = await getListingUnavailableDates(searchParams.get("listing") || location.state?.id);
     console.log(res, "listing unavailable dates");
     res?.data?.map((item) => {
       const result = moment(item?.date).format("YYYY-MM-DD");
@@ -407,7 +408,7 @@ if(!dateRange?.start && !dateRange?.end){
         console.log("Search state:", searchState);
         console.log("Date from search:", dateFromSearch ,location?.state?.checkOutDate);
 
-        const data = await getListingById(location.state?.id);
+        const data = await getListingById(searchParams.get("listing") || location.state?.id);
 
         // If we have price data from search results, use it
         if (priceFromSearch) {
@@ -420,7 +421,7 @@ if(!dateRange?.start && !dateRange?.end){
         const token = localStorage.getItem("token");
         if (token && id) {
           try {
-            await API.post(`/users/recently-viewed/${location.state?.id}`);
+            await API.post(`/users/recently-viewed/${searchParams.get("listing") || location.state?.id}`);
             console.log("Added to recently viewed:", location.state?.id);
           } catch (err) {
             console.error("Error adding to recently viewed:", err);
@@ -577,7 +578,7 @@ if(!dateRange?.start && !dateRange?.end){
       }
     };
 
-    if (location.state?.id) {
+    if (searchParams.get("listing") || location.state?.id) {
       fetchAccommodation();
     }
   }, [location.state?.id]);
@@ -877,7 +878,7 @@ console.log(checkInMinStay);
                 />
               </div>
             </section>
-            {accommodation?.provider && (
+            {accommodation?.provider !== "Interhome" && (
               <div className="mb-10">
                 <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
                   {t("timing")}

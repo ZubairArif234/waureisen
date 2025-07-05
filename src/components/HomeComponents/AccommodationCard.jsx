@@ -81,7 +81,7 @@ const AccommodationCard = ({
 
   const handleClick = (title) => {
     console.log(code)
-    navigate(`/accommodation/${title + "-"+ code}`, {
+    navigate(`/accommodation/${title + "-"+ code}?listing=${id}`, {
       state: {
         id:id,
         pricePerNight: pricePerNight || { price, currency: "CHF" },
