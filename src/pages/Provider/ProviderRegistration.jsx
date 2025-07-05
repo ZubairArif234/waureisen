@@ -202,10 +202,13 @@ console.log(name , value);
     }
 
     if (step === 3) {
-      if (!formData.stripeAccountId.trim() || !stripeAccount ) {
+      console.log(formData , stripeAccount , "dono");
+      
+      if (!formData.stripeAccountId && !stripeAccount ) {
         newErrors.stripeAccountId = "Stripe ccount is required";
       }
     }
+console.log(newErrors , "new errors");
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -217,6 +220,7 @@ console.log(name , value);
     
     const isValid = validateStep(currentStep);
 
+console.log(isValid , "step 3" , currentStep);
 
       const registrationData = {
         step:currentStep,
@@ -240,7 +244,7 @@ console.log(name , value);
         swift: formData.swift,
 
         // stripe Account ID
-        stripeAccountId: formData?.stripeAccountId,
+        stripeAccountId:stripeAccount ?  accountId : formData?.stripeAccountId ,
 
         // Additional information
         hostingExperience: formData.hostingExperience,
