@@ -91,9 +91,10 @@ const ProviderRegistration = () => {
   });
 
   const handleGetProviderProfile = async () => {
-    const profile =  getProviderProfile()
+    const profile = await getProviderProfile();
     console.log(profile , "provider profile");
     
+    if (profile?.step) setCurrentStep(profile?.step+1)
 
   }
 
