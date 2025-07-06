@@ -148,7 +148,7 @@ useEffect(() => {
     return;
   }
 
-  if (provider.registrationStatus === 'incomplete') {
+  if (provider.registrationStatus === 'incomplete' && !provider?.profileCompleted) {
     // console.log('Provider registration incomplete, redirecting to registration');
     navigate('/provider/registration');
     return;
