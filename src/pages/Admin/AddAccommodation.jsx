@@ -633,6 +633,7 @@ const isoCheckOut = convertToISOString(checkOutDate, formData.availability.check
           currency: formData?.pricing?.currency,
           isDiscountActivate:isDiscount || false,
         },
+        price:isDiscount ? formData?.pricing?.discountedPrice : formData?.pricing?.regularPrice ,
         maxDogs: formData?.capacity?.dogs,
         maxGuests: formData?.capacity?.people,
         bedRooms: formData?.capacity?.bedrooms,

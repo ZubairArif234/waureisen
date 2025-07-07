@@ -364,13 +364,13 @@ if(!dateRange?.start && !dateRange?.end){
 
           setAccommodation((prev) => ({
             ...prev,
-            pricePerNight: {
-              price: calculatedPricePerNight,
-              currency: priceData.priceList.currency || "",
-              totalPrice: selectedOption.price,
-              duration: 7,
-              paxUpTo: selectedOption.paxUpTo,
-            },
+            // pricePerNight: {
+            //   price: calculatedPricePerNight,
+            //   currency: priceData.priceList.currency || "",
+            //   totalPrice: selectedOption.price,
+            //   duration: 7,
+            //   paxUpTo: selectedOption.paxUpTo,
+            // },
           }));
         }
       }
@@ -413,7 +413,7 @@ if(!dateRange?.start && !dateRange?.end){
         // If we have price data from search results, use it
         if (priceFromSearch) {
           console.log("Using price data from search results:", priceFromSearch);
-          data.pricePerNight = priceFromSearch;
+          // data.pricePerNight = priceFromSearch;
         }
         // Otherwise, fetch price data if needed
 
@@ -481,7 +481,7 @@ if(!dateRange?.start && !dateRange?.end){
         // If we have price data from search results, use it
         if (priceFromSearch) {
           console.log("Using price data from search results:", priceFromSearch);
-          data.pricePerNight = priceFromSearch;
+          // data.pricePerNight = priceFromSearch;
         }
         // Otherwise, fetch price data if needed
         else if (
@@ -537,13 +537,13 @@ if(!dateRange?.start && !dateRange?.end){
                 );
 
                 // Update the accommodation data with price information
-                data.pricePerNight = {
-                  price: calculatedPricePerNight,
-                  currency: priceData.priceList.currency || "",
-                  totalPrice: selectedOption.price,
-                  duration: 7,
-                  paxUpTo: selectedOption.paxUpTo,
-                };
+                // data.pricePerNight = {
+                //   price: calculatedPricePerNight,
+                //   currency: priceData.priceList.currency || "",
+                //   totalPrice: selectedOption.price,
+                //   duration: 7,
+                //   paxUpTo: selectedOption.paxUpTo,
+                // };
 
                 console.log("Fetched new price data:", data.pricePerNight);
               }
@@ -766,7 +766,7 @@ if(!dateRange?.start && !dateRange?.end){
       });
     }
   };
-console.log(checkInMinStay);
+console.log(accommodation , "accommodation hai ye");
 
   const petService = interhomePrice?.services?.service?.find(
     (item) => item?.code === "PET"
@@ -1149,13 +1149,15 @@ console.log(checkInMinStay);
                   </span>
                   <span className="text-xl font-semibold">
                     
-                     {( `${(
-                       (accommodation.pricePerNight?.isDiscountActivate && accommodation.pricePerNight?.discount) || accommodation?.pricePerNight?.price )}X ${
-                        getNoOfDays(dateRange?.start, dateRange?.end) || 1
-                      } = ${Math.round(
-                       (accommodation.pricePerNight?.isDiscountActivate && accommodation.pricePerNight?.discount) || accommodation?.pricePerNight?.price  *
-                          (getNoOfDays(dateRange?.start, dateRange?.end) || 1)
-                      )} ${accommodation?.pricePerNight?.currency || "CHF"}`)}
+                   {`${(
+  ((accommodation.pricePerNight?.isDiscountActivate && accommodation.pricePerNight?.discount) || accommodation?.pricePerNight?.price)
+)} x ${
+  getNoOfDays(dateRange?.start, dateRange?.end) || 1
+} = ${Math.round(
+  ((accommodation.pricePerNight?.isDiscountActivate && accommodation.pricePerNight?.discount) || accommodation?.pricePerNight?.price) *
+  (getNoOfDays(dateRange?.start, dateRange?.end) || 1)
+)} ${accommodation?.pricePerNight?.currency || "CHF"}`}
+
                     
                   </span>
                 </div>
