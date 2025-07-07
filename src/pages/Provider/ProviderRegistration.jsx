@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, Check, HelpCircle } from "lucide-react";
 import Navbar from "../../components/Shared/Navbar";
@@ -30,6 +30,9 @@ const ProviderRegistration = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
   const [profileData, setProfileData] = useState(null);
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const buttonRef = useRef(null);
+
 
   // Initialize form data
   const [formData, setFormData] = useState({
@@ -183,17 +186,30 @@ const ProviderRegistration = () => {
     handleGetStripeAccount();
   }, [accountId]);
 
+  console.log(buttonRef , "button ref");
   // Handle Stripe connection
   const handleConnectStripe = async () => {
     try {
-      const res = await connectToStripe({ email: formData.email, accountId });
-      if (res?.url) {
-        window.location.href = res.url;
-      }
-    } catch (error) {
-      console.error("Error connecting to Stripe:", error);
-      toast.error("Failed to connect to Stripe. Please try again.");
-    }
+      
+      console.log(buttonRef , "button ref inside");
+  setStripeLoading(true);
+   buttonRef.current.disabled = true;
+  const res = await connectToStripe({ email: formData.email, accountId });
+  if (res?.url) {
+    setIsRedirecting(true);
+    window.location.href = res.url;
+    return;
+  }
+} catch (error) {
+  console.error("Error connecting to Stripe:", error);
+  toast.error("Failed to connect to Stripe. Please try again.");
+} finally {
+  setStripeLoading(false);
+  buttonRef.current.disabled = true;
+  // if (buttonRef.current) {
+  //   }
+}
+
   };
 
   // Handle form input changes
@@ -890,16 +906,18 @@ const ProviderRegistration = () => {
             <p className="text-sm text-gray-500 mb-4">
               {t("banking_details_required")}
             </p>
-            { !stripeAccount && !stripeLoading && (
+            { !stripeAccount  && (
               <div className="flex justify-center">
                 <button
-                  className="bg-brand text-white py-3 px-4 rounded-lg font-medium hover:bg-brand-dark transition-color"
+                 ref={buttonRef}
+                 disabled={stripeLoading || isRedirecting}
+                  className="bg-brand text-white py-3 px-4 rounded-lg font-medium hover:bg-brand-dark transition-color disabled:cursor-not-allowed"
                   onClick={handleConnectStripe}
                 >
                   Connect to stripe
                 </button>
               </div>
-            )}
+            ) }
            {accountId  && !stripeAccount && !stripeLoading ? (
             <> 
   <p className="text-amber-500 text-center">
