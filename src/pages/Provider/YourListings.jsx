@@ -247,7 +247,7 @@ const YourListings = () => {
      setDeleteModal({ isOpen: false, listing:null })}
   
    };
-  const handleView = (id,name) => navigate(`/accommodation/${name}`, { state: { id } });
+  const handleView = (id,name) => navigate(`/accommodation/${name}?listing=${id}`, { state: { id } });
   const handleCreate = () => navigate(`/provider/create-listing`);
 console.log(deleteModal);
 
