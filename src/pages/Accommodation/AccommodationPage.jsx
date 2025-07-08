@@ -200,24 +200,36 @@ console.log(dateRange,"vacanciess");
     }
     setIsPriceLoading(true)
     let paramList = id?.split("-");
-    const defaultDate = vacancies?.day?.length > 0 ? vacancies?.day?.find((item)=>(item?.state  == "Y" && item?.allotment > 0)) : []
-console.log(defaultDate ,"default");
+   const availableDates = vacancies?.day?.filter(
+  (item) => item?.state === "Y" && item?.allotment > 0
+);
 
-    const firstDate = defaultDate?.date; 
-  
-  const secondDate = new Date(defaultDate?.date);
-  secondDate.setDate(secondDate?.getDate() + defaultDate?.minimumStay);
-  const secondDateFormatted = secondDate?.toISOString()?.split('T')[0];
+// Get the last valid date object
+const lastDateObj = availableDates?.[availableDates.length - 1];
+let startDateFormatted ;
+let endDateFormatted ;
+if (lastDateObj) {
+  const endDate = lastDateObj?.date;
+
+  const startDateObj = new Date(endDate);
+  startDateObj.setDate(startDateObj.getDate() - lastDateObj?.minimumStay);
+
+   startDateFormatted = startDateObj.toISOString().split("T")[0];
+   endDateFormatted = new Date(endDate).toISOString().split("T")[0];
+
+  console.log("Start Date:", startDateFormatted);
+  console.log("End Date:", endDateFormatted);
+}
 if(!dateRange?.start && !dateRange?.end){
 
-  setDateRange({start : new Date(firstDate) , end: new Date(secondDateFormatted)})
+  setDateRange({start : new Date(startDateFormatted) , end: new Date(endDateFormatted)})
 }
     console.log(
       dateRange,
       guests,
       paramList[paramList?.length - 1],
-      firstDate,
-      secondDateFormatted,
+      startDateFormatted,
+      endDateFormatted,
       "payload data"
     );
 
@@ -228,10 +240,10 @@ if(!dateRange?.start && !dateRange?.end){
         Adults: guests?.people,
         CheckIn: dateRange?.start
           ? moment(dateRange?.start).format("YYYY-MM-DD")
-          : firstDate,
+          : startDateFormatted,
         CheckOut: dateRange?.end
           ? moment(dateRange?.end).format("YYYY-MM-DD")
-          : secondDateFormatted,
+          : endDateFormatted,
         Language: "EN",
         Currency: "CHF",
       },
@@ -957,15 +969,18 @@ console.log(accommodation , "accommodation hai ye");
               )}
 
             {/* Cancellation Policy */}
-            {accommodation?.customRefundPolicies?.length > 0 &&
-            accommodation?.legal?.cancellationPolicy == "custom" &&
+            {(accommodation?.customRefundPolicies?.length > 0 &&
+            accommodation?.legal?.cancellationPolicy == "custom" ) || 
+            accommodation?.legal?.cancellationPolicy !== "custom" &&
             accommodation?.provider !== "Interhome" ? (
               <section className="mb-10">
                 <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
                   {t("cancellation_policy")}
                 </h2>
+{accommodation?.legal?.cancellationPolicy == "custom" ?
+(
 
-                <ul className="list-disc text-gray-600 text-sm mt-2">
+  <ul className="list-disc text-gray-600 text-sm mt-2">
                   {accommodation?.customRefundPolicies?.map((policy, index) => (
                     <ol key={index} className="flex gap-2 items-center">
                       <Dot /> Cancellations made before {policy?.days} days:{" "}
@@ -973,8 +988,11 @@ console.log(accommodation , "accommodation hai ye");
                     </ol>
                   ))}
                 </ul>
+                ) : (
+                  <p>{accommodation?.legal?.cancellationPolicy }</p>
+                )}
 
-                {accommodation?.legal?.termsAndConditions && (
+                {accommodation?.legal?.termsAndConditions && accommodation?.provider == "Interhome"  && (
                   <div className="mt-4">
                     <h3 className="text-[#4D484D] text-base font-medium mb-2">
                       {t("terms_and_conditions")}

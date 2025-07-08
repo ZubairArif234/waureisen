@@ -1259,9 +1259,9 @@ const isoCheckOut = convertToISOString(checkOutDate, formData.availability.check
     }else if (activeTab === "photos") {
 
       if (!formData?.mainImage) validationErrors.push("Main image is required");
-      // if (!formData?.galleryImages || formData?.galleryImages.length < 4) {
-      //   validationErrors.push("At least 4 gallery images are required");
-      // }
+      if (!formData?.galleryImages || formData?.galleryImages.length < 5) {
+        validationErrors.push("At least 5 gallery images are required");
+      }
 
     }else if( activeTab === "description") {
        if ( !formData?.shortDescription) validationErrors.push("Description is required");
