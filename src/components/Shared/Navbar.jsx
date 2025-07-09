@@ -299,13 +299,13 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-4 lg:space-x-8 lg:ml-[410px] md:ml-auto">
             <Link
               to="/camper-rental"
-              className="text-gray-700 hover:text-gray-100 text-sm font-medium whitespace-nowrap"
+              className={`${location?.pathname == "/camper-rental" && "!text-brand"} text-gray-700 hover:text-gray-100 text-sm font-medium whitespace-nowrap`}
             >
               {t("camper_rental")}
             </Link>
             <Link
               to="/travelshop"
-              className="text-gray-700 hover:text-gray-100 text-sm font-medium whitespace-nowrap"
+              className={`${location?.pathname == "/travelshop" && "!text-brand"} text-gray-700 hover:text-gray-100 text-sm font-medium whitespace-nowrap`}
             >
               {t("Travelshop")}
             </Link>
@@ -327,7 +327,7 @@ const Navbar = () => {
                   navigate("/host");
                 }
               }}
-              className="text-gray-700 hover:text-gray-100 text-sm font-medium whitespace-nowrap"
+              className={`${location?.pathname == "/host" && "!text-brand"} text-gray-700 hover:text-gray-100 text-sm font-medium whitespace-nowrap`}
             >
               {t("register_accommodation")}
             </Link>

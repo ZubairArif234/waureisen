@@ -151,7 +151,7 @@ const AccommodationPage = () => {
   useEffect(() => {
     changeMetaData(`${id?.replace(/-/g, " ")} - Waureisen`);
   }, []);
-  
+  const userType = window.localStorage.getItem("userType")
   const [isPriceLoading, setIsPriceLoading] = useState(false);
   const [isOurDatePickerOpen, setIsOurDatePickerOpen] = useState(false);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -1308,22 +1308,26 @@ console.log(accommodation , "accommodation hai ye");
                   </div>
                 </div>
               )}
-
+              {
+                userType != "provider" &&  userType != "admin" &&
+<>
 <div className="bg-amber-100 border border-amber-200 rounded-md p-1 mb-2 text-justify">
   <p className="text-xs text-amber-700">{t("check_dates")} {checkInMinStay?.minimumStay} {t("nights")}.</p>
 </div>
 
               {/* Reserve Button */}
               <button
-                className="w-full bg-brand text-white py-3 rounded-lg font-medium hover:bg-brand-dark transition-colors"
-                onClick={() => {
-                  handleReserved();
-                  // Handle reservation logic here
-                  // alert('Booking functionality will be implemented soon!');
-                }}
+              className="w-full bg-brand text-white py-3 rounded-lg font-medium hover:bg-brand-dark transition-colors"
+              onClick={() => {
+                handleReserved();
+                // Handle reservation logic here
+                // alert('Booking functionality will be implemented soon!');
+              }}
               >
                 {t("reserve")}
               </button>
+              </>
+              }
             </div>
           </div>
         </div>
