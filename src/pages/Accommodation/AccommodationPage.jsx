@@ -146,6 +146,7 @@ const Amenity = ({ icon, text }) => (
 const AccommodationPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+   const searchParams = new URLSearchParams(location.search);
   const { id } = useParams(); // Get the accommodation ID from URL
   useEffect(() => {
     changeMetaData(`${id?.replace(/-/g, " ")} - Waureisen`);
@@ -161,6 +162,7 @@ const AccommodationPage = () => {
    const [vacancies, setVacancies] = useState([]); // Add state for available dates
   const { t } = useLanguage();
   const [dateRange, setDateRange] = useState({ start: null, end: null });
+  const [checkInMinStay, setCheckInMinStay] = useState(null );
   const [guests, setGuests] = useState({
     people: 1,
     dogs: 1,
@@ -198,24 +200,36 @@ console.log(dateRange,"vacanciess");
     }
     setIsPriceLoading(true)
     let paramList = id?.split("-");
-    const defaultDate = vacancies?.day?.length > 0 ? vacancies?.day?.find((item)=>(item?.state  == "Y" && item?.allotment > 0)) : []
-console.log(defaultDate ,"default");
+   const availableDates = vacancies?.day?.filter(
+  (item) => item?.state === "Y" && item?.allotment > 0
+);
 
-    const firstDate = defaultDate?.date; 
-  
-  const secondDate = new Date(defaultDate?.date);
-  secondDate.setDate(secondDate?.getDate() + defaultDate?.minimumStay);
-  const secondDateFormatted = secondDate?.toISOString()?.split('T')[0];
+// Get the last valid date object
+const lastDateObj = availableDates?.[availableDates.length - 1];
+let startDateFormatted ;
+let endDateFormatted ;
+if (lastDateObj) {
+  const endDate = lastDateObj?.date;
+
+  const startDateObj = new Date(endDate);
+  startDateObj.setDate(startDateObj.getDate() - lastDateObj?.minimumStay);
+
+   startDateFormatted = startDateObj.toISOString().split("T")[0];
+   endDateFormatted = new Date(endDate).toISOString().split("T")[0];
+
+  console.log("Start Date:", startDateFormatted);
+  console.log("End Date:", endDateFormatted);
+}
 if(!dateRange?.start && !dateRange?.end){
 
-  setDateRange({start : new Date(firstDate) , end: new Date(secondDateFormatted)})
+  setDateRange({start : new Date(startDateFormatted) , end: new Date(endDateFormatted)})
 }
     console.log(
       dateRange,
       guests,
       paramList[paramList?.length - 1],
-      firstDate,
-      secondDateFormatted,
+      startDateFormatted,
+      endDateFormatted,
       "payload data"
     );
 
@@ -226,10 +240,10 @@ if(!dateRange?.start && !dateRange?.end){
         Adults: guests?.people,
         CheckIn: dateRange?.start
           ? moment(dateRange?.start).format("YYYY-MM-DD")
-          : firstDate,
+          : startDateFormatted,
         CheckOut: dateRange?.end
           ? moment(dateRange?.end).format("YYYY-MM-DD")
-          : secondDateFormatted,
+          : endDateFormatted,
         Language: "EN",
         Currency: "CHF",
       },
@@ -264,10 +278,10 @@ if(!dateRange?.start && !dateRange?.end){
 
     return dates;
   };
-  console.log(bookedDates, "state dates");
+  console.log(location, "state dates");
 
   const handleGetBooking = async () => {
-    const res = await getBookingByListing(location.state?.id);
+    const res = await getBookingByListing(searchParams.get("listing") || location.state?.id);
 
     res.map((item) => {
       const result = getAllDates(item?.checkInDate, item?.checkOutDate);
@@ -281,7 +295,7 @@ if(!dateRange?.start && !dateRange?.end){
     });
   };
   const handleGetListingAvailable = async () => {
-    const res = await getListingUnavailableDates(location.state?.id);
+    const res = await getListingUnavailableDates(searchParams.get("listing") || location.state?.id);
     console.log(res, "listing unavailable dates");
     res?.data?.map((item) => {
       const result = moment(item?.date).format("YYYY-MM-DD");
@@ -362,13 +376,13 @@ if(!dateRange?.start && !dateRange?.end){
 
           setAccommodation((prev) => ({
             ...prev,
-            pricePerNight: {
-              price: calculatedPricePerNight,
-              currency: priceData.priceList.currency || "",
-              totalPrice: selectedOption.price,
-              duration: 7,
-              paxUpTo: selectedOption.paxUpTo,
-            },
+            // pricePerNight: {
+            //   price: calculatedPricePerNight,
+            //   currency: priceData.priceList.currency || "",
+            //   totalPrice: selectedOption.price,
+            //   duration: 7,
+            //   paxUpTo: selectedOption.paxUpTo,
+            // },
           }));
         }
       }
@@ -404,14 +418,14 @@ if(!dateRange?.start && !dateRange?.end){
         const dateFromSearch = searchState.checkInDate || searchDateParam;
 
         console.log("Search state:", searchState);
-        console.log("Date from search:", dateFromSearch);
+        console.log("Date from search:", dateFromSearch ,location?.state?.checkOutDate);
 
-        const data = await getListingById(location.state?.id);
+        const data = await getListingById(searchParams.get("listing") || location.state?.id);
 
         // If we have price data from search results, use it
         if (priceFromSearch) {
           console.log("Using price data from search results:", priceFromSearch);
-          data.pricePerNight = priceFromSearch;
+          // data.pricePerNight = priceFromSearch;
         }
         // Otherwise, fetch price data if needed
 
@@ -419,7 +433,7 @@ if(!dateRange?.start && !dateRange?.end){
         const token = localStorage.getItem("token");
         if (token && id) {
           try {
-            await API.post(`/users/recently-viewed/${location.state?.id}`);
+            await API.post(`/users/recently-viewed/${searchParams.get("listing") || location.state?.id}`);
             console.log("Added to recently viewed:", location.state?.id);
           } catch (err) {
             console.error("Error adding to recently viewed:", err);
@@ -438,6 +452,12 @@ if(!dateRange?.start && !dateRange?.end){
             // console.log(vacanciesDate , "vacanciesDate");
             if (vacanciesDate && vacanciesDate.calendar) {
               setVacancies(vacanciesDate.calendar);
+              console.log(vacanciesDate?.calendar?.day , location?.state?.checkOutDate);
+              
+              const checkInDateMinStay = vacanciesDate?.calendar?.day?.find((item)=>{
+                return item?.date == location?.state?.checkOutDate
+              })
+              setCheckInMinStay(checkInDateMinStay)
             }
             // ---------> new vacancies code end <----------
 
@@ -453,12 +473,12 @@ if(!dateRange?.start && !dateRange?.end){
                     (date) => date.paxUpTo || 0
                   )
                 );
-                if (maxPaxUpTo > 0) {
+                // if (maxPaxUpTo > 0) {
                   //console.log(`Setting maximum guests to ${maxPaxUpTo} based on availability data`);
-                  setMaxGuests(maxPaxUpTo);
+                  // setMaxGuests(maxPaxUpTo);
                   // Also set it on the accommodation object for reference
-                  data.maxGuests = maxPaxUpTo;
-                }
+                  // data.maxGuests = maxPaxUpTo;
+                // }
               }
             }
           } catch (availabilityError) {
@@ -473,7 +493,7 @@ if(!dateRange?.start && !dateRange?.end){
         // If we have price data from search results, use it
         if (priceFromSearch) {
           console.log("Using price data from search results:", priceFromSearch);
-          data.pricePerNight = priceFromSearch;
+          // data.pricePerNight = priceFromSearch;
         }
         // Otherwise, fetch price data if needed
         else if (
@@ -529,13 +549,13 @@ if(!dateRange?.start && !dateRange?.end){
                 );
 
                 // Update the accommodation data with price information
-                data.pricePerNight = {
-                  price: calculatedPricePerNight,
-                  currency: priceData.priceList.currency || "",
-                  totalPrice: selectedOption.price,
-                  duration: 7,
-                  paxUpTo: selectedOption.paxUpTo,
-                };
+                // data.pricePerNight = {
+                //   price: calculatedPricePerNight,
+                //   currency: priceData.priceList.currency || "",
+                //   totalPrice: selectedOption.price,
+                //   duration: 7,
+                //   paxUpTo: selectedOption.paxUpTo,
+                // };
 
                 console.log("Fetched new price data:", data.pricePerNight);
               }
@@ -554,8 +574,8 @@ if(!dateRange?.start && !dateRange?.end){
         // Update date range if we have a date from search
         if (dateFromSearch) {
           const startDate = new Date(dateFromSearch);
-          const endDate = new Date(startDate);
-          endDate.setDate(endDate.getDate() + 7); // Default to 7-day stay
+          const endDate = new Date(location?.state?.checkOutDate);
+          // endDate.setDate(endDate); // Default to 7-day stay
 
           setDateRange({
             start: startDate,
@@ -570,7 +590,7 @@ if(!dateRange?.start && !dateRange?.end){
       }
     };
 
-    if (location.state?.id) {
+    if (searchParams.get("listing") || location.state?.id) {
       fetchAccommodation();
     }
   }, [location.state?.id]);
@@ -580,7 +600,7 @@ if(!dateRange?.start && !dateRange?.end){
     {
       icon: Users,
       text: t("people"),
-      value: t("upto") + accommodation?.maxGuests?.toString() || "6 ", // Default
+      value: t("upto") + accommodation?.maxGuests || "2", // Default
     },
     {
       icon: Dog,
@@ -758,6 +778,7 @@ if(!dateRange?.start && !dateRange?.end){
       });
     }
   };
+console.log(accommodation , "accommodation hai ye");
 
   const petService = interhomePrice?.services?.service?.find(
     (item) => item?.code === "PET"
@@ -869,7 +890,7 @@ if(!dateRange?.start && !dateRange?.end){
                 />
               </div>
             </section>
-            {accommodation?.provider && (
+            {accommodation?.provider !== "Interhome" && (
               <div className="mb-10">
                 <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
                   {t("timing")}
@@ -948,15 +969,18 @@ if(!dateRange?.start && !dateRange?.end){
               )}
 
             {/* Cancellation Policy */}
-            {accommodation?.customRefundPolicies?.length > 0 &&
-            accommodation?.legal?.cancellationPolicy == "custom" &&
+            {(accommodation?.customRefundPolicies?.length > 0 &&
+            accommodation?.legal?.cancellationPolicy == "custom" ) || 
+            accommodation?.legal?.cancellationPolicy !== "custom" &&
             accommodation?.provider !== "Interhome" ? (
               <section className="mb-10">
                 <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4">
                   {t("cancellation_policy")}
                 </h2>
+{accommodation?.legal?.cancellationPolicy == "custom" ?
+(
 
-                <ul className="list-disc text-gray-600 text-sm mt-2">
+  <ul className="list-disc text-gray-600 text-sm mt-2">
                   {accommodation?.customRefundPolicies?.map((policy, index) => (
                     <ol key={index} className="flex gap-2 items-center">
                       <Dot /> Cancellations made before {policy?.days} days:{" "}
@@ -964,8 +988,11 @@ if(!dateRange?.start && !dateRange?.end){
                     </ol>
                   ))}
                 </ul>
+                ) : (
+                  <p>{accommodation?.legal?.cancellationPolicy }</p>
+                )}
 
-                {accommodation?.legal?.termsAndConditions && (
+                {accommodation?.legal?.termsAndConditions && accommodation?.provider == "Interhome"  && (
                   <div className="mt-4">
                     <h3 className="text-[#4D484D] text-base font-medium mb-2">
                       {t("terms_and_conditions")}
@@ -1140,13 +1167,15 @@ if(!dateRange?.start && !dateRange?.end){
                   </span>
                   <span className="text-xl font-semibold">
                     
-                     {( `${(
-                       (accommodation.pricePerNight?.isDiscountActivate && accommodation.pricePerNight?.discount) || accommodation?.pricePerNight?.price )}X ${
-                        getNoOfDays(dateRange?.start, dateRange?.end) || 1
-                      } = ${Math.round(
-                       (accommodation.pricePerNight?.isDiscountActivate && accommodation.pricePerNight?.discount) || accommodation?.pricePerNight?.price  *
-                          (getNoOfDays(dateRange?.start, dateRange?.end) || 1)
-                      )} ${accommodation?.pricePerNight?.currency || "CHF"}`)}
+                   {`${(
+  ((accommodation.pricePerNight?.isDiscountActivate && accommodation.pricePerNight?.discount) || accommodation?.pricePerNight?.price)
+)} x ${
+  getNoOfDays(dateRange?.start, dateRange?.end) || 1
+} = ${Math.round(
+  ((accommodation.pricePerNight?.isDiscountActivate && accommodation.pricePerNight?.discount) || accommodation?.pricePerNight?.price) *
+  (getNoOfDays(dateRange?.start, dateRange?.end) || 1)
+)} ${accommodation?.pricePerNight?.currency || "CHF"}`}
+
                     
                   </span>
                 </div>
@@ -1279,6 +1308,10 @@ if(!dateRange?.start && !dateRange?.end){
                   </div>
                 </div>
               )}
+
+<div className="bg-amber-100 border border-amber-200 rounded-md p-1 mb-2 text-justify">
+  <p className="text-xs text-amber-700">{t("check_dates")} {checkInMinStay?.minimumStay} {t("nights")}.</p>
+</div>
 
               {/* Reserve Button */}
               <button

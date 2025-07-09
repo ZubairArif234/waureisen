@@ -514,7 +514,7 @@ const BlockDateModal = ({unavailableDates,selectedBooking,selectedListingForBloc
                 className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                 required
               >
-                <option value="" disabled>{t('select_property')}</option>
+                <option value=" ">{t('select_property')}</option>
                 {listings.map(listing => (
                   <option key={listing.id || listing._id} value={listing.id || listing._id}>{listing.title}</option>
                 ))}

@@ -482,7 +482,7 @@ const ProviderRow = ({ provider, onAction }) => {
         {provider.email}
       </td>
       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600 text-center">
-        {provider.listings?.length || 0}
+        {provider.myListing || 0}
       </td>
       <td className="px-4 py-4 whitespace-nowrap">
         <span
