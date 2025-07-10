@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { useLanguage } from '../../utils/LanguageContext';
+import { Link } from 'react-router-dom';
 
 const AccordionItem = ({ question, answer, isOpen, onClick }) => {
   return (
@@ -38,7 +39,7 @@ const FAQContent = () => {
     },
     {
       question: t('faq2_question'),
-      answer: t('faq2_answer')
+      answer: t('faq2_answer') 
     },
     {
       question: t('faq3_question'),
@@ -87,7 +88,21 @@ const FAQContent = () => {
             <AccordionItem
               key={index}
               question={item.question}
-              answer={item.answer}
+              answer={
+  index === 1 ? (
+    <>
+      {item.answer}{" "}
+      <div>
+
+      <Link target="_blank" to="https://be.erv.ch/?agency=WAUREISEN_01&lang=de" className='text-brand text-sm'>
+        https://be.erv.ch/?agency=WAUREISEN_01&lang=de
+      </Link>
+      </div>
+    </>
+  ) : (
+    item.answer
+  )
+}
               isOpen={openIndex === index}
               onClick={() => setOpenIndex(openIndex === index ? null : index)}
             />

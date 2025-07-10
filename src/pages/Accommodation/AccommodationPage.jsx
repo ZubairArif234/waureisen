@@ -1312,7 +1312,7 @@ console.log(accommodation , "accommodation hai ye");
                 userType != "provider" &&  userType != "admin" &&
 <>
 <div className="bg-amber-100 border border-amber-200 rounded-md p-1 mb-2 text-justify">
-  <p className="text-xs text-amber-700">{t("check_dates")} {checkInMinStay?.minimumStay} {t("nights")}.</p>
+  <p className="text-xs text-amber-700">{t("check_dates")} {checkInMinStay?.minimumStay} {t("nights_eng")}.</p>
 </div>
 
               {/* Reserve Button */}
