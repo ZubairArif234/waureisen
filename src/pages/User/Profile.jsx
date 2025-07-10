@@ -77,7 +77,7 @@ const Profile = () => {
           isProvider: userData?.isProvider || false, // Now mapping from the backend
           profilePicture: null,
           customerNumber: userData?.customerNumber ,
-          subscribeNewsletter: userData?.newsletter === 'on',
+          subscribeNewsletter: userData?.newsletter ,
           dogs: userData?.dogs?.map((dog) => ({
             id: Math.random().toString(36).substr(2, 9), // Generate a unique ID for frontend
             name: dog?.name ,
@@ -239,7 +239,7 @@ const Profile = () => {
         nationality: profileData.nationality,
         gender: profileData.gender,
         isProvider: profileData.isProvider,
-        newsletter: profileData.subscribeNewsletter ? 'on' : 'off',
+        newsletter: profileData.subscribeNewsletter ,
         paymentMethod: {
           streetNumber: profileData.streetNumber,
           cardNumber: "N/A",

@@ -1,5 +1,6 @@
 const translations = {
   en: {
+    nights_eng:"nights",
     check_dates:"Please check the checkin and checkout dates before reserving. The current checkin date should have min stay of",
     cannot_select:"Cannot select this date range. Date",
     not_available:"is not available",
@@ -1396,6 +1397,7 @@ const translations = {
   },
 
   de: {
+   nights_eng:"",
      check_dates:"Bitte überprüfen Sie vor der Reservierung die Check-in- und Check-out-Daten. Das gewählte Check-in-Datum muss die Mindestanzahl an Übernachtungen erfüllen.",
     cannot_select:"Dieser Datumsbereich kann nicht ausgewählt werden. Datum",
     not_available:"ist nicht verfügbar",

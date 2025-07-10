@@ -16,7 +16,7 @@ const FeatureCard = ({ icon: IconSrc, title, description }) => {
           className="w-9 h-9 text-brand"
         />
       </div>
-      <h3 className="text-xl font-semibold mb-3 text-gray-900 text-center">{title}</h3> {/* Added text-center */}
+      <h3 className="text-lg font-semibold mb-3 text-gray-900 text-center">{title}</h3> {/* Added text-center */}
       <p className="text-gray-600 leading-relaxed text-center">{description}</p> {/* Added text-center */}
     </div>
   );
