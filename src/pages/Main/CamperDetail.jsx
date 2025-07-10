@@ -37,48 +37,91 @@ const CamperDetail = () => {
     }
   }, [title]);
 
-  // Render content based on type
-  const renderContent = (content) => {
-    if (!content || !Array.isArray(content)) return null;
+const renderContent = (content) => {
+  if (!content || !Array.isArray(content)) return null;
 
-    return content.map((item, index) => {
+  const elements = [];
+  let imageGroup = [];
+
+  content.forEach((item, index) => {
+    const isLastItem = index === content.length - 1;
+
+    if (item.type === 'img') {
+      imageGroup.push(item);
+
+      if (!isLastItem) return; // wait for next item to decide
+
+    }
+
+    // Render accumulated images if next item is not image or it's the last one
+    if (imageGroup.length) {
+      if (imageGroup.length === 1) {
+        elements.push(
+          <div key={`img-${index}`} className="my-4 mx-[8rem]">
+            <img src={imageGroup[0].url} className="w-full h-[40vh]" alt="" />
+          </div>
+        );
+      } else {
+        elements.push(
+          <div key={`img-group-${index}`} className="my-6 grid grid-cols-1 sm:grid-cols-3 gap-4 ">
+            {imageGroup.map((imgItem, imgIndex) => (
+              <img
+                key={`img-${index}-${imgIndex}`}
+                src={imgItem.url}
+                className="w-full h-[40vh] object-cover"
+                alt=""
+              />
+            ))}
+          </div>
+        );
+      }
+      imageGroup = []; // reset
+    }
+
+    // Render non-image item
+    if (item.type !== 'img') {
       switch (item.type) {
         case 'h1':
-          return <h1 key={index} className="text-3xl font-bold my-4 text-gray-900">{item.text}</h1>;
+          elements.push(<h1 key={index} className="text-3xl font-bold my-4 text-gray-900">{item.text}</h1>);
+          break;
         case 'h2':
-          return <h2 key={index} className="text-2xl font-semibold my-3 text-gray-800">{item.text}</h2>;
+          elements.push(<h2 key={index} className="text-2xl font-semibold my-3 text-gray-800">{item.text}</h2>);
+          break;
         case 'p':
-          return <p key={index} className="my-3 text-gray-600">{item.text}</p>;
+          elements.push(<p key={index} className="my-3 text-gray-600">{item.text}</p>);
+          break;
         case 'link':
-          return (
+          elements.push(
             <p key={index} className="my-2">
-              <a href={item.url} className="text-[#B4A481] hover:underline" target="_blank" rel="noopener noreferrer">{item.text}</a>
+              <a href={item.url} className="text-[#B4A481] hover:underline" target="_blank" rel="noopener noreferrer">
+                {item.text}
+              </a>
             </p>
           );
+          break;
         case 'cta':
-          return (
+          elements.push(
             <p key={index} className="my-4">
-              <a 
-                href={item.url} 
+              <a
+                href={item.url}
                 className="inline-block bg-[#B4A481] text-white px-6 py-2 rounded-lg hover:bg-[#a3927b] transition-colors"
-                target="_blank" 
+                target="_blank"
                 rel="noopener noreferrer"
               >
                 {item.text}
               </a>
             </p>
           );
-        case 'img':
-          return (
-            <div key={index} className={`my-4 flex justify-center mx-[8rem]`}>
-             <img src={item?.url}  className='w-full h-[40vh]'/>
-            </div>
-          );
+          break;
         default:
-          return null;
+          break;
       }
-    });
-  };
+    }
+  });
+
+  return elements;
+};
+
 
   return (
     <div className="min-h-screen bg-white">
