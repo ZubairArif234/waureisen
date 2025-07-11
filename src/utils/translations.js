@@ -225,7 +225,7 @@ const translations = {
     // Hero
     holiday_with_dog: "Holiday with Dog",
     find_suitable_accommodation: "Find the suitable accommodation",
-    where: "Where",
+    where: "Where , Code (CH8905.9806)",
     when: "When",
     person: "person",
     people: "people",
@@ -1895,7 +1895,7 @@ const translations = {
     // Hero
     holiday_with_dog: "Urlaub mit Hund",
     find_suitable_accommodation: "Finden Sie die passende Unterkunft",
-    where: "Wo",
+    where: "Wo , Code (CH8905.9806)",
     when: "Wann",
     person: "Person",
     people: "Personen",
