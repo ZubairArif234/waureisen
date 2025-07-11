@@ -37,7 +37,7 @@ const OptimizedMapWithClustering = () => {
     isDraggingMap,
     setMapDragging
   } = useListings();
-  
+  console.log(listings)
   // Helper function to determine if a listing has valid coordinates
   const hasValidCoordinates = useCallback((listing) => {
     if (!listing || !listing.location || !listing.location.coordinates) {
@@ -267,8 +267,8 @@ const OptimizedMapWithClustering = () => {
       // CRITICAL FIX: Always prioritize the search params coordinates
       // Make sure we use parseFloat for all coordinates
       const center = {
-        lat: searchParams && searchParams.lat ? parseFloat(searchParams.lat) : 46.818188,
-        lng: searchParams && searchParams.lng ? parseFloat(searchParams.lng) : 8.227512
+        lat: searchParams && searchParams.lat ? parseFloat(searchParams.lat) : listings[0]?.location?.coordinates[1],
+        lng: searchParams && searchParams.lng ? parseFloat(searchParams.lng) : listings[0]?.location?.coordinates[0]
       };
       
       console.log("Initializing map with center:", center);
