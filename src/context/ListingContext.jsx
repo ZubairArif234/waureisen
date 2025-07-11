@@ -27,6 +27,7 @@ const initialState = {
     lat: null,
     lng: null,
     radius: 150,
+    code:"",
     locationName: '',
     filters: {
       dateRange: { start: null, end: null },
@@ -405,140 +406,150 @@ export function ListingProvider({ children }) {
     return `${year}-${month}-${day}`;
   }, []);
   
-  // Fetch listings for a specific page
-  const fetchListingsPage = useCallback(async (page = 1) => {
-    const { lat, lng, radius, filters, priceRange, searchFilters } = state.searchParams;
+ // Fetch listings for a specific page
+const fetchListingsPage = useCallback(async (page = 1) => {
+  const { lat, lng, radius, filters, priceRange, searchFilters, code } = state.searchParams;
+  
+  // Allow API call if we have either location (lat/lng) OR code
+  if (!code && (!lat || !lng)) {
+    console.log('No search parameters provided - need either location or code');
+    return [];
+  }
+  
+  try {
+    dispatch({ type: Actions.FETCH_LISTINGS_START });
     
-    // Skip if lat/lng not set
-    if (!lat || !lng) return [];
+    // Log the filters being sent
+    console.log('Sending search filters to API:', { code, lat, lng });
     
-    try {
-      dispatch({ type: Actions.FETCH_LISTINGS_START });
-      
-      // Log the filters being sent
-      console.log('Sending search filters to API:', searchFilters);
-      
-      // Pass filters to the backend
-      const result = await getStreamedListings({
-        limit: state.itemsPerPage,
-        skip: (page - 1) * state.itemsPerPage,
-        page: page,
-        lat,
-        lng,
-        radius,
-        filters: JSON.stringify(filters),
-        priceMin: priceRange?.min,
-        priceMax: priceRange?.max,
-        searchFilters // Pass the search filters from state
-      });
-      
-      // Update total accommodations count if available
-      if (result.total !== undefined) {
-        dispatch({ 
-          type: Actions.SET_TOTAL_ACCOMMODATIONS, 
-          payload: result.total 
-        });
-      }
-      
-      // Update total pages if available
-      if (result.totalPages) {
-        dispatch({
-          type: Actions.SET_TOTAL_PAGES,
-          payload: result.totalPages
-        });
-      }
-      
-      // Ensure we have valid listings
-      if (!result.listings || !Array.isArray(result.listings)) {
-        console.error('Invalid listings data received:', result);
-        dispatch({ 
-          type: Actions.FETCH_LISTINGS_ERROR, 
-          payload: 'Invalid listings data received from server' 
-        });
-        return [];
-      }
-      
-      // The backend should now handle Interhome price data,
-      // but we'll check if there's any need for client-side processing
-      const listings = result.listings;
-      
-      // Use first date from filters if available for price calculations
-      const checkInDate = filters.dateRange?.start 
-        ? formatDate(filters.dateRange.start) 
-        : null;
-      
-      // Only run client-side processing if necessary 
-      // (if any Interhome listings are missing price data)
-      let processedListings = listings;
-      const needPriceProcessing = checkInDate && listings.some(listing => 
-        listing.provider === 'Interhome' && 
-        listing.Code && 
-        (!listing.interhomePriceData || !listing.pricePerNight)
-      );
-      
-      if (needPriceProcessing) {
-        console.log('Running client-side price processing for Interhome listings');
-        processedListings = await Promise.all(
-          listings.map(listing => processInterhomePricing(listing, checkInDate))
-        );
-      }
-      
-      // Filter out any null results
-      const validListings = processedListings.filter(listing => listing !== null);
-      
+    // Pass filters to the backend
+    const result = await getStreamedListings({
+      limit: state.itemsPerPage,
+      skip: (page - 1) * state.itemsPerPage,
+      page: page,
+      lat,
+      lng,
+      code,
+      radius,
+      filters: JSON.stringify(filters),
+      priceMin: priceRange?.min,
+      priceMax: priceRange?.max,
+      searchFilters // Pass the search filters from state
+    });
+    
+    // Update total accommodations count if available
+    if (result.total !== undefined) {
       dispatch({ 
-        type: Actions.FETCH_LISTINGS_SUCCESS, 
-        payload: {
-          listings: validListings,
-          hasMore: result.hasMore,
-          totalPages: result.totalPages || Math.ceil(result.total / state.itemsPerPage) || 1,
-          replace: true // Flag to replace listings instead of appending
-        }
+        type: Actions.SET_TOTAL_ACCOMMODATIONS, 
+        payload: result.total 
       });
-      
-      return validListings;
-    } catch (error) {
-      console.error(`Error fetching listings for page ${page}:`, error);
+    }
+    
+    // Update total pages if available
+    if (result.totalPages) {
+      dispatch({
+        type: Actions.SET_TOTAL_PAGES,
+        payload: result.totalPages
+      });
+    }
+    
+    // Ensure we have valid listings
+    if (!result.listings || !Array.isArray(result.listings)) {
+      console.error('Invalid listings data received:', result);
       dispatch({ 
         type: Actions.FETCH_LISTINGS_ERROR, 
-        payload: error.message 
+        payload: 'Invalid listings data received from server' 
       });
       return [];
     }
-  }, [
-    state.searchParams,
-    state.itemsPerPage,
-    formatDate,
-    processInterhomePricing,
-    getStreamedListings,
-    dispatch
-  ]);
-  
-  // Fetch initial batch of listings
-  const fetchInitialListings = useCallback(async () => {
-    // Reset to page 1
-    dispatch({ type: Actions.SET_CURRENT_PAGE, payload: 1 });
     
-    // Use the new fetchListingsPage method
-    return fetchListingsPage(1);
-  }, [fetchListingsPage]);
-  
-  // Legacy fetch more listings (for infinite scroll, can be removed when pagination is fully implemented)
-  const fetchMoreListings = useCallback(async () => {
-    // Skip if already loading or no more listings or dragging the map
-    if (state.isLoading || !state.hasMore || state.isDraggingMap) return [];
+    // The backend should now handle Interhome price data,
+    // but we'll check if there's any need for client-side processing
+    const listings = result.listings;
     
-    const nextPage = state.currentPage + 1;
-    setCurrentPage(nextPage);
-    return fetchListingsPage(nextPage);
-  }, [
-    state.isLoading,
-    state.hasMore,
-    state.isDraggingMap,
-    state.currentPage,
-    setCurrentPage,
-    fetchListingsPage
-  ]);
+    // Use first date from filters if available for price calculations
+    const checkInDate = filters.dateRange?.start 
+      ? formatDate(filters.dateRange.start) 
+      : null;
+    
+    // Only run client-side processing if necessary 
+    // (if any Interhome listings are missing price data)
+    let processedListings = listings;
+    const needPriceProcessing = checkInDate && listings.some(listing => 
+      listing.provider === 'Interhome' && 
+      listing.Code && 
+      (!listing.interhomePriceData || !listing.pricePerNight)
+    );
+    
+    if (needPriceProcessing) {
+      console.log('Running client-side price processing for Interhome listings');
+      processedListings = await Promise.all(
+        listings.map(listing => processInterhomePricing(listing, checkInDate))
+      );
+    }
+    
+    // Filter out any null results
+    const validListings = processedListings.filter(listing => listing !== null);
+    
+    dispatch({ 
+      type: Actions.FETCH_LISTINGS_SUCCESS, 
+      payload: {
+        listings: validListings,
+        hasMore: result.hasMore,
+        totalPages: result.totalPages || Math.ceil(result.total / state.itemsPerPage) || 1,
+        replace: true // Flag to replace listings instead of appending
+      }
+    });
+    
+    return validListings;
+  } catch (error) {
+    console.error(`Error fetching listings for page ${page}:`, error);
+    dispatch({ 
+      type: Actions.FETCH_LISTINGS_ERROR, 
+      payload: error.message 
+    });
+    return [];
+  }
+}, [
+  state.searchParams,
+  state.itemsPerPage,
+  formatDate,
+  processInterhomePricing,
+  getStreamedListings,
+  dispatch
+]);
+
+// Fetch initial batch of listings
+const fetchInitialListings = useCallback(async () => {
+  // Reset to page 1
+  dispatch({ type: Actions.SET_CURRENT_PAGE, payload: 1 });
+  
+  // Use the new fetchListingsPage method
+  return fetchListingsPage(1);
+}, [fetchListingsPage, dispatch]);
+
+// Legacy fetch more listings (for infinite scroll, can be removed when pagination is fully implemented)
+const fetchMoreListings = useCallback(async () => {
+  // Skip if already loading or no more listings or dragging the map
+  if (state.isLoading || !state.hasMore || state.isDraggingMap) return [];
+  
+  const nextPage = state.currentPage + 1;
+  
+  // Update current page in state
+  dispatch({ type: Actions.SET_CURRENT_PAGE, payload: nextPage });
+  
+  // Fetch the next page
+  const result = await fetchListingsPage(nextPage);
+  
+  return result;
+}, [
+  state.isLoading,
+  state.hasMore,
+  state.isDraggingMap,
+  state.currentPage,
+  fetchListingsPage,
+  dispatch
+]);
   
   // Fetch a single listing by ID
   const fetchSingleListing = useCallback(async (id) => {
@@ -668,37 +679,39 @@ export function ListingProvider({ children }) {
   ]);
   
   // FIXED: Handle initial user location setting
-  useEffect(() => {
-    // When user provides lat/lng coordinates, update map center first
-    if (state.searchParams.lat && state.searchParams.lng && !hasInitializedFromUserLocationRef.current) {
-      console.log('Setting map center from user location:', state.searchParams.lat, state.searchParams.lng);
-      setMapCenterFromUserLocation(state.searchParams.lat, state.searchParams.lng);
-    }
-  }, [state.searchParams.lat, state.searchParams.lng, setMapCenterFromUserLocation]);
+useEffect(() => {
+  // When user provides lat/lng coordinates, update map center first
+  if (state.searchParams.lat && state.searchParams.lng && !hasInitializedFromUserLocationRef.current) {
+    console.log('Setting map center from user location:', state.searchParams.lat, state.searchParams.lng);
+    setMapCenterFromUserLocation(state.searchParams.lat, state.searchParams.lng);
+  }
+}, [state.searchParams.lat, state.searchParams.lng, setMapCenterFromUserLocation]);
   
   // Handle fetching when search params change
-  useEffect(() => {
-    if (state.searchParams.lat && state.searchParams.lng) {
-      console.log('Search params changed, resetting and fetching listings');
-      resetListings();
-      
-      // Use a small timeout to ensure the reset has completed in the state
-      const timer = setTimeout(() => {
-        fetchInitialListings();
-      }, 10);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [
-    state.searchParams.lat, 
-    state.searchParams.lng, 
-    state.searchParams.radius,
-    // Use JSON.stringify for objects to properly detect changes
-    JSON.stringify(state.searchParams.filters),
-    JSON.stringify(state.searchParams.priceRange),
-    resetListings,
-    fetchInitialListings
-  ]);
+ useEffect(() => {
+  // Allow search if we have either location OR code
+  if ((state.searchParams.lat && state.searchParams.lng) || state.searchParams.code) {
+    console.log('Search params changed, resetting and fetching listings');
+    resetListings();
+    
+    // Use a small timeout to ensure the reset has completed in the state
+    const timer = setTimeout(() => {
+      fetchInitialListings();
+    }, 10);
+    
+    return () => clearTimeout(timer);
+  }
+}, [
+  state.searchParams.lat, 
+  state.searchParams.lng, 
+  state.searchParams.code, // Add code to dependency array
+  state.searchParams.radius,
+  // Use JSON.stringify for objects to properly detect changes
+  JSON.stringify(state.searchParams.filters),
+  JSON.stringify(state.searchParams.priceRange),
+  resetListings,
+  fetchInitialListings
+]);
   
 // FIXED: Handle map viewport changes with proper user interaction tracking
 useEffect(() => {
@@ -707,10 +720,12 @@ useEffect(() => {
     !debouncedViewport.center ||
     !debouncedViewport.center.lat ||
     !debouncedViewport.center.lng ||
-    !hasInitializedFromUserLocationRef.current
+    !hasInitializedFromUserLocationRef.current ||
+    !state.searchParams.lat || // Only run if we have location-based search
+    !state.searchParams.lng
   ) return;
   
-  // FIXED: Only update search params if this is a user-initiated move
+  // Only update search params if this is a user-initiated move
   // AND the coordinates have actually changed significantly
   if (userInitiatedMoveRef.current) {
     const latDiff = Math.abs(state.searchParams.lat - debouncedViewport.center.lat);

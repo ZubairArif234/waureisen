@@ -148,6 +148,7 @@ export const getStreamedListings = async (params) => {
       skip = null,
       lat,
       lng,
+      code,
       radius = 150,
       filters = {},
       priceMin,
@@ -180,6 +181,9 @@ export const getStreamedListings = async (params) => {
     
     if (radius) {
       queryParams.append('radius', radius);
+    }
+    if (code) {
+      queryParams.append('code', code);
     }
     
     // Add filters if provided

@@ -6,10 +6,18 @@ import { Search, Calendar, Users } from 'lucide-react';
 import { loadGoogleMapsScript, initAutocomplete } from '../../utils/googleMapsUtils';
 import { useLanguage } from '../../utils/LanguageContext';
 
-const SearchBar = ({ initialLocation = '', initialDateRange = { start: null, end: null }, initialGuests = { people: 1, dogs: 0 }, onSearch }) => {
+const SearchBar = ({ 
+  initialCode = "",
+  initialLocation = '', 
+  initialDateRange = { start: null, end: null }, 
+  initialGuests = { people: 1, dogs: 0 }, 
+  onSearch 
+}) => {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [location, setLocation] = useState(initialLocation);
+  const [code, setCode] = useState(initialCode);
+  const [inputValue, setInputValue] = useState(initialCode || initialLocation); // Combined input value
   const [placeData, setPlaceData] = useState(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isGuestSelectorOpen, setIsGuestSelectorOpen] = useState(false);
@@ -19,6 +27,29 @@ const SearchBar = ({ initialLocation = '', initialDateRange = { start: null, end
   const locationInputRef = useRef(null);
   const autocompleteRef = useRef(null);
   const placeSelectedRef = useRef(false);
+
+  // Helper function to check if input is a listing code
+  const isListingCode = (value) => {
+    if (!value) return false;
+    const regex = /^[A-Z]{2}/;
+    return regex.test(value);
+  };
+
+  // Update state when props change
+  useEffect(() => {
+    setLocation(initialLocation);
+    setCode(initialCode);
+    setInputValue(initialCode || initialLocation);
+    setDateRange(initialDateRange);
+    setGuests(initialGuests);
+    
+    // If we have a location, set the placeData
+    if (initialLocation) {
+      setPlaceData({
+        address: initialLocation,
+      });
+    }
+  }, [initialLocation, initialDateRange, initialGuests, initialCode]);
 
   // Load Google Maps script
   useEffect(() => {
@@ -48,92 +79,124 @@ const SearchBar = ({ initialLocation = '', initialDateRange = { start: null, end
     };
   }, []);
 
+  const handlePlaceSelect = (place) => {
+    if (!place) {
+      console.warn("No place data received in handlePlaceSelect");
+      return;
+    }
 
-const handlePlaceSelect = (place) => {
-  if (!place) {
-    console.warn("No place data received in handlePlaceSelect");
-    return;
-  }
+    if (!place.geometry || !place.geometry.location) {
+      console.warn("Place selected with no geometry/location:", place);
+      return;
+    }
 
-  if (!place.geometry || !place.geometry.location) {
-    console.warn("Place selected with no geometry/location:", place);
-    return;
-  }
+    // Get coordinates from the place
+    const lat = place.geometry.location.lat();
+    const lng = place.geometry.location.lng();
+    
+    if (isNaN(lat) || isNaN(lng)) {
+      console.warn("Place has invalid coordinates:", { lat, lng });
+      return;
+    }
 
-  // Get coordinates from the place
-  const lat = place.geometry.location.lat();
-  const lng = place.geometry.location.lng();
-  
-  if (isNaN(lat) || isNaN(lng)) {
-    console.warn("Place has invalid coordinates:", { lat, lng });
-    return;
-  }
-
-  console.log("Selected place with coordinates:", {
-    address: place.formatted_address,
-    lat: lat,
-    lng: lng
-  });
-
-  // Store location data including coordinates
-  setLocation(place.formatted_address);
-  setPlaceData({
-    address: place.formatted_address,
-    location: {
+    console.log("Selected place with coordinates:", {
+      address: place.formatted_address,
       lat: lat,
       lng: lng
-    }
-  });
-  
-  placeSelectedRef.current = true;
-  setShowLocationSuggestions(false);
-};
+    });
 
-const handleSearch = () => {
-  // Get coordinates from placeData
-  console.log("Place data before search:", placeData);  
-  const coordinates = placeData?.location ;
-
-  // Build search URL with coordinates
-  let searchUrl = `/search?location=${encodeURIComponent(location || "Switzerland")}`;
-  searchUrl += `&lat=${coordinates.lat}&lng=${coordinates.lng}`;
-  
-  // Add other parameters
-  let dateParam = '';
-  if (dateRange.start && dateRange.end) {
-    const startDate = `${dateRange.start.toLocaleString('default', { month: 'short' })} ${String(dateRange.start.getDate()).padStart(2, '0')} ${dateRange.start.getFullYear()}`;
-    const endDate = `${dateRange.end.toLocaleString('default', { month: 'short' })} ${String(dateRange.end.getDate()).padStart(2, '0')} ${dateRange.end.getFullYear()}`;
-    dateParam = `&dates=${startDate} - ${endDate}`;
-  }
-  
-  // Build people and dogs parameter with || separator
-  let guestParam = `&people=${guests.people}`;
-  if (guests.dogs && guests.dogs > 0) {
-    guestParam += `&dogs=${guests.dogs}`;
-  }
-  
-  searchUrl += `${dateParam}${guestParam}`;
-  
-  // Navigate to search page
-  if (onSearch && typeof onSearch === 'function') {
-    onSearch(searchUrl);
-  } else {
-    navigate(searchUrl);
-  }
-}
-
-  const handleLocationChange = (e) => {
-    setLocation(e.target.value);
-    setShowLocationSuggestions(e.target.value.length > 0);
-    // Reset place selection status when the user types manually
-    placeSelectedRef.current = false;
+    // Update states for location-based search
+    setLocation(place.formatted_address);
+    setCode(''); // Clear code when location is selected
+    setInputValue(place.formatted_address);
+    setPlaceData({
+      address: place.formatted_address,
+      location: {
+        lat: lat,
+        lng: lng
+      }
+    });
     
-    // If the user clears the input, also clear the place data
-    if (!e.target.value) {
-      setPlaceData(null);
+    placeSelectedRef.current = true;
+    setShowLocationSuggestions(false);
+  };
+
+  const handleSearch = () => {
+    console.log("Input value:", inputValue);
+    console.log("Place data before search:", placeData);
+    
+    let searchUrl = "/search?";
+    
+    // Check if input is a listing code
+    if (isListingCode(inputValue)) {
+      // Handle listing code
+      console.log("Searching by listing code:", inputValue);
+      searchUrl += `code=${encodeURIComponent(inputValue)}&`;
+    } else {
+      // Handle location search
+      if (inputValue) {
+        searchUrl += `location=${encodeURIComponent(inputValue)}&`;
+      } else {
+        // Default to Switzerland if no location provided
+        searchUrl += `location=${encodeURIComponent("Switzerland")}&`;
+      }
+      
+      // Add coordinates if available
+      const coordinates = placeData?.location;
+      if (coordinates?.lat && coordinates?.lng) {
+        searchUrl += `lat=${coordinates.lat}&lng=${coordinates.lng}&`;
+      }
+    }
+    
+    // Add date range
+    if (dateRange.start && dateRange.end) {
+      const startDate = `${dateRange.start.toLocaleString('default', { month: 'short' })} ${String(dateRange.start.getDate()).padStart(2, '0')} ${dateRange.start.getFullYear()}`;
+      const endDate = `${dateRange.end.toLocaleString('default', { month: 'short' })} ${String(dateRange.end.getDate()).padStart(2, '0')} ${dateRange.end.getFullYear()}`;
+      searchUrl += `dates=${encodeURIComponent(startDate + ' - ' + endDate)}&`;
+    }
+    
+    // Add guests
+    searchUrl += `people=${guests.people}&`;
+    if (guests.dogs && guests.dogs > 0) {
+      searchUrl += `dogs=${guests.dogs}&`;
+    }
+    
+    // Remove trailing '&' if present
+    if (searchUrl.endsWith('&')) {
+      searchUrl = searchUrl.slice(0, -1);
+    }
+    
+    // Navigate to search page
+    if (onSearch && typeof onSearch === 'function') {
+      onSearch(searchUrl);
+    } else {
+      navigate(searchUrl);
     }
   };
 
+  const handleLocationChange = (e) => {
+    const value = e.target.value;
+    setInputValue(value);
+    
+    if (isListingCode(value)) {
+      // Handle listing code input
+      setCode(value);
+      setLocation('');
+      setPlaceData(null);
+      setShowLocationSuggestions(false);
+    } else {
+      // Handle location input
+      setLocation(value);
+      setCode('');
+      setShowLocationSuggestions(value.length > 0);
+      placeSelectedRef.current = false;
+      
+      // Clear placeData if input is empty
+      if (!value) {
+        setPlaceData(null);
+      }
+    }
+  };
 
   return (
     <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 md:p-8 flex flex-col md:flex-row items-stretch md:items-center gap-4 w-full">
@@ -144,8 +207,8 @@ const handleSearch = () => {
           <input
             ref={locationInputRef}
             type="text"
-            placeholder={t('where')}
-            value={location}
+            placeholder={t('where') || 'Where to? / Enter code (e.g., CH93849)'}
+            value={inputValue}
             onChange={handleLocationChange}
             className="bg-transparent outline-none w-full text-sm text-gray-700 placeholder-gray-500 focus:placeholder-brand"
             autoComplete="off"
@@ -180,18 +243,16 @@ const handleSearch = () => {
           </span>
         </div>
         {isGuestSelectorOpen && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-10">
-   
-      <GuestSelector
-        guests={guests}
-        onChange={setGuests}
-        onClose={() => setIsGuestSelectorOpen(false)}
-        maxGuests={25}
-        maxDogs={25}
-      />
-    
-  </div>
-)}
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-10">
+            <GuestSelector
+              guests={guests}
+              onChange={setGuests}
+              onClose={() => setIsGuestSelectorOpen(false)}
+              maxGuests={25}
+              maxDogs={25}
+            />
+          </div>
+        )}
       </div>
 
       {/* Search Button */}

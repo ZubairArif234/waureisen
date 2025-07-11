@@ -9,6 +9,7 @@ import MoreFiltersModal from './MoreFiltersModal';
 import { useSearchFilters } from '../../context/SearchFiltersContext';
 
 const SearchBarTwo = ({ 
+  initialCode = "",
   initialLocation = '', 
   initialDateRange = { start: null, end: null }, 
   initialGuests = { people: 1, dogs: 0 }, 
@@ -18,6 +19,8 @@ const SearchBarTwo = ({
   const { t } = useLanguage();
   const { searchFilters } = useSearchFilters();
   const [location, setLocation] = useState(initialLocation);
+  const [code, setCode] = useState(initialCode);
+  const [inputValue, setInputValue] = useState(initialCode || initialLocation); // Combined input value
   const [placeData, setPlaceData] = useState(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isGuestSelectorOpen, setIsGuestSelectorOpen] = useState(false);
@@ -29,9 +32,18 @@ const SearchBarTwo = ({
   const autocompleteRef = useRef(null);
   const placeSelectedRef = useRef(false);
 
+  // Helper function to check if input is a listing code
+  const isListingCode = (value) => {
+    if (!value) return false;
+    const regex = /^[A-Z]{2}/;
+    return regex.test(value);
+  };
+
   // Update state when props change
   useEffect(() => {
     setLocation(initialLocation);
+    setCode(initialCode);
+    setInputValue(initialCode || initialLocation);
     setDateRange(initialDateRange);
     setGuests(initialGuests);
     
@@ -39,13 +51,9 @@ const SearchBarTwo = ({
     if (initialLocation) {
       setPlaceData({
         address: initialLocation,
-        // location: {
-        //   lat: 46.8182,
-        //   lng: 8.2275
-        // }
       });
     }
-  }, [initialLocation, initialDateRange, initialGuests]);
+  }, [initialLocation, initialDateRange, initialGuests, initialCode]);
 
   // Load Google Maps script
   useEffect(() => {
@@ -116,7 +124,7 @@ const SearchBarTwo = ({
   }, []);
 
   const handlePlaceSelect = (place) => {
-    console.log(place , "ye konsi hai")
+    console.log(place, "selected place");
     if (!place) {
       console.warn("No place data received in handlePlaceSelect");
       return;
@@ -141,7 +149,10 @@ const SearchBarTwo = ({
       lng: lng
     });
 
+    // Update states for location-based search
     setLocation(place.formatted_address);
+    setCode(''); // Clear code when location is selected
+    setInputValue(place.formatted_address);
     setPlaceData({
       address: place.formatted_address,
       location: {
@@ -156,28 +167,47 @@ const SearchBarTwo = ({
 
   const handleSearch = () => {
     const urlParams = new URLSearchParams(window.location.search);
-    console.log("Place data before search:", placeData);  
+    console.log("Input value:", inputValue);
+    console.log("Place data before search:", placeData);
     console.log("Current search filters from context:", searchFilters);
     
-    const coordinates = placeData?.location ;
-    let lat = urlParams.get("lat")
-    let lng = urlParams.get("lng")
-
-    let searchUrl = `/search?location=${encodeURIComponent(location)}`;
-    searchUrl += `&lat=${coordinates?.lat ? coordinates?.lat : lat}&lng=${coordinates?.lng ? coordinates?.lng : lng}`;
+    let searchUrl = "/search?";
     
-    let dateParam = '';
+    // Check if input is a listing code
+    if (isListingCode(inputValue)) {
+      // Handle listing code
+      console.log("Searching by listing code:", inputValue);
+      searchUrl += `code=${encodeURIComponent(inputValue)}&`;
+    } else {
+      // Handle location search
+      if (inputValue) {
+        searchUrl += `location=${encodeURIComponent(inputValue)}&`;
+      }
+      
+      // Add coordinates if available
+      const coordinates = placeData?.location;
+      const urlLat = urlParams.get("lat");
+      const urlLng = urlParams.get("lng");
+      
+      if (coordinates?.lat && coordinates?.lng) {
+        searchUrl += `lat=${coordinates.lat}&lng=${coordinates.lng}&`;
+      } else if (urlLat && urlLng) {
+        searchUrl += `lat=${urlLat}&lng=${urlLng}&`;
+      }
+    }
+
+    // Add date range
     if (dateRange.start && dateRange.end) {
       const startDate = `${dateRange.start.toLocaleString('default', { month: 'short' })} ${String(dateRange.start.getDate()).padStart(2, '0')} ${dateRange.start.getFullYear()}`;
       const endDate = `${dateRange.end.toLocaleString('default', { month: 'short' })} ${String(dateRange.end.getDate()).padStart(2, '0')} ${dateRange.end.getFullYear()}`;
-      dateParam = `&dates=${startDate} - ${endDate}`;
+      searchUrl += `dates=${encodeURIComponent(startDate + ' - ' + endDate)}&`;
     }
 
-    let guestParam = `&people=${guests.people}`;
-  if (guests.dogs && guests.dogs > 0) {
-    guestParam += `&dogs=${guests.dogs}`;
-  }
-    searchUrl += `${dateParam}${guestParam}`;
+    // Add guests
+    searchUrl += `people=${guests.people}&`;
+    if (guests.dogs && guests.dogs > 0) {
+      searchUrl += `dogs=${guests.dogs}&`;
+    }
     
     // Get filters from URL if they exist
     const urlFilters = urlParams.get('searchFilters');
@@ -209,25 +239,46 @@ const SearchBarTwo = ({
       
       if (hasSelectedFilters || hasRangeFilters) {
         console.log('Sending filters to API:', filtersToSend);
-        searchUrl += `&searchFilters=${encodeURIComponent(JSON.stringify(filtersToSend))}`;
+        searchUrl += `searchFilters=${encodeURIComponent(JSON.stringify(filtersToSend))}&`;
       }
+    }
+    
+    // Remove trailing '&' if present
+    if (searchUrl.endsWith('&')) {
+      searchUrl = searchUrl.slice(0, -1);
     }
     
     if (onSearch && typeof onSearch === 'function') {
       // Pass the filters directly to the onSearch function
       onSearch(searchUrl, filtersToSend);
+      onSearch(searchUrl, filtersToSend);
     } else {
+      navigate(searchUrl);
       navigate(searchUrl);
     }
   };
 
   const handleLocationChange = (e) => {
-    setLocation(e.target.value);
-    setShowLocationSuggestions(e.target.value.length > 0);
-    placeSelectedRef.current = false;
+    const value = e.target.value;
+    setInputValue(value);
     
-    if (!e.target.value) {
+    if (isListingCode(value)) {
+      // Handle listing code input
+      setCode(value);
+      setLocation('');
       setPlaceData(null);
+      setShowLocationSuggestions(false);
+    } else {
+      // Handle location input
+      setLocation(value);
+      setCode('');
+      setShowLocationSuggestions(value.length > 0);
+      placeSelectedRef.current = false;
+      
+      // Clear placeData if input is empty
+      if (!value) {
+        setPlaceData(null);
+      }
     }
   };
 
@@ -242,12 +293,11 @@ const SearchBarTwo = ({
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 hover:bg-gray-50 rounded-lg">
                 <Search className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                {/* Always show input field */}
                 <input
                   ref={locationInputRef}
                   type="text"
-                  placeholder={t('where') || 'Where to?'}
-                  value={location}
+                  placeholder={t('where') || 'Where to? / Enter code (e.g., CH93849)'}
+                  value={inputValue}
                   onChange={handleLocationChange}
                   className="bg-transparent outline-none w-full text-xs sm:text-sm text-gray-700 placeholder-gray-400"
                   autoComplete="off"
@@ -352,8 +402,6 @@ const SearchBarTwo = ({
           </div>
         </div>
       )}
-
-     
 
       {/* More Filters Modal */}
       <MoreFiltersModal

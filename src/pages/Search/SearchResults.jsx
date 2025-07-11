@@ -79,6 +79,7 @@ const SearchResultsContent = () => {
     
     // Extract location and coordinates
     const locationName = urlParams.get("location") || "";
+    let code = urlParams.get("code");
     
     // Extract and validate coordinates
     let lat = urlParams.get("lat");
@@ -94,8 +95,8 @@ const SearchResultsContent = () => {
     if (lat === null || lng === null || isNaN(lat) || isNaN(lng) || 
         lat < -90 || lat > 90 || lng < -180 || lng > 180) {
       console.warn("Invalid or missing coordinates in URL, using defaults");
-      lat = 50.818188;
-      lng = 8.227512;
+      // lat = 50.818188;
+      // lng = 8.227512;
     }
     
     // Use a 500km radius by default
@@ -108,7 +109,7 @@ const SearchResultsContent = () => {
     // Extract guest counts
     const people = parseInt(urlParams.get("people")) || 1;
     const dogs = parseInt(urlParams.get("dogs")) || 1;
-    console.log(dogs , urlParams.get("dogs") , "jkkko kkk jhj ");
+    console.log(dogs , urlParams.get("dogs") , "jkkko kkk jhj ",code);
     
     // Extract filters
     const filtersParam = urlParams.get("filters");
@@ -141,6 +142,7 @@ const SearchResultsContent = () => {
       lng,
       radius,
       locationName,
+      code,
       filters: {
         dateRange: {
           start: dates[0] ? new Date(dates[0]) : null,
@@ -262,6 +264,7 @@ const SearchResultsContent = () => {
         <div className="max-w-4xl mx-auto">
           <EnhancedSearchBar
             initialLocation={searchParams.locationName || ""}
+            initialCode={ searchParams.code || ""}
             initialDateRange={searchParams.filters.dateRange || { start: null, end: null }}
             initialGuests={{
               people: searchParams.filters.guestCount || 1,
