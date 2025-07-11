@@ -36,20 +36,20 @@ const SearchBar = ({
   };
 
   // Update state when props change
-  useEffect(() => {
-    setLocation(initialLocation);
-    setCode(initialCode);
-    setInputValue(initialCode || initialLocation);
-    setDateRange(initialDateRange);
-    setGuests(initialGuests);
+  // useEffect(() => {
+  //   setLocation(initialLocation);
+  //   setCode(initialCode);
+  //   setInputValue(initialCode || initialLocation);
+  //   setDateRange(initialDateRange);
+  //   setGuests(initialGuests);
     
-    // If we have a location, set the placeData
-    if (initialLocation) {
-      setPlaceData({
-        address: initialLocation,
-      });
-    }
-  }, [initialLocation, initialDateRange, initialGuests, initialCode]);
+  //   // If we have a location, set the placeData
+  //   if (initialLocation) {
+  //     setPlaceData({
+  //       address: initialLocation,
+  //     });
+  //   }
+  // }, [initialLocation, initialDateRange, initialGuests, initialCode]);
 
   // Load Google Maps script
   useEffect(() => {
