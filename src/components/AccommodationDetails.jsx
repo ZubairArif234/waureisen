@@ -88,10 +88,11 @@ const AccommodationDetails = ({ accommodation }) => {
       <p className="text-gray-600 whitespace-pre-line text-sm">
         {formattedDescription}
       </p>
-
+{allFilters?.length > 0 && 
       <h2 className="text-[#4D484D] md:text-xl text-lg font-semibold mb-4 mt-6">
         {t("details")}
       </h2>
+}
 {/* 
       {filterData &&
         filterData.subsections &&
